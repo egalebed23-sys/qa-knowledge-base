@@ -22,6 +22,7 @@
     --muted-2: #5a5f72;
     --tag-bg: #1e2230;
     --sidebar-w: 260px;
+    --content-max: 1280px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -132,7 +133,7 @@
     max-width: calc(100vw - var(--sidebar-w));
   }
   .topbar {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 32px;
     display: flex;
     align-items: center;
@@ -173,7 +174,7 @@
 
   /* ─── HEADER ─── */
   .header {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 36px;
     border-left: 3px solid var(--accent);
     padding-left: 20px;
@@ -193,7 +194,7 @@
 
   /* ─── SECTION ─── */
   .section {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 28px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -529,7 +530,7 @@
     <p>// 4 подтемы · OWASP, инъекции, auth, практика</p>
   </div>
 
-  <div style="max-width:920px;margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
+  <div style="max-width:var(--content-max);margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
     <strong style="color:#fff;display:block;margin-bottom:4px;font-size:13px;">Уровень этого раздела</strong>
     QA-автоматизатор — не пентестер. Цель — <strong>понимать основные угрозы и уметь о них поговорить</strong>, а не находить 0-day. На собесах безопасность обычно спрашивают по верхам: что такое инъекции, XSS, как безопасно хранить токены. Этого блока хватает, чтобы отвечать предметно.
   </div>

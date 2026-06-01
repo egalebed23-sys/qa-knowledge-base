@@ -22,6 +22,7 @@
     --muted-2: #5a5f72;
     --tag-bg: #1e2230;
     --sidebar-w: 260px;
+    --content-max: 1280px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -132,7 +133,7 @@
     max-width: calc(100vw - var(--sidebar-w));
   }
   .topbar {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 32px;
     display: flex;
     align-items: center;
@@ -173,7 +174,7 @@
 
   /* ─── HEADER ─── */
   .header {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 36px;
     border-left: 3px solid var(--accent);
     padding-left: 20px;
@@ -193,7 +194,7 @@
 
   /* ─── SECTION ─── */
   .section {
-    max-width: 920px;
+    max-width: var(--content-max);
     margin: 0 auto 28px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -481,11 +482,11 @@
   }
 
   /* ─── HOME ─── */
-  .home-hero { max-width: 920px; margin: 0 auto 28px; }
+  .home-hero { max-width: var(--content-max); margin: 0 auto 28px; }
   .home-hero h1 { font-size: 34px; margin-bottom: 8px; }
   .home-hero .tagline { color: var(--muted); font-size: 15px; line-height: 1.6; }
   .section-cards {
-    max-width: 920px; margin: 0 auto 40px;
+    max-width: var(--content-max); margin: 0 auto 40px;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
   }
   .sec-card {
@@ -498,7 +499,7 @@
   .sec-card .num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); }
   .sec-card .name { font-weight: 700; font-size: 15px; margin: 4px 0; }
   .sec-card .desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .home-block { max-width: 920px; margin: 0 auto 28px; }
+  .home-block { max-width: var(--content-max); margin: 0 auto 28px; }
   .home-block h2 { font-size: 20px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .format-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
   .format-badge {
