@@ -520,20 +520,21 @@
   </div>
   <div class="toc-inner">
     <div class="nav-group-title">На этой странице</div>
-        <a href="#sdlc">01 · SDLC, STLC и роль QA</a>
-    <a href="#qa-qc">02 · QA vs QC vs Testing</a>
-    <a href="#types">03 · Виды тестирования</a>
-    <a href="#levels">04 · Уровни тестирования</a>
-    <a href="#pyramid">05 · Пирамида тестирования</a>
-    <a href="#design">06 · Техники тест-дизайна</a>
-    <a href="#docs">07 · Тестовая документация</a>
-    <a href="#practice">08 · Дизайн кейсов: практика</a>
-    <a href="#bug-life">09 · Жизненный цикл бага</a>
-    <a href="#sev-prio">10 · Severity vs Priority</a>
-    <a href="#metrics">11 · Метрики QA</a>
-    <a href="#risk">12 · Risk-based · Shift-left/right</a>
-    <a href="#senior">13 · Senior-кейсы на собесе</a>
-    <a href="#extra">14 · Доп. вопросы: сети, CS-теория</a>
+        <a href="#what-is-testing">01 · Что такое тестирование</a>
+    <a href="#sdlc">02 · SDLC, STLC и роль QA</a>
+    <a href="#qa-qc">03 · QA vs QC vs Testing</a>
+    <a href="#types">04 · Виды тестирования</a>
+    <a href="#levels">05 · Уровни тестирования</a>
+    <a href="#pyramid">06 · Пирамида тестирования</a>
+    <a href="#design">07 · Техники тест-дизайна</a>
+    <a href="#docs">08 · Тестовая документация</a>
+    <a href="#practice">09 · Дизайн кейсов: практика</a>
+    <a href="#bug-life">10 · Жизненный цикл бага</a>
+    <a href="#sev-prio">11 · Severity vs Priority</a>
+    <a href="#metrics">12 · Метрики QA</a>
+    <a href="#risk">13 · Risk-based · Shift-left/right</a>
+    <a href="#senior">14 · Senior-кейсы на собесе</a>
+    <a href="#extra">15 · Доп. вопросы: сети, CS-теория</a>
   </div>
 </aside>
 
@@ -551,14 +552,90 @@
 
   <div class="header">
     <h1>Теория тестирования</h1>
-    <p>// 13 подтем · база, без которой не пройти ни один собес</p>
+    <p>// 15 подтем · база, без которой не пройти ни один собес</p>
   </div>
 
 
-  <!-- ─────── 01. SDLC, STLC, РОЛЬ QA ─────── -->
-  <section class="section" id="sdlc">
+  <!-- ─────── 01. ЧТО ТАКОЕ ТЕСТИРОВАНИЕ ─────── -->
+  <section class="section" id="what-is-testing">
     <div class="section-header">
       <span class="section-num">01</span>
+      <span class="section-title">Что такое тестирование</span>
+      <span class="section-badge">definition</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Тестирование — это процесс сбора информации о качестве продукта для принятия решений.</strong> Не «поиск багов» и не «проверка, что всё работает» — а добыча данных, на основе которых команда и бизнес решают: релизить, доделать, откатить.</p>
+        <p>ISTQB-формулировка: оценка соответствия продукта требованиям и ожиданиям + поиск дефектов. Классическое определение знать надо, но в реальной работе мыслят шире.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>QA — не контролёр на конвейере, который ставит штамп «годен / брак». QA — это исследователь: приносит команде факты «вот так система себя ведёт, такие риски, такие сценарии падают». Решение о релизе — за командой и бизнесом, а не за тестировщиком.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что тестирование делает, а что — нет:</strong></p>
+        <table>
+          <thead><tr><th>Делает</th><th>НЕ делает</th></tr></thead>
+          <tbody>
+            <tr><td>находит дефекты</td><td>не доказывает их отсутствие</td></tr>
+            <tr><td>оценивает риски</td><td>не убирает их — это задача разработки</td></tr>
+            <tr><td>даёт данные для решения о релизе</td><td>не принимает это решение само</td></tr>
+            <tr><td>проверяет соответствие модели</td><td>не «создаёт качество» — качество закладывается при разработке</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Дейкстра, 1969</span><em>«Testing shows the presence, not the absence of bugs»</em> — любая партия тестов проверяет конечное подмножество поведений; полностью доказать корректность тестами нельзя. Для абсолютных гарантий существует formal verification — но это другой инструмент и другая цена.</div>
+        <p style="margin-top:14px;"><strong>Два уровня цели тестирования:</strong></p>
+        <ul>
+          <li><strong>Тактический</strong> — найти и зарепортить конкретные баги в конкретной фиче (задача мидла)</li>
+          <li><strong>Стратегический</strong> — снизить риск дорогих ошибок в проде до приемлемого уровня (задача синьора)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Полное тестирование невозможно.</strong> Простая форма регистрации с 5 полями и 10 валидными значениями у каждого — уже 10⁵ комбинаций. Добавь порядок ввода, разные браузеры, состояния сети, время суток — числа взрывные. Работа QA — не «проверить всё», а <em>выбрать, что важно проверить</em>. Это и есть risk-based мышление, фундамент синьорства.</p>
+
+        <p style="margin-top:14px;"><strong>Семь принципов тестирования (ISTQB)</strong> — каркас, на котором держится всё остальное:</p>
+        <ol style="padding-left:20px; margin: 6px 0; font-size: 14px;">
+          <li>Тестирование показывает наличие, но не отсутствие дефектов</li>
+          <li>Исчерпывающее тестирование невозможно</li>
+          <li>Раннее тестирование экономит время и деньги (shift-left)</li>
+          <li>Дефекты скапливаются — <em>pesticide paradox</em>: одни и те же тесты со временем находят всё меньше</li>
+          <li>Тесты надо обновлять — то, что ловило баги вчера, не ловит их сегодня</li>
+          <li>Тестирование зависит от контекста — банк и стартап тестируют по-разному</li>
+          <li>Заблуждение «нет багов = качественный продукт» — если продукт не нужен пользователю, безбажность не спасёт</li>
+        </ol>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если разработчик пишет чистый код и unit-тесты, зачем нужен QA?» — За тем, что <strong>качество кода ≠ качество продукта</strong>. Код может быть идеальным, но: 1) фича не решает проблему пользователя, 2) не интегрируется с соседним сервисом, 3) роняет систему под нагрузкой, 4) нарушает требования закона / GDPR. QA смотрит на продукт глазами пользователя и бизнеса — это другая роль и другой угол атаки, чем у разработчика.</div>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«QA — последний рубеж перед прод».</strong> Если тестирование начинается после того, как код написан — уже поздно. Boehm в 1981 году показал: дефект в требованиях обходится в 100× дороже починить в проде, чем поймать на старте. Поэтому senior QA приходит в задачу <em>до</em> кода, а не <em>после</em>.</div>
+
+        <div class="hl modern"><span class="hl-label">Школа RST (Bach / Bolton)</span>«Testing is the process of <strong>evaluating</strong> a product by <strong>learning</strong> about it through <strong>exploration</strong> and <strong>experimentation</strong>». Ключевая мысль: testing — это <em>investigation</em>, а не <em>check</em> (галочки в чек-листе). Checks можно автоматизировать; testing — это критическое мышление, и его автоматизировать нельзя.</div>
+
+        <div class="hl llm"><span class="hl-label">AI-эпоха</span>С появлением LLM-копайлотов классические «галочки» — генерация тест-кейсов из требований, типовые edge cases, шаблоны баг-репортов — автоматизируются за минуты. То, что остаётся за инженером и растёт в цене — <em>что именно тестировать</em>: оценка рисков, дизайн стратегии, понимание домена, разговор с пользователем. Тестирование как «нажал кнопку и сверил результат» уходит; тестирование как «определил, какие сигналы нам нужны от системы» — становится главной ценностью.</div>
+
+        <p style="margin-top:14px;"><strong>Как отвечать на этот вопрос на собесе как синьор</strong> (схема ответа на 60–90 секунд):</p>
+        <ol style="padding-left:20px; margin: 6px 0; font-size: 14px;">
+          <li>Дать определение через <em>цель</em>, а не через <em>действие</em>: «процесс сбора информации о качестве для принятия решений»</li>
+          <li>Развести понятия: <em>testing ≠ debugging ≠ quality assurance ≠ verification</em></li>
+          <li>Упомянуть ограничение: полное тестирование невозможно → отсюда risk-based мышление</li>
+          <li>Закончить уровнем своей ответственности: «как синьор, я отвечаю не за поиск багов, а за то, чтобы команда могла принимать обоснованные решения о релизе»</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 02. SDLC, STLC, РОЛЬ QA ─────── -->
+  <section class="section" id="sdlc">
+    <div class="section-header">
+      <span class="section-num">02</span>
       <span class="section-title">SDLC, STLC и роль QA в процессе</span>
       <span class="section-badge">process</span>
     </div>
@@ -647,10 +724,10 @@
   </section>
 
 
-  <!-- ─────── 02. QA vs QC vs TESTING ─────── -->
+  <!-- ─────── 03. QA vs QC vs TESTING ─────── -->
   <section class="section" id="qa-qc">
     <div class="section-header">
-      <span class="section-num">02</span>
+      <span class="section-num">03</span>
       <span class="section-title">QA vs QC vs Testing</span>
       <span class="section-badge">terminology</span>
     </div>
@@ -698,10 +775,10 @@
   </section>
 
 
-  <!-- ─────── 03. ВИДЫ ТЕСТИРОВАНИЯ ─────── -->
+  <!-- ─────── 04. ВИДЫ ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="types">
     <div class="section-header">
-      <span class="section-num">03</span>
+      <span class="section-num">04</span>
       <span class="section-title">Виды тестирования</span>
       <span class="section-badge">classification</span>
     </div>
@@ -760,10 +837,10 @@
   </section>
 
 
-  <!-- ─────── 04. УРОВНИ ТЕСТИРОВАНИЯ ─────── -->
+  <!-- ─────── 05. УРОВНИ ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="levels">
     <div class="section-header">
-      <span class="section-num">04</span>
+      <span class="section-num">05</span>
       <span class="section-title">Уровни тестирования</span>
       <span class="section-badge">levels</span>
     </div>
@@ -809,10 +886,10 @@
   </section>
 
 
-  <!-- ─────── 05. ПИРАМИДА ТЕСТИРОВАНИЯ ─────── -->
+  <!-- ─────── 06. ПИРАМИДА ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="pyramid">
     <div class="section-header">
-      <span class="section-num">05</span>
+      <span class="section-num">06</span>
       <span class="section-title">Пирамида тестирования</span>
       <span class="section-badge">test strategy</span>
     </div>
@@ -874,10 +951,10 @@
   </section>
 
 
-  <!-- ─────── 06. ТЕХНИКИ ТЕСТ-ДИЗАЙНА ─────── -->
+  <!-- ─────── 07. ТЕХНИКИ ТЕСТ-ДИЗАЙНА ─────── -->
   <section class="section" id="design">
     <div class="section-header">
-      <span class="section-num">06</span>
+      <span class="section-num">07</span>
       <span class="section-title">Техники тест-дизайна</span>
       <span class="section-badge">test design</span>
     </div>
@@ -947,10 +1024,10 @@
   </section>
 
 
-  <!-- ─────── 07. ТЕСТОВАЯ ДОКУМЕНТАЦИЯ ─────── -->
+  <!-- ─────── 08. ТЕСТОВАЯ ДОКУМЕНТАЦИЯ ─────── -->
   <section class="section" id="docs">
     <div class="section-header">
-      <span class="section-num">07</span>
+      <span class="section-num">08</span>
       <span class="section-title">Тестовая документация</span>
       <span class="section-badge">artifacts</span>
     </div>
@@ -1025,10 +1102,10 @@
   </section>
 
 
-  <!-- ─────── 08. ДИЗАЙН КЕЙСОВ НА ПРАКТИКЕ ─────── -->
+  <!-- ─────── 09. ДИЗАЙН КЕЙСОВ НА ПРАКТИКЕ ─────── -->
   <section class="section" id="practice">
     <div class="section-header">
-      <span class="section-num">08</span>
+      <span class="section-num">09</span>
       <span class="section-title">Дизайн тест-кейсов: практика</span>
       <span class="section-badge">interview classics</span>
     </div>
@@ -1257,10 +1334,10 @@
   </section>
 
 
-  <!-- ─────── 09. ЖИЗНЕННЫЙ ЦИКЛ БАГА ─────── -->
+  <!-- ─────── 10. ЖИЗНЕННЫЙ ЦИКЛ БАГА ─────── -->
   <section class="section" id="bug-life">
     <div class="section-header">
-      <span class="section-num">09</span>
+      <span class="section-num">10</span>
       <span class="section-title">Жизненный цикл бага</span>
       <span class="section-badge">workflow</span>
     </div>
@@ -1321,10 +1398,10 @@
   </section>
 
 
-  <!-- ─────── 10. SEVERITY vs PRIORITY ─────── -->
+  <!-- ─────── 11. SEVERITY vs PRIORITY ─────── -->
   <section class="section" id="sev-prio">
     <div class="section-header">
-      <span class="section-num">10</span>
+      <span class="section-num">11</span>
       <span class="section-title">Severity vs Priority</span>
       <span class="section-badge">bug attrs</span>
     </div>
@@ -1376,10 +1453,10 @@
   </section>
 
 
-  <!-- ─────── 11. МЕТРИКИ QA ─────── -->
+  <!-- ─────── 12. МЕТРИКИ QA ─────── -->
   <section class="section" id="metrics">
     <div class="section-header">
-      <span class="section-num">11</span>
+      <span class="section-num">12</span>
       <span class="section-title">Метрики QA</span>
       <span class="section-badge">measurement</span>
     </div>
@@ -1441,10 +1518,10 @@
   </section>
 
 
-  <!-- ─────── 12. RISK-BASED, SHIFT-LEFT/RIGHT ─────── -->
+  <!-- ─────── 13. RISK-BASED, SHIFT-LEFT/RIGHT ─────── -->
   <section class="section" id="risk">
     <div class="section-header">
-      <span class="section-num">12</span>
+      <span class="section-num">13</span>
       <span class="section-title">Risk-based testing · Shift-left / right</span>
       <span class="section-badge">strategy</span>
     </div>
@@ -1501,10 +1578,10 @@
   </section>
 
 
-  <!-- ─────── 13. SENIOR-КЕЙСЫ ─────── -->
+  <!-- ─────── 14. SENIOR-КЕЙСЫ ─────── -->
   <section class="section" id="senior">
     <div class="section-header">
-      <span class="section-num">13</span>
+      <span class="section-num">14</span>
       <span class="section-title">Senior-кейсы на собесе</span>
       <span class="section-badge">strategy questions</span>
     </div>
@@ -1603,10 +1680,10 @@
     </div>
   </section>
 
-  <!-- ─────── 14. ДОП. ВОПРОСЫ ─────── -->
+  <!-- ─────── 15. ДОП. ВОПРОСЫ ─────── -->
   <section class="section" id="extra">
     <div class="section-header">
-      <span class="section-num">14</span>
+      <span class="section-num">15</span>
       <span class="section-title">Доп. вопросы: сети, CS-теория</span>
       <span class="section-badge">cs theory</span>
     </div>
