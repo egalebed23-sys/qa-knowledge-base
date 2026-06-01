@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA · Блокчейн, Кошельки, Telegram Mini Apps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA · Wallet prep</div>
+    <div class="sub">// blockchain · TMA · отдельный модуль</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Теория блокчейна</div>
+    <a class="nav-item active" href="#"><span class="nav-num">01</span> Как устроен блокчейн</a>
+    <a class="nav-item" href="#forks"><span class="nav-num">02</span> Форки и управление</a>
+    <a class="nav-item" href="#crypto"><span class="nav-num">03</span> Криптография: ключи</a>
+    <a class="nav-item" href="#consensus"><span class="nav-num">04</span> Консенсус: PoW, PoS</a>
+    <a class="nav-item" href="#btc-eth"><span class="nav-num">05</span> Bitcoin vs Ethereum</a>
+    <a class="nav-item" href="#contracts"><span class="nav-num">06</span> Смарт-контракты, токены</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">QA-специфика</div>
+    <a class="nav-item" href="#wallets"><span class="nav-num">07</span> Кошельки</a>
+    <a class="nav-item" href="#tx-testing"><span class="nav-num">08</span> Тестирование транзакций</a>
+    <a class="nav-item" href="#ton-dapp"><span class="nav-num">09</span> TON и dApps</a>
+    <a class="nav-item" href="#mobile"><span class="nav-num">10</span> Мобильное тестирование</a>
+    <a class="nav-item" href="#webview"><span class="nav-num">11</span> Тестирование WebView</a>
+    <a class="nav-item" href="#tma"><span class="nav-num">12</span> Telegram Mini Apps</a>
+    <a class="nav-item" href="#cases"><span class="nav-num">13</span> Кейсы и риски</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">Заметка</div>
+    <a href="#" style="font-size:11px;color:var(--muted);line-height:1.5;">Отдельный модуль под крипто-вакансии (Wallet in Telegram и т.п.). Не входит в общую базу.</a>
+  </div>
+  </aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA / <span>Блокчейн · Кошельки · TMA</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Блокчейн · Кошельки · Telegram Mini Apps</h1>
+    <p>// отдельный модуль · теория блокчейна + QA-специфика · 13 подтем</p>
+  </div>
+
+  <div style="max-width:920px;margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
+    <strong style="color:#fff;display:block;margin-bottom:4px;font-size:13px;">О модуле</strong>
+    Самостоятельная страница под вакансии вроде <strong>Wallet in Telegram / TON</strong>. Намеренно <em>не вшита</em> в общую базу — это нишевая специфика, которая нужна не всем. Покрывает: как устроен блокчейн с точки зрения тестировщика, кошельки (custodial / self-custodial), тестирование транзакций через testnet, TON и dApps, Telegram Mini Apps. Тема быстро меняется — проверяй актуальность по официальным докам (core.telegram.org, docs.ton.org).
+  </div>
+
+  <!-- ─────── 01. КАК УСТРОЕН БЛОКЧЕЙН ─────── -->
+  <section class="section" id="basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Как устроен блокчейн</span>
+      <span class="section-badge">fundamentals</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Блокчейн</strong> — это база данных, у которой нет хозяина и которую нельзя переписать задним числом. Технически — цепочка блоков: каждый блок содержит пачку транзакций и <strong>хеш предыдущего блока</strong>. Копию хранят тысячи независимых компьютеров (нод).</p>
+        <ul>
+          <li><strong>Децентрализация</strong> — нет центрального сервера, реестр у всех нод сразу</li>
+          <li><strong>Неизменность</strong> — поменяешь старый блок → изменится его хеш → порвётся вся цепочка после него</li>
+          <li><strong>Прозрачность</strong> — любой может проверить любую транзакцию в explorer'е</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Почему нельзя подделать</span>Каждый блок «запечатан» хешем предыдущего. Цепочка как пломбы: подменил один блок — его хеш меняется, и все следующие блоки указывают «не туда». Чтобы подделка прошла, нужно пересчитать все последующие блоки <em>быстрее всей остальной сети</em> — практически невозможно. Отсюда неизменность.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что внутри блока:</strong> список транзакций, время, хеш предыдущего блока, свой хеш, и (для PoW) nonce. Хеш — результат хеш-функции (у Bitcoin — SHA-256): любое изменение входа полностью меняет хеш.</p>
+        <p><strong>Путь транзакции в сеть:</strong></p>
+        <ol style="padding-left:18px;">
+          <li>Пользователь создаёт и подписывает транзакцию приватным ключом</li>
+          <li>Она попадает в <strong>mempool</strong> — очередь неподтверждённых транзакций</li>
+          <li>Тот, кто формирует блок (майнер/валидатор), берёт транзакции из mempool в блок</li>
+          <li>Блок добавляется в цепочку, транзакция получает подтверждения</li>
+        </ol>
+        <p><strong>Ноды</strong> — компьютеры с копией блокчейна. Они проверяют транзакции и блоки по правилам сети и отвергают невалидные. Никому не нужно «доверять» — каждый проверяет сам.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Merkle tree</strong> — все транзакции блока свёрнуты в один корневой хеш (merkle root). Это позволяет быстро доказать, что транзакция в блоке, не скачивая весь блок. Деталь, которую любят на собесах «для проверки фундамента».</p>
+        <p><strong>51% атака</strong> — если кто-то контролирует больше половины мощности сети (PoW) или стейка (PoS), он теоретически может переписать недавние блоки и провести double-spend. На крупных сетях (Bitcoin, Ethereum) это запретительно дорого, на мелких — реальный риск.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему блокчейн называют неизменяемым, ведь данные хранятся на обычных компьютерах?» — Неизменность не про «нельзя физически изменить файл», а про экономику и криптографию. Изменить старый блок → пересчитать хеши всех следующих блоков → и сделать это быстрее, чем вся честная сеть продолжает строить настоящую цепочку. Сеть всегда принимает самую длинную/тяжёлую валидную цепочку, поэтому подделка отстаёт и отвергается. Менять невыгодно и невозможно на практике, а не «технически запрещено».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. ФОРКИ И УПРАВЛЕНИЕ ─────── -->
+  <section class="section" id="forks">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Форки и управление протоколом</span>
+      <span class="section-badge">governance</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Частая путаница: «если блокчейн неизменяемый, как же его обновляют?». Тут два разных уровня:</p>
+        <ul>
+          <li><strong>Данные</strong> (транзакции, блоки) — <em>неизменяемы</em>. Записанную транзакцию переписать нельзя</li>
+          <li><strong>Правила протокола</strong> (сам софт нод) — <em>меняемы</em> через обновление, но не принудительно</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Ключевая идея</span>Неизменяемость данных ≠ невозможность развития. Биткоин — это программа на тысячах независимых нод. Код можно обновить, но <strong>никто не может навязать обновление силой</strong>: каждый оператор ноды сам решает, ставить новую версию или нет. Нет «владельца» или кнопки у разработчиков.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Как меняются правила — на примере Bitcoin:</strong></p>
+        <ol style="padding-left:18px;">
+          <li>Кто угодно предлагает изменение через <strong>BIP</strong> (Bitcoin Improvement Proposal) — публичный документ</li>
+          <li>Обсуждение в сообществе: разработчики, майнеры, операторы нод, биржи, бизнесы</li>
+          <li>При поддержке изменение входит в новую версию софта</li>
+          <li>Операторы нод <strong>добровольно</strong> обновляются. Правила сети меняются, только когда новую версию запустило подавляющее большинство</li>
+        </ol>
+        <p>Это не голосование акционеров и не решение компании, а «согласие через принятие»: правила меняются, если почти все независимые участники согласились их принять. Поэтому крупные изменения в Bitcoin редкие и медленные — нужен консенсус сторон с разными интересами.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p>Когда правила меняют, возможны два типа форка:</p>
+        <table>
+          <thead><tr><th></th><th>Soft fork</th><th>Hard fork</th></tr></thead>
+          <tbody>
+            <tr><td>Совместимость</td><td>совместим со старыми правилами (ужесточение)</td><td>несовместим (старые ноды отвергают новые блоки)</td></tr>
+            <tr><td>Старые ноды</td><td>продолжают видеть цепочку валидной</td><td>отказываются принимать — раскол</td></tr>
+            <tr><td>Результат</td><td>сеть остаётся единой</td><td>цепочка может расколоться на две</td></tr>
+            <tr><td>Пример</td><td>SegWit</td><td>Bitcoin → Bitcoin Cash (2017)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Soft fork</strong> — добавляет ограничения, не ломая совместимость: то, что было валидным, валидно и дальше. <strong>Hard fork</strong> — несовместимое изменение: если часть сети обновилась, а часть нет, цепочка раскалывается на две с общей историей до точки раскола. Так из Bitcoin появился Bitcoin Cash.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если блокчейн неизменяем, кто и как его обновляет?» — Неизменяемы <em>данные</em>, а не <em>правила</em>. Правила — это софт нод, его можно обновить, но никто не делает это единолично: изменение проходит через предложение (BIP), обсуждение и <strong>добровольное</strong> обновление операторами нод. Сеть меняет правила только при широком консенсусе. Несовместимое изменение (hard fork) может расколоть цепочку на две (как Bitcoin Cash), совместимое (soft fork) сеть переживает единой (как SegWit). Главное — нет центральной «кнопки»: развитие идёт через согласие участников.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. КРИПТОГРАФИЯ ─────── -->
+  <section class="section" id="crypto">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Криптография: ключи, подписи, адреса</span>
+      <span class="section-badge">crypto basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Владение криптой = владение <strong>приватным ключом</strong>. Из него выводится публичный ключ, из него — адрес. Цепочка односторонняя:</p>
+        <div class="code-block">приватный ключ  →  публичный ключ  →  адрес
+   (секрет)         (можно делиться)   (куда слать)</div>
+        <ul>
+          <li><strong>Приватный ключ</strong> — секрет, доказывает владение. Знаешь его — владеешь средствами</li>
+          <li><strong>Публичный ключ / адрес</strong> — можно давать всем, на него присылают</li>
+          <li><strong>Подпись</strong> — доказывает «это я», не раскрывая приватный ключ</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Адрес — номер счёта (даёшь всем, чтобы прислали). Приватный ключ — подпись + печать, которой ты распоряжаешься счётом. Подпись транзакции как роспись: все видят, что подпись настоящая, но повторить её без ключа нельзя. «Not your keys — not your coins»: нет ключа — нет контроля.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Асимметричная криптография</strong> — пара ключей, математически связанных так, что из публичного нельзя вычислить приватный. Приватным <em>подписывают</em>, публичным <em>проверяют</em> подпись.</p>
+        <p><strong>Цифровая подпись транзакции:</strong> пользователь подписывает транзакцию приватным ключом → сеть проверяет подпись публичным ключом → если сходится, транзакция валидна и точно от владельца. Приватный ключ при этом не передаётся.</p>
+        <p><strong>Хеш-функция</strong> (SHA-256 и др.) — превращает любые данные в строку фиксированной длины. Свойства: одинаковый вход → одинаковый хеш; малейшее изменение → совсем другой хеш; по хешу нельзя восстановить вход. На этом держится связь блоков и адреса.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Seed-фраза и HD-кошельки.</strong> Из одной мнемоники (12/24 слова) детерминированно выводится дерево ключей (HD — hierarchical deterministic). Поэтому одна seed-фраза восстанавливает все адреса кошелька. Seed → master key → много пар ключей → много адресов.</p>
+        <p><strong>Multisig</strong> — для операции нужно несколько подписей (например, 2 из 3). Повышает безопасность: один скомпрометированный ключ не даёт доступ.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Можно ли по адресу или публичному ключу вычислить приватный?» — Нет, в этом весь смысл асимметричной криптографии: функция односторонняя. Из приватного легко получить публичный и адрес, обратно — вычислительно невозможно. Поэтому адрес можно публиковать без риска. Угроза не в «взломе ключа», а в <em>утечке</em> приватного ключа / seed-фразы (фишинг, малварь, скриншот) — это и есть главный вектор в крипте.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. КОНСЕНСУС ─────── -->
+  <section class="section" id="consensus">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Консенсус: PoW и PoS</span>
+      <span class="section-badge">самое спрашиваемое</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Проблема:</strong> в сети без центра кто-то должен решать, какие транзакции попадут в следующий блок и какая версия истории правильная. Механизм, которым децентрализованная сеть договаривается, — <strong>консенсус</strong>. Два главных:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Proof of Work (PoW)</div>
+            «Доказательство работы». Майнеры тратят вычислительную мощность, решая задачу-подбор. Кто первый решил — собирает блок и получает награду. <strong>Bitcoin.</strong>
+          </div>
+          <div class="card">
+            <div class="card-title">Proof of Stake (PoS)</div>
+            «Доказательство доли». Валидаторы замораживают (стейкают) монеты как залог. Сеть выбирает, кто соберёт блок, пропорционально стейку. <strong>Ethereum (с 2022).</strong>
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Proof of Work — как работает:</strong></p>
+        <ul>
+          <li>Майнеры подбирают число (nonce), чтобы хеш блока оказался меньше заданного порога — это и есть «работа», тысячи попыток в секунду</li>
+          <li>Первый нашедший публикует блок и получает награду + комиссии</li>
+          <li>Защита: чтобы переписать историю, нужно переделать всю работу быстрее всей сети — нереально</li>
+          <li><strong>Минус:</strong> огромное энергопотребление (фермы из видеокарт/ASIC)</li>
+        </ul>
+        <p><strong>Proof of Stake — как работает:</strong></p>
+        <ul>
+          <li>Валидаторы вносят залог (стейк). Чем больше стейк, тем выше шанс быть выбранным собрать блок</li>
+          <li>За честную работу — награда; за обман/офлайн — <strong>slashing</strong> (часть стейка сжигается)</li>
+          <li>Защита: атаковать сеть = рисковать своим залогом, экономически невыгодно</li>
+          <li><strong>Плюс:</strong> энергопотребление в разы ниже PoW</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>The Merge</strong> — в сентябре 2022 Ethereum перешёл с PoW на PoS, снизив энергопотребление сети примерно на 99%. Bitcoin остаётся на PoW. Это частый вопрос «что и когда сменил консенсус».</p>
+        <p><strong>Другие механизмы</strong> (знать названия): <strong>DPoS</strong> (delegated — голосуют за делегатов), <strong>PoA</strong> (proof of authority — доверенные валидаторы, для приватных сетей), <strong>PoH</strong> (Solana). TON использует вариант PoS.</p>
+        <table>
+          <thead><tr><th></th><th>PoW</th><th>PoS</th></tr></thead>
+          <tbody>
+            <tr><td>Ресурс</td><td>вычислительная мощность</td><td>замороженный стейк</td></tr>
+            <tr><td>Энергия</td><td>очень высокая</td><td>низкая</td></tr>
+            <tr><td>Наказание за обман</td><td>впустую потраченное электричество</td><td>slashing стейка</td></tr>
+            <tr><td>Пример</td><td>Bitcoin</td><td>Ethereum, TON</td></tr>
+          </tbody>
+        </table>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём принципиальная разница PoW и PoS?» — В том, <em>чем</em> участник доказывает право добавить блок и что теряет при обмане. PoW: тратишь реальную энергию на вычисления, обман = впустую сожжённое электричество. PoS: замораживаешь капитал как залог, обман = потеря залога (slashing). PoW защищает «внешним» ресурсом (электричество), PoS — «внутренним» (сама монета). PoS энергоэффективнее, PoW дольше проверен временем. Ethereum перешёл с PoW на PoS в 2022 (The Merge), Bitcoin остался на PoW.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. BITCOIN VS ETHEREUM ─────── -->
+  <section class="section" id="btc-eth">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Bitcoin vs Ethereum</span>
+      <span class="section-badge">частый вопрос</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Самое частое сравнение на собесе. Коротко — у них <strong>разные цели</strong>:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Bitcoin (BTC)</div>
+            «Цифровое золото». Цель — децентрализованные деньги и хранение ценности. В основном умеет одно: переводить BTC. Простой, консервативный, максимально надёжный.
+          </div>
+          <div class="card">
+            <div class="card-title">Ethereum (ETH)</div>
+            «Программируемый блокчейн». Цель — платформа для приложений. Умеет смарт-контракты, токены, dApps, DeFi, NFT. Гибкий, но сложнее.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Одной фразой</span>Bitcoin — это <em>деньги</em>. Ethereum — это <em>платформа, на которой можно построить что угодно</em>, включая свои деньги. Bitcoin сознательно делает мало, но идеально; Ethereum делает много и потому сложнее.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th></th><th>Bitcoin</th><th>Ethereum</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Назначение</strong></td><td>деньги / хранение ценности</td><td>платформа для приложений</td></tr>
+            <tr><td><strong>Смарт-контракты</strong></td><td>ограниченный скрипт</td><td>полноценные (EVM, Turing-complete)</td></tr>
+            <tr><td><strong>Модель учёта</strong></td><td>UTXO</td><td>account-based (счета с балансами)</td></tr>
+            <tr><td><strong>Консенсус</strong></td><td>PoW</td><td>PoS (с 2022)</td></tr>
+            <tr><td><strong>Время блока</strong></td><td>~10 минут</td><td>~12 секунд</td></tr>
+            <tr><td><strong>Эмиссия</strong></td><td>лимит 21 млн BTC</td><td>без жёсткого лимита</td></tr>
+            <tr><td><strong>Комиссия</strong></td><td>за транзакцию</td><td>«газ» за вычисления</td></tr>
+          </tbody>
+        </table>
+        <p><strong>UTXO vs account-based</strong> — частый подвопрос:</p>
+        <ul>
+          <li><strong>UTXO</strong> (Bitcoin) — баланс это сумма «непотраченных выходов» (как наличные купюры: тратишь купюры, получаешь сдачу новой купюрой). Нет единого «счёта»</li>
+          <li><strong>Account-based</strong> (Ethereum) — как банковский счёт: у адреса есть баланс, транзакция его уменьшает/увеличивает</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Почему Ethereum гибче, но это имеет цену.</strong> Turing-complete смарт-контракты позволяют любую логику — отсюда DeFi, NFT, токены. Но: сложнее, дороже (газ за вычисления), больше поверхность для багов и атак (уязвимые контракты). Bitcoin намеренно ограничен — меньше возможностей, но меньше что ломать.</p>
+        <p><strong>Газ.</strong> В Ethereum каждое действие стоит «газ» — плату за вычисления, чтобы не зациклить сеть. Сложный контракт = больше газа. Это влияет на тестирование: проверять поведение при нехватке газа, скачках цены газа.</p>
+        <p><strong>L2-решения</strong> (Arbitrum, Optimism, для TON — свои) — надстройки над L1 для скорости и дешевизны: обрабатывают транзакции вне основной сети, итог пишут в L1. Знать концепцию L1/L2.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем отличаются цепочки Bitcoin и Ethereum?» — Назначением и устройством. Bitcoin — деньги: UTXO-модель, PoW, ограниченный скрипт, лимит 21M, блок ~10 мин. Ethereum — платформа приложений: account-модель с балансами, PoS (после Merge 2022), полноценные смарт-контракты в EVM с оплатой газом, без жёсткого лимита эмиссии, блок ~12 сек. Если коротко: Bitcoin делает одно идеально (переводить ценность), Ethereum — программируемая среда для приложений, отсюда вся его гибкость и сложность.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. СМАРТ-КОНТРАКТЫ ─────── -->
+  <section class="section" id="contracts">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Смарт-контракты, токены, EVM</span>
+      <span class="section-badge">programmable</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Смарт-контракт</strong> — программа, живущая в блокчейне, которая исполняется автоматически при выполнении условий. Без посредника: код = договор. «Если пришло X токенов — отправь Y на адрес Z».</p>
+        <p><strong>Токены</strong> — активы, выпущенные поверх блокчейна смарт-контрактом. Сам блокчейн имеет нативную монету (ETH, TON), а токены — это «надстройки» (стейблкоины, игровые валюты, NFT).</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Смарт-контракт — как вендинговый автомат: засунул монету (условие) → автоматически выдал товар (результат), без продавца. Никто не может «передумать»: код исполнится как написан. Это сила и опасность — ошибка в коде тоже исполнится буквально.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>EVM (Ethereum Virtual Machine)</strong> — «процессор» Ethereum, исполняющий смарт-контракты. Контракты пишут на <strong>Solidity</strong>, компилируют в байткод для EVM. Многие сети EVM-совместимы (один контракт работает в разных сетях).</p>
+        <p><strong>Стандарты токенов</strong> — частый вопрос:</p>
+        <table>
+          <thead><tr><th>Стандарт</th><th>Что это</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ERC-20</strong></td><td>взаимозаменяемые токены (1 токен = другому: валюты, стейблкоины)</td></tr>
+            <tr><td><strong>ERC-721</strong></td><td>NFT — невзаимозаменяемые, каждый уникален</td></tr>
+            <tr><td><strong>ERC-1155</strong></td><td>смешанный (и взаимозаменяемые, и уникальные в одном контракте)</td></tr>
+          </tbody>
+        </table>
+        <p>В TON свои стандарты (Jetton — аналог ERC-20, NFT-стандарты TON), но идея та же.</p>
+        <div class="hl orange"><span class="hl-label">Jetton по-TONовски — важное отличие</span>В отличие от ERC-20 (один контракт хранит балансы всех), в TON у Jetton-токена <strong>распределённая архитектура</strong>: есть <strong>Jetton Master</strong> (контракт самого токена — общая информация, эмиссия) и <strong>отдельный Jetton Wallet contract для каждого владельца</strong>. Твой баланс USDT — это твой персональный Jetton Wallet, а не запись в общем контракте. Перевод = взаимодействие между Jetton Wallet'ами отправителя и получателя. Для QA это значит: проверять надо адрес <em>Jetton Wallet</em>, а не только Jetton Master, и учитывать, что у получателя Jetton Wallet может ещё не существовать (создаётся при первом получении).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Главное про смарт-контракты с точки зрения QA:</strong> задеплоенный контракт обычно <strong>неизменяем</strong> — баг в нём остаётся навсегда (нельзя выпустить хотфикс как в обычном приложении). Поэтому контракты проходят аудит до деплоя, а цена ошибки — потерянные средства пользователей.</p>
+        <p><strong>Известные классы уязвимостей</strong> (знать названия): <strong>reentrancy</strong> (повторный вызов до завершения — классика взломов DeFi), переполнение чисел, неверные права доступа к функциям, манипуляция через front-running. Глубокий аудит — отдельная роль (security/audit), но QA полезно понимать риски.</p>
+        <div class="hl orange"><span class="hl-label">Token approval — практический риск</span>Чтобы dApp мог тратить твои токены, ты выдаёшь ему approval. Опасность — <strong>unlimited approval</strong>: разрешил тратить без лимита, dApp оказался вредным → увёл всё. QA-проверка кошелька: предупреждение о неограниченном approval, возможность задать лимит и отозвать выданные разрешения.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что особенного в тестировании смарт-контрактов по сравнению с обычным кодом?» — Контракт после деплоя неизменяем — нельзя пропатчить баг, он остаётся навсегда, и цена ошибки — реальные деньги. Поэтому: тестирование максимально полное <em>до</em> деплоя (на testnet, локальных сетях), обязательный аудит безопасности, акцент на необратимости и правах доступа. Плюс детерминизм: контракт исполняется одинаково на всех нодах, любая ошибка воспроизводится у всех. Это ближе к «нельзя ошибиться вообще», чем обычная разработка с быстрыми фиксами.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. КОШЕЛЬКИ ─────── -->
+  <section class="section" id="wallets">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Кошельки: custodial vs self-custodial</span>
+      <span class="section-badge">wallets</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Кошелёк хранит ключи и даёт отправлять/получать активы. Два типа — это прямо про Wallet in Telegram (у них оба):</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Custodial (кастодиальный)</div>
+            Ключами управляет сервис. Пользователь как в банке: логин/пароль, восстановление через поддержку. Проще для юзера, но он доверяет сервису. (в Telegram — Crypto Wallet / DeFi Account)
+          </div>
+          <div class="card">
+            <div class="card-title">Self-custodial / некастодиальный</div>
+            Ключи только у пользователя (seed-фраза). Потерял фразу — потерял доступ навсегда, никто не восстановит. Полный контроль, полная ответственность. (в Telegram — TON Wallet)
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Seed-фраза (мнемоника)</strong> — 12/24 слова, из которых выводятся ключи. Это «мастер-пароль» self-custodial кошелька. Что тестировать:</p>
+        <ul>
+          <li><strong>Генерация</strong> — фраза создаётся, показывается один раз, есть предупреждение «запишите и не показывайте никому»</li>
+          <li><strong>Восстановление</strong> — импорт по фразе возвращает тот же кошелёк/баланс</li>
+          <li><strong>Валидация</strong> — неверная фраза, перепутанный порядок слов, лишние пробелы → понятная ошибка</li>
+          <li><strong>Безопасность</strong> — фраза не утекает в логи, бэкап, скриншоты, буфер обмена надолго</li>
+        </ul>
+        <p><strong>Разница в тестировании двух типов:</strong></p>
+        <table>
+          <thead><tr><th></th><th>Custodial</th><th>Self-custodial</th></tr></thead>
+          <tbody>
+            <tr><td>Восстановление</td><td>через сервис (email/пароль/2FA)</td><td>только seed-фраза</td></tr>
+            <tr><td>Фокус тестов</td><td>auth, сессии, серверная логика</td><td>ключи, фраза, локальное хранение</td></tr>
+            <tr><td>Риск</td><td>взлом аккаунта на сервере</td><td>утечка/потеря фразы у юзера</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что проверять в отправке средств</strong> (самое критичное — необратимо):</p>
+        <ul>
+          <li><strong>Предпросмотр</strong> — пользователь видит до подтверждения: сколько уйдёт, кому, какая комиссия, сколько останется</li>
+          <li><strong>Валидация адреса</strong> — неверный формат, адрес другой сети, свой же адрес, пустой</li>
+          <li><strong>Недостаточно средств</strong> — на сумму и/или на комиссию (классика: денег хватает, на газ — нет)</li>
+          <li><strong>Двойная отправка</strong> — двойной тап / повтор не создаёт две транзакции (идемпотентность)</li>
+          <li><strong>Граничные суммы</strong> — 0, очень маленькая (меньше комиссии), весь баланс, дробная точность</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как тестировать восстановление self-custodial кошелька?» — Сгенерировать кошелёк → записать seed → пополнить на testnet → удалить/переустановить → восстановить по seed → проверить, что адрес и баланс те же. Негатив: неверная фраза, перепутанный порядок, 11 слов вместо 12, чужая фраза (даёт другой кошелёк, не ошибку). Главное понимать: для self-custodial seed — единственный путь восстановления, сервис не поможет.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 07. ТЕСТИРОВАНИЕ ТРАНЗАКЦИЙ ─────── -->
+  <section class="section" id="tx-testing">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Тестирование транзакций через testnet</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Основное окружение QA — <strong>testnet</strong>: та же механика, что mainnet, но монеты без ценности. Тестовые монеты берут из <strong>faucet</strong> (кран) — бот/сайт, который шлёт их на твой testnet-адрес.</p>
+        <div class="hl green"><span class="hl-label">Для TON</span>Тестовые Toncoin раздаёт faucet-бот (например, Test Giver TON Bot). Конкретные лимиты (сумма, частота) меняются — уточняй актуальные. Кошелёк надо переключить на testnet. Транзакции смотришь в testnet-эксплорере (testnet.tonviewer.com).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Базовый цикл проверки перевода:</strong></p>
+        <ol style="padding-left:18px;">
+          <li>Получить testnet-монеты из faucet на адрес A</li>
+          <li>Отправить с A на адрес B, проверить предпросмотр (сумма, комиссия)</li>
+          <li>Подтвердить → статус pending в UI</li>
+          <li>Дождаться подтверждения → проверить в explorer, что tx прошла</li>
+          <li>Сверить балансы A и B в UI <em>и</em> в explorer (источник правды — сеть)</li>
+        </ol>
+        <p><strong>Что проверять по статусам транзакции:</strong></p>
+        <ul>
+          <li><strong>Pending</strong> — UI показывает «в обработке», не даёт потратить те же средства снова</li>
+          <li><strong>Confirmed</strong> — баланс обновился, история показывает tx с хешем</li>
+          <li><strong>Failed</strong> — внятная причина (недостаточно газа, отклонено), средства не списались некорректно</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Тонкие места транзакций:</strong></p>
+        <ul>
+          <li><strong>Подтверждения медленнее</strong> на testnet — закладывай ожидание (polling статуса), не sleep</li>
+          <li><strong>UI vs сеть рассинхрон</strong> — UI показал «успешно», а в explorer'е tx ещё pending/failed. Расхождение — баг</li>
+          <li><strong>Комиссия в реальном времени</strong> — fee может меняться; проверить, что предпросмотр совпал с фактически списанным</li>
+          <li><strong>Token approvals</strong> (для токенов/dApp) — отзыв разрешений, предупреждение про unlimited approval</li>
+          <li><strong>Параллельные транзакции</strong> — две отправки подряд, корректность seqno (или query_id для highload-кошельков)</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">Инструменты</span>Explorer (Tonviewer / testnet.tonviewer.com) — проверять статус и балансы независимо от своего бэкенда. Faucet — пополнение testnet. API сети — для автоматизации (создать tx, проверить статус программно). Держи набор testnet-кошельков с разными состояниями (пустой, с балансом, с историей) — как тестовые данные.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«UI показал "перевод успешен", как убедиться, что это правда?» — Не верить UI. Источник правды — сеть: взять хеш транзакции, открыть в explorer, проверить статус (confirmed, а не pending/failed) и что сумма/адреса совпадают. Сверить баланс получателя в сети, а не только в своём приложении. Расхождение UI и explorer — баг, и в крипте критичный.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 08. TON И dApps ─────── -->
+  <section class="section" id="ton-dapp">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">TON и dApps</span>
+      <span class="section-badge">ecosystem</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>TON (The Open Network)</strong> — блокчейн, изначально созданный командой Telegram, теперь развивается сообществом. Нативная монета — <strong>Toncoin</strong>. Тесно интегрирован с Telegram (кошельки, Mini Apps, оплата).</p>
+        <p><strong>dApp</strong> (decentralized app) — приложение, работающее поверх блокчейна: кошелёк подключается к dApp и подписывает операции. Пользователь не вводит ключи в dApp — он <em>подтверждает</em> действия из своего кошелька.</p>
+        <div class="hl green"><span class="hl-label">Связка кошелёк ↔ dApp</span>dApp просит «подключить кошелёк» → кошелёк показывает запрос на подключение → пользователь одобряет → dApp может предлагать транзакции, которые пользователь подтверждает в кошельке. Ключи никогда не покидают кошелёк. Для TON стандарт подключения — TON Connect.</div>
+        <div class="hl"><span class="hl-label">TON-адреса — что знать QA</span>Адрес TON имеет нюансы, которые надо проверять: <strong>Raw</strong> (технический вид <code>0:abc...</code>) vs <strong>user-friendly</strong> (то, что видит юзер, base64). User-friendly бывает <strong>bounceable</strong> (если контракт-получатель не существует/ошибка — средства вернутся) и <strong>non-bounceable</strong> (вернуть нельзя — для кошельков юзеров обычно так). <strong>Workchain</strong> — номер цепочки (обычно 0). И адрес кодирует сеть — <strong>testnet и mainnet адреса разные</strong> (нельзя случайно отправить из одной сети в другую). Для QA кошелька это практичнее, чем теория Merkle tree.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что тестировать в связке кошелёк ↔ dApp:</strong></p>
+        <ul>
+          <li><strong>Подключение</strong> — dApp запрашивает доступ, кошелёк показывает что именно, пользователь одобряет/отклоняет</li>
+          <li><strong>Подпись транзакции</strong> — dApp инициирует, в кошельке виден понятный предпросмотр (что подписываю, сколько уйдёт)</li>
+          <li><strong>Отклонение</strong> — пользователь отклонил в кошельке → dApp корректно обработал отказ</li>
+          <li><strong>Отзыв доступа</strong> — отключение dApp от кошелька, отзыв разрешений</li>
+          <li><strong>Мультичейн</strong> — если кошелёк поддерживает несколько сетей, переключение и изоляция активов</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Кошелёк в TON — это smart contract</span>Важное отличие: в TON кошелёк не «запись в системе», а <strong>отдельный смарт-контракт</strong>. Что знать:
+          <ul style="margin:8px 0 0;">
+            <li><strong>Версии</strong> — v4, v5 (для нового — v5: gasless-транзакции, account recovery, до 255 сообщений за раз). Для новых деплоев рекомендуется v5</li>
+            <li><strong>seqno</strong> — последовательный счётчик, защита от replay: каждая транзакция увеличивает seqno, повторить старую подпись нельзя. Плюс <code>valid_until</code> ограничивает срок жизни подписи</li>
+            <li><strong>subwallet_id</strong> кодирует сеть → у testnet и mainnet кошельков с одним ключом <em>разные адреса</em> (защита от replay между сетями)</li>
+            <li><strong>Highload Wallet</strong> — для сервисов/бирж с массовыми отправками: использует <code>query_id</code> вместо seqno, что позволяет слать транзакции <em>параллельно</em> (seqno-кошелёк — строго последовательно). Для новых — v3 (v1/v2 deprecated)</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl"><span class="hl-label">TON Connect — глубже (must-have для вакансии)</span>Протокол подключения кошелька к dApp. Что тестировать:
+          <ul style="margin:8px 0 0;">
+            <li><strong>manifest</strong> (<code>tonconnect-manifest.json</code>) — dApp публикует манифест (имя, иконка, URL); кошелёк показывает их юзеру. Проверять: некорректный/недоступный манифест, подменённые данные</li>
+            <li><strong>connect / disconnect session</strong> — установка и разрыв сессии, состояние на обеих сторонах синхронно</li>
+            <li><strong>sendTransaction</strong> — dApp шлёт запрос на транзакцию, кошелёк показывает предпросмотр и подписывает</li>
+            <li><strong>SignData</strong> — подпись произвольных данных (не транзакции) — отдельный поток, свой предпросмотр</li>
+            <li><strong>ton_proof</strong> — доказательство владения кошельком при подключении (для авторизации на бэкенде dApp). Проверять валидацию proof на сервере</li>
+            <li><strong>feature negotiation</strong> — dApp и кошелёк согласуют поддерживаемые возможности; старый кошелёк может не поддерживать нужную фичу</li>
+            <li><strong>восстановление сессии</strong> — после reload страницы / reconnect сессия должна восстановиться, а не потеряться</li>
+          </ul>
+        </div>
+        <div class="hl orange"><span class="hl-label">Главный риск dApp — слепая подпись</span>Опасность для пользователя — подписать вредную транзакцию, не поняв, что он одобряет (фишинговый dApp, запрос на unlimited approval, подмена адреса получателя). Ключевая проверка QA: <em>кошелёк показывает понятный и честный предпросмотр того, что реально произойдёт</em> — какой контракт, сколько средств, какие разрешения. Пользователь должен видеть последствия до подписи.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«На что в первую очередь смотреть при тестировании подключения dApp к кошельку?» — На то, что пользователь <strong>видит и контролирует, что одобряет</strong>: при подключении — какие права запрашивает dApp и валиден ли его манифест; при транзакции — честный предпросмотр (адрес, сумма, комиссия, тип операции), возможность отклонить, отсутствие «тихих» разрешений. Плюс устойчивость сессии: reconnect/reload не должен ломать или «терять» запрос на подпись. Безопасность тут — про прозрачность подписи и валидацию ton_proof, а не только про happy path.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── MOBILE ─────── -->
+  <section class="section" id="mobile">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Мобильное тестирование</span>
+      <span class="section-badge">mobile</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Wallet — прежде всего мобильный продукт, поэтому базовое мобильное тестирование могут спросить. Главное отличие от веба: на мобильном гораздо больше <strong>внешних факторов</strong>, влияющих на приложение, — оно живёт не в стабильном окне браузера, а в среде, которая постоянно меняется.</p>
+        <div class="hl green"><span class="hl-label">Главная мысль</span>В вебе пользователь сидит за более-менее стабильной машиной. На мобильном — десятки моделей, версий ОS, размеров экрана, прерывания (звонок, пуш), скачущая сеть, разряжающаяся батарея, переключение фон/передний план. Мобильное тестирование — это во многом проверка поведения <em>в нестабильной среде</em>.</p></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что специфично для мобильного</strong> (чего почти нет в вебе):</p>
+        <table>
+          <thead><tr><th>Фактор</th><th>Что проверять</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Прерывания</strong></td><td>входящий звонок, пуш, будильник посреди операции — приложение не падает, состояние сохраняется</td></tr>
+            <tr><td><strong>Фон / передний план</strong></td><td>свернул приложение и вернулся — сессия, данные, незавершённая операция на месте</td></tr>
+            <tr><td><strong>Сеть</strong></td><td>переключение Wi-Fi ↔ мобильная, потеря связи, медленная сеть, режим полёта</td></tr>
+            <tr><td><strong>Прерывание питания</strong></td><td>низкий заряд, убийство приложения системой в фоне (особенно агрессивно на Android)</td></tr>
+            <tr><td><strong>Разрешения</strong></td><td>камера, уведомления, биометрия — выдал / отклонил / отозвал в настройках</td></tr>
+            <tr><td><strong>Ориентация и размеры</strong></td><td>портрет/ландшафт, маленькие и большие экраны, вырезы (notch), жесты</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Native vs Web vs Hybrid</strong> — три типа мобильных приложений:</p>
+        <ul>
+          <li><strong>Native</strong> — отдельное приложение под платформу (Swift/Kotlin), ставится из стора, полный доступ к функциям устройства</li>
+          <li><strong>Web / PWA</strong> — сайт в браузере (сюда близки Telegram Mini Apps — web в webview)</li>
+          <li><strong>Hybrid</strong> — web внутри нативной оболочки (React Native, Flutter)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>iOS vs Android — ключевые различия для тестирования:</strong></p>
+        <ul>
+          <li><strong>Фрагментация</strong> — Android: тысячи устройств, версий, оболочек (Samsung, Xiaomi). iOS: ограниченный набор устройств, проще покрыть</li>
+          <li><strong>Управление фоном</strong> — Android агрессивнее убивает фоновые процессы (зависит от вендора), iOS строже с фоновым выполнением — проверять восстановление состояния</li>
+          <li><strong>Разрешения и навигация</strong> — разные модели запроса разрешений, кнопка «назад» на Android (системная) vs её отсутствие на iOS</li>
+          <li><strong>Релизы</strong> — App Store ревьюит обновления (дни), Google Play быстрее. Для критичных фиксов это влияет на скорость доставки</li>
+        </ul>
+        <p><strong>Чем тестируют:</strong> реальные устройства (точнее всего), эмуляторы/симуляторы (быстро, для базовой проверки), облачные device farms (BrowserStack, Sauce Labs — много устройств без своего парка). Автоматизация мобильных — Appium (кросс-платформенный), нативные XCUITest (iOS) / Espresso (Android).</p>
+        <div class="hl modern"><span class="hl-label">Связка с Wallet и TMA</span>Telegram Mini App — это web в webview мобильного клиента, поэтому сходятся оба пласта: web-специфика TMA (initData, cross-client) + мобильная среда (прерывания, сеть, фон/передний план). Самые ценные баги — на стыке: например, потеря сети или сворачивание приложения <em>посреди отправки транзакции</em>. В крипте это критично — операция необратима, а состояние при прерывании должно оставаться однозначным.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем мобильное тестирование отличается от веб?» — На мобильном гораздо больше внешних факторов, которых нет в вебе: прерывания (звонок, пуш), переключение фон/передний план, нестабильная сеть (Wi-Fi ↔ мобильная, потеря связи), разрешения, ограничения батареи и памяти (система убивает приложение в фоне), фрагментация устройств и версий ОС, ориентация экрана, жесты. Веб-тест проверяет в основном функциональность и кросс-браузерность в стабильном окне; мобильный добавляет проверку поведения в постоянно меняющейся среде устройства. Плюс различия iOS/Android по управлению фоном, разрешениям и навигации.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── WEBVIEW ─────── -->
+  <section class="section" id="webview">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <span class="section-title">Тестирование WebView</span>
+      <span class="section-badge">webview</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>WebView</strong> — встроенный в нативное приложение «браузер без адресной строки»: компонент, который показывает веб-страницу внутри мобильного приложения. Telegram Mini Apps работают именно так — это web-страница в webview клиента Telegram.</p>
+        <div class="hl green"><span class="hl-label">Суть для тестирования</span>WebView — гибрид: контент это web (HTML/CSS/JS, тестируешь как сайт), но <em>окружение</em> — нативное приложение на мобильном устройстве. Значит сходятся проблемы обоих миров: баги вёрстки и JS (как в вебе) + специфика мобильной среды и моста «native ↔ web» (которого в обычном браузере нет).</p></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Чем WebView отличается от обычного браузера</strong> — что проверять отдельно:</p>
+        <table>
+          <thead><tr><th>Особенность</th><th>Что проверять</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Движок зависит от ОС</strong></td><td>на iOS — WKWebView (WebKit), на Android — System WebView (Chromium). Рендеринг и поведение различаются — тестировать на обеих</td></tr>
+            <tr><td><strong>Версия движка</strong></td><td>на Android System WebView обновляется отдельно от ОС — у пользователя может быть старая версия со своими багами</td></tr>
+            <tr><td><strong>Мост native ↔ web</strong></td><td>обмен данными между web-контентом и нативной оболочкой (JS bridge) — частый источник багов</td></tr>
+            <tr><td><strong>Нет адресной строки / навигации</strong></td><td>нельзя обновить страницу, ввести URL, кнопки браузера. Навигация — только внутри приложения</td></tr>
+            <tr><td><strong>Доступ к функциям</strong></td><td>камера, файлы, буфер, биометрия — через разрешения приложения, не браузера</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Дебаг WebView</strong> — отдельный навык (обычные DevTools напрямую недоступны):</p>
+        <ul>
+          <li><strong>Android</strong> — Chrome remote debugging: <code>chrome://inspect</code> на десктопе подключается к WebView на устройстве по USB</li>
+          <li><strong>iOS</strong> — Safari Web Inspector: Develop → устройство → инспектируешь WKWebView</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Самые проблемные места WebView</strong> (из практики):</p>
+        <ul>
+          <li><strong>Мост native↔web</strong> — данные передаются с задержкой/теряются, разный порядок событий, web вызвал нативный метод, а тот не ответил</li>
+          <li><strong>Жизненный цикл</strong> — приложение свернули → WebView может быть выгружен и перезагружен; состояние страницы (форма, незавершённая операция) теряется, если не сохранено</li>
+          <li><strong>Скролл и жесты</strong> — конфликт скролла web-контента и нативного контейнера, тач-зоны, клавиатура перекрывает поля</li>
+          <li><strong>Хранение</strong> — cookie/localStorage в WebView могут чиститься или быть изолированы иначе, чем в браузере</li>
+          <li><strong>Производительность</strong> — WebView тяжелее нативного UI, на слабых устройствах тормозит, прогрев холодного старта</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">Связка с Wallet и TMA</span>Telegram Mini App = web в WebView клиента Telegram. Значит при тестировании Wallet нужно держать в голове три слоя сразу: <em>web</em> (вёрстка, JS, как в разделе UI/E2E), <em>WebView</em> (движок iOS/Android, мост, жизненный цикл) и <em>крипто</em> (необратимость операций). Критичные баги — на стыке: WebView перезагрузился (свернул Telegram) посреди подписи транзакции — что с состоянием? Деньги необратимы, поэтому поведение при выгрузке WebView должно быть однозначным.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем тестирование WebView отличается от тестирования сайта в браузере?» — Контент тот же web, но окружение другое: 1) движок зависит от ОС (WKWebView на iOS, Chromium WebView на Android) и от его версии — рендеринг различается; 2) есть мост native↔web, которого нет в браузере, — отдельный источник багов; 3) нет браузерной навигации (адресной строки, обновления, кнопок); 4) жизненный цикл управляется приложением — WebView могут выгрузить при сворачивании, теряется состояние; 5) доступ к функциям устройства через разрешения приложения. Поэтому тестируешь и как web, и как часть мобильного приложения одновременно, плюс дебажишь через remote debugging (Chrome inspect / Safari Web Inspector), а не обычные DevTools.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 09. TELEGRAM MINI APPS ─────── -->
+  <section class="section" id="tma">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <span class="section-title">Telegram Mini Apps</span>
+      <span class="section-badge">TMA</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Telegram Mini App (TMA)</strong> — веб-приложение (HTML/CSS/JS), которое открывается <em>внутри</em> Telegram, без установки из стора. По сути web-страница в встроенном webview клиента, с доступом к Telegram-API (данные юзера с разрешения, тема, кнопки, платежи).</p>
+        <div class="hl green"><span class="hl-label">Суть для тестирования</span>TMA — это web внутри мессенджера. Значит тестируешь как web-приложение (раздел UI/E2E применим), <strong>плюс</strong> специфику Telegram: разные клиенты (iOS/Android/desktop/web), интеграцию с Telegram-API, поведение во встроенном webview, отсутствие ревью стора (выкат мгновенный — выше цена бага в проде).</p></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что специфично для TMA:</strong></p>
+        <ul>
+          <li><strong>Cross-client</strong> — TMA работает в Telegram на iOS, Android, desktop, web, macOS. Webview на каждой платформе свой — поведение различается, тестировать на всех</li>
+          <li><strong>Тестовое окружение Telegram</strong> — отдельный test server (аккаунт создаётся в мобильном клиенте: тапнуть Settings 10 раз → Accounts → Test). В нём можно HTTP без TLS, отдельные боты через @BotFather</li>
+          <li><strong>Дебаг</strong> — web view inspection: на iOS через Safari Develop, на Android через USB-debugging + Chrome inspect. Включается тапом по иконке настроек 10 раз</li>
+          <li><strong>Параметры запуска</strong> — Telegram прокидывает только один параметр <code>startapp</code>; несколько значений упаковывают в него через разделитель</li>
+          <li><strong>Авторизация и initData</strong> — TMA получает от Telegram два объекта: <code>initData</code> (подписанная строка) и <code>initDataUnsafe</code> (распарсенный объект). <strong>initDataUnsafe нельзя доверять</strong> — это клиентские данные, их легко подделать. Бэкенд должен валидировать именно <code>initData</code> (проверка подписи Telegram). Это прямо предупреждается в офиц. доках Telegram</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Edge cases, специфичные для TMA</strong> (из практики):</p>
+        <ul>
+          <li><strong>Сессия и реконнекты</strong> — свернул Telegram, потерял сеть, вернулся — TMA восстанавливается корректно</li>
+          <li><strong>Перезапуск бота</strong> — состояние не теряется неожиданно</li>
+          <li><strong>Тема Telegram</strong> — TMA подхватывает light/dark тему клиента</li>
+          <li><strong>Кнопки Telegram</strong> — MainButton/BackButton ведут себя согласованно с навигацией</li>
+          <li><strong>Клиентский рендеринг</strong> — TMA работает в основном на клиенте (нужен window для Telegram-API), SSR ограничен — проверять на медленных устройствах/сети</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">Связка с кошельком</span>В Wallet in Telegram сходятся оба пласта: TMA (интерфейс внутри Telegram) + блокчейн (кошельки, транзакции, TON). Значит тестируешь и web-специфику Telegram (cross-client, initData, webview), и крипто-специфику (необратимость, seed, подтверждения). Самые ценные баги — на стыке: например, реконнект TMA посреди отправки транзакции.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«initData от Telegram — что с ним важно проверить?» — Что бэкенд <strong>валидирует подпись</strong> <code>initData</code>, а не доверяет ему слепо. Ключевой нюанс: есть <code>initData</code> (подписанная строка) и <code>initDataUnsafe</code> (удобный распарсенный объект) — <strong>Unsafe нельзя доверять</strong>, это клиентские данные, подделываются тривиально. Сервер должен проверять подпись именно <code>initData</code>; без этого злоумышленник подделает «я юзер X». Подменённый/неподписанный initData должен отклоняться.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 10. КЕЙСЫ И РИСКИ ─────── -->
+  <section class="section" id="cases">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <span class="section-title">Кейсы и риски</span>
+      <span class="section-badge">senior</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Главные категории рисков крипто-кошелька, на которые смотрит QA:</p>
+        <ul>
+          <li><strong>Потеря средств</strong> — необратимая отправка, неверный адрес, баг в сумме/комиссии</li>
+          <li><strong>Потеря доступа</strong> — проблемы с seed/восстановлением</li>
+          <li><strong>Безопасность</strong> — утечка ключей, фишинг, вредные dApp, подмена адреса</li>
+          <li><strong>Рассинхрон</strong> — UI показывает не то, что в сети</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Abuse / fraud векторы</strong> (актуально для финтех/крипто — это в обязанностях вакансии):</p>
+        <ul>
+          <li><strong>Двойное расходование в UI</strong> — успеть потратить «зависшие» в pending средства дважды</li>
+          <li><strong>Подмена адреса</strong> — clipboard-малварь меняет скопированный адрес; проверка, что юзер видит полный адрес перед отправкой</li>
+          <li><strong>Накрутка бонусов/рефералов</strong> — обойти лимиты faucet/промо, мультиаккаунты</li>
+          <li><strong>Манипуляция комиссией</strong> — слишком низкий fee → застрявшая транзакция, поведение UI</li>
+          <li><strong>Фишинговые dApp</strong> — запрос опасных разрешений под видом легитимных</li>
+        </ul>
+        <p><strong>Travel Rule</strong> (комплаенс): для крупных переводов (порог зависит от юрисдикции, часто ~$1–3K) сервис обязан собирать и передавать данные отправителя/получателя. Тестировать сбор данных и поведение, когда данных контрагента нет.</p>
+        <div class="hl"><span class="hl-label">Что сверять в explorer (Tonviewer)</span>Explorer — источник правды, не UI. При проверке транзакции сверяй: <strong>tx hash</strong> (есть ли транзакция вообще), <strong>адрес отправителя и получателя</strong> (те ли, в правильном формате), <strong>amount</strong> (сумма совпадает), <strong>fee</strong> (комиссия — не больше ожидаемой), <strong>status</strong> (успех, а не failed/pending), <strong>timestamp / logical time (lt)</strong> (когда и в каком порядке), для токенов — <strong>детали Jetton transfer</strong> (тот ли Jetton, верный Jetton Wallet, сумма в нужных единицах). Расхождение UI и explorer — баг, в крипте критичный.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl"><span class="hl-label">Quality strategy for TON wallet — по слоям</span>Структурированный ответ на «как тестировать TON-кошелёк», по слоям от ввода к проду:
+          <ul style="margin:8px 0 0;">
+            <li><strong>Адреса / сеть</strong> — формат (raw/user-friendly), bounceable/non-bounceable, workchain, testnet vs mainnet</li>
+            <li><strong>Подпись</strong> — seqno/replay-защита, valid_until, корректный предпросмотр перед подписью</li>
+            <li><strong>Отправка</strong> — суммы и границы, комиссия, защита от двойной отправки, Jetton-переводы (Jetton Wallet)</li>
+            <li><strong>Explorer verification</strong> — сверка результата с сетью (hash, адреса, amount, status, lt)</li>
+            <li><strong>TMA / WebView</strong> — cross-client, валидация initData, жизненный цикл webview, reconnect</li>
+            <li><strong>Fraud / abuse</strong> — подмена адреса, фишинговые dApp, накрутка, манипуляция fee</li>
+            <li><strong>Monitoring</strong> — Sentry/OpenSearch: failed tx, ошибки подписи/подключения, расхождения балансов</li>
+          </ul>
+        </div>
+        <div class="hl red"><span class="hl-label">TON-специфичные кейсы (проговорить на собесе)</span>
+          <ul style="margin:6px 0 0;">
+            <li>Отправка на <strong>bounceable</strong> vs <strong>non-bounceable</strong> адрес — поведение при несуществующем получателе (вернутся / не вернутся средства)</li>
+            <li><strong>Mainnet-адрес в testnet</strong> и наоборот — должно отклоняться, а не «уйти в никуда»</li>
+            <li><strong>Неверный memo / comment при депозите</strong> — на биржу/сервис без комментария или с неверным → средства не зачислятся нужному счёту</li>
+            <li><strong>Reconnect во время TON Connect transaction request</strong> — сессия восстановилась, запрос не задвоился и не потерялся</li>
+            <li><strong>dApp показывает одно, wallet preview — другое</strong> — расхождение между тем, что обещает dApp, и что реально в запросе на подпись (вектор атаки)</li>
+            <li><strong>Устаревший Telegram-клиент</strong> — не поддерживает нужную WebApp/TonConnect фичу → понятная деградация, а не белый экран</li>
+          </ul>
+        </div>
+        <p><strong>Production monitoring</strong> (в вакансии — Sentry, OpenSearch): крипто-приложение особенно требует мониторинга прода, потому что баг = потерянные деньги. Что отслеживать: всплески failed-транзакций, ошибки подписи/подключения кошелька, расхождения балансов UI vs сеть, аномалии в выводах средств (возможный фрод). Реакция на инцидент в крипте критичнее по времени.</p>
+        <div class="hl modern"><span class="hl-label">Как показать себя на собесе под эту вакансию</span>Связывай крипто-специфику с product-mindset: не «прокликал кошелёк», а «защитил пользователя от необратимой потери средств». Сильные акценты: тестирование на testnet, сверка с explorer (не верю UI), фокус на необратимых операциях и предпросмотре, валидация initData в TMA, fraud-векторы, мониторинг прода. Покажи, что ты <em>сам пользуешься</em> крипто-кошельками (в требованиях — «experienced blockchain user»).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как бы ты выстроил quality strategy для крипто-кошелька в Telegram?» — По слоям риска: 1) <strong>адреса и сеть</strong> — формат, bounceable/non-bounceable, testnet vs mainnet; 2) <strong>необратимые операции</strong> (отправка) — предпросмотр, защита от двойной отправки, seqno, testnet + сверка с explorer (hash/amount/status); 3) <strong>доступ</strong> — seed/восстановление; 4) <strong>TMA/WebView</strong> — cross-client, валидация initData, reconnect; 5) <strong>безопасность/фрод</strong> — подмена адреса, опасные dApp, abuse-векторы; 6) <strong>прод</strong> — мониторинг failed tx и расхождений балансов (Sentry/OpenSearch). Приоритет — туда, где цена ошибки = реальные деньги пользователя.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

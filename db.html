@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Базы данных</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ─── SQL RESULT TABLE ─── */
+  .sql-result {
+    margin: 8px 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sql-result .rr-label { padding: 6px 12px; background: var(--surface-2); margin: 0; border-bottom: 1px solid var(--border); }
+  .sql-result table { margin: 0; }
+  .sql-result th { background: #16202c; }
+</style>
+</head>
+<body data-level="2">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item active" href="#"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#basics">01 · Реляционные БД, SQL vs NoSQL</a>
+    <a href="#sql">02 · Базовый SQL</a>
+    <a href="#joins">03 · JOIN</a>
+    <a href="#groupby">04 · GROUP BY и HAVING</a>
+    <a href="#tasks">05 · SQL-задачи с собеса</a>
+    <a href="#qa-db">06 · БД в работе QA</a>
+    <a href="#rare">07 · Реже: транзакции, NoSQL, теория</a>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Базы данных</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Базы данных</h1>
+    <p>// 7 подтем · SQL, JOIN, БД в работе QA</p>
+  </div>
+
+
+  <!-- ─────── 01. РЕЛЯЦИОННЫЕ БД ─────── -->
+  <section class="section" id="basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Реляционные БД, SQL vs NoSQL</span>
+      <span class="section-badge">basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Реляционная БД</strong> хранит данные в таблицах — строки (записи) и столбцы (поля). Таблицы связаны между собой через ключи. Язык общения с такой БД — <strong>SQL</strong>.</p>
+        <ul>
+          <li><strong>Таблица</strong> — например, <code>users</code>: каждая строка — пользователь, столбцы — id, name, email</li>
+          <li><strong>Первичный ключ</strong> (PK) — уникальный идентификатор строки (<code>id</code>). Не повторяется, не пустой</li>
+          <li><strong>Внешний ключ</strong> (FK) — ссылка на строку в другой таблице. В <code>orders</code> поле <code>user_id</code> ссылается на <code>users.id</code></li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия и как запомнить</span>Таблица — как список объектов одного класса: строка = экземпляр, столбцы = поля. <strong>Первичный ключ — «кто я»</strong> (уникальный id строки). <strong>Внешний ключ — «на кого я ссылаюсь»</strong> (id строки в другой таблице). Пример: в <code>t_employee</code> поле <code>loc_id</code> — внешний ключ, ссылается на <code>t_location.loc_id</code> (первичный ключ там). Так сотрудник «знает» свою локацию, не дублируя её название.</div>
+        <div class="hl"><span class="hl-label">Зачем FK нужен</span>Внешний ключ не только связывает таблицы для JOIN, но и обеспечивает <strong>целостность данных</strong>: СУБД не даст вставить сотрудника с <code>loc_id = 99</code>, если такой локации нет, и (при настройке) не даст удалить локацию, пока на неё ссылаются сотрудники. Защита от «висячих» ссылок.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>SQL vs NoSQL</strong> — два больших семейства баз:</p>
+        <table>
+          <thead><tr><th></th><th>SQL (реляционные)</th><th>NoSQL</th></tr></thead>
+          <tbody>
+            <tr><td>Структура</td><td>таблицы, жёсткая схема</td><td>документы / ключ-значение / графы, гибкая схема</td></tr>
+            <tr><td>Связи</td><td>через ключи и JOIN</td><td>обычно вложенные данные</td></tr>
+            <tr><td>Примеры</td><td>PostgreSQL, MySQL</td><td>MongoDB (документы), Redis (ключ-значение)</td></tr>
+            <tr><td>Когда</td><td>связанные данные, транзакции, отчёты</td><td>гибкие данные, кэш, огромный объём, скорость</td></tr>
+          </tbody>
+        </table>
+        <p>В большинстве проектов основная БД — реляционная (Postgres/MySQL), а NoSQL — для конкретных задач: Redis для кэша и сессий, MongoDB для гибких документов.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Типы связей между таблицами:</strong></p>
+        <ul>
+          <li><strong>Один-к-одному</strong> (1:1) — пользователь и его профиль</li>
+          <li><strong>Один-ко-многим</strong> (1:N) — один пользователь, много заказов. Самая частая</li>
+          <li><strong>Многие-ко-многим</strong> (M:N) — студенты и курсы. Реализуется через промежуточную таблицу (<code>student_courses</code>)</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатор почти всегда работает с реляционной БД — чтобы проверить, что данные после операции записались правильно. NoSQL встречается реже и чаще как кэш (Redis). Для QA обычно достаточно прикладного уровня: хватает уверенного <code>SELECT</code> с <code>JOIN</code> и понимания связей таблиц.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем PK отличается от UNIQUE?» — Оба гарантируют уникальность. Но в таблице один primary key constraint (хотя он может состоять из нескольких колонок), он не может быть NULL и обычно по нему строится основной индекс. UNIQUE-ограничений может быть несколько. Поведение UNIQUE + NULL зависит от СУБД: в PostgreSQL NULL по умолчанию считаются различными, поэтому несколько NULL допускаются (есть опция NULLS NOT DISTINCT).</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. БАЗОВЫЙ SQL ─────── -->
+  <section class="section" id="sql">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Базовый SQL</span>
+      <span class="section-badge">queries</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Главный запрос — <code>SELECT</code>: «выбери данные». Базовая структура:</p>
+        <div class="code-block"><span class="kw">SELECT</span> name, email      <span class="cm">-- какие столбцы</span>
+<span class="kw">FROM</span> users              <span class="cm">-- из какой таблицы</span>
+<span class="kw">WHERE</span> city = <span class="st">'Москва'</span>   <span class="cm">-- условие фильтра</span>
+<span class="kw">ORDER BY</span> name           <span class="cm">-- сортировка</span>
+<span class="kw">LIMIT</span> <span class="val">10</span>;              <span class="cm">-- сколько строк вернуть</span></div>
+        <p><code>SELECT *</code> — все столбцы. Но в реальных запросах лучше перечислять нужные.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Фильтры в <code>WHERE</code>:</strong></p>
+        <div class="code-block"><span class="kw">WHERE</span> age >= <span class="val">18</span>                      <span class="cm">-- сравнение</span>
+<span class="kw">WHERE</span> city <span class="kw">IN</span> (<span class="st">'Москва'</span>, <span class="st">'Питер'</span>)     <span class="cm">-- из списка</span>
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="st">'Иван%'</span>             <span class="cm">-- по шаблону (начинается с)</span>
+<span class="kw">WHERE</span> age <span class="kw">BETWEEN</span> <span class="val">18</span> <span class="kw">AND</span> <span class="val">65</span>          <span class="cm">-- диапазон</span>
+<span class="kw">WHERE</span> email <span class="kw">IS NULL</span>                 <span class="cm">-- пустое значение</span>
+<span class="kw">WHERE</span> age > <span class="val">18</span> <span class="kw">AND</span> city = <span class="st">'Москва'</span>   <span class="cm">-- несколько условий</span></div>
+
+        <p><strong>Агрегатные функции</strong> — считают по множеству строк:</p>
+        <div class="code-block"><span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*)        <span class="cm">-- количество строк</span>,
+  <span class="fn">SUM</span>(amount)     <span class="cm">-- сумма</span>,
+  <span class="fn">AVG</span>(amount)     <span class="cm">-- среднее</span>,
+  <span class="fn">MIN</span>(amount)     <span class="cm">-- минимум</span>,
+  <span class="fn">MAX</span>(amount)     <span class="cm">-- максимум</span>
+<span class="kw">FROM</span> orders;</div>
+        <div class="hl"><span class="hl-label">Порядок выполнения</span>SQL пишется как <code>SELECT ... FROM ... WHERE ... ORDER BY</code>, но <em>выполняется</em> иначе: сначала <code>FROM</code> (откуда), потом <code>WHERE</code> (фильтр), потом <code>SELECT</code> (что вернуть), и в конце <code>ORDER BY</code> и <code>LIMIT</code>. Поэтому в <code>WHERE</code> нельзя использовать алиасы из <code>SELECT</code>.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>DISTINCT</strong> — убрать дубликаты: <code>SELECT DISTINCT city FROM users</code> вернёт каждый город один раз.</p>
+        <p><strong>INSERT / UPDATE / DELETE</strong> — QA иногда готовит тестовые данные и убирает их за собой:</p>
+        <div class="code-block"><span class="kw">INSERT INTO</span> users (name, email) <span class="kw">VALUES</span> (<span class="st">'Test'</span>, <span class="st">'t@x.io'</span>);
+<span class="kw">UPDATE</span> orders <span class="kw">SET</span> status = <span class="st">'paid'</span> <span class="kw">WHERE</span> id = <span class="val">42</span>;
+<span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> email <span class="kw">LIKE</span> <span class="st">'%@test.io'</span>;</div>
+        <div class="hl orange"><span class="hl-label">Осторожно с UPDATE/DELETE без WHERE</span>Забыл <code>WHERE</code> — изменишь/удалишь <em>всю таблицу</em>. На тестовом стенде это потеря данных, на проде — катастрофа. Привычка: сначала <code>SELECT</code> с тем же условием (посмотреть, что затронется), потом UPDATE/DELETE.</div>
+        <p><strong>Подзапросы</strong> — запрос внутри запроса:</p>
+        <div class="code-block"><span class="cm">-- пользователи, у которых есть хотя бы один заказ</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders);</div>
+        <div class="hl red"><span class="hl-label">NULL — отдельная ловушка</span>NULL ломает SQL-задачи чаще всего. Что помнить: <code>NULL != NULL</code> (сравнение даёт «неизвестно», не True) → нельзя <code>= NULL</code>, только <code>IS NULL</code> / <code>IS NOT NULL</code>. <code>COUNT(column)</code> <em>не считает</em> NULL (а <code>COUNT(*)</code> считает все строки). <code>NOT IN</code> с подзапросом, где есть NULL, может вернуть пустой результат неожиданно. При сложении/конкатенации NULL «заражает» результат (нужен <code>COALESCE</code>).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>WHERE</code> отличается от <code>HAVING</code>?» — <code>WHERE</code> фильтрует строки <em>до</em> группировки, <code>HAVING</code> — группы <em>после</em> агрегации. Нельзя в <code>WHERE</code> написать <code>COUNT(*) > 5</code> — для этого есть <code>HAVING</code> (см. раздел 04).</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. JOIN ─────── -->
+  <section class="section" id="joins">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">JOIN</span>
+      <span class="section-badge">главная тема</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>JOIN</strong> объединяет строки из двух таблиц по общему ключу. Данные лежат раздельно (users и orders), а нужно показать их вместе — имя пользователя рядом с его заказом.</p>
+        <div class="code-block"><span class="kw">SELECT</span> users.name, orders.amount
+<span class="kw">FROM</span> users
+<span class="kw">JOIN</span> orders <span class="kw">ON</span> users.id = orders.user_id;</div>
+        <p><code>ON</code> — условие, по которому связываем: <code>users.id</code> совпадает с <code>orders.user_id</code>.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>JOIN — как объединить два списка объектов по общему полю. Есть список <code>users</code> и список <code>orders</code> со ссылкой <code>user_id</code>. JOIN склеивает их в одну таблицу, где у каждого заказа подставлены данные его пользователя — как <code>merge</code> по ключу.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Четыре вида JOIN</strong> — главное, что спрашивают:</p>
+        <table>
+          <thead><tr><th>JOIN</th><th>Что возвращает</th></tr></thead>
+          <tbody>
+            <tr><td><strong>INNER JOIN</strong></td><td>только строки, где есть совпадение в обеих таблицах</td></tr>
+            <tr><td><strong>LEFT JOIN</strong></td><td>все строки из левой таблицы + совпавшие из правой (где нет — NULL)</td></tr>
+            <tr><td><strong>RIGHT JOIN</strong></td><td>все из правой + совпавшие из левой</td></tr>
+            <tr><td><strong>FULL JOIN</strong></td><td>все строки из обеих таблиц</td></tr>
+          </tbody>
+        </table>
+        <p><strong>INNER JOIN</strong> (по умолчанию, можно писать просто <code>JOIN</code>) — пользователи, у которых <em>есть</em> заказы:</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, o.amount
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id;
+<span class="cm">-- пользователи без заказов НЕ попадут в результат</span></div>
+        <p><strong>LEFT JOIN</strong> — <em>все</em> пользователи, даже без заказов (у них amount будет NULL):</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, o.amount
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id;
+<span class="cm">-- Иван без заказов: name='Иван', amount=NULL</span></div>
+        <div class="hl"><span class="hl-label">Алиасы</span><code>users u</code> и <code>orders o</code> — короткие псевдонимы таблиц, чтобы не писать длинные имена. Очень частая практика.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>LEFT JOIN + IS NULL</strong> — частый приём: найти пользователей <em>без</em> заказов:</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> o.id <span class="kw">IS NULL</span>;
+<span class="cm">-- остаются те, для кого совпадений в orders не нашлось</span></div>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>На собесах QA в 90% случаев нужен <code>INNER JOIN</code> и <code>LEFT JOIN</code> — этого достаточно. <code>RIGHT JOIN</code> используют редко (его всегда можно переписать через <code>LEFT</code>), <code>FULL JOIN</code> — ещё реже. Если уверенно пишешь INNER и LEFT с пониманием разницы — собес по SQL ты проходишь.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница INNER и LEFT JOIN?» — INNER вернёт только тех, у кого есть пара в обеих таблицах. LEFT вернёт всех из левой таблицы, а где пары нет — подставит NULL. Простой способ запомнить: LEFT = «все слева + что нашлось справа».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. GROUP BY и HAVING ─────── -->
+  <section class="section" id="groupby">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">GROUP BY и HAVING</span>
+      <span class="section-badge">aggregation</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>GROUP BY</strong> группирует строки по значению столбца и считает агрегат для каждой группы. «Сколько заказов у каждого пользователя?»</p>
+        <div class="code-block"><span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> orders_count
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> user_id;</div>
+        <div class="sql-result">
+          <div class="rr-label">// результат</div>
+          <table>
+            <thead><tr><th>user_id</th><th>orders_count</th></tr></thead>
+            <tbody><tr><td>1</td><td>5</td></tr><tr><td>2</td><td>3</td></tr><tr><td>3</td><td>1</td></tr></tbody>
+          </table>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>GROUP BY — как сгруппировать список объектов по полю и посчитать агрегат в каждой группе. В Python это <code>itertools.groupby</code> или <code>Counter</code>: разложил заказы по user_id и посчитал, сколько в каждой пачке.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>HAVING</strong> — фильтр для групп <em>после</em> агрегации. «Пользователи, у которых больше 3 заказов»:</p>
+        <div class="code-block"><span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="val">3</span>;</div>
+        <p><strong>WHERE vs HAVING</strong> — ключевое различие:</p>
+        <ul>
+          <li><code>WHERE</code> фильтрует <em>строки до</em> группировки</li>
+          <li><code>HAVING</code> фильтрует <em>группы после</em> агрегации</li>
+        </ul>
+        <div class="code-block"><span class="cm">-- заказы за 2026, сгруппировать по юзеру, оставить тех у кого сумма > 10000</span>
+<span class="kw">SELECT</span> user_id, <span class="fn">SUM</span>(amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> created_at >= <span class="st">'2026-01-01'</span>   <span class="cm">-- фильтр строк ДО</span>
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(amount) > <span class="val">10000</span>;       <span class="cm">-- фильтр групп ПОСЛЕ</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Правило GROUP BY:</strong> в <code>SELECT</code> можно класть только столбцы из <code>GROUP BY</code> либо агрегатные функции. Нельзя выбрать «голый» столбец, которого нет в группировке — СУБД не знает, какое из значений группы показать.</p>
+        <p><strong>GROUP BY + JOIN</strong> — частая комбинация. «Имя пользователя и количество его заказов»:</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> orders_count
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">GROUP BY</span> u.id, u.name;
+<span class="cm">-- LEFT JOIN, чтобы попали и юзеры с 0 заказов</span></div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему <code>COUNT(*)</code> и <code>COUNT(column)</code> могут дать разный результат?» — <code>COUNT(*)</code> считает все строки. <code>COUNT(column)</code> считает только строки, где column <em>не NULL</em>. Поэтому в LEFT JOIN лучше <code>COUNT(o.id)</code>, а не <code>COUNT(*)</code> — иначе юзер без заказов даст 1 вместо 0.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. SQL-ЗАДАЧИ ─────── -->
+  <section class="section" id="tasks">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">SQL-задачи с собеса</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Типовые задачи, которые реально дают на собесах. Везде две таблицы: <code>users (id, name, city)</code> и <code>orders (id, user_id, amount, created_at)</code>.</p>
+
+        <p style="margin-top:12px;"><strong>Задача 1. Все пользователи из Москвы, отсортированные по имени.</strong></p>
+        <div class="code-block"><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> city = <span class="st">'Москва'</span>
+<span class="kw">ORDER BY</span> name;</div>
+
+        <p style="margin-top:12px;"><strong>Задача 2. Количество заказов у каждого пользователя.</strong></p>
+        <div class="code-block"><span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> user_id;</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Задача 3. Имя пользователя и сумма его заказов</strong> (JOIN + GROUP BY).</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, <span class="fn">SUM</span>(o.amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">GROUP BY</span> u.id, u.name;</div>
+
+        <p style="margin-top:12px;"><strong>Задача 4. Пользователи без единого заказа</strong> (LEFT JOIN + IS NULL).</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> o.id <span class="kw">IS NULL</span>;</div>
+
+        <p style="margin-top:12px;"><strong>Задача 5. Найти дубликаты email</strong> (GROUP BY + HAVING).</p>
+        <div class="code-block"><span class="kw">SELECT</span> email, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+<span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> email
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="val">1</span>;</div>
+
+        <p style="margin-top:12px;"><strong>Задача 6. Топ-5 пользователей по сумме заказов.</strong></p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, <span class="fn">SUM</span>(o.amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">GROUP BY</span> u.id, u.name
+<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="val">5</span>;</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Задача 7. Второй по величине заказ</strong> — классика «со звёздочкой». Без оконных функций, через <code>LIMIT / OFFSET</code>:</p>
+        <div class="code-block"><span class="kw">SELECT</span> amount <span class="kw">FROM</span> orders
+<span class="kw">ORDER BY</span> amount <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="val">1</span> <span class="kw">OFFSET</span> <span class="val">1</span>;
+<span class="cm">-- пропустить 1 строку (максимум), взять следующую</span></div>
+        <div class="hl orange"><span class="hl-label">Подвох</span>Этот запрос вернёт <em>вторую строку</em>, а не вторую <em>уникальную</em> сумму. Если у двух заказов одинаковый максимум, «вторым» окажется тот же максимум. Нужна вторая уникальная сумма — добавь <code>DISTINCT</code>: <code>SELECT DISTINCT amount FROM orders ORDER BY amount DESC LIMIT 1 OFFSET 1</code>. На собесе это стоит проговорить — показывает внимание к дубликатам.</div>
+        <div class="hl"><span class="hl-label">Оконные функции (L3 / optional)</span>Современный способ для задач «второй по величине», «последняя запись по пользователю», «топ-N в группе». <code>ROW_NUMBER()</code> — уникальный номер строки, <code>RANK()</code> — ранг с пропусками при равенстве (1,1,3), <code>DENSE_RANK()</code> — без пропусков (1,1,2). Пример:
+        <div class="code-block"><span class="kw">SELECT</span> name, amount,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> user_id <span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>) <span class="kw">AS</span> rn
+<span class="kw">FROM</span> orders;
+<span class="cm">-- rn=1 → последний заказ каждого пользователя</span></div>
+        Для QA это L3/optional, но современно и часто решает задачи элегантнее, чем подзапросы.</div>
+
+
+        <p style="margin-top:12px;"><strong>Задача 8. Заказы с именем пользователя за последний месяц</strong> — комбинация JOIN + WHERE по дате:</p>
+        <div class="code-block"><span class="kw">SELECT</span> u.name, o.amount, o.created_at
+<span class="kw">FROM</span> orders o
+<span class="kw">JOIN</span> users u <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> o.created_at >= CURRENT_DATE - <span class="kw">INTERVAL</span> <span class="st">'1 month'</span>
+<span class="kw">ORDER BY</span> o.created_at <span class="kw">DESC</span>;</div>
+
+        <p style="margin-top:14px;"><strong>Задача 9. Исключение по списку</strong> (реальная с собеса) — сотрудники, у которых локация не «Водный» и не «ТЦР». Связь employee → location:</p>
+        <div class="code-block"><span class="kw">SELECT</span> e.*
+<span class="kw">FROM</span> t_employee e
+<span class="kw">JOIN</span> t_location l <span class="kw">ON</span> e.loc_id = l.loc_id
+<span class="kw">WHERE</span> l.loc_name <span class="kw">NOT IN</span> (<span class="st">'Водный'</span>, <span class="st">'ТЦР'</span>);
+<span class="cm">-- эквивалент: WHERE l.loc_name != 'Водный' AND l.loc_name != 'ТЦР'</span></div>
+        <div class="hl orange"><span class="hl-label">Подвох с NULL</span>Если в <code>loc_name</code> бывают <code>NULL</code>, <code>NOT IN</code> их <em>не включит в результат без явной ошибки</em>: сравнение с NULL даёт «неизвестно», не True. На собесе это стоит проговорить — «при наличии NULL добавил бы <code>OR loc_name IS NULL</code>, если их надо включить». Показывает, что думаешь про граничные случаи.</div>
+
+        <p style="margin-top:12px;"><strong>Задача 10. Фильтр до агрегации</strong> (реальная с собеса) — клиенты со средним успешным платежом > 2000. Связь идёт через счёт: <code>payments.account_id → account.id → client_id</code>:</p>
+        <div class="code-block"><span class="kw">SELECT</span> a.client_id, <span class="fn">AVG</span>(p.amount) <span class="kw">AS</span> avg_payment
+<span class="kw">FROM</span> t_account a
+<span class="kw">JOIN</span> t_payments p <span class="kw">ON</span> p.account_id = a.id
+<span class="kw">WHERE</span> p.success_flg = <span class="st">'Y'</span>          <span class="cm">-- только успешные, ДО агрегации</span>
+<span class="kw">GROUP BY</span> a.client_id
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(p.amount) > <span class="val">2000</span>;</div>
+        <div class="hl"><span class="hl-label">Два ключевых момента</span>1) <strong>Связь через счёт</strong> — платёж привязан к <code>account_id</code>, а не напрямую к клиенту; нужен JOIN к t_account, чтобы добраться до <code>client_id</code>. 2) <strong><code>WHERE</code> до агрегации</strong> — неуспешный платёж (success_flg = 'N') надо исключить <em>до</em> подсчёта AVG, иначе среднее будет рассчитано некорректно. Это и есть разница WHERE (фильтр строк до GROUP BY) vs HAVING (фильтр групп после).</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>SQL-запросы — удобно делегировать, но на собесе писать придётся самому. Для подготовки:<br><br>
+          <em>«Дай 10 SQL-задач уровня собеса QA на таблицах users и orders, с решениями. Только SELECT, JOIN, GROUP BY, HAVING — без оконных функций.»</em><br><br>
+          <em>«Объясни, что делает этот запрос построчно, и есть ли в нём ошибка: [запрос]»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Совет на собесе</span>Прежде чем писать запрос — проговори вслух структуру: «беру orders, джойню users по user_id, группирую по имени, считаю сумму, сортирую, беру топ-5». Интервьюер оценивает ход мысли, а не идеальный синтаксис. Забыл точное имя функции — скажи логику, тебе помогут.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 06. БД В РАБОТЕ QA ─────── -->
+  <section class="section" id="qa-db">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">БД в работе QA</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Зачем QA обращается к базе: <strong>проверить, что данные записались правильно</strong> после действия. Создал заказ через API → проверил в БД, что он реально появился с нужными полями.</p>
+        <div class="code-block"><span class="cm"># Псевдо-сценарий автотеста</span>
+<span class="cm"># 1. Создаём заказ через API</span>
+response = api.post(<span class="st">'/orders'</span>, json={...})
+order_id = response.json()[<span class="st">'id'</span>]
+
+<span class="cm"># 2. Проверяем в БД, что записалось правильно</span>
+row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>, order_id)
+<span class="kw">assert</span> row.status == <span class="st">'pending'</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Основные задачи QA с БД:</strong></p>
+        <ul>
+          <li><strong>Проверка результата</strong> — после операции данные в БД корректны (статусы, суммы, связи)</li>
+          <li><strong>Подготовка тест-данных</strong> — заполнить БД нужным состоянием перед тестом (seed)</li>
+          <li><strong>Очистка</strong> — удалить созданное после теста, чтобы не мешало следующим прогонам</li>
+          <li><strong>Поиск причины бага</strong> — посмотреть, что реально в данных, когда UI/API ведут себя странно</li>
+        </ul>
+        <p><strong>Инструменты в Python:</strong></p>
+        <ul>
+          <li><code>psycopg</code> (psycopg3) — драйвер для PostgreSQL; <code>psycopg2</code> по-прежнему часто встречается как legacy-вариант. Сырые SQL-запросы</li>
+          <li><code>SQLAlchemy</code> — ORM, работа с таблицами как с объектами</li>
+          <li>GUI-клиенты для ручной проверки: DBeaver, pgAdmin, DataGrip</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Расхождение UI / API / DB</strong> — частая задача. Одни и те же данные в трёх местах могут различаться. Как локализовать, где возникает расхождение:</p>
+        <ul>
+          <li><strong>UI показывает X, API возвращает Y</strong> → проблема на фронте (кэш, неверный рендеринг)</li>
+          <li><strong>API возвращает Y, в БД Z</strong> → проблема в бэке (кэш, неверная логика, рассинхрон)</li>
+          <li><strong>В БД Z, а должно быть W</strong> → проблема в записи (бизнес-логика, транзакция не прошла)</li>
+        </ul>
+        <p>Проверяешь по цепочке UI → API → DB, находишь, на каком слое значение расходится с ожидаемым.</p>
+        <div class="hl orange"><span class="hl-label">Подводный камень</span><strong>Eventual consistency</strong>: в системах с кэшем или асинхронной обработкой данные в БД появляются <em>не сразу</em>. Автотест, который проверяет БД мгновенно после API-запроса, может упасть. Решение — polling с таймаутом («жди до 10 сек, пока статус не станет shipped»), а не моментальная проверка.</div>
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span>Не делай тесты зависимыми от <em>конкретных</em> данных в проде/стейдже («там точно есть юзер с id=5»). Тест должен сам создать нужные данные и сам убрать. Иначе он сломается, как только кто-то почистит базу.</div>
+        <div class="hl"><span class="hl-label">Миграции схемы — что проверять QA</span>Миграция меняет структуру БД (новые колонки, типы, ограничения). Риски, которые проверяет QA:
+          <ul style="margin:8px 0 0;">
+            <li><strong>Rollback</strong> — миграцию можно откатить без потери данных, если что-то пошло не так</li>
+            <li><strong>Backward compatibility</strong> — старая версия приложения работает с новой схемой во время раскатки (zero-downtime деплой: сначала схема, потом код)</li>
+            <li><strong>nullable → NOT NULL</strong> — добавление ограучения на колонку с существующими NULL упадёт; нужен дефолт или предварительное заполнение</li>
+            <li><strong>Дефолты</strong> — у новой колонки корректное значение по умолчанию для старых строк</li>
+            <li><strong>Сохранность данных</strong> — после изменения схемы данные на месте и не повреждены (счёт записей, агрегаты, выборочная сверка)</li>
+          </ul>
+        </div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как проверить, что миграция данных прошла корректно?» — 1) Кол-во записей до и после совпадает (или изменилось ожидаемо), 2) выборочная сверка ключевых полей, 3) проверка, что связи (FK) не побились, 4) контрольные суммы / агрегаты (<code>SUM</code>, <code>COUNT</code>) до и после, 5) граничные и «странные» записи (NULL, юникод, длинные значения) перенеслись правильно. Плюс для схемных миграций — проверить rollback и что старая версия кода ещё работает (backward compatibility).</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 07. РЕЖЕ НА СОБЕСЕ ─────── -->
+  <section class="section" id="rare">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Реже на собесе: транзакции, NoSQL, теория</span>
+      <span class="section-badge">rare</span>
+    </div>
+    <div class="section-body">
+
+      <div class="hl modern" style="margin-top:0;"><span class="hl-label">Зачем это здесь</span>Темы, которые на собесах QA всплывают редко: транзакции, устройство индексов, нормализация, NoSQL/Redis и академическая терминология. Держим коротко, чтобы было что ответить, если спросят.</div>
+
+      <!-- Индексы -->
+      <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">① Транзакции и ACID</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Транзакция</strong> — группа операций, которая выполняется <em>как единое целое</em>: либо всё успешно, либо ничего (откат). Классический пример — перевод денег:</p>
+        <div class="code-block"><span class="kw">BEGIN</span>;
+  <span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - <span class="val">1000</span> <span class="kw">WHERE</span> id = <span class="val">1</span>;
+  <span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance + <span class="val">1000</span> <span class="kw">WHERE</span> id = <span class="val">2</span>;
+<span class="kw">COMMIT</span>;
+<span class="cm">-- если между двумя UPDATE упадёт сервер — ROLLBACK,</span>
+<span class="cm">-- деньги не «потеряются» и не «удвоятся»</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Транзакция — как atomic-операция или <code>commit</code> в git: либо все изменения применяются вместе, либо откатываются целиком. Нельзя оказаться в состоянии «деньги списались, но не зачислились» — это как наполовину применённый коммит, которого не бывает.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>ACID</strong> — четыре свойства, которые гарантирует транзакция:</p>
+        <table>
+          <thead><tr><th>Свойство</th><th>Что значит</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A</strong>tomicity (атомарность)</td><td>всё или ничего — частичного выполнения не бывает</td></tr>
+            <tr><td><strong>C</strong>onsistency (согласованность)</td><td>данные валидны до и после (соблюдены все правила и ограничения)</td></tr>
+            <tr><td><strong>I</strong>solation (изоляция)</td><td>параллельные транзакции не мешают друг другу</td></tr>
+            <tr><td><strong>D</strong>urability (долговечность)</td><td>после COMMIT данные сохранены даже при сбое питания</td></tr>
+          </tbody>
+        </table>
+        <p><code>COMMIT</code> — применить изменения. <code>ROLLBACK</code> — откатить всё с начала транзакции.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Уровни изоляции</strong> — компромисс между корректностью и скоростью. Чем строже, тем безопаснее, но медленнее:</p>
+        <ul>
+          <li><strong>Read Uncommitted</strong> — видны даже незакоммиченные чужие изменения (грязное чтение)</li>
+          <li><strong>Read Committed</strong> — видны только закоммиченные (дефолт в PostgreSQL)</li>
+          <li><strong>Repeatable Read</strong> — в рамках транзакции данные не меняются при повторном чтении</li>
+          <li><strong>Serializable</strong> — самый строгий, транзакции как будто выполняются по очереди</li>
+        </ul>
+        <p><strong>Deadlock</strong> — взаимная блокировка: транзакция A держит ресурс 1 и ждёт ресурс 2, а B держит ресурс 2 и ждёт ресурс 1. СУБД обнаруживает это и откатывает одну из транзакций.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA редко настраивает уровни изоляции, но понимать их нужно для тестирования <strong>конкурентности</strong>: два одновременных списания с одного счёта, два refund'а, повторный webhook. Именно изоляция и транзакции защищают от «charged twice» и гонок. На собесе в финтехе про это спрашивают часто.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Два пользователя одновременно покупают последний товар на складе. Что должно произойти?» — Только один должен успешно купить. Это решается транзакцией + блокировкой строки (<code>SELECT ... FOR UPDATE</code>) или проверкой остатка внутри транзакции. Задача QA — проверить, что не возникает «продали 2 товара при остатке 1».</div>
+      </div>
+
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">② Индексы</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Индекс</strong> ускоряет поиск по таблице. Без него БД проверяет каждую строку подряд (full scan). С индексом — находит сразу, как по оглавлению.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Индекс — как оглавление в книге или отсортированный указатель. Без него, чтобы найти слово, читаешь всю книгу страница за страницей. С указателем — открываешь нужную страницу сразу. Технически индекс — это отдельная упорядоченная структура с указателями на строки в таблице.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <div class="code-block"><span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users(email);
+<span class="cm">-- теперь поиск WHERE email = '...' будет быстрым</span></div>
+        <p><strong>Минусы индексов</strong> (почему не создавать индексы без необходимости):</p>
+        <ul>
+          <li>Замедляют <em>запись</em>: при каждом INSERT/UPDATE индекс тоже надо обновить</li>
+          <li>Занимают место на диске — каждый индекс это доп. структура</li>
+        </ul>
+        <p>Правило: индексы — на столбцы, по которым часто ищут и джойнят (PK индексируется автоматически, FK почти всегда стоит проиндексировать).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p>Чаще всего используется <strong>B-tree</strong> индекс (сбалансированное дерево) — хорош для сравнений и диапазонов. Есть и другие: hash (точное совпадение), GIN (полнотекстовый поиск, JSON).</p>
+        <p><strong>EXPLAIN</strong> — команда, показывающая план выполнения запроса: использует ли он индекс или делает full scan. Главный инструмент для разбора медленных запросов.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Добавили индекс, а запрос не ускорился. Почему?» — Варианты: 1) в таблице мало строк (full scan и так быстр), 2) запрос всё равно читает большую часть таблицы, 3) индекс не подходит под условие (например, <code>LIKE '%text'</code> с ведущим <code>%</code> не использует обычный индекс), 4) статистика БД устарела. Проверяется через <code>EXPLAIN</code>.</div>
+      </div>
+
+      <!-- Нормализация -->
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">③ Нормализация</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Нормализация</strong> — организация данных так, чтобы убрать дублирование. Вместо того чтобы в каждой строке заказа писать имя и адрес пользователя, хранят <code>user_id</code> — ссылку, а данные пользователя лежат один раз в таблице <code>users</code>.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p>Три базовые нормальные формы (для собеса достаточно знать суть):</p>
+        <ul>
+          <li><strong>1NF</strong> — в каждой ячейке атомарное значение (не список). Не «телефоны: 123, 456», а отдельные строки</li>
+          <li><strong>2NF</strong> — нет частичной зависимости: все поля зависят от всего первичного ключа</li>
+          <li><strong>3NF</strong> — нет транзитивных зависимостей: поля зависят только от ключа, а не друг от друга</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Денормализация</strong> — намеренное дублирование данных ради скорости чтения. В аналитике и высоконагруженных системах часто сознательно нарушают нормализацию: лучше хранить копию, чем делать тяжёлый JOIN на каждый запрос.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA нормализацию почти не трогает — это забота архитекторов и бэкендеров. Знать определения нужно ровно для собеса. На практике важнее понимать <em>связи</em> между таблицами (через что джойнить), чем уметь доказать, что схема в 3NF.</div>
+      </div>
+
+      <!-- NoSQL и Redis -->
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">④ NoSQL и Redis</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>NoSQL</strong> — базы без жёсткой табличной схемы. Несколько семейств:</p>
+        <ul>
+          <li><strong>Key-value</strong> — простые пары ключ→значение. Redis, DynamoDB</li>
+          <li><strong>Документные</strong> — хранят JSON-подобные документы. MongoDB</li>
+          <li><strong>Wide-column</strong> — Cassandra (большие объёмы, распределённость). Для аналитических колоночных БД примеры другие: ClickHouse, BigQuery, Redshift</li>
+          <li><strong>Графовые</strong> — для связей (соцсети, рекомендации). Neo4j</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Реляционная БД — это таблица в Excel со строгими столбцами. Key-value (Redis) — это обычный словарь <code>dict</code> в памяти: <code>cache["user:42"] = {...}</code>. Документная (Mongo) — список JSON-объектов, где у каждого может быть свой набор полей.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Redis</strong> — самая частая NoSQL, которую встретит QA. Это <em>in-memory</em> key-value хранилище: данные лежат в оперативной памяти, поэтому очень быстрое (микросекунды).</p>
+        <p>Где применяется:</p>
+        <ul>
+          <li><strong>Кэш</strong> — хранить результат тяжёлого запроса, чтобы не обращаться к БД каждый раз</li>
+          <li><strong>Сессии</strong> — session_id → данные пользователя</li>
+          <li><strong>Rate limiting</strong> — счётчик запросов с TTL</li>
+          <li><strong>Очереди</strong> — простые задачи между сервисами</li>
+          <li><strong>Счётчики, лидерборды</strong> — атомарные инкременты, сортированные множества</li>
+        </ul>
+        <p>Поддерживает структуры: strings, hashes, lists, sets, sorted sets. У каждого ключа можно задать <strong>TTL</strong> — время жизни, после которого ключ автоматически удаляется (идеально для кэша и сессий).</p>
+        <div class="code-block"><span class="kw">SET</span> user:42 <span class="st">"{...}"</span> <span class="kw">EX</span> <span class="val">3600</span>   <span class="cm"># записать с TTL 1 час</span>
+<span class="kw">GET</span> user:42                       <span class="cm"># прочитать</span>
+<span class="kw">INCR</span> page_views                    <span class="cm"># атомарно +1 (счётчик)</span>
+<span class="kw">TTL</span> user:42                        <span class="cm"># сколько осталось жить</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что тестировать с Redis:</strong></p>
+        <ul>
+          <li><strong>Кэш работает</strong>: первый запрос идёт в БД, повторный — из кэша (быстрее, БД не дёргается)</li>
+          <li><strong>Инвалидация кэша</strong>: после изменения данных кэш сбросился, не отдаёт устаревшее</li>
+          <li><strong>TTL</strong>: ключ исчезает после истечения времени</li>
+          <li><strong>Сессии</strong>: после logout сессия удалена из Redis</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Подводный камень</span>Типичная проблема кэша — <strong>устаревшие данные</strong> (stale cache). Обновили запись в БД, а Redis отдаёт старое значение, потому что забыли инвалидировать. Классический баг: «поменял имя в профиле, а везде показывается старое». При тестировании всегда проверяй пару «изменение → отражается ли сразу».</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Redis — это база данных или кэш?» — И то, и другое. Чаще используется как кэш (быстрый слой перед основной БД), но может быть и основным хранилищем. Persistence есть: RDB (снапшоты на диск) и AOF (лог операций). Но если данные критичны и их нельзя терять — основной БД обычно остаётся реляционная.</div>
+      </div>
+
+      <!-- Терминология -->
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">⑤ Академическая терминология</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Теоретические термины из реляционной модели Кодда. На практике говорят «таблица / строка / столбец», но академические названия такие:</p>
+        <table>
+          <thead><tr><th>Академический термин</th><th>На практике</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Отношение</strong> (relation)</td><td>таблица</td></tr>
+            <tr><td><strong>Кортеж</strong> (tuple)</td><td>строка / запись</td></tr>
+            <tr><td><strong>Атрибут</strong> (attribute)</td><td>столбец / поле</td></tr>
+            <tr><td><strong>Домен</strong> (domain)</td><td>тип и множество допустимых значений атрибута</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Запомнить</span><strong>Кортеж = строка таблицы.</strong> Название идёт от математики: строка — это упорядоченный набор значений (как tuple в Python). Если спросят «что такое кортеж» — это просто строка в реляционной БД.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>

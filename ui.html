@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · UI и E2E-автоматизация</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item active" href="#"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#ui-basics">01 · UI/UX: что проверять</a>
+    <a href="#mockups">02 · Mockups, cross-browser, responsive</a>
+    <a href="#a11y">03 · Accessibility и локализация</a>
+    <a href="#pw-basics">04 · Playwright: основы</a>
+    <a href="#pw-locators">05 · Локаторы, ожидания, Page Object</a>
+    <a href="#pw-practice">06 · UI-автоматизация на практике</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>UI и E2E</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>UI и E2E-автоматизация</h1>
+    <p>// 6 подтем · ручное UI/UX + Playwright на Python</p>
+  </div>
+
+  <div style="max-width:920px;margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
+    <strong style="color:#fff;display:block;margin-bottom:4px;font-size:13px;">О разделе</strong>
+    Два пласта в одном: <strong>ручное UI/UX-тестирование</strong> (что проверять глазами, против дизайна) и <strong>UI-автоматизация на Playwright</strong> (Python-биндинг). Playwright сейчас на подъёме и часто требуется как E2E-инструмент — теснит Selenium. <span style="color:#5de0b0;">L1/L2/L3</span> — уровни глубины.
+  </div>
+
+  <!-- ─────── 01. UI/UX ЧТО ПРОВЕРЯТЬ ─────── -->
+  <section class="section" id="ui-basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">UI/UX: что проверять</span>
+      <span class="section-badge">manual</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>UI-тестирование — проверка интерфейса глазами и руками: видит ли пользователь то, что должен, и работает ли это так, как ожидается. Базовые категории:</p>
+        <ul>
+          <li><strong>Функциональность</strong> — кнопки, формы, ссылки делают то, что должны</li>
+          <li><strong>Визуал</strong> — вёрстка не поехала, элементы на месте, нет наложений</li>
+          <li><strong>Состояния</strong> — загрузка, пустой экран, ошибка, успех</li>
+          <li><strong>Ввод</strong> — валидация полей, сообщения об ошибках</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Главное</span>UI ≠ только «красиво ли». Это про то, может ли пользователь <em>выполнить задачу</em> без лишних затруднений. Кнопка есть, но не нажимается; форма отправилась, но нет фидбэка; ошибка отображается, но непонятно что делать — это UI-баги, даже если «пиксели на месте».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Состояния UI</strong> — то, что часто забывают проверить (а баги живут именно тут):</p>
+        <table>
+          <thead><tr><th>Состояние</th><th>Что проверить</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Loading</strong></td><td>спиннер/скелетон, не зависает, нет «прыжков» контента</td></tr>
+            <tr><td><strong>Empty</strong></td><td>пустой список — понятное «ничего нет», а не белый экран</td></tr>
+            <tr><td><strong>Error</strong></td><td>ошибка сети/сервера — внятное сообщение + что делать</td></tr>
+            <tr><td><strong>Success</strong></td><td>действие прошло — есть подтверждение</td></tr>
+            <tr><td><strong>Edge</strong></td><td>очень длинный текст, много элементов, нет данных</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Формы</strong> — отдельный фокус: валидация (вживую и при сабмите), сообщения об ошибках у нужных полей, поведение кнопки (disabled пока невалидно), что происходит при двойном клике.</p>
+        <div class="hl"><span class="hl-label">Microcopy — частый источник UX-багов</span>Тексты интерфейса проверяют отдельно: понятны ли <strong>сообщения об ошибках</strong> («что-то пошло не так» vs «email уже занят, войдите»), осмысленны ли <strong>тексты кнопок</strong> (не «OK/Отмена» в опасном действии), есть ли внятный текст в <strong>empty states</strong>, понятны ли <strong>confirmation-сообщения</strong> (после действия ясно, что произошло). Технически работает, но непонятный текст = UX-баг.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Senior QA не просто «проверяет по тикету», а смотрит на продукт глазами пользователя: где затруднение в флоу, что неинтуитивно, где можно срезать шаг. Это product-orientation — ценится выше, чем умение находить съехавший пиксель. Полезная привычка — регулярно проходить ключевые сценарии как живой пользователь и сравнивать с конкурентами (как у них решён этот флоу).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«С чего начнёшь тестировать новый экран?» — Не «проверю элементы без приоритизации». Сначала: 1) что это за экран, какая задача пользователя, 2) happy path — основной сценарий работает, 3) состояния (loading/empty/error), 4) ввод и границы, 5) визуал против дизайна, 6) что будет «не так» (нет сети, медленно, чужие данные). От задачи пользователя — к деталям, а не наоборот.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. MOCKUPS, CROSS-BROWSER ─────── -->
+  <section class="section" id="mockups">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Mockups, cross-browser, responsive</span>
+      <span class="section-badge">visual</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Тестирование против mockups</strong> — сверка реализации с макетом дизайнера (Figma и т.п.). Проверяешь, что разработчик собрал то, что нарисовали: отступы, шрифты, цвета, размеры, состояния элементов.</p>
+        <div class="hl green"><span class="hl-label">Что сверять — не только пиксели</span>Пиксель-перфект — не главная ценность. Важнее: соответствие <strong>дизайн-системе</strong> (те же компоненты, токены, отступы из общей библиотеки), все ли <strong>состояния</strong> реализованы (hover, active, disabled, error), и <strong>отсутствие регрессий</strong> при изменениях. Точное совпадение каждого пикселя вторично — система и состояния первичны.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Cross-browser</strong> — проверка в разных браузерах (Chrome, Firefox, Safari, Edge). Движки рендерят по-разному: <strong>Safari/WebKit часто имеет отличия в рендеринге и поддержке API</strong>. Что чаще ломается: CSS-флексы/гриды, шрифты, даты, видео/аудио, новые API.</p>
+        <p><strong>Responsive / адаптив</strong> — поведение на разных размерах: десктоп, планшет, мобильный. Проверять на брейкпоинтах (точках, где меняется вёрстка) и между ними. Частые баги: горизонтальный скролл, наложение элементов, обрезанный текст, нерабочие тач-зоны.</p>
+        <div class="hl"><span class="hl-label">Mobile-специфика веб-интерфейса</span>На мобильном вебе свои частые баги: <strong>touch targets</strong> (кнопки достаточного размера для пальца, не слипаются), <strong>экранная клавиатура перекрывает input</strong> (поле уезжает под клавиатуру), <strong>sticky header/footer</strong> (не ломаются при скролле и клавиатуре), <strong>orientation change</strong> (поворот экрана не ломает верстку и не теряет данные), <strong>safe areas на iOS</strong> (контент не заходит под «чёлку»/индикатор).</div>
+        <p><strong>Инструменты:</strong> DevTools device mode (быстрая проверка размеров), реальные устройства (точнее эмуляции), облачные фермы (BrowserStack, Sauce Labs) — много браузеров/устройств без своего парка.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Visual regression testing</strong> — автоматическая сверка скриншотов: эталон vs текущее состояние, инструмент подсвечивает пиксельные различия. Ловит случайные визуальные поломки, которые человек пропустит. Инструменты: Percy, Applitools, встроенный скриншот-сравниватель Playwright.</p>
+        <div class="hl orange"><span class="hl-label">Подводный камень visual testing</span>Скриншот-тесты хрупкие: меняются шрифты на разных ОС, анимации, динамические данные (даты, аватары) → ложные срабатывания. Лечится: маскировать динамические зоны, фиксировать данные и шрифты, задавать порог различий. Без этого visual-тесты быстро начинают нестабильно падать (flaky) и им перестают доверять.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Стоит ли автоматизировать сверку с дизайном?» — Частично. Пиксельную сверку отступов/цветов делает visual regression (Percy/Applitools) — это автоматизируемо. Но «удобно ли пользоваться, логичен ли флоу» автомат не оценивает — это ручная и продуктовая работа. Автоматизируй стабильный визуал, оставь UX-суждение человеку.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. A11Y И ЛОКАЛИЗАЦИЯ ─────── -->
+  <section class="section" id="a11y">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Accessibility и локализация</span>
+      <span class="section-badge">a11y · l10n</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Accessibility (a11y)</strong> — доступность для людей с ограничениями: незрячие (скринридеры), слабовидящие, без мыши (только клавиатура). Базовое, что проверяют:</p>
+        <ul>
+          <li><strong>Клавиатура</strong> — всё доступно через Tab, виден фокус, нет ловушек</li>
+          <li><strong>Контраст</strong> — текст читается (есть нормы WCAG по контрасту)</li>
+          <li><strong>Alt-тексты</strong> — у картинок есть описания для скринридеров</li>
+          <li><strong>Семантика</strong> — кнопка это <code>&lt;button&gt;</code>, а не <code>&lt;div&gt;</code> с onclick</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Локализация (l10n)</strong> — работа приложения на разных языках и в разных регионах. Что проверять:</p>
+        <table>
+          <thead><tr><th>Аспект</th><th>Что ломается</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Длина текста</strong></td><td>немецкий длиннее английского на ~30% → текст не влезает, обрезается, ломает вёрстку</td></tr>
+            <tr><td><strong>RTL</strong></td><td>арабский/иврит справа налево → весь layout зеркалится</td></tr>
+            <tr><td><strong>Форматы</strong></td><td>даты (MM/DD vs DD/MM), числа (1,000.5 vs 1 000,5), валюты</td></tr>
+            <tr><td><strong>Непереведённое</strong></td><td>захардкоженные строки, оставшиеся на английском</td></tr>
+            <tr><td><strong>Кодировки</strong></td><td>юникод, эмодзи, спецсимволы языков</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">WCAG 2.2 — конкретные критерии</span>W3C рекомендует <strong>WCAG 2.2</strong> как актуальный стандарт. Проверяемые вещи: <strong>контраст 4.5:1</strong> для обычного текста (3:1 для крупного), <strong>видимый focus</strong> на всех интерактивных элементах, полное <strong>управление с клавиатуры</strong>, <strong>focus not obscured</strong> (элемент в фокусе не перекрыт другим, например sticky-хедером), достаточный <strong>target size</strong> (минимальный размер кликабельной зоны). Это конкретные пункты, а не «сделайте доступно».</div>
+        <p><strong>a11y-инструменты:</strong> axe DevTools, Lighthouse (встроен в Chrome) — автоматический аудит доступности и базовых проблем.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Локализация — частый отдельный навык в вакансиях (особенно у продуктов с глобальной аудиторией). Ключевая мысль: <em>псевдолокализация</em> — заменить текст на удлинённую версию с акцентами (<code>Ĥéĺĺö Ŵöŕĺđ</code>) ещё до реального перевода, чтобы заранее поймать обрезанный текст и захардкоженные строки. Автоматизировать можно проверку, что все строки вынесены в файлы переводов и нет пропущенных ключей.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как тестировать локализацию, не зная всех языков?» — Не нужно знать языки. Проверяй: 1) <strong>длину</strong> — на самом длинном языке (немецкий) текст влезает, 2) <strong>RTL</strong> — арабский не ломает layout, 3) <strong>непереведённое</strong> — нет английских строк там, где должен быть перевод, 4) <strong>форматы</strong> — даты/числа/валюты под регион, 5) <strong>спецсимволы</strong> — юникод отображается. Псевдолокализация ловит большинство без знания языка.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. PLAYWRIGHT ОСНОВЫ ─────── -->
+  <section class="section" id="pw-basics">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Playwright: основы (Python)</span>
+      <span class="section-badge">automation</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Playwright</strong> — современный инструмент UI-автоматизации от Microsoft. Управляет браузером из кода: открывает страницы, кликает, вводит, проверяет. Есть Python-биндинг (<code>playwright-python</code>) + плагин <code>pytest-playwright</code>.</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_login</span>(page):          <span class="cm"># page — фикстура pytest-playwright</span>
+    page.goto(<span class="st">"https://app.com/login"</span>)
+    page.fill(<span class="st">"#email"</span>, <span class="st">"user@test.com"</span>)
+    page.fill(<span class="st">"#password"</span>, <span class="st">"secret"</span>)
+    page.click(<span class="st">"button[type=submit]"</span>)
+    expect(page).to_have_url(<span class="st">"**/dashboard"</span>)</div>
+        <div class="hl green"><span class="hl-label">Чем хорош</span>Главное преимущество — <strong>авто-ожидания</strong>: Playwright сам ждёт, пока элемент появится и станет кликабельным, перед действием. Это убирает большинство <code>sleep</code> и ручных ожиданий, на которых спотыкается Selenium. Меньше flaky из коробки.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Ключевые объекты:</strong></p>
+        <ul>
+          <li><strong>Browser</strong> — запущенный браузер (Chromium, Firefox, WebKit — все три из коробки)</li>
+          <li><strong>Context</strong> — изолированная сессия (свои куки, storage). Как «новый инкогнито» — для изоляции тестов</li>
+          <li><strong>Page</strong> — вкладка, с которой работаешь</li>
+        </ul>
+        <p><strong>Сравнение с Selenium</strong> (частый вопрос):</p>
+        <table>
+          <thead><tr><th></th><th>Playwright</th><th>Selenium</th></tr></thead>
+          <tbody>
+            <tr><td>Ожидания</td><td>авто-ожидания из коробки</td><td>надо настраивать (waits)</td></tr>
+            <tr><td>Браузеры</td><td>Chromium/Firefox/WebKit встроены</td><td>драйверы отдельно</td></tr>
+            <tr><td>Скорость</td><td>быстрее</td><td>медленнее</td></tr>
+            <tr><td>Где силён</td><td>современный web и E2E</td><td>распространён в enterprise/legacy</td></tr>
+          </tbody>
+        </table>
+        <p>Не «Selenium устарел»: Playwright часто удобнее для modern web и E2E, Selenium всё ещё широко используется в enterprise и legacy-проектах с большой экосистемой.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Фишки, которые ценятся:</strong></p>
+        <ul>
+          <li><strong>Trace viewer</strong> — запись прогона с DOM-снимками на каждом шаге. Упал тест в CI — открыл трейс, видишь что было на экране. Спасение для дебага нестабильных тестов</li>
+          <li><strong>Artifacts on failure</strong> — настроить <code>screenshot</code>, <code>video</code>, <code>trace</code> при падении. В CI это превращает «тест упал» в «вот скриншот, видео и трейс момента падения» — диагностика без воспроизведения</li>
+          <li><strong>Codegen</strong> — записывает действия в браузере и генерит код теста (черновик, не финал)</li>
+          <li><strong>Перехват сети</strong> — мокать API-ответы прямо в UI-тесте (<code>page.route</code>): протестировать, как UI реагирует на 500 от бэка, не трогая бэк</li>
+          <li><strong>Projects</strong> — конфигурации под разные браузеры/viewport (Chromium/Firefox/WebKit, desktop/mobile-профили) одним прогоном</li>
+          <li><strong>Параллелизм</strong> — из коробки через <code>pytest-xdist</code> + изоляция через context</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему Playwright меньше флакает, чем Selenium?» — Главное — авто-ожидания (auto-waiting): перед каждым действием Playwright проверяет actionability — элемент <em>visible, stable, receives events, enabled</em> — и ждёт этого сам. В Selenium ожидания надо прописывать руками (explicit waits), забыл — получил нестабильное падение на таймингах. Плюс Playwright управляет браузерами через собственные browser-server механизмы (для Chromium это близко к CDP), а не через отдельный WebDriver.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. ЛОКАТОРЫ, ОЖИДАНИЯ, POM ─────── -->
+  <section class="section" id="pw-locators">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Локаторы, ожидания, Page Object</span>
+      <span class="section-badge">core</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Локатор</strong> — как найти элемент на странице. Playwright рекомендует искать по тому, что видит пользователь, а не по хрупким CSS/XPath:</p>
+        <div class="code-block">page.get_by_role(<span class="st">"button"</span>, name=<span class="st">"Войти"</span>)   <span class="cm"># по роли + тексту (лучшее)</span>
+page.get_by_text(<span class="st">"Добро пожаловать"</span>)         <span class="cm"># по тексту</span>
+page.get_by_label(<span class="st">"Email"</span>)                   <span class="cm"># по label поля</span>
+page.get_by_test_id(<span class="st">"submit"</span>)               <span class="cm"># по data-testid</span>
+page.locator(<span class="st">".btn-primary"</span>)               <span class="cm"># CSS (хрупче)</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Иерархия локаторов</strong> от устойчивого к хрупкому:</p>
+        <ul>
+          <li><strong>get_by_role / get_by_label</strong> — по доступности и тексту, не ломается при рефакторинге вёрстки</li>
+          <li><strong>get_by_test_id</strong> (<code>data-testid</code>) — выделенный атрибут для тестов, стабильный</li>
+          <li><strong>CSS-селекторы</strong> — ок, но ломаются при смене классов/вёрстки</li>
+          <li><strong>XPath по позиции</strong> (<code>div[3]/span[2]</code>) — самое хрупкое, избегать</li>
+        </ul>
+        <p><strong>Ожидания через expect</strong> — web-first assertions с авто-retry:</p>
+        <div class="code-block">expect(page.get_by_text(<span class="st">"Успешно"</span>)).to_be_visible()
+<span class="cm"># expect сам ждёт появления до таймаута, не нужен sleep</span></div>
+        <p>Это убивает классическую болезнь UI-тестов — гонки и <code>sleep</code>. Не «подожди 3 секунды», а «дождись, пока появится».</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Page Object Model (POM)</strong> — распространённый паттерн UI-автоматизации: страница = класс с локаторами и методами. Тесты не знают про селекторы, работают с понятными действиями (в Playwright нередко обходятся и более лёгкими fixtures/helpers вместо тяжёлых Page Object):</p>
+        <div class="code-block"><span class="kw">class</span> <span class="fn">LoginPage</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, page):
+        self.page = page
+        self.email = page.get_by_label(<span class="st">"Email"</span>)
+        self.submit = page.get_by_role(<span class="st">"button"</span>, name=<span class="st">"Войти"</span>)
+
+    <span class="kw">def</span> <span class="fn">login</span>(self, email, pwd):
+        self.email.fill(email)
+        ...
+        self.submit.click()
+
+<span class="cm"># в тесте: LoginPage(page).login("user", "pass") — читается как сценарий</span></div>
+        <div class="hl green"><span class="hl-label">Зачем POM</span>Та же идея, что client-слой в API-тестах (раздел Pytest): спрятать детали за понятным интерфейсом. Поменялся локатор — правишь в одном месте (Page Object), а не в 50 тестах. Тесты читаются как бизнес-сценарии, а не как клики по селекторам.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какие локаторы выбирать и почему?» — Приоритет — по тому, что видит пользователь: <code>get_by_role</code>, <code>get_by_label</code>, <code>get_by_text</code>. Они устойчивы к рефакторингу вёрстки и заодно проверяют доступность. Если не получается — <code>data-testid</code> (стабильный, но требует поддержки в коде). CSS/XPath по позиции — крайний случай, они ломаются от любой смены вёрстки и дают flaky.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. ПРАКТИКА ─────── -->
+  <section class="section" id="pw-practice">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">UI-автоматизация на практике</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Главный вопрос UI-автоматизации — <strong>что автоматизировать, а что нет</strong>. UI-тесты дорогие и хрупкие, поэтому их держат мало (вершина пирамиды, раздел Теория).</p>
+        <div class="hl green"><span class="hl-label">Что автоматизировать</span>Критичные сквозные пути, которые: 1) важны для бизнеса (логин, оплата, ключевой флоу), 2) стабильны (UI не переделывают каждую неделю), 3) дорого проверять руками каждый релиз. Остальное — ручная и API-проверка.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Почему UI-тесты флакают</strong> и как лечить:</p>
+        <table>
+          <thead><tr><th>Причина flaky</th><th>Лечение</th></tr></thead>
+          <tbody>
+            <tr><td>гонки / тайминги</td><td>авто-ожидания и <code>expect</code> вместо <code>sleep</code></td></tr>
+            <tr><td>хрупкие локаторы</td><td>get_by_role / data-testid вместо XPath по позиции</td></tr>
+            <tr><td>зависимость от данных</td><td>создавать свои данные через API перед тестом</td></tr>
+            <tr><td>нестабильный бэкенд</td><td>мокать сеть (<code>page.route</code>) для UI-логики</td></tr>
+            <tr><td>зависимость тестов</td><td>изоляция через свежий context</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Ускорение setup через API:</strong> не кликать логин в UI на каждый тест, а залогиниться через API и подложить storage state — UI-тест начинается уже авторизованным. Сильно быстрее и стабильнее.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Зрелый подход — <strong>UI-тестов мало, и они про сквозные пути, а не про каждую кнопку</strong>. Логику проверяют на уровне API (быстро, стабильно), UI-автоматизацией — что критичный флоу в принципе работает в браузере. Частая ошибка джунов — автоматизировать всё через UI: получается медленный флакающий suite, которому никто не доверяет. Setup (логин, тест-данные) — через API, не через клики.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> черновик Page Object по HTML, генерация теста по сценарию, разбор хрупкого локатора, по screenshot + DOM предложить устойчивые локаторы и возможные a11y-проблемы.<br>
+          <strong>Пример промпта:</strong> <em>«Вот HTML формы [код]. Сделай Page Object на Playwright Python с устойчивыми локаторами (get_by_role/label) и метод login().»</em><br>
+          <strong>Что проверить руками:</strong> устойчивость локаторов на реальной странице и сценарии, которые LLM не знает (доменный флоу, edge cases).
+        </div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Когда НЕ стоит автоматизировать UI?» — Когда: 1) UI часто меняется (тесты устаревают быстрее, чем окупаются), 2) то же можно проверить на API-уровне (дешевле и стабильнее), 3) разовая проверка (быстрее руками), 4) сложная визуальная/UX-оценка (автомат не оценивает «удобно ли»). Автоматизируй стабильные критичные пути, а не «всё подряд, потому что можем».</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

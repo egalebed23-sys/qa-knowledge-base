@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Теория тестирования</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Внутреннее оглавление текущего раздела */
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a2a4a;
+    color: #6aa3f5;
+  }
+
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .lvl:last-child { margin-bottom: 0; }
+
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+
+  /* Скрытие уровней через body class */
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  ul li strong { color: #fff; font-weight: 700; }
+
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── PYRAMID VIS ─── */
+  .pyramid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 12px 0;
+  }
+  .pyr-row {
+    display: grid;
+    grid-template-columns: 400px 200px;
+    align-items: center;
+    gap: 18px;
+  }
+  .pyr-bar {
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    justify-self: center;
+  }
+  .pyr-bar.e2e { width: 100px; background: linear-gradient(90deg, #f05a5a, #ff8c5a); }
+  .pyr-bar.int { width: 240px; background: linear-gradient(90deg, #e0c05a, #f5c842); color: #1a1a0d; }
+  .pyr-bar.unit { width: 400px; background: linear-gradient(90deg, #5de0b0, #6aa3f5); color: #0d2a1f; }
+  .pyr-info { color: var(--muted); font-size: 12px; }
+
+  /* ─── BUG FLOW ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+  }
+  .flow-arr { color: var(--muted); font-size: 14px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+    .pyr-row { grid-template-columns: 260px 1fr; gap: 12px; }
+    .pyr-bar.unit { width: 260px; }
+    .pyr-bar.int { width: 180px; }
+    .pyr-bar.e2e { width: 80px; }
+    .pyr-info { font-size: 11px; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item active" href="#"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+        <a href="#sdlc">01 · SDLC, STLC и роль QA</a>
+    <a href="#qa-qc">02 · QA vs QC vs Testing</a>
+    <a href="#types">03 · Виды тестирования</a>
+    <a href="#levels">04 · Уровни тестирования</a>
+    <a href="#pyramid">05 · Пирамида тестирования</a>
+    <a href="#design">06 · Техники тест-дизайна</a>
+    <a href="#docs">07 · Тестовая документация</a>
+    <a href="#practice">08 · Дизайн кейсов: практика</a>
+    <a href="#bug-life">09 · Жизненный цикл бага</a>
+    <a href="#sev-prio">10 · Severity vs Priority</a>
+    <a href="#metrics">11 · Метрики QA</a>
+    <a href="#risk">12 · Risk-based · Shift-left/right</a>
+    <a href="#senior">13 · Senior-кейсы на собесе</a>
+    <a href="#extra">14 · Доп. вопросы: сети, CS-теория</a>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Теория тестирования</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Теория тестирования</h1>
+    <p>// 13 подтем · база, без которой не пройти ни один собес</p>
+  </div>
+
+
+  <!-- ─────── 01. SDLC, STLC, РОЛЬ QA ─────── -->
+  <section class="section" id="sdlc">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">SDLC, STLC и роль QA в процессе</span>
+      <span class="section-badge">process</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>SDLC</strong> (Software Development Life Cycle) — цикл разработки продукта от идеи до поддержки. <strong>STLC</strong> (Software Testing Life Cycle) — цикл тестирования, который идёт <em>параллельно</em> SDLC и пересекается с ним на каждой фазе.</p>
+        <table>
+          <thead><tr><th>SDLC</th><th>STLC</th></tr></thead>
+          <tbody>
+            <tr><td>1. Planning</td><td>—</td></tr>
+            <tr><td>2. Requirements Analysis</td><td>1. Requirement Analysis (QA-взгляд)</td></tr>
+            <tr><td>3. Design</td><td>2. Test Planning</td></tr>
+            <tr><td>4. Coding</td><td>3. Test Case Development<br>4. Test Environment Setup</td></tr>
+            <tr><td>5. Testing</td><td>5. Test Execution</td></tr>
+            <tr><td>6. Deployment</td><td>6. Test Closure</td></tr>
+            <tr><td>7. Maintenance</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Ключевой тезис</span>QA — не «отдельная фаза перед релизом», а участник <strong>каждой</strong> фазы SDLC. На этом строится shift-left.</div>
+
+        <p style="margin-top:14px;"><strong>DoR vs DoD</strong> — два чек-листа, которые есть в любой команде. Спрашивают практически всегда:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Definition of Ready (DoR)</div>
+            Когда задачу <em>можно брать в работу</em>:<br>
+            · задача чётко описана<br>
+            · оценена и приоритизирована<br>
+            · зависимости разрешены<br>
+            · критерии приёмки понятны
+          </div>
+          <div class="card">
+            <div class="card-title">Definition of Done (DoD)</div>
+            Когда задачу <em>можно считать завершённой</em>:<br>
+            · код прошёл ревью<br>
+            · покрыт тестами (unit + автотесты)<br>
+            · смержен в main<br>
+            · документация обновлена
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что делает QA на каждой фазе SDLC:</strong></p>
+        <table>
+          <thead><tr><th>Фаза</th><th>Вклад QA</th><th>Senior-нюанс</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Requirements</strong></td><td>вопросы со стороны пользователя, поиск багов в требованиях, тест-модель</td><td>инициирует «3 amigos» сам, не ждёт</td></tr>
+            <tr><td><strong>Design</strong></td><td>design review глазами тестируемости</td><td>закладывает тест-режим, логирование, feature flags</td></tr>
+            <tr><td><strong>Coding</strong></td><td>автотесты параллельно с кодом, ревью PR</td><td>помогает разработчикам с testability</td></tr>
+            <tr><td><strong>Testing</strong></td><td>функциональное и нефункциональное, баг-репорты</td><td>приоритизация по риску, а не «всё подряд»</td></tr>
+            <tr><td><strong>Deploy / Maintenance</strong></td><td>smoke на проде, release notes, мониторинг, инциденты</td><td>смотрит на метрики прода как сигнал качества</td></tr>
+          </tbody>
+        </table>
+
+        <div class="hl"><span class="hl-label">Agile vs Waterfall</span><strong>Waterfall:</strong> фазы строго последовательно, QA в конце. <strong>Agile:</strong> итерации, QA с первого дня. Реальность — гибрид: чистого Waterfall давно нет, чистого Agile тоже редко.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>«3 amigos»</strong> — новую задачу до разработки обсуждают трое: <em>PM/BA</em> (что хотим), <em>Dev</em> (как сделаем), <em>QA</em> (как проверим). Дёшево предотвращает дорогие баги в требованиях.</p>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«QA — бутылочное горлышко перед релизом».</strong> Если так — проблема в процессе. Помогает: shift-left (QA с Requirements), автоматизация регресса, definition of done с тестированием.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Классические 7 фаз SDLC — модель waterfall-эпохи. В команде с trunk-based и CI/CD они <em>сливаются в непрерывный поток</em>: коммит → автотесты → review → деплой за минуты. «Фаза тестирования» больше не отдельный этап. Знай теорию для собеса, но в работе оперируй DORA-метриками и deployment frequency.</div>
+
+        <p style="margin-top:14px;"><strong>Trunk-based development</strong> — современный подход к ветвлению, который часто противопоставляют классическому Git Flow. Суть:</p>
+        <ul>
+          <li>Одна основная ветка (<code>main</code> / <code>trunk</code>), в которую все коммитят напрямую или через короткоживущие feature-ветки (1–2 дня максимум)</li>
+          <li>Нет долгих <code>develop</code>, <code>release</code>, <code>hotfix</code> веток</li>
+          <li>Незаконченные фичи прячутся за <strong>feature flags</strong>, а не в отдельных ветках</li>
+          <li>Релиз = тэг на коммите в main, может быть несколько раз в день</li>
+        </ul>
+        <p><strong>Что меняется для QA:</strong> регресс должен бежать на каждый PR (10–15 минут максимум), нельзя «накопить багов и тестировать неделю», feature flags — основной инструмент для безопасного релиза.</p>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если разработчики пишут unit-тесты сами, зачем QA на фазе Coding?» — Не за unit-тестами. QA на coding: 1) ревью PR на тестируемость, 2) поддержка интеграционных тестов, 3) подготовка тест-данных и окружения, 4) автотесты на новые сценарии до релиза. Unit — задача разработчика, но всё, что выше unit — общая.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 02. QA vs QC vs TESTING ─────── -->
+  <section class="section" id="qa-qc">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">QA vs QC vs Testing</span>
+      <span class="section-badge">terminology</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <table>
+          <thead><tr><th>Термин</th><th>Суть</th><th>Когда</th></tr></thead>
+          <tbody>
+            <tr><td><strong>QA</strong> — Quality Assurance</td><td>обеспечение качества: процессы, ревью, стандарты</td><td>до и во время разработки</td></tr>
+            <tr><td><strong>QC</strong> — Quality Control</td><td>контроль качества: поиск дефектов в готовом продукте</td><td>после разработки</td></tr>
+            <tr><td><strong>Testing</strong></td><td>конкретные действия по запуску проверок</td><td>часть QC</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Аналогия</span>QA — это про <em>процесс</em>: настройка CI/CD, code review правила, coding standards, автоматические линтеры. QC — про <em>продукт</em>: финальная проверка билда перед релизом — все ли автотесты прошли, корректен ли deploy. Testing — конкретные действия: запустить test suite, посмотреть отчёт, открыть баг.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>QA = превентивно.</strong> Ревью требований, тест-планы, code review, статический анализ, CI-стандарты, обучение команды.</p>
+        <p><strong>QC = реактивно.</strong> Запуск тестов, регресс, проверка фикса, баг-репорты.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что делает Senior QA, чего не делает Middle:</strong></p>
+        <ul>
+          <li>Влияет на процессы — не просто тестирует, а меняет, как команда тестирует</li>
+          <li>Дизайн тест-стратегии на проект / релиз</li>
+          <li>Решения о trade-off: что автоматизировать, что оставить ручным, что вообще не тестировать</li>
+          <li>Менторство, ревью кода тестов, найм</li>
+          <li>Метрики качества → разговор с менеджментом на их языке</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«QA — это часть разработки или отдельная функция?» — Современный ответ: часть. Команда отвечает за качество целиком (shared ownership), QA — фасилитатор, а не «отдел приёмки».</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных командах границы QA / QC часто размыты — отдельного «отдела приёмки» обычно нет. Многие продуктовые команды говорят <strong>Quality Engineering (QE)</strong>: embedded-инженер в команде, который пишет тесты как код, ревьюит PR и отвечает за CI-инфру наравне с фичами. Если на собесе слышишь «у нас QE, а не QA» — это про культуру встроенного качества, а не про переименование.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 03. ВИДЫ ТЕСТИРОВАНИЯ ─────── -->
+  <section class="section" id="types">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Виды тестирования</span>
+      <span class="section-badge">classification</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Виды отвечают на вопрос <em>«что именно мы проверяем?»</em>. Главное деление: функциональные vs нефункциональные.</p>
+        <ul>
+          <li><strong>Функциональные</strong> — правильно ли работает фича. «Кнопка ‘Купить’ создаёт заказ?»</li>
+          <li><strong>Нефункциональные</strong> — как работает. Производительность, безопасность, удобство, надёжность.</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Функциональный тест функции <code>login(user, password)</code> — возвращает ли правильный токен на валидный вход. Нефункциональный — сколько занимает по времени (latency), сколько потребляет памяти, выдерживает ли 1000 RPS.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Вид</th><th>Когда</th><th>Цель</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Smoke</strong></td><td>после деплоя</td><td>«не упал ли вообще?» — 5–10 критичных кейсов</td></tr>
+            <tr><td><strong>Sanity</strong></td><td>после фикса</td><td>работает ли конкретная фича/исправление</td></tr>
+            <tr><td><strong>Regression</strong></td><td>перед релизом</td><td>не сломалось ли старое</td></tr>
+            <tr><td><strong>Acceptance</strong></td><td>перед сдачей</td><td>соответствует ли требованиям заказчика</td></tr>
+            <tr><td><strong>Exploratory</strong></td><td>в любой момент</td><td>найти то, что не описано в кейсах</td></tr>
+            <tr><td><strong>Ad-hoc</strong></td><td>спонтанно</td><td>«а что если…» — без плана</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Нефункциональные</span>Performance · Load · Stress · Security · Usability · Compatibility · Localization · Accessibility</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Чем smoke отличается от sanity?</strong> Smoke — <em>широкое и поверхностное</em>: проверяем, что система вообще жива по всем основным фичам. Sanity — <em>узкое и поверхностное</em>: проверяем, что конкретный фикс работает и не сломал ближайший функционал.</p>
+
+        <p><strong>Ad-hoc vs Exploratory</strong> — часто путают. Главная разница: ad-hoc <em>спонтанный</em>, exploratory <em>структурированный</em>:</p>
+        <table>
+          <thead><tr><th></th><th>Ad-hoc</th><th>Exploratory</th></tr></thead>
+          <tbody>
+            <tr><td>Планирование</td><td>нет</td><td>есть (charter, время, цель)</td></tr>
+            <tr><td>Документация</td><td>минимум</td><td>лёгкая, ведётся параллельно</td></tr>
+            <tr><td>Цель</td><td>«что если...»</td><td>исследовать конкретную область</td></tr>
+            <tr><td>Когда</td><td>спонтанно, между делом</td><td>выделенная сессия, обычно 60–90 мин</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Mutation testing</strong> — фреймворк меняет код (<code>a+b → a-b</code>) и смотрит, упадут ли тесты; не упали — тесты слабые. <strong>Chaos engineering</strong> (Chaos Monkey) — намеренные сбои в проде для проверки устойчивости. Оба — знать термин и смысл, глубоко не обязательно.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Acceptance тесты пишет QA?» — Не всегда. UAT (User Acceptance Testing) пишут и проводят бизнес/заказчик. QA готовит инфраструктуру и кейсы, но не финальное «принимаю».</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 04. УРОВНИ ТЕСТИРОВАНИЯ ─────── -->
+  <section class="section" id="levels">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Уровни тестирования</span>
+      <span class="section-badge">levels</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Уровни отвечают на вопрос <em>«насколько крупный кусок системы тестируем?»</em> — от одной функции до всего продукта целиком.</p>
+        <ul>
+          <li><strong>Unit</strong> — функция / класс</li>
+          <li><strong>Integration</strong> — два и более компонента вместе</li>
+          <li><strong>System</strong> — приложение целиком в реалистичном окружении</li>
+          <li><strong>Acceptance</strong> — соответствие бизнес-требованиям</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Уровни ≠ виды.</strong> Это разные оси классификации. На каждом уровне можно проводить разные виды тестирования.</p>
+        <table>
+          <thead><tr><th>Уровень</th><th>Объект</th><th>Окружение</th></tr></thead>
+          <tbody>
+            <tr><td>Unit</td><td>одна функция</td><td>в памяти, всё мокаем</td></tr>
+            <tr><td>Integration</td><td>модули + БД / API</td><td>Docker, тестовые контейнеры</td></tr>
+            <tr><td>System</td><td>всё приложение</td><td>staging, близкий к проду</td></tr>
+            <tr><td>Acceptance</td><td>бизнес-сценарии</td><td>staging или pre-prod</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Component testing</strong> — отдельный уровень между unit и integration. Тестируем один микросервис в изоляции (свой сервис поднят, его БД поднята, остальные сервисы — моки). Часто это «sweet spot» для микросервисной архитектуры.</p>
+        <p><strong>Contract testing</strong> — отдельный уровень: проверяем, что контракт между двумя сервисами не сломан, без поднятия обоих. Pact, Spring Cloud Contract.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Я написал тест на REST-эндпоинт, который ходит в реальную БД. Это какой уровень?» — Скорее всего integration или component. Если поднят весь сервис целиком и БД — component. Если ещё и зависит от других сервисов через HTTP — system.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 05. ПИРАМИДА ТЕСТИРОВАНИЯ ─────── -->
+  <section class="section" id="pyramid">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Пирамида тестирования</span>
+      <span class="section-badge">test strategy</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Суть:</strong> чем «выше» тест — тем он медленнее, дороже и хрупче. Поэтому много мелких внизу, мало больших наверху.</p>
+        <div class="pyramid">
+          <div class="pyr-row"><div class="pyr-bar e2e">E2E · ~5%</div><span class="pyr-info">медленные, дорогие, мало</span></div>
+          <div class="pyr-row"><div class="pyr-bar int">Integration · ~20%</div><span class="pyr-info">средние</span></div>
+          <div class="pyr-row"><div class="pyr-bar unit">Unit · ~70%</div><span class="pyr-info">быстрые, дешёвые, много</span></div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Сборка компьютера: сначала проверяешь каждый компонент отдельно — RAM, CPU, диск (unit). Потом — как они работают вместе на материнской плате (integration). И только в конце — загружается ли вся система целиком (E2E).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Unit</div>
+            Одна функция / класс в изоляции. Все зависимости — моки. Длительность: миллисекунды. Пишет разработчик.
+          </div>
+          <div class="card">
+            <div class="card-title">Integration</div>
+            Несколько компонентов вместе: сервис + БД, два микросервиса. Можно поднимать реальные зависимости через Docker.
+          </div>
+          <div class="card">
+            <div class="card-title">E2E</div>
+            Полный пользовательский путь через систему. Например: регистрация → логин → заказ → оплата.
+          </div>
+          <div class="card">
+            <div class="card-title">Кто что пишет</div>
+            Unit — разработчик. Integration — разработчик + QA. E2E — QA-автоматизатор.
+          </div>
+        </div>
+        <div class="hl"><span class="hl-label">Важно</span>Пирамида — это не догма «70/20/10», а принцип: чем дешевле тест — тем больше его должно быть.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Trophy (Kent C. Dodds)</strong> — альтернатива пирамиде для современных приложений. Упор на integration-тесты, потому что они дают лучший ROI: ловят реальные баги интеграции, но всё ещё достаточно быстрые. Снизу — статический анализ (linters, types), сверху — E2E.</p>
+        <div class="hl orange"><span class="hl-label">Антипаттерны</span><br>
+          <strong>Ice cream cone</strong> — всё ручное и E2E, unit-тестов нет. Долго, дорого, всё падает.<br>
+          <strong>Hourglass</strong> — много unit и E2E, нет integration. Юниты зелёные, а в проде инцидент.<br>
+          <strong>Cupcake</strong> — равномерно по всем уровням. Дорого и без приоритетов.
+        </div>
+        <p><strong>Когда пирамида ломается:</strong> в микросервисной архитектуре integration-тестов становится больше, чем unit. Это нормально — добавляется ещё уровень <em>contract tests</em> (Pact), который дешевле полноценной интеграции.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если у нас 95% unit-покрытие, можно ли убрать E2E?» — Нет. Unit-тесты не ловят баги интеграции: контракты API, схемы БД, конфиги окружения. Покрытие ≠ качество.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Пирамида придумана в 2003 году под десктоп-приложения и долгие релизы. В современных продуктовых командах форма часто <em>не пирамида</em>: 1) в микросервисах integration-слой жирнее unit, 2) <strong>testing in production</strong> (observability, synthetic monitoring, canary, feature flags) <em>снижает зависимость от тяжёлых E2E, но не отменяет их</em> — поведение в проде реалистичнее любого staging. Это нормально, если стратегия осознанная, а не «исторически сложилось».</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 06. ТЕХНИКИ ТЕСТ-ДИЗАЙНА ─────── -->
+  <section class="section" id="design">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Техники тест-дизайна</span>
+      <span class="section-badge">test design</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Тест-дизайн — это как покрыть максимум поведения минимумом тестов. Не перебирать всё, а выбрать представителей.</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Классы эквивалентности</div>
+            Делим вход на группы, где система ведёт себя одинаково. Тестируем по одному из каждой.<br>
+            <em>Возраст:</em> &lt;0 · 0–17 · 18–120 · &gt;120 — берём по одному из каждого.
+          </div>
+          <div class="card">
+            <div class="card-title">Граничные значения</div>
+            Баги живут на границах. Для диапазона [1..100]: тестируем 0, 1, 2, 99, 100, 101.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Функция с 5 параметрами по 4 значения — это 1024 комбинации. Все не прогонишь. Берёшь по одному представителю каждой категории входа (классы) + крайние значения (границы) — покрываешь основное малой кровью.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Pairwise (попарное)</div>
+            Если параметров много — всех комбинаций тысячи. Доказано: большинство багов — это взаимодействие 2 параметров. Покрываем все пары → тестов в 10× меньше.<br>
+            <em>Инструмент:</em> <code>allpairspy</code>, PICT.
+          </div>
+          <div class="card">
+            <div class="card-title">Decision table</div>
+            Таблица: условия (вход) → действия (выход). Удобно для сложной бизнес-логики.<br>
+            <em>Пример:</em> скидка по возрасту, статусу клиента и сумме чека.
+          </div>
+          <div class="card">
+            <div class="card-title">State transition</div>
+            Объект имеет состояния и переходы между ними. Тестируем все переходы + запрещённые.<br>
+            <em>Пример:</em> заказ — <code>new → paid → shipped → delivered</code>.
+          </div>
+          <div class="card">
+            <div class="card-title">Cause-effect</div>
+            Граф: причины → следствия. Помогает не пропустить комбинации условий.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Exploratory testing с charter</strong> — не «потыкаю кнопки», а структурированное исследование с целью, временем и заметками. Для Senior — это инструмент, а не «когда нет тест-кейсов».</p>
+        <p><strong>Property-based testing</strong> — вместо «проверь, что 2+2=4» проверяем свойство: <em>«для любых a, b результат a+b = b+a»</em>. Фреймворк сам генерирует данные. В Python: <code>hypothesis</code>.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Поле принимает email. Сколько тест-кейсов напишешь?» — не «100 кейсов», а по категориям: пустое, без <code>@</code>, без домена, юникод, очень длинный адрес, спецформаты (<code>a@b.c</code>, адрес с точками), нормализация регистра (<code>User@x.com</code> = <code>user@x.com</code>?). Итого ~10–15 кейсов с обоснованием — важно показать <em>категории</em>, а не число.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В 2026 году руками pairwise-таблицы и decision tables никто не строит. Инструменты решают: PICT, <code>allpairspy</code>, или просто LLM за 10 секунд. Знание техник нужно, чтобы: 1) <em>понимать что заказать у инструмента</em>, 2) <em>ревьюить результат</em> на адекватность, 3) пройти собес. Сам процесс генерации — делегируется.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> генерация pairwise-таблиц, классов эквивалентности, decision tables.<br>
+          <strong>Пример промпта:</strong> <em>«Поле "возраст" принимает int от 18 до 120. Распиши классы эквивалентности и граничные значения, для каждого — короткое обоснование.»</em> (аналогично для pairwise по списку параметров и decision table по правилам).<br>
+          <strong>Что проверить руками:</strong> LLM забывает граничные случаи (max+1, юникод, отрицательные). Прогоняй через свой чек-лист: есть ли границы, невалидный ввод, крайние комбинации.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 07. ТЕСТОВАЯ ДОКУМЕНТАЦИЯ ─────── -->
+  <section class="section" id="docs">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Тестовая документация</span>
+      <span class="section-badge">artifacts</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Test Plan</div>
+            Документ <em>«как будем тестировать проект»</em>. Скоуп, риски, ресурсы, окружения, расписание, критерии входа/выхода.
+          </div>
+          <div class="card">
+            <div class="card-title">Test Case</div>
+            Конкретная проверка: шаги + ожидаемый результат. Детально и однозначно.
+          </div>
+          <div class="card">
+            <div class="card-title">Checklist</div>
+            Список проверок без детальных шагов. Быстро, гибко, для опытного тестировщика.
+          </div>
+          <div class="card">
+            <div class="card-title">Bug Report</div>
+            Описание дефекта: что произошло, как воспроизвести, что ожидали.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Test Case vs Checklist:</strong></p>
+        <table>
+          <thead><tr><th></th><th>Test Case</th><th>Checklist</th></tr></thead>
+          <tbody>
+            <tr><td>Детализация</td><td>пошагово, для джуна</td><td>тезисно, для опытного</td></tr>
+            <tr><td>Время написания</td><td>долго</td><td>быстро</td></tr>
+            <tr><td>Гибкость</td><td>низкая</td><td>высокая</td></tr>
+            <tr><td>Когда</td><td>сложная логика, regulated industry</td><td>быстрые проверки, smoke</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Структура хорошего тест-кейса:</strong> ID, заголовок, preconditions, шаги, expected, postconditions, теги/severity, ссылка на требование.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Test Strategy vs Test Plan:</strong> Strategy — высокоуровневый документ на всю компанию / продукт («мы пишем 70% unit + 20% API + 10% E2E, регресс автоматизирован»). Plan — на конкретный релиз / фичу («скоуп этого спринта»).</p>
+
+        <p><strong>Тест-план зависит от стадии и риска продукта:</strong></p>
+        <table>
+          <thead><tr><th>Контекст</th><th>Фокус тестирования</th></tr></thead>
+          <tbody>
+            <tr><td><strong>MVP / стартап</strong></td><td>Скорость важнее полноты. Покрываем критичный happy-path, остальное — exploratory. Минимум автоматизации, чтобы не переписывать на каждом пивоте</td></tr>
+            <tr><td><strong>Mature product</strong></td><td>Регрессия и стабильность. Полное автопокрытие, contract-тесты, нельзя ломать существующее. Баланс скорости и надёжности</td></tr>
+            <tr><td><strong>High-risk domain</strong> (финтех, медицина, авиа)</td><td>Полнота и доказуемость важнее скорости. Покрытие по compliance, аудит, формальные процедуры, тестирование edge cases, которые «почти не случаются»</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Когда документация становится legacy:</strong> когда тест-кейсы расходятся с реальностью продукта. Решение — не «писать больше», а: хранить тесты как код (autotest = документация), использовать BDD-сценарии, регулярно ревьюить актуальность.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Стоит ли писать тест-кейсы перед автотестами?» — Зависит от команды. Senior-команда: можно сразу автотесты с понятными именами. Команда с ручными QA: кейсы как контракт между ручным и автоматизатором. Главное — не дублировать одно в двух местах.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span><strong>Test Plan как 30-страничный документ</strong> почти не пишут — формальность, которую никто не читает. Заменяет: раздел «Testing» в PRD на 5–10 строк, тесты как код (название теста = документация: <code>test_user_cannot_login_with_expired_password</code>), living documentation (Allure) генерится из тестов. Главный принцип: <em>документация должна помогать принимать решения, а не существовать ради процесса</em>.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> user story → чек-лист кейсов, PRD → риски и приоритеты, поиск дыр в требованиях.<br>
+        <strong>Пример промпта:</strong> <em>«User story: пользователь сбрасывает пароль через email-ссылку с TTL 1 час. Сгенерируй чек-лист кейсов: позитив, негатив, безопасность, edge cases, сгруппируй по категориям.»</em><br>
+        <strong>Что проверить руками:</strong> адекватность приоритетов и полноту негативных/безопасных кейсов — LLM не знает контекст продукта.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 08. ДИЗАЙН КЕЙСОВ НА ПРАКТИКЕ ─────── -->
+  <section class="section" id="practice">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Дизайн тест-кейсов: практика</span>
+      <span class="section-badge">interview classics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Вопрос <em>«Сколько тест-кейсов напишешь для X?»</em>. Правильный ответ — <strong>не число</strong>, а <strong>структурированный подход</strong>: позитивные → негативные → граничные → безопасность → UX → совместимость.</p>
+        <div class="hl green"><span class="hl-label">Подход</span>1) Уточни требования (длина, формат, ограничения). 2) Разбей на категории. 3) Применяй техники тест-дизайна (классы, границы). 4) Не забудь нефункциональное (безопасность, UX, a11y). Senior отличает то, что он <em>думает категориями</em>, а не «пишет всё подряд».</div>
+
+        <p style="margin-top:14px;"><strong>Разминочный кейс — «протестируй карандаш».</strong> Проверяет, как кандидат разбивает <em>не-софтверный</em> объект на категории.</p>
+        <div class="hl"><span class="hl-label">Главное</span>Сначала уточни: <em>«Кому карандаш — школьнику, художнику? Где используется? Требования к качеству?»</em> — уточняющие вопросы важнее списка кейсов.</div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Функциональность</div>
+            Оставляет след? Разные нажимы, тип линии. Стирает ли ластик? Точится?
+          </div>
+          <div class="card">
+            <div class="card-title">Физика и прочность</div>
+            Длина, диаметр, вес, твёрдость (H/HB/B). Грифель не ломается, корпус не трескается, падение.
+          </div>
+          <div class="card">
+            <div class="card-title">Среды и износ</div>
+            Разная бумага, температура, влажность. Сколько линий до износа. Точится ли до конца.
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность и QC</div>
+            Токсичность (детям грызть), острота кончика. Заусенцы, кривизна, грифель по центру.
+          </div>
+          <div class="card">
+            <div class="card-title">UX и edge cases</div>
+            Удобен в руке, для левшей? В перчатках, в темноте, письмо вверх ногами.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Принцип</span>Те же категории применимы к любому объекту: функциональность · физика · прочность · износ · среды · безопасность · производство · UX · edge cases. Шаблон выручит на любом «протестируй X».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Кейс 1 — Форма логина (логин + пароль).</strong> Ожидаемо ~30 кейсов. Группы:</p>
+        <table>
+          <thead><tr><th>Категория</th><th>Примеры</th></tr></thead>
+          <tbody>
+            <tr><td>Позитив</td><td>валидная пара, email-как-логин, после смены пароля</td></tr>
+            <tr><td>Негатив (логин)</td><td>пустой, несуществующий, неверный регистр, спецсимволы</td></tr>
+            <tr><td>Негатив (пароль)</td><td>пустой, неверный, короче min, длиннее max</td></tr>
+            <tr><td>Границы</td><td>длина пароля: min−1, min, max, max+1</td></tr>
+            <tr><td>Безопасность</td><td>SQL injection (<code>' OR 1=1 --</code>), XSS, brute force, rate limit</td></tr>
+            <tr><td>UX</td><td>caps lock warning, show/hide password, autofill, remember me</td></tr>
+            <tr><td>Сессия</td><td>logout, expire, multi-tab, multi-device</td></tr>
+            <tr><td>Локализация</td><td>юникод в логине, RTL раскладки</td></tr>
+            <tr><td>A11y</td><td>tab order, screen reader, контраст</td></tr>
+            <tr><td>Совместимость</td><td>Chrome / Safari / Firefox, мобильная клавиатура</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Кейс 2 — Текстовое поле (например, «комментарий»).</strong></p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Длина</div>
+            0 символов, 1, max−1, max, max+1, очень большое (DDoS-подобное)
+          </div>
+          <div class="card">
+            <div class="card-title">Содержимое</div>
+            ASCII, кириллица, юникод, эмодзи, RTL, перенос строк, табы
+          </div>
+          <div class="card">
+            <div class="card-title">Whitespace</div>
+            только пробелы, leading/trailing, двойные пробелы
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность</div>
+            SQL injection, XSS <code>&lt;script&gt;</code>, HTML-инъекции, шаблонные движки <code>{{7*7}}</code>
+          </div>
+          <div class="card">
+            <div class="card-title">Взаимодействие</div>
+            copy/paste, drag&drop, ввод с клавы vs программный, autofill
+          </div>
+          <div class="card">
+            <div class="card-title">Состояния</div>
+            focus, blur, disabled, readonly, валидация на лету vs on submit
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Кейс 3 — Поиск.</strong></p>
+        <ul>
+          <li><strong>Запрос:</strong> пустой, 1 символ, длинный, спецсимволы, юникод, опечатки</li>
+          <li><strong>Релевантность:</strong> точное совпадение, частичное, синонимы, стоп-слова</li>
+          <li><strong>Результаты:</strong> 0 результатов (что показываем?), 1, много, пагинация, сортировка, фильтры</li>
+          <li><strong>Производительность:</strong> время отклика, debounce ввода, кэш повторных запросов</li>
+          <li><strong>UX:</strong> подсветка совпадений, автодополнение, история поиска</li>
+          <li><strong>Безопасность:</strong> SQL/NoSQL injection, ReDoS (regex), утечка приватных данных в индексе</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Кейс 4 — Загрузка файла.</strong></p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Размер</div>
+            0 байт, 1 байт, max−1, max, max+1, прерывание загрузки на полпути
+          </div>
+          <div class="card">
+            <div class="card-title">Формат</div>
+            разрешённые, запрещённые, без расширения, двойное (<code>.jpg.exe</code>), несоответствие расширения и магических байт
+          </div>
+          <div class="card">
+            <div class="card-title">Имя файла</div>
+            длинное, юникод, эмодзи, спецсимволы (<code>../</code>, <code>NUL</code>), reserved (CON, PRN на Windows)
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность</div>
+            EICAR (тест на антивирус), zip-bomb, polyglot-файлы, SVG с JS внутри
+          </div>
+          <div class="card">
+            <div class="card-title">UX</div>
+            drag&drop, кнопка, прогресс-бар, отмена, retry
+          </div>
+          <div class="card">
+            <div class="card-title">Многопоточность</div>
+            несколько файлов одновременно, та же сессия в двух вкладках
+          </div>
+        </div>
+
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как правильно отвечать на «сколько кейсов»:</strong> начни с уточняющих вопросов («какой контекст — банк или соцсеть? Какие требования к безопасности? Есть SLA по производительности?»). Это показывает зрелость лучше, чем 50 кейсов в лоб.</p>
+        <div class="hl orange"><span class="hl-label">Сигнал джуна</span>«Сейчас напишу 100 кейсов» → пишет линейный список валидаций. Senior группирует по категориям, явно называет используемые техники (классы эквивалентности, граничные значения, pairwise), указывает на trade-off (полный покров vs скорость), и говорит, что бы автоматизировал, а что — оставил ручным.</div>
+
+        <p style="margin-top:14px;"><strong>Кейс A — «Протестируй смену пароля».</strong> Здесь сразу видно глубину: безопасность, сессии, гонки, аудит.</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Валидация старого пароля</div>
+            Обязателен, без него нельзя сменить. Неверный — счётчик попыток + блокировка после N. Защита от brute-force.
+          </div>
+          <div class="card">
+            <div class="card-title">Валидация нового пароля</div>
+            Соответствует policy (длина, классы символов, нет в blacklist типа <code>12345</code>), не совпадает со старым, не равен логину/email. Подтверждение пароля совпадает.
+          </div>
+          <div class="card">
+            <div class="card-title">История паролей</div>
+            Если в policy «нельзя использовать последние N паролей» — это проверяется. Хранится хеш истории.
+          </div>
+          <div class="card">
+            <div class="card-title">Сессии и токены</div>
+            Что происходит с активными сессиями на других устройствах? Опции: 1) разлогинить все (банки), 2) оставить текущую (UX-приоритет), 3) спросить пользователя. Все refresh-токены инвалидируются.
+          </div>
+          <div class="card">
+            <div class="card-title">Уведомления и аудит</div>
+            Email / SMS «ваш пароль был изменён» с возможностью отменить. Запись в audit log: timestamp, IP, user-agent. Соответствие GDPR / 152-ФЗ.
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность</div>
+            Тело запроса не попадает в access-логи (фильтрация полей). HTTPS обязателен. CSRF-токен для веб-формы. 2FA-подтверждение для критичных аккаунтов.
+          </div>
+          <div class="card">
+            <div class="card-title">Race conditions</div>
+            Одновременная смена в двух вкладках с разными новыми паролями. Что побеждает? Сервер падает между валидацией и сохранением — атомарность через транзакцию.
+          </div>
+          <div class="card">
+            <div class="card-title">Восстановление</div>
+            «Забыл текущий пароль» — отдельный flow через email/SMS. Reset-токен с TTL, одноразовый, инвалидируется после использования.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Кейс B — «Протестируй платёжный flow» (checkout → оплата → подтверждение).</strong> Сильный Senior-кейс — там и асинхронность, и идемпотентность, и деньги.</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Идемпотентность</div>
+            Юзер дважды нажал «Оплатить» — деньги списались один раз. Через <code>Idempotency-Key</code> в заголовке: повторный запрос возвращает тот же результат, что и первый.
+          </div>
+          <div class="card">
+            <div class="card-title">Валидация карты</div>
+            Luhn-алгоритм для номера, CVV (3 или 4 цифры), expiry date (не в прошлом, не слишком далеко в будущем). PAN не хранится открыто (PCI DSS) — только токен.
+          </div>
+          <div class="card">
+            <div class="card-title">3DS authentication</div>
+            Redirect на банк, возврат с результатом. Что если юзер закрыл окно посреди 3DS? Что если 3DS-результат пришёл, а наш сервер не получил callback?
+          </div>
+          <div class="card">
+            <div class="card-title">Асинхронный webhook</div>
+            Платёжная система шлёт callback о статусе. Что если webhook не дошёл? Что если дошёл дважды (дедупликация по transaction_id)? Что если пришёл раньше нашего ответа клиенту?
+          </div>
+          <div class="card">
+            <div class="card-title">Конкурентность по товару</div>
+            Один товар на складе, два покупателя оформляют одновременно. Кому достанется? Резервация на этапе checkout vs списание на этапе оплаты.
+          </div>
+          <div class="card">
+            <div class="card-title">Decline / Refund</div>
+            Карта отклонена (insufficient funds, fraud, expired) — какой UX? Частичный refund, полный refund. Refund после транзакции, прошедшей более 6 месяцев назад.
+          </div>
+          <div class="card">
+            <div class="card-title">Сетевые сбои</div>
+            На каждом шаге может оборваться сеть. Сервер не получил ответ от провайдера — деньги списались или нет? Reconciliation: ежедневная сверка наших транзакций с банком.
+          </div>
+          <div class="card">
+            <div class="card-title">Валюты и локализация</div>
+            Конвертация курсов, разные decimal places (JPY — 0 знаков, BHD — 3), округление, отображение валютных символов. Платёж в долларах, refund в рублях по другому курсу.
+          </div>
+        </div>
+        <div class="hl orange"><span class="hl-label">Что выделит Senior-ответ</span>На платёжном кейсе все начинают перечислять валидацию карты. Если упомянешь <strong>идемпотентность, webhook deduplication, reconciliation с банком, race condition на складе</strong> — это сразу +1 уровень. Можно добавить: <em>«я бы попросил OpenAPI и архитектурную схему — без них тестировать платежи слепо нельзя»</em>.</div>
+
+        <p style="margin-top:14px;"><strong>Что точно надо упомянуть для Senior-впечатления (на любом кейсе):</strong></p>
+        <ul>
+          <li><strong>Безопасность</strong> — почти никто не вспоминает, выделяешься сразу</li>
+          <li><strong>Accessibility</strong> (a11y) — особенно если идёшь в FAANG или продукт для широкой аудитории</li>
+          <li><strong>Observability</strong> — «как мы поймём в проде, что что-то сломалось?» (логи, метрики)</li>
+          <li><strong>Контракт с бэкендом</strong> — что в ответе API, как обрабатываются 4xx/5xx</li>
+          <li><strong>Race conditions и идемпотентность</strong> — если кейс про деньги или критичные операции</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Кейсов получилось 80. Все будем гонять?» — Нет. Прогон делим: smoke (5–7 ключевых на каждый билд) → regression (полный набор, на релиз) → exploratory (то, что не описано). Часть автоматизируем (стабильные, повторяющиеся), часть — оставляем ручной.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> массовая генерация кейсов по категориям — то, что раньше занимало 2 часа, делается за 5 минут.<br>
+          <strong>Пример промпта:</strong> <em>«Сгенерируй набор тест-кейсов для формы логина. Сгруппируй по категориям: позитив, негатив, границы, безопасность, UX, accessibility, локализация. Используй классы эквивалентности и граничные значения.»</em><br>
+          <strong>Что проверить руками:</strong> специфику продукта, известные баги из прошлого, приоритизацию по риску — это LLM не знает.<br>
+          <strong>На собесе:</strong> сильный ответ — <em>«За 5 минут генерирую базу через Claude, потом 30 минут добавляю доменные кейсы. Лучше, чем 2 часа с нуля.»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 09. ЖИЗНЕННЫЙ ЦИКЛ БАГА ─────── -->
+  <section class="section" id="bug-life">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Жизненный цикл бага</span>
+      <span class="section-badge">workflow</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <div class="flow">
+          <span class="flow-step">New</span><span class="flow-arr">→</span>
+          <span class="flow-step">Assigned</span><span class="flow-arr">→</span>
+          <span class="flow-step">In Progress</span><span class="flow-arr">→</span>
+          <span class="flow-step">Fixed</span><span class="flow-arr">→</span>
+          <span class="flow-step">Verified</span><span class="flow-arr">→</span>
+          <span class="flow-step">Closed</span>
+        </div>
+        <p>Боковые ветки: <code>Reopened</code> (если фикс не помог), <code>Rejected</code> (не баг), <code>Deferred</code> (отложен), <code>Duplicate</code>.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <ul>
+          <li><strong>New</strong> — баг только что заведён, ещё не разобран</li>
+          <li><strong>Assigned</strong> — назначен на исполнителя</li>
+          <li><strong>In Progress</strong> — разработчик фиксит</li>
+          <li><strong>Fixed</strong> — код залит, готов к проверке</li>
+          <li><strong>Verified</strong> — QA проверил фикс на тестовом окружении</li>
+          <li><strong>Closed</strong> — баг закрыт окончательно</li>
+          <li><strong>Reopened</strong> — после Verified обнаружилось, что баг остался</li>
+          <li><strong>Rejected</strong> — это не баг (фича / ошибка в требованиях / не воспроизводится)</li>
+          <li><strong>Deferred</strong> — баг подтверждён, но фикс отложен на потом</li>
+          <li><strong>Duplicate</strong> — такой баг уже есть</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Важно</span>«Не воспроизводится» — не повод закрывать. Сначала: попытаться повторить с уточнениями, добавить логи, видео, env. Только потом — Rejected / Cannot Reproduce.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Хороший баг-репорт</strong> содержит: краткий заголовок, шаги воспроизведения, ожидаемый vs фактический результат, окружение (версия, браузер, ОС), severity, attachments (скрин/видео/логи), и — главное — <em>предполагаемую первопричину</em>, если можешь её локализовать.</p>
+        <p><strong>Кто закрывает баг?</strong> Только тот, кто его завёл (или другой QA). Разработчик ставит <code>Fixed</code>, но финальное <code>Closed</code> — за QA после verify.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что делать, если разработчик ставит Rejected, а ты не согласен?» — Не воевать в комментариях. Шаги: 1) сделать репро ещё раз с подробным env, 2) показать видео, 3) подключить тимлида разработки или PM, 4) если требования неоднозначны — поднять с продактом. Спор о баге — почти всегда спор о требованиях.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Классический workflow с 10 статусами (New / Assigned / In Progress / Fixed / Verified / Reopened / Rejected / Deferred / Duplicate / Closed) — наследие больших корпораций с JIRA. В современных продуктовых командах workflow часто упрощён до 3–4 статусов: <code>Open → In Progress → Resolved → Closed</code>. Всё остальное — лейблы или комментарии. Главное — не симулировать процесс, а реально чинить.</div>
+
+        <p style="margin-top:14px;"><strong>Zero Bug Policy (ZBP)</strong> — <em>либо баг чинится сразу, либо закрывается без фикса</em>. Никакого backlog'а из тысяч тикетов, который копится годами. Принимаем решение в течение N дней: чинить или честно закрыть как «won't fix». Метрика здоровья — число открытых багов держится небольшим, а не растёт.</p>
+        <div class="hl"><span class="hl-label">Когда работает и риск</span><strong>Работает</strong> при сильной культуре приоритизации: чистый трекер, осознанные решения, никаких «зомби-багов». <strong>Риск</strong>: в больших командах легко вырождается в массовое «won't fix» без анализа.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> оформление баг-репортов, дедупликация, гипотезы о причине.<br>
+          <strong>Пример промпта:</strong> <em>«Я нашёл баг: после ввода пароля кнопка не активна. Оформи bug report — заголовок, шаги, ожидаемое vs фактическое, severity с обоснованием.»</em><br>
+          <strong>Что проверить руками:</strong> severity и приоритет (LLM не знает контекст продукта), реальный ли это дубликат, и root cause — LLM направляет, но не заменяет дебаг.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 10. SEVERITY vs PRIORITY ─────── -->
+  <section class="section" id="sev-prio">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Severity vs Priority</span>
+      <span class="section-badge">bug attrs</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <ul>
+          <li><strong>Severity</strong> (серьёзность) — насколько баг ломает систему технически. Ставит QA.</li>
+          <li><strong>Priority</strong> (приоритет) — насколько срочно фиксить с точки зрения бизнеса. Ставит PM / тимлид.</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>В Sentry: severity — это alert level (<code>Error / Warning / Info</code>), объективная техническая категория. Priority — это очередь в JIRA, что фиксят первым, решает PM/тимлид с учётом бизнеса.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Severity</th><th>Пример</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Blocker</strong></td><td>сервис не стартует, нельзя ничего сделать</td></tr>
+            <tr><td><strong>Critical</strong></td><td>оплата не проходит, потеря данных</td></tr>
+            <tr><td><strong>Major</strong></td><td>важная фича не работает, но есть workaround</td></tr>
+            <tr><td><strong>Minor</strong></td><td>мелкий функциональный дефект</td></tr>
+            <tr><td><strong>Trivial</strong></td><td>опечатка, кривая иконка</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Priority:</strong> P0 (срочно, в течение часа) / P1 (в этот спринт) / P2 (в следующий) / P3 (когда-нибудь).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">Пример несовпадения</span><strong>High severity, low priority:</strong> падает админка, но ей пользуется 1 человек раз в месяц.<br><strong>Low severity, high priority:</strong> опечатка в названии компании на главной странице — пофиксить за час до пресс-релиза.</div>
+        <p><strong>Что делать Senior</strong> при споре «это P0!» / «это P3»: не «продавливать», а вынести на стендап с фактами: сколько пользователей затронуто, сколько денег теряем, есть ли workaround. Решение принимается с PM и продактом.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Кто ставит severity?» — QA, по техническому критерию. Это объективная оценка влияния на систему. Priority — субъективная, ставится с учётом бизнес-контекста.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В некоторых командах severity объединяют с priority/impact в <strong>одно поле</strong>: бизнесу важнее «что чинить первым», чем «насколько технически сломано». Если на собесе спросят разницу — отвечай классику. В работе — уточни, какая модель принята у команды.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> классификация severity, triage набора багов как «второе мнение».<br>
+          <strong>Пример промпта:</strong> <em>«Вставляю список 20 багов. Сгруппируй по severity, выдели топ-5 для немедленного фикса, обоснуй приоритизацию по риску для пользователя.»</em><br>
+          <strong>Что проверить руками:</strong> финальный приоритет — он зависит от бизнес-контекста и дедлайнов, которые LLM не видит.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 11. МЕТРИКИ QA ─────── -->
+  <section class="section" id="metrics">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <span class="section-title">Метрики QA</span>
+      <span class="section-badge">measurement</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <ul>
+          <li><strong>Test coverage</strong> — % кода / требований, покрытого тестами</li>
+          <li><strong>Pass / Fail rate</strong> — соотношение зелёных и красных тестов</li>
+          <li><strong>Defect density</strong> — кол-во багов на единицу кода (на 1000 строк / на фичу)</li>
+          <li><strong>Escape rate</strong> — % багов, ушедших в прод (нашли пользователи, а не мы)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Метрика</th><th>Формула / смысл</th><th>Для кого</th></tr></thead>
+          <tbody>
+            <tr><td>Code coverage</td><td>% строк / веток кода, выполняемых тестами</td><td>команда</td></tr>
+            <tr><td>Requirements coverage</td><td>% требований, покрытых хотя бы одним тестом</td><td>PM</td></tr>
+            <tr><td>MTTR</td><td>Mean Time To Repair — среднее время от падения теста до фикса</td><td>тимлид</td></tr>
+            <tr><td>Flaky rate</td><td>% тестов, которые иногда падают без причины</td><td>QA-автоматизатор</td></tr>
+            <tr><td>Bug reopen rate</td><td>% багов, которые пришлось переоткрывать</td><td>тимлид разработки</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">Антипаттерны метрик</span><strong>Coverage 100%</strong> как самоцель — приводит к бесполезным тестам, которые покрывают строки, но не проверяют логику.<br><strong>Кол-во написанных тест-кейсов</strong> как KPI — мотивирует писать тесты ради количества.<br><strong>Кол-во найденных багов</strong> как KPI QA — мотивирует заводить «баги» из требований.</div>
+        <p><strong>Что измерять Senior:</strong></p>
+        <ul>
+          <li><strong>Escape rate</strong> — главная метрика качества тестирования</li>
+          <li><strong>Lead time для бага</strong> — от заведения до фикса в проде</li>
+          <li><strong>Стабильность пайплайна</strong> — % зелёных билдов</li>
+          <li><strong>Время выполнения тестов</strong> — feedback loop для разработки</li>
+          <li><strong>Test Automation ROI</strong> — выгода от автоматизации: <code>(время ручного × запуски − время автоматизации) / время автоматизации</code>. Чем спрашивают: «как обосновать менеджменту, что автоматизация окупится?»</li>
+          <li><strong>Test Maintenance cost</strong> — сколько времени в спринт уходит на починку упавших / переписывание устаревших тестов. Если &gt;30% — фреймворк болен.</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Классические QA-метрики (defect density, test coverage) ушли в тень. Современные команды живут на <strong>DORA-метриках</strong> — это здоровье всего процесса, а не отдельно QA: Deployment Frequency, Lead Time, Change Failure Rate, MTTR. Качество тут — не отдельная метрика, а свойство всего потока.</div>
+
+        <p style="margin-top:14px;"><strong>SRE-практики в работе QA.</strong> Senior смотрит не только в тест-репорты, но и в продакшен:</p>
+        <ul>
+          <li><strong>SLI / SLO / SLA</strong> — что измеряем (latency, error rate) / внутренняя цель / обещание клиенту. Senior участвует в определении SLO и проверяет, держит ли система их</li>
+          <li><strong>Error budget</strong> — если SLO 99.9%, то 0.1% — бюджет на сбои: есть бюджет → катим фичи, кончился → силы на стабильность</li>
+          <li><strong>Observability</strong> как источник сигналов качества — логи, метрики, трейсы (подробнее в разделах Bash и Нагрузка)</li>
+        </ul>
+
+        <div class="hl purple"><span class="hl-label">Goodhart's Law</span>«Когда мера становится целью, она перестаёт быть хорошей мерой». Любую метрику можно обмануть — следи, какое поведение она поощряет. Senior смотрит на <em>качество процесса</em>, а не только на количество багов.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 12. RISK-BASED, SHIFT-LEFT/RIGHT ─────── -->
+  <section class="section" id="risk">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <span class="section-title">Risk-based testing · Shift-left / right</span>
+      <span class="section-badge">strategy</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Risk-based testing</strong> — тестируем не «всё подряд», а сначала то, что критичнее. Приоритет = вероятность бага × ущерб от него.</p>
+        <p><strong>Shift-left</strong> — подключаемся раньше: ревьюим требования, участвуем в дизайне, пишем тесты до кода.</p>
+        <p><strong>Shift-right</strong> — продолжаем тестировать после релиза: мониторинг, A/B, canary releases, feature flags.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Shift-left = static analysis: линтер и type checker ловят ошибки до запуска кода. Shift-right = APM (Datadog, NewRelic, Sentry): мониторят уже работающий код в проде. Оба нужны: одно ловит ошибки кода, другое — поведение системы.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Как делать risk-based:</strong></p>
+        <ul>
+          <li>Для каждой фичи: оценить <em>вероятность бага</em> (новый код, сложность, опытная команда?)</li>
+          <li>Оценить <em>impact</em> (сколько пользователей, потеря денег, регуляторика)</li>
+          <li>Получить матрицу 3×3 или 5×5 → приоритет тестирования</li>
+        </ul>
+        <p><strong>Shift-left на практике:</strong></p>
+        <ul>
+          <li>3 amigos — QA + dev + PM ревьюят требование до разработки</li>
+          <li>BDD: пишем Gherkin-сценарии до кода</li>
+          <li>TDD: тесты до реализации</li>
+          <li>Static analysis: linter, type checker — это тоже тестирование</li>
+        </ul>
+        <p><strong>Shift-right на практике:</strong></p>
+        <ul>
+          <li>Мониторинг и алёрты (Grafana, Sentry)</li>
+          <li>Feature flags — выкатываем фичу 1% пользователей</li>
+          <li>Canary releases — новая версия на 10% трафика</li>
+          <li>Chaos engineering — намеренные сбои в проде</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Когда risk-based не работает:</strong> в regulated industries (медицина, банки, авионика) — там нужно покрыть всё по compliance, независимо от «вероятности».</p>
+        <p><strong>Shift-left имеет цену:</strong> ранние тесты становятся хрупкими, если требования меняются. Не пиши E2E до того, как UX финализирован — переделаешь дважды.</p>
+        <p><strong>Shift-right</strong> — тестирование в проде: synthetic monitoring, real user monitoring, shadow traffic. Детали observability — в разделах Bash и Нагрузка.</p>
+        <p><strong>Как привлечь разработчиков писать тесты.</strong> Что работает: 1) тренинги «testing for devs», 2) coding standards для testability (DI, чистые функции), 3) общая библиотека test-хелперов, 4) ревью тестов на равных с кодом. Что не работает: «вас обязали».</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если есть shift-right, зачем shift-left?» — Они дополняют друг друга. Shift-left ловит баги дёшево (рано). Shift-right ловит то, что shift-left пропустил (поведение в реальности, нагрузка, edge cases). Хороший процесс — shift в обе стороны.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В 2010-х shift-left считался главным подходом. Сейчас фокус — баланс: <strong>shift-right не менее важен</strong>, потому что в микросервисах невозможно предсказать всё поведение тестами (реальная нагрузка, geo, чужие API). Senior QA половину времени смотрит в прод (метрики, ошибки), а не только в тест-кейсы.</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ─────── 13. SENIOR-КЕЙСЫ ─────── -->
+  <section class="section" id="senior">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <span class="section-title">Senior-кейсы на собесе</span>
+      <span class="section-badge">strategy questions</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Открытые вопросы без единственно правильного ответа: <em>«Спроектируй стратегию для X»</em>, <em>«У тебя legacy без тестов — что делаешь?»</em>, <em>«Требования размыты — как тестируешь?»</em>. Ждут не решения, а <strong>структурированного мышления</strong>: уточнить → разложить → приоритизировать → озвучить trade-off.</p>
+        <div class="hl green"><span class="hl-label">Универсальный шаблон ответа</span>1) Уточняющие вопросы (5+ штук) — показывает, что ты не бросаешься делать. 2) Декомпозиция (на блоки/риски). 3) Приоритеты (что первым). 4) Trade-offs (что выбираю и почему). 5) Метрики успеха (как пойму, что работает).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Кейс A — «Спроектируй тест-стратегию для [Netflix / Uber / платежей]».</strong></p>
+        <ul>
+          <li><strong>Уточни:</strong> кто пользователи, регионы, SLA, регуляторика (PCI DSS для платежей), масштаб</li>
+          <li><strong>Декомпозируй систему</strong> на критичные домены (auth, payments, поиск, рекомендации, видеостриминг)</li>
+          <li><strong>Распредели тесты по пирамиде:</strong> где много unit, где integration, где E2E</li>
+          <li><strong>Окружения:</strong> dev → staging → pre-prod (с реальными данными в anon виде) → prod (мониторинг)</li>
+          <li><strong>Данные:</strong> синтетика для нагрузочных, anon-копия прода для регресса, fixtures для unit</li>
+          <li><strong>Нефункциональное:</strong> нагрузка (особенно для стриминга/платежей), security, chaos</li>
+          <li><strong>Релиз:</strong> feature flags, canary 1% → 10% → 100%, rollback план</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Кейс B — «Унаследовал кодовую базу с нулевым покрытием. Что делаешь?»</strong></p>
+        <ul>
+          <li><strong>НЕ:</strong> писать unit-тесты на всё подряд — это марафон без конца, никому не нужно</li>
+          <li><strong>ДА:</strong> найти <em>revenue-critical paths</em> — что приносит деньги / останавливает бизнес при поломке</li>
+          <li>Покрыть эти пути <strong>integration-тестами</strong> (не unit) — они ловят то, из-за чего звонят в 2 ночи</li>
+          <li>Далее — <strong>characterization tests</strong>: фиксируем текущее поведение (даже если оно «странное»), чтобы безопасно рефакторить</li>
+          <li>Параллельно — <strong>smoke на каждый деплой</strong>, чтоб не катить разломанное</li>
+          <li>Через 1–2 месяца — анализ багов из прода → пишем тесты на то, что реально ломается</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Кейс C — «Требования размыты, что тестируешь?»</strong></p>
+        <ol style="padding-left:18px;">
+          <li>Задокументируй то, что <em>известно</em> — текущее поведение, поведение похожих систем</li>
+          <li>Явно выпиши <em>пробелы</em> — список вопросов к PO</li>
+          <li>Создай <em>placeholder-кейсы</em> со статусом <code>pending clarification</code> — они видны в трекере и не теряются</li>
+          <li>Тестируй <em>exploratory</em> — записывай находки, они станут источником требований</li>
+          <li><strong>Главное:</strong> коммуницируй риск PO — «без ответа на X мы рискуем Y». Не молчи и не «придумывай за бизнес»</li>
+        </ol>
+
+        <p style="margin-top:14px;"><strong>Кейс D — «Когда BDD оправдан, а когда нет?»</strong> <strong>Подходит:</strong> сложные бизнес-правила (страхование, налоги), смешанная команда PM/BA + dev + QA, нужен общий язык со стейкхолдерами. <strong>Не подходит:</strong> технические тесты (API, integration), маленькая слаженная команда, когда BDD превращается в «обёртку над pytest ради красоты».</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что отличает Senior-ответ на эти вопросы</strong> — не количество техник, а <em>обоснованные trade-offs</em>. На любой выбор скажи: «выбрал X, потому что Y, в обмен жертвую Z».</p>
+        <div class="hl"><span class="hl-label">Пример trade-off в ответе</span>«Я сделаю E2E на критичные пути, а не покрытие unit-ами 80%. Жертвую быстротой обратной связи (E2E медленнее), но получаю реальную проверку, что фича не сломается у клиента. Когда команда дорастёт — добавим contract-тесты, чтобы вынести часть проверок ниже по пирамиде.»</div>
+
+        <p><strong>Коммуникация рисков наверх:</strong> не «у нас 7 critical багов», а в терминах бизнеса — кого и насколько затрагивает, потенциальная потеря, варианты с рекомендацией. Как структурировать такой ответ на собесе (STAR, executive communication) — в разделе Soft skills.</p>
+
+        <p><strong>Построение QA-функции с нуля</strong> (менеджерская вилка): аудит (где боль, какие баги в проде) → quick wins (smoke в CI, регресс на критичное) → процессы (bug workflow, definition of done с QA) → метрики (escape rate, MTTR, flaky — <em>не</em> «кол-во багов») → найм (один Senior &gt; три Middle для команды до 20 человек).</p>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У вас 3 месяца до релиза и нечего автоматизировать. Что делаешь?» — Не «начну писать фреймворк с нуля». А: 1) Risk-based ручной регресс на критичное, 2) автоматизирую только то, что точно не поменяется (smoke на здоровье сервиса), 3) договариваюсь с командой о паузе после релиза для построения фреймворка. Автоматизация без стабильного продукта — выкинутое время.</div>
+
+        <p style="margin-top:14px;"><strong>Кейс E — «Релиз завтра, найден критичный баг. Что делаешь?»</strong> Проверяют не панику, а структуру решения:</p>
+        <ol style="padding-left:18px;">
+          <li><strong>Оцени влияние</strong>: сколько пользователей затронуто, есть ли потеря денег/данных, есть ли workaround</li>
+          <li><strong>Дай варианты команде</strong>, а не вердикт: 1) отложить релиз, 2) выкатить без сломанной фичи (feature flag), 3) релиз + хотфикс сразу после, 4) выкатить на canary 5% и наблюдать</li>
+          <li><strong>Квантифицируй риск</strong> каждого варианта в терминах бизнеса, не «баг critical»</li>
+          <li><strong>Решение принимает не QA в одиночку</strong> — это разговор с PM/продактом. Твоя роль — дать честную картину рисков и рекомендацию</li>
+        </ol>
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span>Два плохих ответа: «Молча пропустить, дедлайн важнее» (скрыл риск) и «Категорически блокирую релиз» (единолично решает за бизнес). Senior — выносит решение на уровень, где есть полномочия и контекст, со своей аргументированной позицией.</div>
+
+        <p style="margin-top:14px;"><strong>Кейс F — «Как понять, что протестировано достаточно?» (enough testing / exit criteria).</strong> Тестировать можно бесконечно — Senior умеет остановиться осознанно:</p>
+        <ul>
+          <li><strong>Покрыты критичные пути</strong> — revenue-critical и часто используемые сценарии зелёные</li>
+          <li><strong>Достигнуты exit criteria</strong> — заранее договорённые: % прохождения, нет открытых blocker/critical, покрытие требований</li>
+          <li><strong>Кривая багов вышла на плато</strong> — новые прогоны находят всё меньше нового</li>
+          <li><strong>Риск приемлем для бизнеса</strong> — остаточный риск осознан и принят продактом</li>
+          <li><strong>Дальше тестировать — дороже, чем потенциальный баг</strong> — экономическая граница</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Ключевая мысль</span>«Достаточно» — это не «протестировано всё» (так не бывает), а «остаточный риск осознан и принят». Это решение, а не состояние.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>Вопрос про AI в работе QA сейчас почти неизбежен. Что отвечать:<br><br>
+          <strong>Где LLM реально экономит часы:</strong><br>
+          · Генерация тест-кейсов по требованиям (User Story → 30 кейсов за минуту)<br>
+          · Pairwise / decision tables / классы эквивалентности<br>
+          · Bug report по черновику<br>
+          · Анализ логов и подсказка root cause<br>
+          · Конвертация ручных кейсов в код автотестов (pytest, Playwright)<br>
+          · Code review для тестов (антипаттерны, дубли)<br>
+          · Объяснение легаси-кода («что делает эта функция, как её тестировать»)<br><br>
+          <strong>Чему НЕ доверять:</strong> финальная приоритизация, доменная специфика продукта, оценка рисков для пользователя. LLM не знает <em>твой</em> продукт и <em>твоих</em> юзеров.<br><br>
+          <strong>Хороший ответ на собесе:</strong> <em>«Я использую Claude для рутинного генерации (кейсы, отчёты, документация). Это экономит ~30% времени, которое я трачу на то, что машина делать не умеет — приоритизацию, exploratory, разговоры с командой.»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 14. ДОП. ВОПРОСЫ ─────── -->
+  <section class="section" id="extra">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <span class="section-title">Доп. вопросы: сети, CS-теория</span>
+      <span class="section-badge">cs theory</span>
+    </div>
+    <div class="section-body">
+
+      <div class="hl modern" style="margin-top:0;"><span class="hl-label">Зачем это здесь</span>Вопросы из университетской CS-теории, которые любят задавать «для проверки фундамента». В ежедневной работе QA-автоматизатора почти не пригождаются, но знать на собес — надо. Держим коротко: суть + то, что реально спросят.</div>
+
+      <!-- Вопрос 1 -->
+      <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">① Что происходит, когда вводишь google.com и жмёшь Enter</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Цепочка под капотом, по шагам:</p>
+        <div class="flow" style="margin:8px 0;">
+          <span class="flow-step">URL parsing</span><span class="flow-arr">→</span>
+          <span class="flow-step">DNS</span><span class="flow-arr">→</span>
+          <span class="flow-step">TCP handshake</span><span class="flow-arr">→</span>
+          <span class="flow-step">TLS</span><span class="flow-arr">→</span>
+          <span class="flow-step">HTTP-запрос</span><span class="flow-arr">→</span>
+          <span class="flow-step">ответ сервера</span><span class="flow-arr">→</span>
+          <span class="flow-step">рендеринг</span>
+        </div>
+        <p>Кратко: браузер превращает имя <code>google.com</code> в IP-адрес (DNS), устанавливает соединение (TCP), шифрует канал (TLS), шлёт HTTP-запрос, получает HTML и рисует страницу.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <ul>
+          <li><strong>DNS-резолвинг</strong> (имя → IP): кэш браузера → кэш ОС → файл hosts → DNS-резолвер провайдера → корневые серверы → TLD-сервер (<code>.com</code>) → authoritative-сервер домена → IP</li>
+          <li><strong>TCP 3-way handshake</strong>: клиент шлёт <code>SYN</code> → сервер <code>SYN-ACK</code> → клиент <code>ACK</code>. Соединение установлено</li>
+          <li><strong>TLS handshake</strong> (для HTTPS): согласование шифров, проверка сертификата сервера, обмен ключами шифрования</li>
+          <li><strong>HTTP-запрос</strong>: <code>GET /</code> с заголовками (Host, User-Agent, Cookie). Сервер отвечает статусом + HTML</li>
+          <li><strong>Рендеринг</strong>: HTML → DOM, CSS → CSSOM, выполнение JS, построение render tree, layout, paint</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что из этого реально полезно QA</strong> — понимать, где цепочка ломается:</p>
+        <ul>
+          <li><strong>DNS</strong> не резолвится → сайт недоступен, хотя сервер жив</li>
+          <li><strong>TLS</strong> — просроченный или невалидный сертификат → браузер блокирует</li>
+          <li><strong>Редиректы</strong> — первый запрос на <code>google.com</code> обычно отдаёт <span style="color:#e0c05a;">301/302</span> (http→https, добавление www). Длинные цепочки редиректов замедляют загрузку</li>
+          <li><strong>HSTS</strong> — браузер сразу идёт по HTTPS, не делая http-запрос</li>
+          <li>Метрики загрузки: <strong>TTFB</strong> (время до первого байта), <strong>FCP / LCP</strong> (первая и крупнейшая отрисовка)</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сайт не открывается. Как локализуешь проблему по этой цепочке?» — Иду по шагам: <code>ping</code> / <code>nslookup</code> (DNS резолвится?) → <code>curl -v</code> (TCP/TLS устанавливается?) → смотрю статус-код и заголовки ответа (сервер отвечает?) → DevTools Network (что с рендерингом). Локализация по слоям — от сети к приложению.</div>
+      </div>
+
+      <!-- Вопрос 2 -->
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">② TCP/IP, сети, маски подсети</strong></p>
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <ul>
+          <li><strong>TCP/IP</strong> — стек протоколов, на котором работает интернет</li>
+          <li><strong>IP-адрес</strong> — адрес устройства в сети (<code>192.168.1.10</code>). <strong>Порт</strong> — номер приложения на устройстве (<code>:443</code>)</li>
+          <li><strong>TCP vs UDP</strong>: TCP — надёжный (гарантия доставки и порядка, есть handshake). UDP — быстрый, без гарантий (видео, игры, DNS)</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>TCP — заказное письмо с уведомлением о вручении: дойдёт и в правильном порядке, но медленнее. UDP — открытка: бросил и забыл, дойдёт или нет — не узнаешь, зато быстро и без лишних движений.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Слои TCP/IP</strong> (снизу вверх): Link (Ethernet/Wi-Fi) → Internet (IP) → Transport (TCP/UDP) → Application (HTTP, DNS, etc).</p>
+        <p><strong>Маска подсети</strong> определяет, какая часть IP — сеть, какая — хост. Записывается через CIDR: <code>/24</code> = 255.255.255.0 (254 хоста), <code>/16</code> ≈ 65 000, <code>/8</code> ≈ 16 млн. Для QA нужно редко — достаточно понимать смысл.</p>
+        <p><strong>Частые порты</strong>, которые стоит помнить: <code>80</code> HTTP, <code>443</code> HTTPS, <code>22</code> SSH, <code>5432</code> PostgreSQL, <code>3306</code> MySQL, <code>6379</code> Redis, <code>27017</code> MongoDB.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что из этого реально нужно QA</strong> (а нужно редко):</p>
+        <ul>
+          <li><strong>localhost</strong> = <code>127.0.0.1</code>. <code>0.0.0.0</code> — «слушать на всех интерфейсах» (так поднимают сервис в Docker)</li>
+          <li>Проверить, открыт ли порт: <code>nc -zv host 5432</code>, <code>telnet host 80</code>, <code>curl host:port</code></li>
+          <li><strong>Приватные диапазоны</strong> (не маршрутизируются в интернет): <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li>
+          <li>Где TCP, где UDP: HTTP и БД — TCP; DNS, видеостриминг, онлайн-игры — чаще UDP</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Маски подсети и слои OSI/TCP-IP QA-автоматизатор трогает максимум пару раз в год — при настройке тестового окружения или дебаге «почему сервис в Docker недоступен». На собесе же это любят как «проверку фундамента». Учи ровно настолько, чтобы ответить — глубже на практике не понадобится.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем TCP отличается от UDP в одном предложении?» — TCP гарантирует доставку и порядок ценой скорости (есть подтверждения и повторы), UDP шлёт без гарантий, но быстро. HTTP и БД — поверх TCP, потому что там нельзя терять данные; стриминг и игры — поверх UDP, потому что лучше пропустить кадр, чем тормозить.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  // Level switcher
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+
+  // Scroll to top button
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>

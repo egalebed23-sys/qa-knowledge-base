@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Нагрузочное</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item active" href="#"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#types">01 · Виды нагрузочного</a>
+    <a href="#metrics">02 · Метрики и перцентили</a>
+    <a href="#tools">03 · Инструменты</a>
+    <a href="#bottleneck">04 · Bottleneck</a>
+    <a href="#practice">05 · Нагрузочное на практике</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Нагрузочное</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Нагрузочное тестирование</h1>
+    <p>// 5 подтем · виды, метрики, инструменты, bottleneck</p>
+  </div>
+
+
+  <!-- ─────── 01. ВИДЫ ─────── -->
+  <section class="section" id="types">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Виды нагрузочного тестирования</span>
+      <span class="section-badge">types</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Нагрузочное тестирование проверяет <strong>производительность и стабильность</strong> под нагрузкой — не «работает ли функция», а «как быстро отвечает и сколько выдержит». Четыре основных вида:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Load (нагрузочное)</div>
+            Подаём <strong>ожидаемую</strong> нагрузку (например, 1000 пользователей в час пик). Проверяем, что система держит её с приемлемым временем ответа.
+          </div>
+          <div class="card">
+            <div class="card-title">Stress (стресс)</div>
+            Подаём нагрузку <strong>выше ожидаемой</strong> нормы, до точки деградации или отказа. Цель — найти точку слома и понять, как именно деградирует.
+          </div>
+          <div class="card">
+            <div class="card-title">Soak (на выносливость)</div>
+            Держим <strong>среднюю нагрузку долго</strong> (часы, сутки). Ловим утечки памяти, переполнение, деградацию со временем.
+          </div>
+          <div class="card">
+            <div class="card-title">Spike (всплеск)</div>
+            <strong>Резкий скачок</strong> нагрузки (распродажа, рассылка). Проверяем, переживёт ли система внезапный наплыв и восстановится ли.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Load — проверить пропускную способность канала на штатном трафике. Stress — лить всё больше пакетов, пока канал не захлебнётся, чтобы узнать предел. Soak — оставить процесс под нагрузкой на ночь и смотреть, не течёт ли память. Spike — резко открыть шлюз и проверить, не порвёт ли трубу.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Когда что применять:</strong></p>
+        <table>
+          <thead><tr><th>Вид</th><th>Вопрос, на который отвечает</th></tr></thead>
+          <tbody>
+            <tr><td>Load</td><td>«Держим ли мы ожидаемый трафик с нужным SLA?»</td></tr>
+            <tr><td>Stress</td><td>«Где наш потолок и что ломается первым?»</td></tr>
+            <tr><td>Soak</td><td>«Не деградируем ли мы за сутки работы?» (утечки)</td></tr>
+            <tr><td>Spike</td><td>«Переживём ли Чёрную пятницу / вирусную рассылку?»</td></tr>
+          </tbody>
+        </table>
+        <p>На практике часто комбинируют: load для проверки SLA, stress для понимания запаса, soak перед крупным релизом, spike перед ожидаемым событием (распродажа).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p>Менее частые, но иногда упоминаемые виды: <strong>volume testing</strong> (большой объём данных в БД — как ведёт себя на миллионах записей), <strong>scalability testing</strong> (как растёт производительность при добавлении ресурсов — горизонтальное масштабирование).</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Нагрузочное связано с <strong>capacity planning</strong> — сколько серверов нужно под ожидаемый трафик. Результаты stress-теста (где потолок) и load-теста (поведение под нормой) дают данные для решения «выдержим ли мы Х пользователей и сколько это стоит в инфраструктуре». Это не разовый прогон, а вход в планирование мощностей.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница load и stress?» — Load проверяет систему на <em>ожидаемой</em> нагрузке (держим ли SLA при штатном трафике). Stress давит <em>за пределы</em>, чтобы найти точку слома и увидеть, как система деградирует — красиво (плавное замедление, очередь) или катастрофически (падение, потеря данных). Load отвечает «справляемся?», stress — «где предел и что будет за ним?».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. МЕТРИКИ ─────── -->
+  <section class="section" id="metrics">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Метрики и перцентили</span>
+      <span class="section-badge">главная тема</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Три ключевые метрики нагрузочного теста:</p>
+        <ul>
+          <li><strong>Latency (время ответа)</strong> — сколько ждёт пользователь. Измеряется в мс</li>
+          <li><strong>Throughput (пропускная способность)</strong> — сколько запросов в секунду обрабатывается (RPS — requests per second)</li>
+          <li><strong>Error rate</strong> — процент запросов с ошибкой под нагрузкой</li>
+        </ul>
+        <p>Latency почти всегда смотрят через <strong>перцентили</strong>: <code>p50</code>, <code>p95</code>, <code>p99</code>.</p>
+        <div class="hl green"><span class="hl-label">Что такое перцентиль</span><code>p95 = 200мс</code> значит: 95% запросов ответили быстрее 200мс, а 5% — медленнее. <code>p50</code> — это медиана (типичный пользователь). <code>p99</code> — хвост распределения (самые медленные запросы). Чем выше перцентиль, тем меньше пользователей за ним, но именно они страдают сильнее всего.</div>
+        <div class="hl"><span class="hl-label">Модель нагрузки — «1000 пользователей» само по себе ничего не значит</span>Без модели поведения цифра бессмысленна. Развести понятия:
+          <ul style="margin:6px 0 0;">
+            <li><strong>Users</strong> — всего зарегистрировано (не значит, что онлайн)</li>
+            <li><strong>Concurrent users</strong> — одновременно активны в системе</li>
+            <li><strong>Virtual users (VU)</strong> — потоки, которые генерирует нагрузочный инструмент</li>
+            <li><strong>RPS</strong> — фактические запросы в секунду (это то, что реально нагружает сервер)</li>
+          </ul>
+          1000 VU, которые думают между действиями, дают совсем другой RPS, чем 1000 VU, бьющих без пауз. Нагрузку задают через RPS + реалистичное поведение, а не «число юзеров».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <div class="hl orange"><span class="hl-label">Почему среднее (avg) обманывает</span>Среднее прячет проблемы. Пример: 99 запросов по 10мс и 1 запрос на 5000мс. Среднее ≈ 60мс — «вроде нормально». Но <code>p99 = 5000мс</code> — каждый сотый пользователь ждёт 5 секунд. Среднее размазывает выбросы, перцентили показывают реальную картину. Поэтому в SLA пишут «p95 &lt; 300мс», а не «среднее &lt; 300мс».</div>
+        <p><strong>Связь throughput и latency:</strong> до определённого момента система держит RPS с низкой задержкой. После порога — задержка резко растёт (очереди, насыщение ресурсов), а throughput перестаёт расти или падает. Точка перегиба — это и есть потолок (его ищут stress-тестом).</p>
+        <p><strong>Что смотрят в результатах:</strong></p>
+        <ul>
+          <li>p50 / p95 / p99 латентности — укладываемся ли в SLA</li>
+          <li>RPS — сколько обрабатываем</li>
+          <li>Error rate — растут ли ошибки под нагрузкой</li>
+          <li>Поведение во времени — деградирует ли (для soak)</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Think time и pacing</span>Реальный пользователь не бьёт запросы подряд — он читает, думает, печатает. <strong>Think time</strong> — паузы между действиями виртуального пользователя; <strong>pacing</strong> — ритм повторения сценария. Без них тест превращается в нереалистичную долбёжку API: 100 VU без пауз дают нагрузку как тысячи реальных. Закладывай паузы (в Locust — <code>wait_time</code>), иначе измеряешь несуществующий сценарий.</div>
+        <div class="hl"><span class="hl-label">Saturation — отдельный класс метрик</span>Кроме latency/throughput/errors смотрят <strong>насыщение ресурсов</strong>: CPU, RAM, <strong>DB connections</strong> (пул исчерпан → запросы ждут), <strong>thread pool</strong>, <strong>queue length</strong>. Часто потолок системы — не CPU, а исчерпанный пул соединений к БД или переполненная очередь. Saturation показывает, <em>что именно</em> упёрлось.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Tail latency</strong> (хвостовая задержка) — <code>p99</code>, <code>p999</code>. В крупных системах именно хвосты критичны: при сотнях зависимостей на один пользовательский запрос даже редкие медленные ответы складываются и портят опыт многим.</p>
+        <p><strong>Связь с SLO/SLA</strong> (из раздела теории): целевые показатели формулируют в перцентилях — «99% запросов быстрее 500мс за месяц». Error budget считается от этого порога.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Перцентили — это язык, на котором обсуждают производительность в проде. Дашборды Grafana/Datadog показывают p50/p95/p99 латентности по эндпоинтам в реальном времени. Алерты ставят на перцентили («p99 &gt; 1с — буди дежурного»), а не на среднее. Для QA понимать перцентили обязательно — это пересечение нагрузочного тестирования и observability.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Среднее время ответа 50мс — это хорошо?» — Само по себе ни о чём не говорит: при p99 = 3с среднее в 50мс прячет страдающих пользователей. Правильный вопрос — «какой p95/p99 и какой SLA?».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. ИНСТРУМЕНТЫ ─────── -->
+  <section class="section" id="tools">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Инструменты</span>
+      <span class="section-badge">tooling</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Три популярных инструмента для нагрузочного:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">k6</div>
+            Современный, сценарии на JavaScript, code-first. Удобен для CI, хорошие метрики из коробки. Часто выбирают в code-first/CI-подходе.
+          </div>
+          <div class="card">
+            <div class="card-title">Locust</div>
+            Сценарии на <strong>Python</strong> — близко QA-автоматизатору на Python. Простой, расширяемый, веб-интерфейс.
+          </div>
+          <div class="card">
+            <div class="card-title">JMeter</div>
+            Классика на Java, GUI, много протоколов. Часто в энтерпрайзе; для CI лучше non-GUI режим. Поддерживает distributed-режим, но требует аккуратной настройки.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Locust</strong> — ближе всего для Python-QA. Сценарий — обычный Python-класс:</p>
+        <div class="code-block"><span class="kw">from</span> locust <span class="kw">import</span> HttpUser, task, between
+
+<span class="kw">class</span> <span class="fn">ApiUser</span>(HttpUser):
+    wait_time = between(<span class="val">1</span>, <span class="val">3</span>)   <span class="cm"># пауза между запросами</span>
+
+    <span class="hdr">@task</span>
+    <span class="kw">def</span> <span class="fn">get_products</span>(self):
+        self.client.get(<span class="st">"/api/products"</span>)
+
+    <span class="hdr">@task(3)</span>                       <span class="cm"># в 3 раза чаще</span>
+    <span class="kw">def</span> <span class="fn">view_product</span>(self):
+        self.client.get(<span class="st">"/api/products/42"</span>)</div>
+        <p>Запускаешь — Locust поднимает виртуальных пользователей, выполняет запросы к эндпоинтам, собирает p50/p95/p99, RPS, error rate.</p>
+        <p><strong>k6</strong> — то же на JavaScript, с удобными <strong>thresholds</strong> (pass/fail-критерии прямо в скрипте — отлично для CI как gate):</p>
+        <div class="code-block"><span class="kw">export const</span> options = {
+  thresholds: {
+    http_req_duration: [<span class="st">'p(95)&lt;300'</span>],   <span class="cm">// p95 латентности &lt; 300мс</span>
+    http_req_failed: [<span class="st">'rate&lt;0.01'</span>],      <span class="cm">// ошибок &lt; 1%</span>
+  },
+};</div>
+        <p>Если порог нарушен — k6 возвращает non-zero, и pipeline падает по performance gate (связка с CI/CD).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Распределённая нагрузка:</strong> один генератор нагрузки сам упрётся в свои лимиты (CPU, сеть) раньше, чем нагрузит крупную систему. Для серьёзных тестов нагрузку генерируют с нескольких машин (Locust в distributed-режиме, k6 в облаке). Иначе измеряешь предел своего ноутбука, а не сервиса.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Тренд — нагрузочные тесты как код в репозитории (k6/Locust-скрипты рядом с кодом) и прогон в CI на регулярной основе, а не разово «перед большим релизом». Так ловят регрессии производительности рано: смержили PR → p95 вырос вдвое → видно сразу. Gatling (Scala) — ещё один сильный игрок, чаще в JVM-командах.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><em>«Напиши Locust-сценарий: пользователь логинится, смотрит список товаров, открывает случайный товар, добавляет в корзину. wait_time 1-3 сек.»</em><br><br>
+          <em>«Объясни результаты прогона: p50=40мс, p95=800мс, p99=3с, error rate 2%. Что не так и куда копать?»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. BOTTLENECK ─────── -->
+  <section class="section" id="bottleneck">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Bottleneck и узкие места</span>
+      <span class="section-badge">analysis</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Bottleneck (узкое место)</strong> — компонент, который ограничивает производительность всей системы. Сколько ни наращивай остальное — упрёшься в него. Искать обычно надо среди четырёх ресурсов:</p>
+        <ul>
+          <li><strong>CPU</strong> — процессор загружен на 100%</li>
+          <li><strong>Память</strong> — кончилась RAM, начался своп</li>
+          <li><strong>База данных</strong> — медленные запросы, блокировки</li>
+          <li><strong>Сеть / I/O</strong> — упёрлись в канал или диск</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Что такое bottleneck</span>Самый медленный компонент задаёт потолок для всей цепочки. Пример: API отвечает за 500мс, из них 450мс — один SQL-запрос к БД. Сколько ни оптимизируй код приложения, быстрее 450мс не станет, пока не ускоришь этот запрос. Узкое место определяет предел — ускорять остальное бессмысленно, пока оно не расширено.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Как локализовать узкое место:</strong></p>
+        <ul>
+          <li>Смотришь метрики ресурсов под нагрузкой: что упёрлось в потолок первым (CPU 100%? память? БД?)</li>
+          <li>Растёт latency — где именно время теряется (профилирование, трейсинг)</li>
+          <li>Убираешь подозреваемый компонент / увеличиваешь ресурс — стало лучше? Значит он</li>
+        </ul>
+        <p><strong>Самые частые узкие места — в базе данных:</strong></p>
+        <ul>
+          <li><strong>N+1 запросы</strong> — вместо одного запроса делается 1 + N (на каждую запись отдельный запрос). Классический убийца производительности</li>
+          <li><strong>Нет индекса</strong> — запрос делает full scan по большой таблице (см. раздел БД)</li>
+          <li><strong>Пул соединений исчерпан</strong> — все коннекты к БД заняты, запросы ждут в очереди</li>
+          <li><strong>Блокировки</strong> — транзакции ждут друг друга</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Связь с observability</strong> — под нагрузкой узкое место ищут через те же инструменты, что и в проде:</p>
+        <ul>
+          <li><strong>APM</strong> (Datadog, New Relic) — показывает, где время уходит: в коде, в БД, во внешнем вызове</li>
+          <li><strong>Distributed tracing</strong> (Jaeger) — в микросервисах видно, какой сервис в цепочке тормозит</li>
+          <li><strong>Метрики ресурсов</strong> (Grafana) — CPU/память/диск/сеть по сервисам во времени</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Важный принцип</span>Расширил одно узкое место — узким станет следующее. Убрал тормоз в БД → упёрлись в CPU приложения → расширили → упёрлись в сеть. Оптимизация производительности всегда итеративна: находишь и расширяешь горлышки по очереди, пока не достигнешь нужного SLA. Не существует «оптимизировать всё сразу».</div>
+        <div class="hl orange"><span class="hl-label">Не верить одному графику</span>Одна метрика обманывает. Latency выросла, а CPU в норме — это не «всё хорошо с сервером», а сигнал смотреть дальше: БД (медленные запросы, пул), внешние сервисы, длина очередей, DNS/TLS-резолвинг, паузы GC (сборка мусора). Узкое место часто не там, где первый график выглядит спокойным. Сопоставляй несколько сигналов, а не делай вывод по одному.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Под нагрузкой latency растёт, CPU и память в норме. Где копать?» — Раз ресурсы приложения свободны, узкое место снаружи: 1) <strong>БД</strong> — медленные запросы, исчерпан пул соединений, блокировки, 2) <strong>внешний сервис</strong> — зависимость отвечает медленно под нагрузкой, 3) <strong>сеть / I/O</strong>, 4) <strong>пулы и лимиты</strong> — connection pool, thread pool забиты, запросы ждут в очереди, 5) <strong>GC-паузы</strong>, DNS/TLS. APM/трейсинг покажет, на каком шаге теряется время.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. НА ПРАКТИКЕ ─────── -->
+  <section class="section" id="practice">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Нагрузочное на практике</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Процесс нагрузочного теста — четыре шага:</p>
+        <ol style="padding-left:18px;">
+          <li><strong>Цель</strong> — что проверяем и какой критерий успеха («держим 1000 RPS с p95 &lt; 300мс»)</li>
+          <li><strong>Сценарий</strong> — какие эндпоинты, в какой пропорции, сколько пользователей</li>
+          <li><strong>Прогон</strong> — запускаем, постепенно наращивая нагрузку</li>
+          <li><strong>Анализ</strong> — смотрим метрики, ищем узкие места, делаем выводы</li>
+        </ol>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что подготовить перед прогоном:</strong></p>
+        <ul>
+          <li><strong>Окружение как прод</strong> — те же ресурсы, конфиги, объём данных. Иначе цифры не имеют смысла</li>
+          <li><strong>Реалистичный сценарий</strong> — пропорции запросов как у реальных пользователей (не только GET /health)</li>
+          <li><strong>Тест-данные</strong> — БД наполнена как в проде (на пустой таблице запрос быстрый, на миллионе — нет)</li>
+          <li><strong>Изоляция</strong> — нагрузочное не на том же окружении, где идут другие тесты</li>
+        </ul>
+        <p><strong>Как наращивать нагрузку:</strong> не сразу 1000 пользователей, а ramp-up — плавно от 0, чтобы увидеть, на какой нагрузке начинается деградация (точка перегиба).</p>
+        <div class="hl"><span class="hl-label">Baseline — точка отсчёта</span>Перед тем как искать регрессии, сними <strong>baseline</strong>: небольшой стабильный прогон на известной нагрузке, зафиксируй p95/RPS/error rate. Дальше каждый новый прогон сравниваешь <em>относительно baseline</em>: «p95 был 200мс, стал 400мс после этого PR» — конкретная регрессия, а не абстрактное «медленно». Без baseline числа не с чем сравнивать.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">Главная ошибка — нерепрезентативное окружение</span>Прогнал нагрузку на dev-стенде с 1 ядром и пустой БД, получил красивые цифры — а production не выдержал реальный трафик. Окружение и данные должны быть <em>как прод</em>, иначе результат вводит в заблуждение. Это причина №1, почему результаты нагрузочного теста нерепрезентативны.</div>
+        <p><strong>Другие частые ошибки:</strong></p>
+        <ul>
+          <li>Нереалистичный сценарий (бьют один лёгкий эндпоинт вместо реального микса)</li>
+          <li>Генератор нагрузки сам стал узким местом (измеряешь его предел)</li>
+          <li>Пустая БД — запросы быстрые не потому что код хорош, а потому что данных нет</li>
+          <li>Смотрят на среднее вместо перцентилей</li>
+          <li>Один прогон без прогрева (первые запросы медленнее — холодный кэш, JIT)</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Часть нагрузки проверяют прямо в проде, но осторожно: <strong>canary</strong> (см. CI/CD) — выкатить на 5% и следить за перцентилями, <strong>synthetic monitoring</strong> — синтетические проверки постоянно выполняют критичные сценарии и алертят при росте latency. Реальный трафик даёт самые достоверные сигналы, но не заменяет контролируемый нагрузочный тест — наблюдать прод полезно. Для QA нагрузочное — это не только разовый прогон, но и непрерывный мониторинг производительности.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как бы ты протестировал производительность API?» — Структурно: 1) <strong>цель и SLA</strong> — какой RPS и p95 нужны, 2) <strong>сценарий</strong> — реалистичный микс эндпоинтов, окружение и данные как прод, 3) <strong>виды</strong> — load на ожидаемом трафике, stress для поиска потолка, soak если важна стабильность, 4) <strong>метрики</strong> — p50/p95/p99, RPS, error rate, ресурсы, 5) <strong>анализ</strong> — найти bottleneck через APM/трейсинг, 6) <strong>инструмент</strong> — Locust/k6. Главное — не «нагрузил и смотрю», а цель → реалистичный сценарий → перцентили → узкое место.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

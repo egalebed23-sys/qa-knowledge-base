@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Soft skills</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Soft skills</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item active" href="#"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#star">01 · STAR-формат и подготовка</a>
+    <a href="#about">02 · Рассказ о себе</a>
+    <a href="#conflict">03 · Конфликты</a>
+    <a href="#decisions">04 · Решения и ответственность</a>
+    <a href="#leadership">05 · Лидерство и влияние</a>
+    <a href="#tradeoffs">06 · Trade-offs, ambiguity, impact</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Soft skills</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Soft skills / Behavioral</h1>
+    <p>// 6 подтем · STAR, конфликты, решения, лидерство</p>
+  </div>
+
+
+  <!-- ─────── 01. STAR ─────── -->
+  <section class="section" id="star">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">STAR-формат и подготовка</span>
+      <span class="section-badge">framework</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Behavioral-вопросы начинаются с «Расскажи о случае, когда…». Ждут <strong>конкретную историю</strong>, а не рассуждения «вообще». Лучший каркас ответа — <strong>STAR</strong>:</p>
+        <ul>
+          <li><strong>S</strong>ituation — ситуация, контекст: что происходило</li>
+          <li><strong>T</strong>ask — задача: что нужно было сделать, твоя роль</li>
+          <li><strong>A</strong>ction — действия: что <em>именно ты</em> сделал</li>
+          <li><strong>R</strong>esult — результат: чем закончилось, желательно с цифрами</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Главное</span>Частая проблема на behavioral-интервью — behavioral не потому, что нет опыта, а потому что рассказывают расплывчато. STAR превращает «ну, мы как-то улучшали тесты» в чёткую историю с началом, действием и измеримым итогом.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Подготовь заранее 5–7 историй</strong>, которые можно повернуть под разные вопросы. Один сильный кейс часто закрывает несколько тем (конфликт + лидерство + результат). Темы, которые стоит покрыть:</p>
+        <ul>
+          <li>Конфликт с коллегой / разработчиком</li>
+          <li>Сложное решение под давлением (остановка релиза)</li>
+          <li>Ошибка и что из неё вынес</li>
+          <li>Улучшение процесса / влияние на команду</li>
+          <li>Менторство</li>
+          <li>Достижение, которым гордишься</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Говори «я», а не «мы»</span>Интервьюер оценивает <em>тебя</em>. «Мы улучшили процесс» — непонятно, что сделал именно ты. «Я предложил X, настроил Y, и в результате…» — виден твой вклад. Команду упомянуть можно, но твоя роль должна быть явно видна.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Result — самая важная и самая забываемая часть.</strong> Слабый ответ обрывается на действии. Сильный заканчивается измеримым итогом:</p>
+        <ul>
+          <li>«сократил прогон регресса с 2 часов до 25 минут»</li>
+          <li>«escape rate упал с 12% до 3% за квартал»</li>
+          <li>«трое junior'ов, которых менторил, вышли на самостоятельную автоматизацию»</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Антипаттерны</span>
+          · <strong>Расплывчатость</strong> — «ну, как-то договорились» без конкретики<br>
+          · <strong>Обвинение других</strong> — «разработчик был неправ, я доказал» (показывает негибкость)<br>
+          · <strong>Нет результата</strong> — история без итога звучит как «ничем не закончилось»<br>
+          · <strong>Слишком длинно</strong> — растекаешься на 5 минут, теряешь нить</div>
+        <div class="hl"><span class="hl-label">Банк историй — подготовь заранее</span>До собеса собери 6-8 готовых ситуаций, каждая закрывает свой тип вопроса. Тогда на любой behavioral-вопрос есть что рассказать:
+        <table>
+          <thead><tr><th>Ситуация</th><th>Какой вопрос закрывает</th><th>Метрика результата</th></tr></thead>
+          <tbody>
+            <tr><td>Победа над flaky-тестами</td><td>настойчивость, качество</td><td>flaky rate с 15% до 2%</td></tr>
+            <tr><td>Ускорение CI</td><td>инициатива, impact</td><td>регресс с 2ч до 25мин</td></tr>
+            <tr><td>Спор о релизе</td><td>конфликт, ответственность</td><td>предотвращён инцидент / взвешенный риск</td></tr>
+            <tr><td>Разбор инцидента</td><td>работа с провалом</td><td>что изменили в процессе</td></tr>
+            <tr><td>Менторство junior</td><td>лидерство, влияние</td><td>вышли на самостоятельность</td></tr>
+            <tr><td>Конфликт с PM</td><td>влияние без власти</td><td>договорённость через данные</td></tr>
+          </tbody>
+        </table>
+        Одна история может закрывать несколько вопросов — главное, чтобы был измеримый итог.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>LLM — отличный тренажёр для behavioral:<br><br>
+          <em>«Задавай мне по одному behavioral-вопросу для Senior QA, я отвечаю, ты даёшь фидбэк по STAR: чего не хватает, где размыто.»</em><br><br>
+          <em>«Вот моя история [текст]. Помоги структурировать по STAR и усилить результат конкретикой.»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. РАССКАЗ О СЕБЕ ─────── -->
+  <section class="section" id="about">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Рассказ о себе</span>
+      <span class="section-badge">elevator pitch</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>«Tell me about yourself» / «Расскажи о себе» — это <strong>не биография</strong> с детства, а короткий питч: кто ты как профессионал и почему подходишь.</p>
+        <p>Простая структура: <strong>настоящее → прошлое → будущее</strong>:</p>
+        <ul>
+          <li><strong>Сейчас</strong>: кто ты, чем занимаешься, ключевая экспертиза</li>
+          <li><strong>Раньше</strong>: релевантный путь, 1–2 значимых достижения</li>
+          <li><strong>Почему здесь</strong>: что ищешь и почему эта роль</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <ul>
+          <li><strong>60–90 секунд</strong> — не дольше. Это завязка, а не вся история</li>
+          <li><strong>Релевантность под вакансию</strong> — для роли с упором на автоматизацию делай акцент на фреймворках и CI, для финтеха — на работе с критичными системами</li>
+          <li><strong>Один конкретный результат</strong> — зацепка, за которую интервьюер потянет дальше</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Каркас</span><em>«Я QA-инженер с N годами в автоматизации, специализируюсь на API и бэкенд-тестировании на Python. Последние два года в [домен] строил с нуля фреймворк автотестов, который сократил регресс с X до Y. Сейчас ищу Senior-роль, где смогу влиять на стратегию качества, а не только писать тесты — поэтому ваша вакансия и заинтересовала.»</em></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Расставляй зацепки.</strong> Хороший рассказ о себе оставляет «крючки», за которые интервьюер захочет ухватиться: упомянул «сократил регресс» — будь готов к «расскажи подробнее, как». Ты управляешь тем, куда пойдёт разговор.</p>
+        <div class="hl modern"><span class="hl-label">Для Senior</span>На Senior-уровне в питче должна звучать не только техника, но и <em>влияние</em>: стратегия, процессы, работа с командой. Разница в акценте: «пишу хорошие автотесты» — про задачу, «снижаю риск продукта и выстраиваю процесс качества» — про влияние. (Подробнее про язык бизнеса — в разделе Trade-offs.)</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Расскажи о своём самом большом провале / неудаче.» — Не «у меня не было провалов» (звучит неискренне) и не самоуничижение. Формула: реальная ошибка → что осознал → что изменил в работе после → как это больше не повторяется. Показываешь рефлексию и рост, а не отсутствие ошибок.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. КОНФЛИКТЫ ─────── -->
+  <section class="section" id="conflict">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Конфликты и сложные ситуации</span>
+      <span class="section-badge">conflict</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>«Расскажи о конфликте с разработчиком / PM» — почти обязательный вопрос. Проверяют не то, кто был прав, а <strong>как ты разрешаешь разногласия конструктивно</strong>.</p>
+        <div class="hl green"><span class="hl-label">Главное</span>Худший ответ — «я был прав, я доказал, что он ошибался». Это показывает негибкость. Сильный ответ показывает: ты понял чужую позицию, опирался на данные, пришёл к решению, сохранил отношения.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Готовый пример из QA-практики</strong> (разработчик ставит Rejected на твой баг):</p>
+        <ul>
+          <li><strong>S/T</strong>: «Я завёл баг, разработчик закрыл его как Rejected, не воспроизводится. Нужно было понять, кто прав, не раздувая конфликт»</li>
+          <li><strong>A</strong>: «Я не стал спорить в комментариях. Перепроверил на чистом окружении, записал видео с точными шагами и версией, приложил логи. Подошёл лично: оказалось, у нас разные тестовые конфиги»</li>
+          <li><strong>R</strong>: «Баг подтвердился, починили. А заодно мы договорились фиксировать окружение в шаблоне бага — конфликтов из-за "не воспроизводится" стало меньше»</li>
+        </ul>
+        <p>Обрати внимание: фокус на <em>данных и процессе</em>, а не «я был прав». И вышел улучшенный процесс — это сильный финал.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Покажи эмпатию к чужой позиции.</strong> Разработчик не «вредный» — у него свои дедлайны и контекст. PM не «душит качество» — он отвечает за сроки и бизнес. Senior понимает мотивы других сторон и ищет решение, а не победу.</p>
+        <div class="hl modern"><span class="hl-label">Для Senior</span>На Senior-уровне ценится умение <em>разрешать конфликт без эскалации к начальству</em>. Эскалация — последний инструмент, не первый. Сначала — данные, прямой разговор, поиск общего интереса. Если довёл каждый спор до тимлида — это не сильная сторона.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«А если ты был неправ в конфликте?» — Отличная возможность показать зрелость. История, где <em>ты</em> ошибался, признал это и скорректировал позицию, часто сильнее, чем «я победил». Признание ошибки — признак уверенности, а не слабости.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. РЕШЕНИЯ ─────── -->
+  <section class="section" id="decisions">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Решения и ответственность</span>
+      <span class="section-badge">ownership</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Вопросы про решения под давлением: «Когда ты остановил релиз?», «Когда ошибся в оценке риска?». Проверяют, как ты <strong>берёшь ответственность</strong> и принимаешь решения на данных, а не на эмоциях. Сам алгоритм действий (что делать с критбагом перед релизом) — в разделе Теория, Senior-кейсы; здесь — <em>как это рассказать</em>.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>«Когда ты остановил релиз?»</strong> — каркас сильного ответа:</p>
+        <ul>
+          <li><strong>S/T</strong>: какой баг/риск нашёл, что было на кону (деньги, данные, репутация)</li>
+          <li><strong>A</strong>: как оценил влияние, какие данные собрал, <em>как донёс</em> до команды/PM — не «я запретил», а «я показал риск и дал варианты»</li>
+          <li><strong>R</strong>: какое решение приняли совместно, что было бы, если б выкатили</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Тонкость</span>Остановка релиза — это не «QA в одиночку нажал стоп». Это «QA принёс аргументированную картину риска, и команда/продакт приняли решение». Покажи, что ты дал данные для решения, а не диктовал.</div>
+
+        <p style="margin-top:12px;"><strong>«Когда ты ошибся в оценке риска?»</strong> — вопрос про честность и рост:</p>
+        <ul>
+          <li>Реальная ситуация: недооценил риск, что-то прошло в прод</li>
+          <li>Что осознал, как отреагировал (не паника, а действия)</li>
+          <li>Что изменил в процессе, чтобы не повторилось (добавил проверку, поменял подход к risk-based)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">Признавай ошибки</span>На вопрос про ошибку нельзя отвечать «я не ошибаюсь» или «это была вина команды». Senior владеет своими ошибками: называет, объясняет что вынес, показывает изменение. Это парадокс собеса — история про ошибку, рассказанная зрело, усиливает впечатление о кандидате, а не ослабляет.</div>
+        <div class="hl modern"><span class="hl-label">Для Senior</span>Ключевое слово — <strong>ownership</strong>. Senior не перекладывает: «требования были плохие», «в реализации была ошибка». Он говорит «я мог бы это предусмотреть, вот что я теперь делаю иначе». При этом без самобичевания — спокойно, по-инженерному: проблема → анализ → корректировка.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Ты остановил релиз, а баг оказался незначительным. Как теперь?» — Не оправдываться. «На тех данных решение было обоснованным — потенциальный риск выглядел высоким. Постфактум баг оказался мельче, и я учёл это в калибровке: стал точнее оценивать impact, добавил быструю проверку severity перед эскалацией». Решения оцениваются по информации <em>на момент принятия</em>, а не задним числом.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. ЛИДЕРСТВО ─────── -->
+  <section class="section" id="leadership">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Лидерство и влияние</span>
+      <span class="section-badge">leadership</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Вопросы про влияние: «Как убедил команду инвестировать в качество?», «Как менторил junior?», «Как улучшил процесс?». Для Senior это ключевой блок — проверяют, влияешь ли ты <strong>за пределами своих тасок</strong>.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>«Как убедил команду инвестировать в качество?»</strong> — ключевое слово <em>данными, не криком</em>:</p>
+        <ul>
+          <li>Не «я сказал, что надо писать тесты». А «я показал цифры: сколько дефектов попадает в production, сколько времени уходит на ручной регресс»</li>
+          <li>Перевёл качество в язык бизнеса: время, деньги, риск, скорость доставки</li>
+          <li>Предложил небольшой конкретный шаг, показал результат на нём, потом масштабировал</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>«Как менторил junior/middle?»</strong>:</p>
+        <ul>
+          <li>Конкретный человек, конкретная цель (научить автоматизации, code review)</li>
+          <li>Как именно: парное программирование, ревью с объяснениями, постепенное усложнение задач</li>
+          <li>Результат: человек вышел на самостоятельность, что-то стал делать сам</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>«Как улучшил процесс тестирования?»</strong>: конкретное «было → стало» с измеримым эффектом (внедрил contract-тесты, сократил flaky, ускорил пайплайн).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">Влияние без власти</span>Senior QA часто не имеет формальной власти над разработчиками, но влияет: через данные, через авторитет экспертизы, через помощь, а не приказы. Сильнейший признак Senior — «я сделал так, что команде самой захотелось писать тесты», а не «я заставил». Покажи именно это: как ты менял поведение людей, не имея над ними власти.</div>
+        <div class="hl"><span class="hl-label">Обратная связь — давать и принимать</span>Зрелость видна в том, как ты работаешь с feedback на ревью, ретро, постмортемах. <strong>Давать</strong>: конкретно и о работе, не о человеке («этот тест зависит от порядка запуска», не «ты плохо пишешь тесты»), вовремя, с предложением. <strong>Принимать</strong>: без защитной реакции — уточнить, поблагодарить, применить. На собесе спрашивают «расскажи о критике твоей работы» — покажи, что услышал и изменил, а не оправдывался.</div>
+        <div class="hl"><span class="hl-label">Blameless postmortem</span>После инцидента зрелая команда разбирает <em>систему, а не людей</em>: «что произошло, почему система <strong>позволила</strong> этому случиться, что меняем, чтобы не повторилось». Не «кто виноват». Если на собесе рассказываешь про инцидент — фокус на «что в процессе/архитектуре допустило ошибку и что улучшили», а не на поиске виноватого. Это сильный сигнал инженерной зрелости.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Команда не хочет писать тесты. Твои действия?» — Не «жаловаться руководству» и не «писать за них». А: 1) понять <em>почему</em> (нет времени? не умеют? не видят ценности?), 2) убрать барьер — обучение, готовые хелперы, шаблоны, 3) показать быструю победу на одном примере, 4) сделать так, чтобы тесты экономили <em>их</em> время, а не добавляли работу. Влияние через ценность, а не через давление.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. TRADE-OFFS ─────── -->
+  <section class="section" id="tradeoffs">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Trade-offs, ambiguity, impact</span>
+      <span class="section-badge">judgment</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Вопросы на зрелость суждений: «Как балансируешь speed vs quality?», «Как работаешь с неопределённостью?», «Как измеряешь impact своей работы?». Проверяют, мыслишь ли ты как инженер, понимающий бизнес.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>«Speed vs quality»</strong> — не выбирай одну сторону. Сильный ответ — <em>risk-based баланс</em>:</p>
+        <ul>
+          <li>Не «качество важнее всего» (нереалистично) и не «скорость, бизнес ждёт» (безответственно)</li>
+          <li>«Зависит от риска: на платёжный флоу — максимум проверок, на внутреннюю некритичную фичу — быстрый smoke и в прод. Качество вкладываю туда, где цена ошибки высока»</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>«Работа с ambiguity»</strong> (мало требований, неясная задача):</p>
+        <ul>
+          <li>Не ступор и не «требования недостаточно конкретны». А: задаю уточняющие вопросы, делаю разумные предположения и фиксирую их, иду от рисков, начинаю с exploratory</li>
+          <li>Показываешь, что можешь двигаться вперёд при неполной информации</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>«Как измеряешь impact?»</strong>: для личного вклада — сокращение времени регресса, снижение flaky rate, уменьшение escaped defects, ускорение triage, сокращение ручной работы. (Командные метрики вроде deployment frequency — это про команду, не личный impact QA.) Конкретные метрики, а не «стало лучше».</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">Мысли как бизнес</span>Senior переводит QA-работу в язык, понятный руководству: не «я написал 200 тестов», а «я снизил риск релиза и ускорил доставку». Не «нашёл 50 багов», а «предотвратил инцидент, который стоил бы X». Executive communication — умение объяснить ценность качества тем, кто не разбирается в тестировании.</div>
+        <div class="hl orange"><span class="hl-label">Ловушка speed vs quality</span>Частая ошибка — занять жёсткую позицию «качество всегда важнее». Бизнесу это звучит как «QA не понимает реальности». Senior признаёт, что иногда осознанно выпускают с известными багами (если риск приемлем) — и это нормальное инженерное решение, а не «предательство качества».</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«PM требует выкатить завтра, ты не успел протестировать. Что делаешь?» — Не «попробую любой ценой остановить релиз, но не пущу» и не «ну ладно, выкатывайте». А: «Покажу, что протестировано, а что нет, и какой риск в непокрытом. Предложу варианты: выкатить с feature flag, покрыть критичное за оставшееся время, релиз + быстрый хотфикс. Решение о приемлемости риска — за продактом, моя работа — дать честную картину». Снова: данные и варианты, решение — на уровне с полномочиями.</div>
+        <div class="hl"><span class="hl-label">Язык под стейкхолдера</span>Одну и ту же вещь объясняешь по-разному в зависимости от собеседника: <strong>PM</strong> — про сроки и пользовательский риск, <strong>разработчику</strong> — про техническую суть и воспроизведение, <strong>support</strong> — про то, как это видит пользователь и что отвечать, <strong>менеджеру</strong> — про деньги, риск и влияние на релиз. Зрелость — переключать язык, а не говорить со всеми одинаково.</div>
+        <div class="hl"><span class="hl-label">Remote / async-коммуникация</span>В распределённых командах половина общения письменная. Навык: донести риск <em>текстом</em> так, чтобы поняли без созвона (контекст + суть + что предлагаешь), фиксировать договорённости письменно (в тикете/треде, а не «решили на словах»), не терять контекст в Slack/Jira — ссылки, краткие резюме тредов, понятные заголовки. Письменная ясность для Senior важна не меньше устной.</div>
+        <div class="hl modern"><span class="hl-label">Вопросы интервьюеру (тоже soft skill)</span>В конце собеса вопросы кандидата показывают зрелость. Сильные: чего ждут от Senior QA на этой роли, как сейчас обстоит с качеством и какие болевые точки, кто владеет качеством в команде, как устроен CI/CD и релизный процесс, какая доля ручного и автоматизированного, как принимают решение о релизе. Это и оценка роли для себя, и сигнал, что ты мыслишь на уровне.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Backend и API</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item active" href="#"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#intro">01 · Что такое API</a>
+    <a href="#http">02 · HTTP: запрос и ответ</a>
+    <a href="#methods">03 · HTTP-методы и идемпотентность</a>
+    <a href="#status">04 · HTTP статус-коды</a>
+    <a href="#headers">05 · Заголовки</a>
+    <a href="#rest">06 · REST API и его принципы</a>
+    <a href="#api-styles">07 · GraphQL / gRPC</a>
+    <a href="#realtime">08 · WebSockets / SSE</a>
+    <a href="#brokers">09 · Брокеры сообщений</a>
+    <a href="#storage">10 · Cookies, Session, Storage</a>
+    <a href="#authn">11 · Аутентификация</a>
+    <a href="#authz">12 · Авторизация: JWT, OAuth 2.0</a>
+    <a href="#testing">13 · Тестирование REST API</a>
+    <a href="#contract">14 · Контракты и mocking</a>
+    <a href="#tools">15 · Инструменты: Postman, Charles, Swagger</a>
+    <a href="#senior-api">16 · Senior-кейсы по API</a>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Backend и API</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Backend и API</h1>
+    <p>// 16 подтем · от «что такое API» до тестирования и инструментов</p>
+  </div>
+
+
+  <!-- ─────── 01. ЧТО ТАКОЕ API ─────── -->
+  <section class="section" id="intro">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Что такое API</span>
+      <span class="section-badge">basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>API</strong> (Application Programming Interface) — это <em>контракт</em>, по которому одна программа обращается к другой. Он описывает, что можно запросить, что нужно передать и что вернётся в ответ — <strong>не раскрывая, как это устроено внутри</strong>.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>API как сигнатура функции: ты знаешь её имя, какие аргументы подать и что она вернёт — и пользуешься, не зная и не видя реализации. <code>get_user(id) → User</code>. Что происходит внутри (поход в БД, кэш, другой сервис) — тебя не касается. Меняется реализация — API остаётся прежним.</div>
+        <p>Простой пример: приложение погоды на телефоне само не считает погоду. Оно дёргает <em>API погодного сервиса</em>: «дай погоду для Москвы» → получает JSON с температурой. Приложение — клиент, сервис погоды — сервер, API — правила их общения.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>API бывают не только веб-овые:</strong> Web API (по сети, обычно HTTP), Library API (функции библиотеки — <code>requests.get()</code>), OS API (системные вызовы). В контексте Backend-тестирования «API» почти всегда значит <strong>Web API поверх HTTP</strong> — о нём и речь.</p>
+        <p>По доступу Web API делят на <strong>public</strong> (любой разработчик), <strong>partner</strong> (по договору, с ключом) и <strong>private/internal</strong> (между своими сервисами).</p>
+        <div class="hl"><span class="hl-label">Клиент-сервер</span><strong>Клиент</strong> отправляет запрос (браузер, приложение, другой сервис), <strong>сервер</strong> отвечает. QA обычно в роли клиента: шлёт запросы и проверяет ответы.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Почему QA так много работает именно с API</strong>, а не только через UI:</p>
+        <ul>
+          <li><strong>Быстрее</strong> — API-тест в десятки раз быстрее UI-теста (нет рендеринга, кликов, ожиданий)</li>
+          <li><strong>Стабильнее</strong> — UI меняется постоянно (вёрстка, кнопки), API-контракт стабильнее</li>
+          <li><strong>Глубже</strong> — через UI не проверишь то, что фронт не показывает: коды ошибок, граничные ответы, безопасность</li>
+          <li><strong>Раньше</strong> — API готов до фронта, можно тестировать, пока UI ещё пишут</li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современный подход — <strong>API-first</strong>: сначала проектируют и согласуют контракт API (в OpenAPI), и только потом параллельно пишут бэкенд, фронтенд и тесты. Между клиентами и сервисами часто стоит <strong>API Gateway</strong> (Kong, Apigee, AWS API Gateway) — единая точка входа, которая занимается авторизацией, rate limiting, маршрутизацией и логированием. Для QA это значит: часть проверок (лимиты, auth) делается на уровне gateway, а не самого сервиса.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем API отличается от endpoint?» — <strong>API</strong> — это весь интерфейс сервиса целиком (все его возможности). <strong>Endpoint</strong> — конкретный адрес одной операции внутри API (<code>GET /users/42</code>). Один API состоит из множества endpoints. Грубо: API — это меню, endpoint — отдельное блюдо в нём.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. HTTP: запрос и ответ ─────── -->
+  <section class="section" id="http">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">HTTP: запрос и ответ</span>
+      <span class="section-badge">protocol basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>HTTP</strong> — протокол, по которому клиент (браузер, мобильное приложение, другой сервис) общается с сервером. Всё взаимодействие — это пары <em>запрос → ответ</em> поверх TCP.</p>
+        <p>В каждом запросе есть четыре части:</p>
+        <ul>
+          <li><strong>Метод</strong> — что хотим сделать (<code>GET</code>, <code>POST</code>, ...)</li>
+          <li><strong>URL</strong> — куда обращаемся (<code>https://api.shop.com/orders/42</code>)</li>
+          <li><strong>Заголовки</strong> — метаданные (<code>Content-Type</code>, <code>Authorization</code>, ...)</li>
+          <li><strong>Тело</strong> — данные запроса (обычно JSON; не у всех методов есть)</li>
+        </ul>
+        <p>В ответе — три части: <strong>статус-код</strong> (200, 404, 500), <strong>заголовки</strong>, <strong>тело</strong>.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>HTTP-запрос как команда в shell: метод = команда (<code>cat</code>, <code>rm</code>, <code>cp</code>) — что делаем. URL = путь к файлу — над чем. Заголовки = флаги и опции (<code>-r</code>, <code>--force</code>) — как именно. Тело = stdin — что передаём на вход. Ответ — это exit code (статус) + stdout (тело) + дополнительные метаданные (заголовки).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p>Стандартный вид сырого HTTP-запроса и ответа:</p>
+        <div class="req-resp">
+          <div>
+            <div class="rr-label">// Запрос</div>
+            <div class="code-block"><span class="kw">POST</span> /api/orders <span class="cm">HTTP/1.1</span>
+<span class="hdr">Host:</span> <span class="val">api.shop.com</span>
+<span class="hdr">Content-Type:</span> <span class="val">application/json</span>
+<span class="hdr">Authorization:</span> <span class="val">Bearer eyJhbGc...</span>
+
+<span class="st">{</span>
+  <span class="st">"product_id": 42,</span>
+  <span class="st">"quantity": 2</span>
+<span class="st">}</span></div>
+          </div>
+          <div>
+            <div class="rr-label">// Ответ</div>
+            <div class="code-block"><span class="cm">HTTP/1.1</span> <span class="val">201 Created</span>
+<span class="hdr">Content-Type:</span> <span class="val">application/json</span>
+<span class="hdr">Location:</span> <span class="val">/api/orders/789</span>
+
+<span class="st">{</span>
+  <span class="st">"id": 789,</span>
+  <span class="st">"status": "pending"</span>
+<span class="st">}</span></div>
+          </div>
+        </div>
+
+        <p><strong>Особенности протокола:</strong></p>
+        <ul>
+          <li><strong>Stateless</strong> — каждый запрос независим, сервер не «помнит» предыдущий. Контекст передаётся явно (cookie, токен)</li>
+          <li><strong>Текстовый</strong> (в HTTP/1.1) — можно посмотреть глазами через DevTools, <code>curl -v</code>, Wireshark</li>
+          <li><strong>Поверх TCP</strong> — гарантирует доставку и порядок пакетов</li>
+          <li><strong>HTTPS</strong> = HTTP + TLS — то же самое, но в зашифрованном туннеле</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>HTTP/1.1 vs HTTP/2 vs HTTP/3</strong> — в чём разница:</p>
+        <table>
+          <thead><tr><th>Версия</th><th>Транспорт</th><th>Главное отличие</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HTTP/1.1</strong> (1997)</td><td>TCP</td><td>Текстовый, один запрос на соединение (keep-alive — несколько подряд, но не параллельно). Head-of-line blocking на уровне HTTP</td></tr>
+            <tr><td><strong>HTTP/2</strong> (2015)</td><td>TCP</td><td>Бинарный, мультиплексирование (много запросов параллельно в одном соединении), сжатие заголовков (HPACK). Server Push был частью спеки, но на практике почти не используется и свёрнут в браузерах</td></tr>
+            <tr><td><strong>HTTP/3</strong> (2022)</td><td>QUIC (UDP)</td><td>Решает head-of-line blocking на уровне TCP — потеря одного пакета не блокирует все потоки. Быстрое установление соединения</td></tr>
+          </tbody>
+        </table>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>На собесе расскажи разницу, но в работе версия HTTP — почти никогда не предмет ручного выбора, это решает инфраструктура (load balancer, CDN). Нюанс для Python: <code>requests</code> работает по <strong>HTTP/1.1</strong>; для HTTP/2 и async-запросов используют <strong>httpx</strong>.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Можно ли в HTTP сделать запрос без тела?» — Да, у методов GET, HEAD, DELETE тело обычно не передаётся. Спецификация формально не запрещает, но прокси и серверы могут его игнорировать или отвергать. Если нужно передать данные с GET — используй query-параметры в URL.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. HTTP-методы ─────── -->
+  <section class="section" id="methods">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">HTTP-методы и идемпотентность</span>
+      <span class="section-badge">verbs</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Метод говорит серверу <em>что мы хотим сделать с ресурсом</em>. Основные:</p>
+        <ul>
+          <li><span class="http-method m-get">GET</span> получить ресурс. Без тела. Безопасный и идемпотентный</li>
+          <li><span class="http-method m-post">POST</span> создать новый ресурс. С телом. Не идемпотентный (повторный = новая сущность)</li>
+          <li><span class="http-method m-put">PUT</span> заменить ресурс целиком. Идемпотентный</li>
+          <li><span class="http-method m-patch">PATCH</span> обновить часть ресурса. Чаще идемпотентный, но не обязан</li>
+          <li><span class="http-method m-delete">DELETE</span> удалить ресурс. Идемпотентный</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Идемпотентность простыми словами</span>«Если повторить запрос несколько раз — результат на сервере будет тот же, что после первого». GET ничего не меняет — идемпотентный. DELETE удалит один раз, второй уже не найдёт (или вернёт 404) — но состояние сервера то же. POST «создать заказ» при повторе создаст ещё один — не идемпотентный.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Три свойства методов, которые часто путают:</strong></p>
+        <table>
+          <thead><tr><th>Метод</th><th>Safe</th><th>Idempotent</th><th>Cacheable</th></tr></thead>
+          <tbody>
+            <tr><td><span class="http-method m-get">GET</span></td><td>да</td><td>да</td><td>да</td></tr>
+            <tr><td><span class="http-method m-head">HEAD</span></td><td>да</td><td>да</td><td>да</td></tr>
+            <tr><td><span class="http-method m-options">OPTIONS</span></td><td>да</td><td>да</td><td>нет</td></tr>
+            <tr><td><span class="http-method m-post">POST</span></td><td>нет</td><td>нет</td><td>иногда</td></tr>
+            <tr><td><span class="http-method m-put">PUT</span></td><td>нет</td><td>да</td><td>нет</td></tr>
+            <tr><td><span class="http-method m-patch">PATCH</span></td><td>нет</td><td>обычно нет</td><td>нет</td></tr>
+            <tr><td><span class="http-method m-delete">DELETE</span></td><td>нет</td><td>да</td><td>нет</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li><strong>Safe</strong> — не меняет состояние сервера (только чтение)</li>
+          <li><strong>Idempotent</strong> — повторение запроса не меняет результат</li>
+          <li><strong>Cacheable</strong> — ответ можно кэшировать</li>
+        </ul>
+
+        <p><strong>Менее популярные, но реальные методы:</strong></p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">HEAD</div>
+            То же, что GET, но без тела ответа — только заголовки. Используют чтобы проверить существование ресурса (HEAD на файл — есть ли) или его размер (<code>Content-Length</code>) без скачивания.
+          </div>
+          <div class="card">
+            <div class="card-title">OPTIONS</div>
+            Узнать, какие методы поддерживает эндпоинт. Главное практическое применение — <strong>CORS preflight</strong>: браузер автоматически шлёт OPTIONS перед «нестандартными» запросами с другого домена, чтобы проверить разрешения.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>PUT vs PATCH — ключевая разница:</strong></p>
+        <div class="req-resp">
+          <div>
+            <div class="rr-label">// PUT — заменить целиком</div>
+            <div class="code-block"><span class="kw">PUT</span> /users/42
+
+<span class="st">{</span>
+  <span class="st">"name": "Иван",</span>
+  <span class="st">"email": "i@ex.com",</span>
+  <span class="st">"phone": "+7..."</span>
+<span class="st">}</span>
+<span class="cm">// Если поле опустить — оно</span>
+<span class="cm">// очистится / станет null</span></div>
+          </div>
+          <div>
+            <div class="rr-label">// PATCH — обновить часть</div>
+            <div class="code-block"><span class="kw">PATCH</span> /users/42
+
+<span class="st">{</span>
+  <span class="st">"phone": "+7-новый"</span>
+<span class="st">}</span>
+<span class="cm">// Остальные поля остаются</span>
+<span class="cm">// без изменений</span></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Идемпотентность для QA — это о тест-стратегии</strong>, а не теоретическое свойство. Что проверять:</p>
+        <ul>
+          <li>Если документация говорит «метод идемпотентный» — <em>повтори запрос 5 раз подряд</em>. Результат на сервере должен быть тот же, что после первого вызова</li>
+          <li>На неидемпотентных POST — проверь, как сервер защищается от дублей: <strong>Idempotency-Key</strong> в заголовке (Stripe, Yandex) — клиент шлёт уникальный ключ, сервер запоминает и при повторе возвращает старый результат</li>
+          <li>В платёжных и финансовых API — без идемпотентности и Idempotency-Key никуда. Это вопрос денег пользователя при ретраях</li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В большинстве REST API современных продуктов <strong>PATCH преобладает над PUT</strong> — частичные обновления удобнее и безопаснее. PUT в чистом виде встречается реже, чаще используется как «upsert» (создать или обновить целиком). Также набирает популярность <strong>JSON Merge Patch</strong> (<code>RFC 7396</code>) и <strong>JSON Patch</strong> (<code>RFC 6902</code>) — стандартизированные форматы для PATCH-операций.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация cURL-запросов:</strong> <em>«Напиши cURL для POST /api/orders с заголовками Authorization Bearer и Content-Type application/json, телом {product_id: 42, quantity: 2}.»</em><br><br>
+          <strong>Анализ непонятного API:</strong> вставь OpenAPI-спеку или пример запроса/ответа → <em>«Какие методы есть, какие идемпотентны, что вернёт сервер при повторном вызове DELETE?»</em><br><br>
+          <strong>Генерация тестов на идемпотентность:</strong> <em>«Для эндпоинта POST /payments с поддержкой Idempotency-Key напиши набор тест-кейсов: повторный запрос с тем же ключом, с другим, без ключа, с устаревшим.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«PATCH идемпотентен?» — Зависит от реализации. <code>PATCH /counter {"increment": 1}</code> — НЕ идемпотентен (каждый раз +1). <code>PATCH /user {"name": "Иван"}</code> — идемпотентен (всегда тот же результат). Senior-ответ: «PATCH <em>может</em> быть идемпотентным, но не обязан, в отличие от PUT, который идемпотентен по спецификации».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. HTTP статус-коды ─────── -->
+  <section class="section" id="status">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">HTTP статус-коды</span>
+      <span class="section-badge">response codes</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Статус-код — трёхзначное число в ответе сервера. Первая цифра определяет класс:</p>
+        <div class="grid2">
+          <div>
+            <div class="status-grp s1">1xx — информационные</div>
+            <ul>
+              <li><span class="status-code" style="background:#0d1f35;color:#6aa3f5;">100</span> Continue</li>
+              <li><span class="status-code" style="background:#0d1f35;color:#6aa3f5;">101</span> Switching Protocols (WebSocket)</li>
+            </ul>
+            <div class="status-grp s2">2xx — успех</div>
+            <ul>
+              <li><span class="status-code c2">200</span> OK</li>
+              <li><span class="status-code c2">201</span> Created</li>
+              <li><span class="status-code c2">204</span> No Content</li>
+            </ul>
+            <div class="status-grp s3">3xx — перенаправление</div>
+            <ul>
+              <li><span class="status-code c3">301</span> Moved Permanently</li>
+              <li><span class="status-code c3">302</span> Found</li>
+              <li><span class="status-code c3">304</span> Not Modified (из кеша)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="status-grp s4">4xx — ошибка клиента</div>
+            <ul>
+              <li><span class="status-code c4">400</span> Bad Request</li>
+              <li><span class="status-code c4">401</span> Unauthorized</li>
+              <li><span class="status-code c4">403</span> Forbidden</li>
+              <li><span class="status-code c4">404</span> Not Found</li>
+              <li><span class="status-code c4">409</span> Conflict</li>
+              <li><span class="status-code c4">422</span> Unprocessable Entity</li>
+              <li><span class="status-code c4">429</span> Too Many Requests</li>
+            </ul>
+            <div class="status-grp s5">5xx — ошибка сервера</div>
+            <ul>
+              <li><span class="status-code c5">500</span> Internal Server Error</li>
+              <li><span class="status-code c5">502</span> Bad Gateway</li>
+              <li><span class="status-code c5">503</span> Service Unavailable</li>
+              <li><span class="status-code c5">504</span> Gateway Timeout</li>
+            </ul>
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Как exit codes в Unix, только детальнее: <code>2xx</code> — успех (<code>exit 0</code>). <code>3xx</code> — перенаправление, ходи в другое место. <code>4xx</code> — ошибка на стороне клиента (невалидный ввод). <code>5xx</code> — сервер упал, твоей вины нет.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>2xx — успех, но с нюансами:</strong></p>
+        <table>
+          <thead><tr><th>Код</th><th>Когда возвращать</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status-code c2">200</span> OK</td><td>Универсальный успех. GET, обновление через PUT/PATCH, успешный POST с возвратом тела</td></tr>
+            <tr><td><span class="status-code c2">201</span> Created</td><td>Создан новый ресурс. Обычно после POST. Часто включает заголовок <code>Location: /api/orders/789</code></td></tr>
+            <tr><td><span class="status-code c2">202</span> Accepted</td><td>Запрос принят, но обработка асинхронная. Например, отправлен в очередь</td></tr>
+            <tr><td><span class="status-code c2">204</span> No Content</td><td>Успех, но тело ответа пустое. Типично для DELETE и PUT без возврата</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>4xx — ошибки клиента, наиболее частые:</strong></p>
+        <table>
+          <thead><tr><th>Код</th><th>Смысл</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status-code c4">400</span> Bad Request</td><td>Запрос синтаксически кривой: невалидный JSON, отсутствует обязательное поле</td></tr>
+            <tr><td><span class="status-code c4">401</span> Unauthorized</td><td>«Кто ты?» — не передан токен / он невалидный / истёк</td></tr>
+            <tr><td><span class="status-code c4">403</span> Forbidden</td><td>«Я тебя знаю, но тебе нельзя» — авторизован, но прав нет</td></tr>
+            <tr><td><span class="status-code c4">404</span> Not Found</td><td>Ресурс не существует. Или существует, но тебе не показывают (вариант 403)</td></tr>
+            <tr><td><span class="status-code c4">405</span> Method Not Allowed</td><td>На этот URL такой метод не поддерживается (например, PUT на read-only ресурс)</td></tr>
+            <tr><td><span class="status-code c4">409</span> Conflict</td><td>Конфликт состояния: попытка создать сущность с уже занятым именем; устаревшая версия при оптимистичной блокировке</td></tr>
+            <tr><td><span class="status-code c4">422</span> Unprocessable Entity</td><td>Синтаксис ок, но логика данных невалидна (email без @, отрицательная цена)</td></tr>
+            <tr><td><span class="status-code c4">429</span> Too Many Requests</td><td>Превышен rate limit. Часто с заголовком <code>Retry-After: 60</code></td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>5xx — ошибки сервера:</strong></p>
+        <table>
+          <thead><tr><th>Код</th><th>Смысл</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status-code c5">500</span> Internal Server Error</td><td>Что-то упало внутри. Обычно — необработанный exception в коде</td></tr>
+            <tr><td><span class="status-code c5">502</span> Bad Gateway</td><td>Прокси / nginx получил битый ответ от upstream-сервиса</td></tr>
+            <tr><td><span class="status-code c5">503</span> Service Unavailable</td><td>Сервис временно недоступен: перезагрузка, перегрузка, maintenance</td></tr>
+            <tr><td><span class="status-code c5">504</span> Gateway Timeout</td><td>Прокси не дождался ответа от upstream — таймаут</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Каверзные пары кодов:</strong></p>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">401 vs 403</div>
+            <strong>401</strong> — «кто ты вообще?» Не аутентифицирован. Решение: войти / обновить токен.<br>
+            <strong>403</strong> — «знаю тебя, но нельзя». Аутентифицирован, но не имеешь прав на этот ресурс.
+          </div>
+          <div class="card">
+            <div class="card-title">400 vs 422</div>
+            <strong>400</strong> — невалидный синтаксис: битый JSON, отсутствие обязательного поля.<br>
+            <strong>422</strong> — синтаксис ок, но семантика плохая: email <code>"abc"</code>, цена <code>-100</code>. В REST API чаще именно 422 для валидации.
+          </div>
+          <div class="card">
+            <div class="card-title">301 vs 302 vs 307 vs 308</div>
+            <strong>301</strong> навсегда, можно поменять метод на GET.<br>
+            <strong>302</strong> временно, можно поменять метод (исторически).<br>
+            <strong>307</strong> временно, метод и тело сохраняются.<br>
+            <strong>308</strong> навсегда, метод и тело сохраняются.
+          </div>
+          <div class="card">
+            <div class="card-title">404 vs 410</div>
+            <strong>404</strong> — не найдено (возможно, никогда и не было).<br>
+            <strong>410</strong> Gone — было, но удалено навсегда (для поисковиков сигнал «забудьте URL»).
+          </div>
+        </div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных API часто <strong>сознательно используют 404 вместо 403</strong> для защиты приватности. Если бы сервер отвечал 403 — это бы выдавало <em>факт существования</em> приватного ресурса. Возвращая 404, мы скрываем сам факт. Пример — GitHub: на приватный репозиторий с чужого аккаунта отдаётся 404, а не 403.</div>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«200 OK на ошибку»</strong> — встречается часто: сервер возвращает HTTP 200, но в теле <code>{"status": "error", "code": 500}</code>. Это ломает все retry-механизмы (они смотрят на HTTP-код), мониторинг (5xx-метрики чистые, а сервис «лежит»), и противоречит спецификации. На собесе можно упомянуть как пример того, что встречаешь в legacy и аргументируешь рефакторинг.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какой код вернуть, если пользователь хочет удалить ресурс, которого нет?» — Зависит от логики:<br>
+          · <strong>404</strong> — если важно сообщить «такого нет»<br>
+          · <strong>204</strong> — если хотим идемпотентности: DELETE дважды → оба раза 204, как будто всё ок<br>
+          В стандартах REST оба варианта валидны. Команда выбирает по сценарию использования.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. Заголовки ─────── -->
+  <section class="section" id="headers">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Заголовки HTTP</span>
+      <span class="section-badge">headers</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Заголовки — пары <code>Имя: Значение</code> с метаданными запроса или ответа. Тело — это «что», заголовки — это «как, кому, в каком формате». Их десятки, но на собесе важны ~15.</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Чаще всего в запросе</div>
+            <code>Host</code> — куда (домен)<br>
+            <code>Content-Type</code> — формат тела (<code>application/json</code>)<br>
+            <code>Authorization</code> — токен / креды<br>
+            <code>Accept</code> — что мы готовы принять в ответ<br>
+            <code>User-Agent</code> — кто клиент (браузер, бот)<br>
+            <code>Cookie</code> — куки от сервера<br>
+            <code>Referer</code> — откуда пришли
+          </div>
+          <div class="card">
+            <div class="card-title">Чаще всего в ответе</div>
+            <code>Content-Type</code> — формат ответа<br>
+            <code>Content-Length</code> — размер тела в байтах<br>
+            <code>Set-Cookie</code> — установить куку у клиента<br>
+            <code>Cache-Control</code> — как кэшировать<br>
+            <code>Location</code> — куда редирект / где новый ресурс<br>
+            <code>Retry-After</code> — через сколько повторить
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Content-Type — главный заголовок для тестировщика API.</strong> Без него сервер не знает, как парсить тело:</p>
+        <ul>
+          <li><code>application/json</code> — JSON. 90% современных REST-API</li>
+          <li><code>application/xml</code> — XML. Legacy, SOAP, банковские API</li>
+          <li><code>application/x-www-form-urlencoded</code> — формы HTML, <code>key=val&amp;key2=val2</code></li>
+          <li><code>multipart/form-data</code> — загрузка файлов</li>
+          <li><code>text/plain</code> — просто текст</li>
+        </ul>
+
+        <p><strong>Accept</strong> — клиент говорит, что готов принять. Сервер может отдать в другом формате (content negotiation): <code>Accept: application/json, application/xml;q=0.5</code> — предпочту JSON, но XML тоже пойдёт.</p>
+
+        <p style="margin-top:14px;"><strong>Кэширование — три уровня заголовков:</strong></p>
+        <table>
+          <thead><tr><th>Заголовок</th><th>Где</th><th>Смысл</th></tr></thead>
+          <tbody>
+            <tr><td><code>Cache-Control</code></td><td>в ответе</td><td>Главный. <code>max-age=3600</code>, <code>no-cache</code>, <code>private</code>, <code>public</code></td></tr>
+            <tr><td><code>ETag</code></td><td>в ответе</td><td>Уникальный хеш версии ресурса</td></tr>
+            <tr><td><code>If-None-Match</code></td><td>в запросе</td><td>Клиент посылает прошлый ETag → сервер вернёт <span class="status-code c3">304</span> Not Modified, если не изменилось</td></tr>
+            <tr><td><code>Last-Modified</code></td><td>в ответе</td><td>Дата последнего изменения ресурса</td></tr>
+            <tr><td><code>If-Modified-Since</code></td><td>в запросе</td><td>Аналог If-None-Match, но по дате</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Безопасностные заголовки</strong> (часто в нагрузке для QA):</p>
+        <ul>
+          <li><code>Strict-Transport-Security</code> (HSTS) — заставляет браузер всегда ходить по HTTPS</li>
+          <li><code>Content-Security-Policy</code> (CSP) — что разрешено выполнять (защита от XSS)</li>
+          <li><code>X-Frame-Options</code> — можно ли встраивать страницу в iframe (защита от clickjacking)</li>
+          <li><code>X-Content-Type-Options: nosniff</code> — не угадывать MIME-тип, верить заголовку</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Кастомные X- заголовки</strong> — клиенты и серверы часто добавляют свои. Префикс <code>X-</code> исторически означал «нестандартный», сейчас от него отказались (RFC 6648), но в legacy его всё ещё много:</p>
+        <ul>
+          <li><code>X-Request-ID</code> — трейсинг запроса через микросервисы</li>
+          <li><code>X-Forwarded-For</code> — реальный IP клиента, когда между ним и сервисом стоят прокси / load balancer</li>
+          <li><code>X-Rate-Limit-Remaining</code> — сколько запросов осталось до лимита</li>
+          <li><code>X-API-Version</code> — версия API (альтернатива версионированию через URL)</li>
+        </ul>
+
+        <p><strong>CORS-заголовки</strong> — без понимания не пройти ни одного собеса по фронтенду или Backend, даже как QA:</p>
+        <ul>
+          <li><code>Access-Control-Allow-Origin: https://shop.com</code> — какие домены могут обращаться</li>
+          <li><code>Access-Control-Allow-Methods: GET, POST, PUT</code> — какие методы разрешены</li>
+          <li><code>Access-Control-Allow-Credentials: true</code> — можно ли слать куки</li>
+          <li><strong>Preflight</strong> — браузер автоматически шлёт OPTIONS перед «нестандартными» запросами (не-GET, нестандартный Content-Type) и смотрит на CORS-ответ</li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатор регулярно сталкивается с заголовками в трёх контекстах: 1) <strong>аутентификация</strong> через <code>Authorization</code> или кастомный <code>X-API-Key</code>, 2) <strong>трейсинг</strong> через <code>X-Request-ID</code> — без него невозможно найти запрос в логах в микросервисной архитектуре, 3) <strong>rate limiting</strong> — твои тесты должны уметь читать <code>X-Rate-Limit-*</code> и тормозить себя, а не падать с 429.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Расшифровка непонятных заголовков:</strong> вставь любой <code>curl -v</code> или дамп DevTools → <em>«Что делает каждый заголовок? Какие из них критичны для теста, какие можно игнорировать?»</em><br><br>
+          <strong>Генерация тест-кейсов на заголовки:</strong> <em>«Эндпоинт принимает Authorization Bearer и X-API-Key. Сгенерируй негативные тест-кейсы: оба отсутствуют, один отсутствует, оба невалидны, формат сломан, регистр не тот.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что вернёт сервер, если послать запрос с <code>Content-Type: application/json</code>, но в теле — XML?» — Обычно <span class="status-code c4">400</span> Bad Request: парсер JSON не сможет прочитать тело. Реже сервер пытается угадать формат, но это плохая практика. Хорошее тест-покрытие — проверить эту комбинацию: правильный Content-Type / неправильное тело и наоборот.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────── 05. REST API ─────── -->
+  <section class="section" id="rest">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">REST API и его принципы</span>
+      <span class="section-badge">architectural style</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>REST</strong> (Representational State Transfer) — архитектурный стиль для API. Не протокол и не стандарт, а набор принципов того, как организовать обмен между клиентом и сервером.</p>
+        <p>Главные принципы:</p>
+        <ul>
+          <li><strong>Ресурсы</strong> — всё, чем оперируем (заказы, пользователи, товары) — это ресурсы с уникальным URL</li>
+          <li><strong>URL = имя ресурса</strong>, метод HTTP = действие. <code>GET /users/42</code>, а не <code>GET /getUser?id=42</code></li>
+          <li><strong>Stateless</strong> — сервер не хранит состояние клиента между запросами. Всё нужное передаётся в запросе</li>
+          <li><strong>Унифицированный интерфейс</strong> — одинаковые правила для всех ресурсов: GET читает, POST создаёт, и т.д.</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>REST как файловая система: каждый ресурс — это файл с уникальным путём (URL). Операции стандартизированы: <code>cat /users/42</code> = GET, <code>echo data > /users</code> = POST, <code>rm /users/42</code> = DELETE. Правила одинаковые для всех ресурсов — не нужно учить отдельный синтаксис для каждого.</div>
+
+        <p style="margin-top:14px;"><strong>REST vs SOAP</strong> — единственное, что обычно спрашивают про SOAP. SOAP — старый тяжёлый протокол на XML, который ещё встречается в банках и госуслугах:</p>
+        <table>
+          <thead><tr><th></th><th>REST</th><th>SOAP</th></tr></thead>
+          <tbody>
+            <tr><td>Это</td><td>архитектурный стиль</td><td>строгий протокол</td></tr>
+            <tr><td>Формат</td><td>обычно JSON</td><td>только XML (в <code>&lt;Envelope&gt;</code>)</td></tr>
+            <tr><td>Контракт</td><td>OpenAPI (опционально)</td><td>WSDL (обязательно)</td></tr>
+            <tr><td>Вес</td><td>лёгкий</td><td>тяжёлый, многословный</td></tr>
+            <tr><td>Где</td><td>почти везде</td><td>банки, госуслуги, legacy, SAP, 1C</td></tr>
+          </tbody>
+        </table>
+        <p>Главное для собеса: REST гибче и легче, SOAP строже и тяжелее. Новые проекты на SOAP почти не делают.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>URL-дизайн</strong> — самая частая ошибка в REST. Правильно:</p>
+        <table>
+          <thead><tr><th>Действие</th><th>Правильно (REST)</th><th>Неправильно (RPC-стиль)</th></tr></thead>
+          <tbody>
+            <tr><td>Получить пользователя</td><td><code>GET /users/42</code></td><td><code>GET /getUser?id=42</code></td></tr>
+            <tr><td>Создать заказ</td><td><code>POST /orders</code></td><td><code>POST /createOrder</code></td></tr>
+            <tr><td>Заказы пользователя</td><td><code>GET /users/42/orders</code></td><td><code>GET /getOrdersByUser?id=42</code></td></tr>
+            <tr><td>Удалить</td><td><code>DELETE /orders/789</code></td><td><code>POST /deleteOrder?id=789</code></td></tr>
+          </tbody>
+        </table>
+        <p>Правила: <em>существительные во множественном числе</em> (<code>/users</code>, не <code>/user</code>), <em>иерархия через вложение</em> (<code>/users/42/orders</code>), <em>никаких глаголов</em> (действие определяет HTTP-метод).</p>
+
+        <p style="margin-top:14px;"><strong>Версионирование API</strong> — три подхода:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">В URL</div>
+            <code>/api/v1/users</code><br><br>
+            Самый распространённый. Просто, видно глазами, легко переключаться.
+          </div>
+          <div class="card">
+            <div class="card-title">В заголовке</div>
+            <code>Accept: application/vnd.api+json;version=2</code><br><br>
+            «Чистый» REST по Fielding — URL не меняется. Сложнее тестировать.
+          </div>
+          <div class="card">
+            <div class="card-title">В query-параметре</div>
+            <code>/api/users?version=2</code><br><br>
+            Редкий вариант. Удобно для миграции, но «грязно».
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Пагинация — три модели:</strong></p>
+        <table>
+          <thead><tr><th>Подход</th><th>Пример</th><th>Когда</th></tr></thead>
+          <tbody>
+            <tr><td>Page/per_page</td><td><code>?page=3&per_page=20</code></td><td>UI с номерами страниц</td></tr>
+            <tr><td>Offset/limit</td><td><code>?offset=40&limit=20</code></td><td>Аналогично, чуть гибче</td></tr>
+            <tr><td>Cursor-based</td><td><code>?cursor=eyJpZCI6MTAwfQ</code></td><td>Большие списки, бесконечный скролл, real-time ленты. Не «прыгает» при добавлении новых записей</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Фильтрация и сортировка</strong> — общепринятые форматы:</p>
+        <div class="code-block"><span class="cm"># Фильтры</span>
+GET /orders?status=paid&user_id=42&created_after=2026-01-01
+
+<span class="cm"># Сортировка (минус = по убыванию)</span>
+GET /orders?sort=-created_at,price
+
+<span class="cm"># Выбор полей (sparse fieldsets)</span>
+GET /users/42?fields=id,name,email
+
+<span class="cm"># Включение связанных ресурсов</span>
+GET /orders/789?include=user,items</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Richardson Maturity Model</strong> — 4 уровня «зрелости» REST API:</p>
+        <ul>
+          <li><strong>Level 0</strong> — один URL, один метод (обычно POST), всё через тело. По сути — RPC поверх HTTP. SOAP сюда</li>
+          <li><strong>Level 1</strong> — появляются ресурсы (разные URL), но методы используют криво (<code>POST /getUser</code>)</li>
+          <li><strong>Level 2</strong> — используются разные HTTP-методы по назначению + правильные статус-коды. Большинство «REST API» в реальности — это Level 2</li>
+          <li><strong>Level 3</strong> — HATEOAS: в ответе сервер возвращает ссылки на возможные следующие действия. Полноценный REST по Fielding</li>
+        </ul>
+
+        <p><strong>HATEOAS</strong> (Hypermedia as the Engine of Application State) — в ответе сервер кладёт ссылки на возможные действия:</p>
+        <div class="code-block"><span class="st">{</span>
+  <span class="st">"id": 789,</span>
+  <span class="st">"status": "pending",</span>
+  <span class="st">"_links": {</span>
+    <span class="st">"self": "/orders/789",</span>
+    <span class="st">"cancel": "/orders/789/cancel",</span>
+    <span class="st">"pay": "/orders/789/pay"</span>
+  <span class="st">}</span>
+<span class="st">}</span></div>
+        <p>Идея: клиент не «знает» URL заранее, а ходит по ссылкам. На практике <em>почти никто так не делает</em> — слишком сложно для клиента и слишком много трафика.</p>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В работе под «REST» обычно понимают <em>Richardson Level 2</em>: разные URL, осмысленные методы, JSON в теле, нормальные коды. <strong>HATEOAS редко встречается в прикладных JSON API</strong> — в продакшене его почти не найти, кроме отдельных банков и Spring HATEOAS / HAL-проектов. Если на собесе спросят «у нас REST» — уточни, что под этим понимают. Часто это просто «HTTP + JSON».</div>
+
+        <div class="hl orange"><span class="hl-label">Типичные нарушения REST</span>
+          · <strong>Глаголы в URL</strong>: <code>/api/createUser</code>, <code>/api/getOrders</code><br>
+          · <strong>200 OK на ошибки</strong>: <code>{"error": "not found"}</code> вместо 404<br>
+          · <strong>Изменение состояния через GET</strong>: <code>GET /users/42/delete</code><br>
+          · <strong>Версионирование без плана</strong> — наплодили v1, v2, v3, никто не помнит, что где<br>
+          · <strong>Возврат HTML вместо JSON</strong> при ошибке — клиент пытается распарсить, падает</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Ревью REST API:</strong> вставь список эндпоинтов → <em>«Какие нарушают REST-принципы? Предложи правильные варианты с обоснованием.»</em><br><br>
+          <strong>Дизайн нового API:</strong> <em>«Спроектируй REST API для системы заказов: пользователи, заказы, позиции в заказе, статусы. Дай URL-схему, методы, примеры запросов/ответов.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если REST stateless, как работает авторизация?» — Авторизация передаётся <em>в каждом запросе</em>: токен в <code>Authorization</code>-заголовке или кука. Сервер не «помнит» сессию между запросами в смысле бизнес-состояния, но может валидировать токен (JWT — без БД, OAuth — с проверкой в БД/Redis). Stateless ≠ «без авторизации», а «без хранения контекста запросов».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. GraphQL / gRPC ─────── -->
+  <section class="section" id="api-styles">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">GraphQL · gRPC</span>
+      <span class="section-badge">api styles</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Кроме REST есть ещё два популярных стиля API. Когда какой использовать:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">GraphQL</div>
+            Один эндпоинт. Клиент сам пишет запрос и указывает, какие поля ему нужны. Меньше over-/under-fetching. Хорош для гибких UI.
+          </div>
+          <div class="card">
+            <div class="card-title">gRPC</div>
+            Бинарный протокол поверх HTTP/2 с контрактом через Protobuf. Быстрый, типизированный. Идеален для общения между микросервисами.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>REST</strong> — REST-эндпоинты типа <code>/users/42</code> с заранее определённой структурой ответа. <strong>GraphQL</strong> — SQL-style: клиент указывает поля, как <code>SELECT name, email FROM users WHERE id=42</code>. <strong>gRPC</strong> — Unix domain sockets для общения между процессами: быстро, бинарно, типизированно, не для browser.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>GraphQL</strong> — один эндпоинт (<code>/graphql</code>), клиент сам пишет запрос. По сети это <strong>обычный POST с JSON-телом</strong>, где запрос лежит в поле <code>query</code>:</p>
+        <div class="req-resp">
+          <div>
+            <div class="rr-label">// Запрос (реальное HTTP-тело)</div>
+            <div class="code-block"><span class="kw">POST</span> /graphql
+<span class="hdr">Content-Type:</span> <span class="val">application/json</span>
+
+<span class="st">{</span>
+  <span class="st">"query": "{ user(id: 42) { name email } }",</span>
+  <span class="st">"variables": {}</span>
+<span class="st">}</span></div>
+          </div>
+          <div>
+            <div class="rr-label">// Ответ</div>
+            <div class="code-block"><span class="st">{</span>
+  <span class="st">"data": {</span>
+    <span class="st">"user": {</span>
+      <span class="st">"name": "Иван",</span>
+      <span class="st">"email": "i@ex.com"</span>
+    <span class="st">}</span>
+  <span class="st">}</span>
+<span class="st">}</span></div>
+          </div>
+        </div>
+        <p>Важно для тестирования: GraphQL — это <code>POST</code> с JSON, где сам запрос — строка в поле <code>query</code> (+ <code>variables</code> для параметров). В Postman/requests шлёшь обычный JSON, а не «графкуэловский синтаксис» напрямую.</p>
+        <ul>
+          <li><strong>Query</strong> — чтение, <strong>Mutation</strong> — изменение, <strong>Subscription</strong> — real-time через WebSocket</li>
+          <li><strong>Schema</strong> — типизированный контракт всех типов и операций</li>
+          <li><strong>Плюс:</strong> нет over-/under-fetching, версионирование не нужно. <strong>Минус:</strong> сложнее кэшировать, N+1 проблема, сложнее rate-limiting</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>gRPC</strong> — бинарный RPC от Google. Контракт описывается в <code>.proto</code>-файле:</p>
+        <div class="code-block"><span class="cm">// user.proto</span>
+<span class="kw">service</span> <span class="fn">UserService</span> {
+  <span class="kw">rpc</span> GetUser(GetUserRequest) <span class="kw">returns</span> (User);
+  <span class="kw">rpc</span> ListUsers(ListUsersRequest) <span class="kw">returns</span> (stream User);
+}
+
+<span class="kw">message</span> User {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}</div>
+        <div class="hl"><span class="hl-label">Что такое .proto файл</span>Это текстовый файл с описанием gRPC-сервиса на языке <strong>Protocol Buffers</strong>. В нём определяют: <code>service</code> — какие методы (RPC) есть, <code>message</code> — структуры данных и типы полей. Цифры (<code>= 1</code>, <code>= 2</code>) — это номера полей для бинарной сериализации, а не значения. Из <code>.proto</code> компилятор <code>protoc</code> генерирует готовый код клиента и сервера на нужном языке. По сути это <em>контракт</em> — аналог OpenAPI для REST или WSDL для SOAP, только строже и компактнее.</div>
+        <ul>
+          <li><strong>HTTP/2 + Protobuf</strong> — бинарная сериализация, в разы меньше JSON по размеру</li>
+          <li><strong>Генерация кода</strong> — из <code>.proto</code> генерируются клиенты и серверы на 10+ языках. Полностью типизировано</li>
+          <li><strong>Streaming</strong> — поддержка bi-directional streaming из коробки</li>
+          <li><strong>Где:</strong> внутреннее общение между микросервисами (Google, Netflix, Uber, Yandex)</li>
+          <li><strong>Плюс:</strong> быстро, компактно, строго типизировано, контракт встроен</li>
+          <li><strong>Минус:</strong> бинарь нельзя посмотреть глазами в DevTools, плохо работает с браузерами без gRPC-Web прокси</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Когда какой стиль выбирать</strong> — итоговая таблица:</p>
+        <table>
+          <thead><tr><th></th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr></thead>
+          <tbody>
+            <tr><td>Транспорт</td><td>HTTP</td><td>HTTP</td><td>HTTP/2</td></tr>
+            <tr><td>Формат</td><td>JSON</td><td>JSON</td><td>Protobuf (бинарь)</td></tr>
+            <tr><td>Контракт</td><td>OpenAPI</td><td>Schema (SDL)</td><td>.proto</td></tr>
+            <tr><td>Когда выбирать</td><td>Public API, веб, мобайл</td><td>Гибкий UI, много полей</td><td>Internal микросервисы</td></tr>
+            <tr><td>Browser-friendly</td><td>да</td><td>да</td><td>через gRPC-Web</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Особенности тестирования каждого:</strong></p>
+
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">REST</div>
+            · Инструмент: Postman, requests, REST Assured<br>
+            · Контракт через OpenAPI / Swagger<br>
+            · Самая зрелая экосистема<br>
+            · Подводный камень: «REST» бывает разной степени строгости — уточняй, что под этим понимают
+          </div>
+          <div class="card">
+            <div class="card-title">GraphQL</div>
+            · Инструмент: GraphiQL, Postman, Insomnia<br>
+            · Тестируем по schema<br>
+            · Запросы query / mutation / subscription<br>
+            · Подводный камень: один эндпоинт, но сотни вариаций — нужна стратегия покрытия. Проверка авторизации <em>на уровне полей</em>, не только эндпоинта
+          </div>
+          <div class="card">
+            <div class="card-title">gRPC</div>
+            · Инструмент: <code>grpcurl</code> (CLI), Postman (поддержка с 2022), grpcui. BloomRPC устарел (архивирован)<br>
+            · Контракт через <code>.proto</code> — отлично тестируется<br>
+            · Тестировать streaming-сценарии (client-side, server-side, bi-directional)<br>
+            · Подводный камень: бинарь нельзя глазами проверить, нужен прокси-инструмент
+          </div>
+        </div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современная типичная архитектура: <strong>REST/GraphQL наружу</strong> (для веба и мобайла) + <strong>gRPC внутри</strong> (между микросервисами). GraphQL хорош, но требует зрелой команды — иначе даёт проблемы производительности (N+1 на бэке, гигантские payload'ы от слишком жадных клиентов). Для нового внешнего API REST + OpenAPI 3.x по-прежнему самый частый выбор.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Конвертация контрактов:</strong> <em>«Преобразуй этот OpenAPI / .proto в набор тест-сценариев pytest + requests.»</em><br><br>
+          <strong>Объяснение незнакомого протокола:</strong> вставь .proto или GraphQL schema → <em>«Что делает этот сервис? Какие методы есть, какие риски при тестировании?»</em><br><br>
+          <strong>Генерация GraphQL-запросов:</strong> <em>«По этой schema сгенерируй: 1) минимальный валидный query, 2) запрос со всеми полями, 3) запрос с превышением сложности (для тестирования rate limit).»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Может ли GraphQL вернуть HTTP 200 при ошибке?» — Да, и это норма. GraphQL обычно возвращает 200 даже если внутри есть ошибки — они описываются в поле <code>"errors"</code> в теле ответа:<br>
+          <code>{"data": null, "errors": [{"message": "..."}]}</code><br>
+          Это сбивает с толку — проверять надо не только HTTP-код, но и наличие <code>errors</code> в ответе. На собесе можешь упомянуть как пример «GraphQL ломает привычные REST-паттерны».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 07. WebSockets / SSE ─────── -->
+  <section class="section" id="realtime">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">WebSockets · SSE</span>
+      <span class="section-badge">real-time</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Обычный HTTP — это <em>«клиент спросил → сервер ответил»</em>. Но иногда нужно, чтобы сервер сам отправлял данные клиенту (чаты, котировки, нотификации). Для этого есть два основных подхода:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">SSE (Server-Sent Events)</div>
+            Сервер открывает поток и шлёт сообщения клиенту в одну сторону. Поверх обычного HTTP. Авто-reconnect из коробки.
+          </div>
+          <div class="card">
+            <div class="card-title">WebSocket</div>
+            Постоянное двунаправленное соединение. После handshake клиент и сервер могут слать друг другу что угодно когда угодно.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>SSE</strong> — как <code>tail -f logfile</code>: сервер пишет в поток, ты читаешь по мере появления, обратной связи нет. <strong>WebSocket</strong> — обычный TCP-сокет: full-duplex, оба могут писать в любой момент.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>SSE — поток сообщений по HTTP:</strong></p>
+        <div class="code-block"><span class="cm"># Запрос</span>
+GET /events
+Accept: text/event-stream
+
+<span class="cm"># Ответ — поток, не закрывается</span>
+HTTP/1.1 200 OK
+Content-Type: text/event-stream
+
+data: {"order_id": 789, "status": "paid"}
+
+data: {"order_id": 790, "status": "shipped"}
+
+event: alert
+data: {"level": "warning", "msg": "..."}</div>
+        <ul>
+          <li>Однонаправленный (сервер → клиент)</li>
+          <li>Авто-reconnect: браузер сам переподключается, если разорвалось</li>
+          <li>Простой текстовый формат, легко отлаживать</li>
+          <li>Работает через прокси (это просто HTTP)</li>
+          <li><strong>Где:</strong> ленты новостей, нотификации, прогресс долгих операций, streaming-ответы от LLM (ChatGPT, Claude используют SSE)</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>WebSocket — двунаправленное соединение:</strong></p>
+        <div class="code-block"><span class="cm"># Handshake — обычный HTTP с Upgrade</span>
+GET /chat HTTP/1.1
+Host: chat.com
+<span class="hdr">Upgrade:</span> websocket
+<span class="hdr">Connection:</span> Upgrade
+<span class="hdr">Sec-WebSocket-Key:</span> dGhlIHNhbXBsZSBub25jZQ==
+
+<span class="cm"># Ответ сервера</span>
+HTTP/1.1 101 Switching Protocols
+<span class="hdr">Upgrade:</span> websocket
+<span class="hdr">Connection:</span> Upgrade
+
+<span class="cm"># После этого — двоичный или текстовый обмен</span>
+<span class="cm"># через ws:// (или wss:// — TLS)</span></div>
+        <ul>
+          <li>Двунаправленный, постоянное соединение</li>
+          <li>Любой формат сообщений (текст, JSON, бинарь)</li>
+          <li>Низкий overhead — после handshake нет повторных HTTP-заголовков</li>
+          <li><strong>Где:</strong> чаты, многопользовательские игры, биржевые тикеры, collaborative editing (Figma, Google Docs)</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Сравнительная таблица:</strong></p>
+        <table>
+          <thead><tr><th></th><th>SSE</th><th>WebSocket</th></tr></thead>
+          <tbody>
+            <tr><td>Направление</td><td>сервер → клиент</td><td>двунаправленное</td></tr>
+            <tr><td>Транспорт</td><td>HTTP</td><td>WS (over TCP)</td></tr>
+            <tr><td>Reconnect</td><td>автоматический</td><td>ручной (через библиотеки)</td></tr>
+            <tr><td>Сложность</td><td>низкая</td><td>средняя</td></tr>
+            <tr><td>Где встречается</td><td>стриминг LLM, нотификации</td><td>чаты, игры, биржи</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Что тестировать в real-time соединениях:</strong></p>
+        <ul>
+          <li><strong>Установление соединения:</strong> успешный handshake, отказ при невалидной авторизации</li>
+          <li><strong>Доставка сообщений:</strong> все сообщения дошли, в правильном порядке, без дубликатов</li>
+          <li><strong>Разрыв и переподключение:</strong> сервер падает / сеть прерывается → клиент переподключается с exponential backoff, не уходит в бесконечный цикл</li>
+          <li><strong>Heartbeat / ping-pong:</strong> соединение не убивается прокси из-за idle timeout</li>
+          <li><strong>Нагрузка:</strong> 1000–10000 одновременных соединений на сервер</li>
+          <li><strong>Безопасность:</strong> авторизация при handshake (не в URL!), ограничение скорости сообщений, защита от flood</li>
+          <li><strong>Очистка состояния:</strong> при дисконнекте — освобождение ресурсов, обновление статуса «online/offline»</li>
+        </ul>
+
+        <div class="hl orange"><span class="hl-label">Типичный баг</span>Аутентификация через токен <em>в URL</em>: <code>wss://chat.com/?token=eyJ...</code>. Проблема — токен попадает в логи прокси, истории браузера, server access logs. Правильно: передать через subprotocol-заголовок при handshake или через первое сообщение после подключения.</div>
+
+        <p><strong>Инструменты для тестирования:</strong></p>
+        <ul>
+          <li><strong>Postman</strong> — поддерживает WebSocket с 2022</li>
+          <li><strong>websocat</strong> — CLI «curl для WebSocket»</li>
+          <li><strong>Python: <code>websockets</code></strong> — для автотестов</li>
+          <li><strong>k6</strong> — нагрузочное тестирование WebSocket</li>
+          <li><strong>wscat</strong> — простой Node.js клиент</li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>SSE неожиданно получил вторую жизнь благодаря LLM-стримингу (ChatGPT, Claude шлют ответы по символам именно через SSE). WebSocket остаётся стандартом для чатов и интерактивных приложений. Часто на верхнем уровне используется не «голый» WebSocket, а абстракции: <strong>Socket.IO</strong>, <strong>SignalR</strong> (.NET), <strong>Phoenix Channels</strong> (Elixir). Они дают надёжность, переподключение, комнаты — но добавляют свой протокол поверх.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Анализ дампа WebSocket-сессии:</strong> вставь логи обмена → <em>«Найди аномалии: пропущенные сообщения, дубликаты, неправильный порядок.»</em><br><br>
+          <strong>Генерация нагрузочного сценария:</strong> <em>«Напиши k6-скрипт для тестирования WebSocket-чата: 500 пользователей одновременно, каждый шлёт сообщение раз в 5 секунд, проверка получения от других.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Когда использовать SSE вместо WebSocket?» — Когда нужен только односторонний поток сервер→клиент. Преимущества SSE: 1) проще, 2) поверх обычного HTTP — работает через любые прокси / CDN, 3) авто-reconnect из коробки, 4) текстовый формат — легко дебажить. WebSocket нужен, если клиент тоже должен слать данные постоянно (чат, игра). Для нотификаций или real-time лент — SSE достаточно и удобнее.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────── 08. БРОКЕРЫ СООБЩЕНИЙ ─────── -->
+  <section class="section" id="brokers">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Брокеры сообщений: Kafka, RabbitMQ, PubSub</span>
+      <span class="section-badge">async messaging</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>REST, GraphQL, gRPC — это <em>синхронная</em> связь: запросил → подождал → получил ответ. Но часто сервисам не нужно ждать друг друга. <strong>Брокер сообщений</strong> — это посредник, через который сервисы обмениваются сообщениями <em>асинхронно</em>: один кладёт сообщение, другой забирает, когда сможет.</p>
+        <ul>
+          <li><strong>Producer</strong> — кто отправляет сообщение</li>
+          <li><strong>Broker</strong> — посредник, который хранит и доставляет</li>
+          <li><strong>Consumer</strong> — кто получает и обрабатывает</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Синхронный вызов (REST) — телефонный звонок: ждёшь, пока возьмут трубку и ответят. Брокер сообщений — это очередь задач в фоне: положил задачу в очередь (как <code>queue.put()</code> между потоками), и пошёл дальше. Worker разберёт её, когда дойдут руки. Отправитель не блокируется.</div>
+        <div class="hl"><span class="hl-label">Зачем</span>1) <strong>Развязка сервисов</strong> — producer не знает и не ждёт consumer. 2) <strong>Сглаживание нагрузки</strong> — пик запросов кладётся в очередь, обрабатывается ровно. 3) <strong>Надёжность</strong> — если consumer упал, сообщения не теряются, ждут в брокере. 4) <strong>Масштабирование</strong> — несколько consumer'ов разбирают очередь параллельно.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p>Три самых частых брокера. Они решают похожую задачу, но устроены по-разному:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">RabbitMQ</div>
+            Классическая <strong>очередь сообщений</strong> (message queue). Брокер активно <em>раздаёт</em> сообщения consumer'ам и удаляет их после подтверждения (ack). Гибкая маршрутизация через exchange. Протокол AMQP.
+          </div>
+          <div class="card">
+            <div class="card-title">Kafka</div>
+            <strong>Лог событий</strong> (event log), а не очередь. Сообщения не удаляются после прочтения — лежат в топике N дней. Consumer сам читает с нужной позиции (offset). Заточен под огромные объёмы и повторное чтение.
+          </div>
+          <div class="card">
+            <div class="card-title">Google Pub/Sub</div>
+            <strong>Облачный</strong> managed-брокер по модели publish/subscribe. Не надо поднимать инфраструктуру — это сервис в GCP. Похож на Kafka идеологически, но полностью управляемый. Аналоги: AWS SNS/SQS, Azure Service Bus.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Ключевая разница — очередь vs лог:</strong></p>
+        <table>
+          <thead><tr><th></th><th>RabbitMQ (очередь)</th><th>Kafka (лог)</th></tr></thead>
+          <tbody>
+            <tr><td>Что после прочтения</td><td>сообщение удаляется (ack)</td><td>остаётся, можно перечитать</td></tr>
+            <tr><td>Кто управляет доставкой</td><td>брокер «пушит» consumer'у</td><td>consumer сам «тянет» по offset</td></tr>
+            <tr><td>Повторное чтение</td><td>нет (сообщение ушло)</td><td>да (перемотать offset назад)</td></tr>
+            <tr><td>Порядок</td><td>в пределах очереди</td><td>в пределах партиции</td></tr>
+            <tr><td>Главный сценарий</td><td>задачи, RPC-команды, рассылки</td><td>потоки событий, аналитика, event sourcing</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Модели доставки</strong> — общие для всех брокеров:</p>
+        <ul>
+          <li><strong>Point-to-point (очередь):</strong> одно сообщение получает <em>один</em> consumer. Несколько consumer'ов делят нагрузку</li>
+          <li><strong>Publish/Subscribe:</strong> одно сообщение получают <em>все</em> подписчики. Например, событие «заказ оплачен» слушают и склад, и аналитика, и нотификации</li>
+        </ul>
+
+        <p><strong>Гарантии доставки</strong> — важно для тестировщика:</p>
+        <ul>
+          <li><strong>At most once</strong> — максимум один раз (может потеряться). Быстро, но ненадёжно</li>
+          <li><strong>At least once</strong> — минимум один раз (могут быть дубли). Самый частый режим</li>
+          <li><strong>Exactly once</strong> — ровно один раз. Идеал, но сложно и дорого (Kafka умеет с оговорками)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Что тестировать в системах с брокерами:</strong></p>
+        <ul>
+          <li><strong>Дубликаты (at least once)</strong>: брокер может доставить сообщение дважды. Consumer должен быть идемпотентным — обработка дубля не должна списать деньги повторно</li>
+          <li><strong>Порядок сообщений</strong>: пришли ли события в правильном порядке? В Kafka порядок гарантирован только внутри партиции — события одного заказа должны идти в одну партицию (по ключу)</li>
+          <li><strong>Потеря сообщений</strong>: consumer упал во время обработки — сообщение вернулось в очередь или потерялось?</li>
+          <li><strong>Dead Letter Queue (DLQ)</strong>: сообщение, которое не удалось обработать N раз, уходит в отдельную очередь. Проверить, что «ядовитые» сообщения не блокируют очередь навечно</li>
+          <li><strong>Consumer lag</strong>: consumer не успевает за producer'ом — очередь растёт. Метрика, за которой следят в проде</li>
+          <li><strong>Retry и backoff</strong>: при ошибке обработки — повтор с задержкой, а не бесконечный цикл</li>
+        </ul>
+
+        <div class="hl orange"><span class="hl-label">Eventual consistency</span>Главная боль тестирования асинхронных систем: после действия результат появляется <em>не сразу</em>. Положил заказ → событие ушло в Kafka → склад обработал через 2 секунды. Автотест, который сразу проверяет статус склада, <strong>упадёт</strong>. Решение: polling с таймаутом («жди до 10 секунд, пока статус не станет shipped»), а не мгновенная проверка. Это причина большей части flaky-тестов в микросервисах.</div>
+
+        <p><strong>Как тестировать практически:</strong></p>
+        <ul>
+          <li>Поднять брокер в Docker (Testcontainers) — реальный Kafka/RabbitMQ в тесте</li>
+          <li>Producer: проверить, что сообщение ушло в топик с правильным телом и ключом</li>
+          <li>Consumer: положить сообщение в топик → проверить, что обработалось правильно</li>
+          <li>End-to-end: REST-запрос → событие в брокере → изменение в другом сервисе (с polling)</li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Грубо: <strong>RabbitMQ</strong> — задачи и команды с гибкой маршрутизацией, <strong>Kafka</strong> — потоки событий большого объёма и повторное чтение, <strong>Pub/Sub / SNS+SQS</strong> — managed-вариант в облаке. Но для QA важнее не «какой брокер», а <em>тестовые риски</em>: дубли, порядок, потеря сообщений, retry и eventual consistency — именно из-за них ломаются тесты.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация теста с polling:</strong> <em>«Напиши pytest-тест: POST создаёт заказ, событие уходит в Kafka, статус склада обновляется асинхронно. Используй polling с таймаутом 10 секунд вместо time.sleep.»</em><br><br>
+          <strong>Анализ проблемы:</strong> <em>«Consumer обрабатывает одно сообщение дважды, списывает деньги повторно. Как сделать обработку идемпотентной? Предложи варианты.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем Kafka отличается от RabbitMQ в двух словах?» — RabbitMQ это <em>очередь</em>: сообщение прочитали — оно исчезло. Kafka это <em>лог</em>: сообщение прочитали — оно осталось, можно перечитать с любого места. Отсюда всё остальное: Kafka лучше для аналитики и больших потоков, RabbitMQ — для задач и команд с гибкой маршрутизацией.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 09. COOKIES, SESSION, STORAGE ─────── -->
+  <section class="section" id="storage">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Cookies, Session, localStorage, sessionStorage</span>
+      <span class="section-badge">client state</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>HTTP сам по себе stateless — между запросами сервер ничего не помнит о клиенте. Чтобы хранить состояние (логин, корзину, настройки), есть четыре места:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Cookie</div>
+            Маленький текстовый файлик, который сервер просит браузер хранить. <strong>Автоматически отправляется с каждым запросом</strong> на этот домен в заголовке <code>Cookie:</code>. Размер до ~4 КБ.
+          </div>
+          <div class="card">
+            <div class="card-title">Session (серверная)</div>
+            На клиенте — только <code>session_id</code> (обычно в cookie). Сами данные — на сервере (в Redis / БД). Stateless для клиента, stateful для сервера.
+          </div>
+          <div class="card">
+            <div class="card-title">localStorage</div>
+            Хранилище в браузере, до ~5–10 МБ. <strong>На сервер не отправляется автоматически</strong>. Живёт между перезапусками браузера, пока вручную не очистить.
+          </div>
+          <div class="card">
+            <div class="card-title">sessionStorage</div>
+            То же, что localStorage, но <strong>живёт только пока открыта вкладка</strong>. Закрыл вкладку — данные пропали. Другая вкладка с тем же сайтом видит свои данные.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>Cookie</strong> = переменные окружения для процесса — подставляются автоматически в каждый запрос. <strong>Session</strong> = session_id это PID процесса, а сами данные — в shared memory на сервере. <strong>localStorage</strong> = файл на диске для домена, переживает перезагрузку. <strong>sessionStorage</strong> = переменная в памяти процесса — умирает с процессом (вкладкой).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Cookie — как сервер устанавливает</strong> и как браузер отправляет:</p>
+        <div class="req-resp">
+          <div>
+            <div class="rr-label">// Сервер устанавливает cookie</div>
+            <div class="code-block">HTTP/1.1 200 OK
+<span class="hdr">Set-Cookie:</span> <span class="val">session_id=abc123;
+  Path=/;
+  Domain=.shop.com;
+  Max-Age=3600;
+  Secure;
+  HttpOnly;
+  SameSite=Lax</span></div>
+          </div>
+          <div>
+            <div class="rr-label">// Браузер шлёт автоматически</div>
+            <div class="code-block">GET /api/cart HTTP/1.1
+<span class="hdr">Host:</span> <span class="val">shop.com</span>
+<span class="hdr">Cookie:</span> <span class="val">session_id=abc123;
+  theme=dark;
+  lang=ru</span></div>
+          </div>
+        </div>
+
+        <p><strong>Атрибуты cookie — главные для QA:</strong></p>
+        <table>
+          <thead><tr><th>Атрибут</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><code>HttpOnly</code></td><td>JS не может прочитать через <code>document.cookie</code>. Защита от XSS-кражи токена</td></tr>
+            <tr><td><code>Secure</code></td><td>Cookie шлётся только по HTTPS. На HTTP-запрос игнорируется</td></tr>
+            <tr><td><code>SameSite</code></td><td><code>Strict</code> / <code>Lax</code> / <code>None</code>. Когда cookie шлётся при cross-site запросах. Защита от CSRF</td></tr>
+            <tr><td><code>Domain</code></td><td>На какой домен слать. <code>.shop.com</code> — на сам и поддомены, <code>shop.com</code> — только на сам</td></tr>
+            <tr><td><code>Path</code></td><td>На какой путь слать. <code>/api</code> — только на запросы под этим путём</td></tr>
+            <tr><td><code>Max-Age</code> / <code>Expires</code></td><td>Сколько живёт. Без них — session cookie (умирает при закрытии браузера)</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>localStorage и sessionStorage — JS API:</strong></p>
+        <div class="code-block"><span class="cm">// Запись</span>
+localStorage.setItem(<span class="st">'user_id'</span>, <span class="st">'42'</span>);
+sessionStorage.setItem(<span class="st">'cart_draft'</span>, JSON.stringify(items));
+
+<span class="cm">// Чтение</span>
+<span class="kw">const</span> userId = localStorage.getItem(<span class="st">'user_id'</span>);
+
+<span class="cm">// Удаление</span>
+localStorage.removeItem(<span class="st">'user_id'</span>);
+localStorage.clear();</div>
+        <ul>
+          <li>Хранят только <strong>строки</strong>. Объекты — через <code>JSON.stringify</code> / <code>JSON.parse</code></li>
+          <li>Привязаны к origin (<code>protocol://domain:port</code>). <code>http://shop.com</code> и <code>https://shop.com</code> — разные хранилища</li>
+          <li><strong>На сервер не отправляются автоматически</strong> — клиент должен сам положить в заголовок / тело</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Что выбрать когда — сравнительная таблица:</strong></p>
+        <table>
+          <thead><tr><th></th><th>Cookie</th><th>Session (server)</th><th>localStorage</th><th>sessionStorage</th></tr></thead>
+          <tbody>
+            <tr><td>Где данные</td><td>браузер</td><td>сервер (id в cookie)</td><td>браузер</td><td>браузер</td></tr>
+            <tr><td>Размер</td><td>~4 КБ</td><td>сколько хочешь</td><td>~5–10 МБ</td><td>~5–10 МБ</td></tr>
+            <tr><td>Шлётся в запросе</td><td>автоматически</td><td>id шлётся в cookie</td><td>нет</td><td>нет</td></tr>
+            <tr><td>Время жизни</td><td>Max-Age / сессия</td><td>зависит от сервера</td><td>persistent</td><td>пока вкладка открыта</td></tr>
+            <tr><td>Доступ из JS</td><td>да, если не HttpOnly</td><td>нет (только id)</td><td>да</td><td>да</td></tr>
+            <tr><td>Типичное применение</td><td>auth-token, A/B-id</td><td>классический logged-in flow</td><td>тема, язык, черновики</td><td>state мастера / формы</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>SameSite cookies — главная защита от CSRF</strong>:</p>
+        <table>
+          <thead><tr><th>Значение</th><th>Когда cookie отправляется</th></tr></thead>
+          <tbody>
+            <tr><td><code>Strict</code></td><td>Только если запрос с того же сайта. На клик по ссылке из письма — НЕ шлётся (надо перелогиниваться). Самый безопасный, но плохой UX</td></tr>
+            <tr><td><code>Lax</code></td><td>Шлётся на «безопасные» переходы (клик по ссылке, GET-навигация), не шлётся на POST с другого сайта. Дефолт в современных браузерах</td></tr>
+            <tr><td><code>None</code></td><td>Шлётся всегда (старое поведение). Требует <code>Secure</code> — только HTTPS. Для cross-site сценариев (виджеты, iframe-интеграции)</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Что и как тестировать в cookie-сценариях</strong> — частый Senior-вопрос:</p>
+        <ul>
+          <li><strong>Auth-token в cookie</strong>: HttpOnly стоит? Secure стоит на HTTPS-сайте? SameSite не <code>None</code>?</li>
+          <li><strong>Logout</strong>: cookie действительно очищена? Token инвалидирован на сервере?</li>
+          <li><strong>Multi-domain</strong>: cookie с <code>Domain=.shop.com</code> доступна на <code>cart.shop.com</code>? Не утекает на <code>partner.com</code>?</li>
+          <li><strong>Expired cookie</strong>: после истечения сервер возвращает 401 / редирект на login?</li>
+          <li><strong>Cookie размер</strong>: что если положить много? Превышение лимита — заголовок обрезается</li>
+        </ul>
+
+        <div class="hl red"><span class="hl-label">Антипаттерн</span><strong>Хранение auth-токена в localStorage</strong> — частая ошибка. Любой XSS-баг (даже в стороннем скрипте на странице) читает токен через <code>localStorage.getItem('token')</code> → angreifer ходит от твоего имени. <strong>Правильно</strong> — токен в HttpOnly cookie. localStorage — для нечувствительных данных: настройки темы, черновики формы.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Вокруг <strong>third-party cookies</strong> много лет идёт сворачивание: Safari и Firefox их блокируют по умолчанию. Google в Chrome в итоге (2025) <strong>оставил пользовательский выбор</strong>, а не полное отключение — но тренд на отказ от кросс-сайт-трекинга сохраняется. В новых проектах закладывают: 1) <strong>first-party cookies</strong> (на своём домене), 2) <strong>server-side tracking</strong> вместо клиентских пикселей, 3) <strong>CHIPS</strong> (Cookies Having Independent Partitioned State) для встраиваемых виджетов. Третий вариант — <strong>IndexedDB</strong>: полноценная NoSQL-БД в браузере, до сотен МБ, для PWA и offline-приложений.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Аудит cookie на безопасность:</strong> вставь <code>Set-Cookie</code> заголовки из DevTools → <em>«Найди cookies, в которых отсутствуют HttpOnly / Secure / SameSite. Оцени риск для каждой.»</em><br><br>
+          <strong>Генерация тест-кейсов:</strong> <em>«Сгенерируй тест-кейсы для проверки cookie-флагов после login: HttpOnly, Secure, SameSite, expiry, domain scope, очистка при logout.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Я залогинился, токен в HttpOnly cookie. Как фронтенду понять, что я залогинен?» — Фронтенд не видит сам токен, но: 1) сервер возвращает endpoint <code>GET /me</code> — 200 если залогинен, 401 если нет, 2) при login сервер дополнительно ставит <em>не-HttpOnly</em> cookie <code>is_logged_in=true</code> для UI-флага (не для auth!), 3) клиент кэширует флаг в памяти после login-ответа. Главное — флаг «залогинен» != сам токен.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 10. АУТЕНТИФИКАЦИЯ ─────── -->
+  <section class="section" id="authn">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <span class="section-title">Аутентификация: Basic, Bearer, API Key</span>
+      <span class="section-badge">authentication</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Аутентификация</strong> (authentication, AuthN) — «<em>кто ты?</em>». Сервер проверяет, что клиент тот, за кого себя выдаёт. Не путать с авторизацией («что тебе можно?») — это следующий шаг.</p>
+        <p>В REST API три популярные схемы:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">Basic Auth</div>
+            <code>Authorization: Basic &lt;base64(login:password)&gt;</code>. Простейшая, но логин/пароль шлются с каждым запросом. Только для HTTPS и internal API.
+          </div>
+          <div class="card">
+            <div class="card-title">Bearer Token</div>
+            <code>Authorization: Bearer &lt;token&gt;</code>. Токен заранее выдан сервером (по логин/паролю или OAuth). Не нужно слать пароль каждый раз.
+          </div>
+          <div class="card">
+            <div class="card-title">API Key</div>
+            Уникальный ключ для клиента. Передаётся в заголовке, query или теле. Часто для machine-to-machine, без пользователей.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>Basic</strong> = SSH с паролем — пароль шлётся с каждой командой. <strong>Bearer</strong> = SSH-ключ — один раз настроил, дальше работаешь по ключу. <strong>API Key</strong> = personal access token в GitHub — выдан конкретному клиенту/сервису, можно отозвать отдельно.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Basic Auth</strong> — самая простая схема, описана в RFC 7617:</p>
+        <div class="code-block"><span class="cm"># Логин:пароль = "admin:secret123"</span>
+<span class="cm"># base64("admin:secret123") = "YWRtaW46c2VjcmV0MTIz"</span>
+
+GET /api/users HTTP/1.1
+<span class="hdr">Authorization:</span> <span class="val">Basic YWRtaW46c2VjcmV0MTIz</span></div>
+        <ul>
+          <li><strong>Base64 — это НЕ шифрование</strong>, а кодирование. Любой за секунду декодирует</li>
+          <li>Без HTTPS — пароль уйдёт открытым текстом</li>
+          <li>Браузер кеширует Basic Auth — выйти можно только закрытием браузера или специальным трюком</li>
+          <li>Если сервер ждёт Basic, но клиент не передал — отвечает <code>401</code> + заголовок <code>WWW-Authenticate: Basic realm="..."</code></li>
+          <li><strong>Где встречается:</strong> internal admin-панели, легаси, базовая защита dev-окружений</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Bearer Token</strong> — главная схема современных API:</p>
+        <div class="code-block"><span class="cm"># 1. Логинимся — получаем токен</span>
+POST /api/auth/login
+{"login": "admin", "password": "secret123"}
+
+<span class="cm"># Ответ:</span>
+{"access_token": "eyJhbGciOiJIUzI1NiIs...", "token_type": "Bearer"}
+
+<span class="cm"># 2. Дальше — ходим с токеном</span>
+GET /api/users HTTP/1.1
+<span class="hdr">Authorization:</span> <span class="val">Bearer eyJhbGciOiJIUzI1NiIs...</span></div>
+        <ul>
+          <li>Токен — это <em>«предъявитель этого билета — тот, кто его получил»</em>. Любой с токеном может ходить от твоего имени</li>
+          <li>Токены бывают <strong>opaque</strong> (просто строка, сервер проверяет по БД) или <strong>JWT</strong> (самодостаточная подписанная структура — см. раздел 10)</li>
+          <li>Обычно — пара: короткоживущий <strong>access_token</strong> + долгоживущий <strong>refresh_token</strong> для обновления</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>API Key</strong> — три способа передачи:</p>
+        <table>
+          <thead><tr><th>Где</th><th>Пример</th><th>Когда</th></tr></thead>
+          <tbody>
+            <tr><td>В заголовке</td><td><code>X-API-Key: abc123</code></td><td>Самый правильный способ. Не попадает в логи URL</td></tr>
+            <tr><td>В query</td><td><code>?api_key=abc123</code></td><td>Удобно для curl, но <em>попадает в логи серверов и proxy</em></td></tr>
+            <tr><td>В теле</td><td><code>{"api_key": "abc123", ...}</code></td><td>Только для POST. Редкий вариант</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Менее популярные, но важные схемы:</strong></p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">mTLS (mutual TLS)</div>
+            И сервер, и клиент предъявляют сертификаты при handshake. Сервер не отдаст ничего без валидного клиентского сертификата. Используется в banking, internal microservices в zero-trust сетях, service mesh (Istio, Linkerd).
+          </div>
+          <div class="card">
+            <div class="card-title">HMAC Signature</div>
+            Клиент подписывает запрос секретным ключом (включая body, timestamp, метод, URL). Сервер проверяет подпись. Так работают AWS API, российские СБИС / Эльба. Защита от replay-атак за счёт timestamp.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Что тестировать в аутентификации:</strong></p>
+        <ul>
+          <li>Валидный логин — выдаёт ли токен с правильным TTL</li>
+          <li>Невалидный пароль — <span class="status-code c4">401</span>, без подсказки «логин верный, пароль нет»</li>
+          <li>Несуществующий логин — тот же <span class="status-code c4">401</span>, идентичное время ответа (защита от <strong>timing attack</strong>)</li>
+          <li><strong>Brute-force</strong> — после N неуспешных попыток: rate limit / capture / временная блокировка аккаунта</li>
+          <li>Истекший токен — <span class="status-code c4">401</span>, клиент идёт за refresh</li>
+          <li>Отозванный токен (logout / смена пароля) — старый токен не работает на других устройствах</li>
+          <li>Tampered token (изменены символы) — <span class="status-code c4">401</span>, без утечки info об ошибке валидации</li>
+          <li>Замена своего токена на чужой — <span class="status-code c4">403</span> при доступе к чужим ресурсам</li>
+          <li>Token в логах сервера / в URL / в Sentry-эвентах — недопустимо, должен быть отфильтрован</li>
+        </ul>
+
+        <div class="hl orange"><span class="hl-label">Типичные баги</span>
+          · <strong>Утечка в логах</strong>: nginx access.log пишет URL с <code>?api_key=...</code><br>
+          · <strong>Слишком долгий TTL</strong>: access-token на месяц — украденный долго опасен<br>
+          · <strong>Без rate limit</strong>: brute-force перебирает 10000 паролей за час<br>
+          · <strong>Одинаковая ошибка при разных причинах</strong>: «invalid credentials» = и неверный пароль, и истёкший токен — клиенту непонятно, что делать
+        </div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных API дефолт — <strong>Bearer JWT</strong> для веб/мобайл + <strong>API Key в header</strong> для machine-to-machine. Basic Auth почти не используется (только internal). Для критичных внутренних коммуникаций — <strong>mTLS</strong>. OAuth 2.0 (раздел 10) — отдельная история, это не схема аутентификации, а протокол получения токенов.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация тестов аутентификации:</strong> <em>«Эндпоинт принимает JWT в Authorization: Bearer. Сгенерируй полный набор негативных тест-кейсов: без токена, истёкший, с изменённой signature, с alg:none, чужой токен, неверный issuer.»</em><br><br>
+          <strong>Декодирование Basic Auth:</strong> <em>«В логе видел Authorization: Basic YWRtaW46c2VjcmV0MTIz — что это значит и какой пароль?»</em> (Спойлер: <code>admin:secret123</code>)
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница между 401 и 403 в контексте аутентификации?» — <span class="status-code c4">401</span> «не аутентифицирован»: токен не предъявлен, истёк, невалиден. Клиент идёт логиниться / обновлять токен. <span class="status-code c4">403</span> «аутентифицирован, но не имеет прав»: токен валиден, ты — это ты, но к этому ресурсу тебе нельзя. На login делать не имеет смысла, результат тот же.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 11. АВТОРИЗАЦИЯ: JWT, OAuth ─────── -->
+  <section class="section" id="authz">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <span class="section-title">Авторизация: JWT, OAuth 2.0</span>
+      <span class="section-badge">authorization</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Авторизация</strong> (authorization, AuthZ) — «<em>что тебе можно?</em>». После того, как сервер узнал, кто ты (аутентификация), он решает, к каким ресурсам и операциям ты имеешь доступ.</p>
+        <p>Две главные технологии в современных API:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">JWT (JSON Web Token)</div>
+            Самодостаточный подписанный токен. Внутри уже лежит информация о пользователе и его правах — серверу не нужно ходить в БД, чтобы проверить, кто это. Формат <code>header.payload.signature</code>.
+          </div>
+          <div class="card">
+            <div class="card-title">OAuth 2.0</div>
+            Не схема аутентификации, а <em>протокол делегирования доступа</em>. «Я разрешаю приложению X читать мою почту в Gmail, не давая ему мой пароль». Стандарт за «войти через Google / GitHub / VK».
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>JWT</strong> = self-signed сертификат с данными внутри: «предъявителю по фамилии Иванов разрешено читать /orders до 18:00». Никуда не нужно звонить — проверил подпись, прочитал данные. <strong>OAuth</strong> = протокол выдачи временных пропусков: вместо того чтобы дать чужому приложению ключи от квартиры, выдаёшь ограниченный пропуск «только в гостиную, только сегодня, могу отозвать в любой момент».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>JWT — структура</strong>. Три части, разделённые точками: <code>eyJhbGc...</code><strong>.</strong><code>eyJzdWI...</code><strong>.</strong><code>SflKxw...</code></p>
+        <div class="req-resp">
+          <div>
+            <div class="rr-label">// HEADER (base64-encoded JSON)</div>
+            <div class="code-block"><span class="st">{</span>
+  <span class="st">"alg": "HS256",</span>
+  <span class="st">"typ": "JWT"</span>
+<span class="st">}</span></div>
+          </div>
+          <div>
+            <div class="rr-label">// PAYLOAD (base64-encoded JSON)</div>
+            <div class="code-block"><span class="st">{</span>
+  <span class="st">"sub": "user_42",</span>
+  <span class="st">"name": "Иван",</span>
+  <span class="st">"role": "admin",</span>
+  <span class="st">"iat": 1735689600,</span>
+  <span class="st">"exp": 1735693200</span>
+<span class="st">}</span></div>
+          </div>
+        </div>
+        <div class="code-block"><span class="cm">// SIGNATURE = HMAC-SHA256(</span>
+<span class="cm">//     base64(header) + "." + base64(payload),</span>
+<span class="cm">//     secret</span>
+<span class="cm">// )</span></div>
+        <ul>
+          <li><strong>Header</strong> — алгоритм подписи и тип</li>
+          <li><strong>Payload</strong> — <em>claims</em>: данные о пользователе, правах, времени</li>
+          <li><strong>Signature</strong> — подпись от header + payload секретным ключом. Без неё JWT — это просто открытый base64</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Стандартные claims</strong> (RFC 7519):</p>
+        <table>
+          <thead><tr><th>Claim</th><th>Смысл</th></tr></thead>
+          <tbody>
+            <tr><td><code>iss</code></td><td>Issuer — кто выдал токен</td></tr>
+            <tr><td><code>sub</code></td><td>Subject — кому выдан (user_id)</td></tr>
+            <tr><td><code>aud</code></td><td>Audience — для какого сервиса предназначен</td></tr>
+            <tr><td><code>iat</code></td><td>Issued At — когда выдан (Unix timestamp)</td></tr>
+            <tr><td><code>exp</code></td><td>Expiration — когда истекает</td></tr>
+            <tr><td><code>nbf</code></td><td>Not Before — раньше этого времени невалиден</td></tr>
+            <tr><td><code>jti</code></td><td>JWT ID — уникальный id токена (для blacklist)</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>OAuth 2.0 — четыре роли</strong>:</p>
+        <ul>
+          <li><strong>Resource Owner</strong> — пользователь (ты)</li>
+          <li><strong>Client</strong> — приложение, которое хочет доступ (Trello)</li>
+          <li><strong>Authorization Server</strong> — выдаёт токены (Google OAuth)</li>
+          <li><strong>Resource Server</strong> — где лежат данные (Gmail API)</li>
+        </ul>
+
+        <p><strong>Главный flow — Authorization Code with PKCE</strong> (для веб/мобайл):</p>
+        <ol style="padding-left:18px;">
+          <li>Trello редиректит юзера на Google: <em>«я хочу access к календарю»</em></li>
+          <li>Google показывает экран consent: <em>«Trello просит read access. Разрешить?»</em></li>
+          <li>Юзер соглашается → Google редиректит обратно в Trello с временным <code>code</code></li>
+          <li>Trello обменивает <code>code</code> на <code>access_token</code> + <code>refresh_token</code> (запрос идёт между серверами, не через браузер)</li>
+          <li>Trello ходит в Gmail API с <code>access_token</code></li>
+        </ol>
+
+        <div class="hl"><span class="hl-label">Главное</span>OAuth — это не «кто ты», а «что тебе разрешено от моего имени». Для собственно аутентификации поверх OAuth построен <strong>OpenID Connect (OIDC)</strong>: добавляет <code>id_token</code> в JWT-формате со сведениями о пользователе. «Войти через Google» — это OIDC.</div>
+
+        <p style="margin-top:14px;"><strong>Grant types OAuth 2.0</strong>:</p>
+        <table>
+          <thead><tr><th>Grant</th><th>Когда</th></tr></thead>
+          <tbody>
+            <tr><td>Authorization Code + PKCE</td><td>Веб-приложения, мобайл, SPA. Современный дефолт</td></tr>
+            <tr><td>Client Credentials</td><td>Machine-to-machine: backend → backend без пользователя</td></tr>
+            <tr><td>Refresh Token</td><td>Обновление access_token, когда тот истёк</td></tr>
+            <tr><td>Implicit <span style="color:#f05a5a;">(deprecated)</span></td><td>Старый flow для SPA. Заменён на Code + PKCE</td></tr>
+            <tr><td>Password Grant <span style="color:#f05a5a;">(deprecated)</span></td><td>Юзер вводил логин/пароль в чужом приложении. Убит из стандарта</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>JWT vs Session — когда что выбрать</strong>:</p>
+        <table>
+          <thead><tr><th></th><th>JWT</th><th>Session (server)</th></tr></thead>
+          <tbody>
+            <tr><td>Где хранится state</td><td>в самом токене (на клиенте)</td><td>в Redis/БД (на сервере)</td></tr>
+            <tr><td>Проверка</td><td>signature, без БД</td><td>лезем в Redis по session_id</td></tr>
+            <tr><td>Отозвать токен</td><td>сложно (blacklist по jti)</td><td>удалить из БД — мгновенно</td></tr>
+            <tr><td>Размер</td><td>~500 байт — заметно</td><td>session_id ~30 байт</td></tr>
+            <tr><td>Когда выбрать</td><td>микросервисы, мобайл, third-party API</td><td>классический веб с одним сервером</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Уязвимости JWT:</strong></p>
+        <ul>
+          <li><strong><code>alg: none</code></strong> — атакующий меняет header на <code>{"alg":"none"}</code> и удаляет signature. Плохо написанная библиотека «верит» и пропускает. <em>Защита</em>: явно валидировать ожидаемый алгоритм</li>
+          <li><strong>Key confusion (RS256 → HS256)</strong>: сервер ждёт RS256 (асимметричный), атакующий шлёт HS256, используя <em>публичный ключ</em> как HMAC-секрет. <em>Защита</em>: жёсткая проверка алгоритма</li>
+          <li><strong>Слабый секрет</strong>: HMAC-ключ <code>"secret"</code> или <code>"123456"</code> подбирается за минуты. <em>Защита</em>: длинные random-секреты (≥32 байт), ротация ключей</li>
+          <li><strong>Чувствительные данные в payload</strong>: JWT — НЕ шифрование. <code>password</code>, PAN карты в payload — катастрофа</li>
+          <li><strong>Долгий TTL без revocation</strong>: украденный токен на месяц = месяц доступа. <em>Защита</em>: короткий access (15 мин) + refresh с возможностью отзыва</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>RBAC vs ABAC vs ReBAC</strong> — модели контроля доступа:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">RBAC (Role-Based)</div>
+            Роли: admin, user, guest. У каждой — список разрешений. Простая, понятная. Минус: ролей становится много (admin_payments, admin_users, admin_readonly...).
+          </div>
+          <div class="card">
+            <div class="card-title">ABAC (Attribute-Based)</div>
+            Решение по атрибутам: «user может читать orders, если order.owner == user.id и время рабочее». Гибче, сложнее в реализации. Используется в AWS IAM.
+          </div>
+          <div class="card">
+            <div class="card-title">ReBAC (Relationship-Based)</div>
+            Доступ через связи: «user может редактировать doc, если он owner или editor этого doc, или owner родительской папки». Google Drive, Notion, Figma. Базовый инструмент — Google Zanzibar.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Что тестировать в авторизации:</strong></p>
+        <ul>
+          <li><strong>Vertical privilege escalation</strong>: user пытается выполнить admin-операцию → <span class="status-code c4">403</span></li>
+          <li><strong>Horizontal privilege escalation (IDOR)</strong>: user A пытается прочитать данные user B через <code>GET /orders/789</code> → <span class="status-code c4">403</span> или <span class="status-code c4">404</span></li>
+          <li><strong>Force browsing</strong>: попытка попасть на admin-URL без admin-роли</li>
+          <li><strong>Token replay</strong>: использовать токен после logout — не должно работать</li>
+          <li><strong>Token expiration</strong>: что происходит точно в момент <code>exp</code>, чуть раньше, чуть позже</li>
+          <li><strong>Refresh flow</strong>: можно ли использовать refresh_token дважды (rotation)? Старый должен инвалидироваться</li>
+          <li><strong>Scope</strong> в OAuth: если токен выдан с <code>scope=read</code>, попытка POST → <span class="status-code c4">403</span></li>
+        </ul>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современный стек авторизации в типичном продукте: <strong>OAuth 2.0 + PKCE</strong> для веб/мобайл, <strong>OIDC</strong> для «войти через X», <strong>JWT</strong> как формат access-токена, <strong>refresh-token rotation</strong> для безопасного обновления. Для зрелых продуктов с тонкими правами — <strong>OPA (Open Policy Agent)</strong> или <strong>SpiceDB</strong> вместо ручного RBAC в коде. Authentication часто делегируют SaaS: <strong>Auth0</strong>, <strong>Clerk</strong>, <strong>Keycloak</strong>, <strong>WorkOS</strong> — не пишут свой login с нуля.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Декодирование JWT:</strong> вставь токен → <em>«Расшифруй header и payload, проверь срок действия, оцени риски: чувствительные данные в payload? Слабый alg?»</em><br><br>
+          <strong>Аудит OAuth-flow:</strong> вставь Postman-коллекцию или последовательность запросов → <em>«Найди проблемы: hardcoded client_secret, отсутствие state-параметра против CSRF, redirect_uri без валидации.»</em><br><br>
+          <strong>Генерация тестов:</strong> <em>«Сгенерируй полный набор тестов для авторизации с RBAC ролями user/manager/admin. Включи vertical/horizontal escalation, IDOR, force browsing.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как инвалидировать JWT до его <code>exp</code>?» — В чистом виде — никак, в этом боль JWT vs session. Варианты: 1) <strong>blacklist по <code>jti</code></strong> — но это уже state на сервере, теряем главное преимущество JWT, 2) <strong>версия ключа</strong> в payload — при logout инкрементируем версию у юзера, старые токены становятся невалидны, 3) <strong>короткий TTL + refresh-token rotation</strong> — самый используемый подход: access живёт 15 минут, refresh можно отозвать в БД.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 12. ТЕСТИРОВАНИЕ REST API ─────── -->
+  <section class="section" id="testing">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <span class="section-title">Тестирование REST API на практике</span>
+      <span class="section-badge">api testing</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Тестирование API — это проверка, что на запрос приходит правильный ответ. В каждом ответе проверяем <strong>пять вещей</strong>:</p>
+        <ul>
+          <li><strong>Статус-код</strong> — 200 / 201 / 404 / тот, что ожидаем</li>
+          <li><strong>Тело</strong> — правильные данные, правильные значения полей</li>
+          <li><strong>Схема</strong> — структура и типы полей соответствуют контракту</li>
+          <li><strong>Заголовки</strong> — Content-Type, Location, кэширование</li>
+          <li><strong>Время ответа</strong> — укладывается в SLA (например, &lt;500мс)</li>
+        </ul>
+        <p>В Python основной инструмент — библиотека <code>requests</code>:</p>
+        <div class="code-block"><span class="kw">import</span> requests
+
+r = requests.get(
+    <span class="st">'https://api.shop.com/users/42'</span>,
+    headers={<span class="st">'Authorization'</span>: <span class="st">'Bearer token'</span>},
+    timeout=<span class="val">5</span>
+)
+
+<span class="kw">assert</span> r.status_code == <span class="val">200</span>
+data = r.json()
+<span class="kw">assert</span> data[<span class="st">'id'</span>] == <span class="val">42</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>API-тест как unit-тест функции, только функция живёт на сервере. Вход — запрос (метод, URL, заголовки, тело), выход — ответ (статус, тело, заголовки). Принцип тот же: подал известный вход → проверил ожидаемый выход.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>requests — что нужно знать для тестов:</strong></p>
+        <div class="code-block"><span class="cm"># Session — переиспользует соединение и заголовки</span>
+session = requests.Session()
+session.headers.update({<span class="st">'Authorization'</span>: <span class="st">'Bearer token'</span>})
+
+<span class="cm"># Retry на нестабильных эндпоинтах</span>
+<span class="kw">from</span> requests.adapters <span class="kw">import</span> HTTPAdapter
+<span class="kw">from</span> urllib3.util <span class="kw">import</span> Retry
+retries = Retry(total=<span class="val">3</span>, backoff_factor=<span class="val">0.5</span>,
+                status_forcelist=[<span class="val">502</span>, <span class="val">503</span>, <span class="val">504</span>])
+session.mount(<span class="st">'https://'</span>, HTTPAdapter(max_retries=retries))
+
+<span class="cm"># Timeout — ВСЕГДА указывай, иначе тест может висеть вечно</span>
+r = session.post(url, json=payload, timeout=<span class="val">10</span>)</div>
+
+        <p style="margin-top:14px;"><strong>Структура автотеста — паттерн AAA</strong> (Arrange-Act-Assert):</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_create_order_returns_201</span>():
+    <span class="cm"># Arrange — подготовка данных</span>
+    payload = {<span class="st">'product_id'</span>: <span class="val">42</span>, <span class="st">'quantity'</span>: <span class="val">2</span>}
+
+    <span class="cm"># Act — выполняем действие</span>
+    r = session.post(<span class="st">'/api/orders'</span>, json=payload, timeout=<span class="val">5</span>)
+
+    <span class="cm"># Assert — проверяем результат</span>
+    <span class="kw">assert</span> r.status_code == <span class="val">201</span>
+    <span class="kw">assert</span> r.json()[<span class="st">'status'</span>] == <span class="st">'pending'</span>
+    <span class="kw">assert</span> <span class="st">'Location'</span> <span class="kw">in</span> r.headers</div>
+
+        <p><strong>Что покрываем для каждого эндпоинта:</strong></p>
+        <table>
+          <thead><tr><th>Категория</th><th>Примеры</th></tr></thead>
+          <tbody>
+            <tr><td>Позитив</td><td>валидный запрос → правильный код и тело</td></tr>
+            <tr><td>Негатив</td><td>невалидное тело → 400, нет авторизации → 401, нет прав → 403, нет ресурса → 404</td></tr>
+            <tr><td>Границы</td><td>пустые значения, max длина, спецсимволы, юникод</td></tr>
+            <tr><td>Безопасность</td><td>чужой токен → 403, SQL/NoSQL injection в параметрах, IDOR</td></tr>
+            <tr><td>Контракт</td><td>схема ответа, типы полей, обязательные поля</td></tr>
+            <tr><td>Идемпотентность</td><td>повторный POST с Idempotency-Key, повторный DELETE</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Тест-данные</strong> — главная боль API-тестов:</p>
+        <ul>
+          <li><strong>Setup / teardown</strong>: создал данные перед тестом, удалил после. В pytest — через fixtures</li>
+          <li><strong>Изоляция</strong>: тесты не должны зависеть друг от друга. Каждый создаёт свои данные</li>
+          <li><strong>Очистка</strong>: упавший тест не должен оставлять данные, которые сломают следующий прогон</li>
+          <li><strong>Уникальность</strong>: генерируй уникальные email/имена (<code>user_{uuid}@test.com</code>), чтобы не было конфликтов при параллельном запуске</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Слоистая организация API-тестов</strong> — отделяет поддерживаемый фреймворк от набора скриптов:</p>
+        <ul>
+          <li><strong>HTTP-слой</strong> — обёртка над requests (сессия, базовый URL, retry, логирование)</li>
+          <li><strong>Service / Client-слой</strong> — методы под домен: <code>OrderClient.create(product, qty)</code>, а не голые URL в тестах</li>
+          <li><strong>Test-слой</strong> — сами тесты, читаются как бизнес-сценарии, без деталей HTTP</li>
+          <li><strong>Data-слой</strong> — фабрики тест-данных (factory_boy), фикстуры</li>
+        </ul>
+        <div class="code-block"><span class="cm"># Плохо — детали HTTP в тесте</span>
+r = requests.post(<span class="st">'https://.../api/orders'</span>,
+    headers={...}, json={<span class="st">'product_id'</span>: <span class="val">42</span>})
+
+<span class="cm"># Хорошо — тест читается как сценарий</span>
+order = order_client.create(product_id=<span class="val">42</span>, quantity=<span class="val">2</span>)
+<span class="kw">assert</span> order.status == <span class="st">'pending'</span></div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Для ручной проверки и исследования API — <strong>Postman</strong> (или его легковесные конкуренты <strong>Bruno</strong>, <strong>Hoppscotch</strong> — без облака и регистрации). Для автотестов в Python — <strong>requests</strong> + <strong>pytest</strong>, либо <strong>httpx</strong> (поддерживает async). В Java-мире — REST Assured. Тренд: тесты держат рядом с кодом API, гоняют в CI на каждый PR. Коллекции Postman экспортируют в CI через <strong>Newman</strong>, но для серьёзной автоматизации это слабее, чем код на pytest.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация тестов из OpenAPI:</strong> <em>«Вот OpenAPI-спека эндпоинта POST /orders. Сгенерируй pytest + requests тесты: позитив, негатив (400/401/403/404), границы, проверка схемы ответа.»</em><br><br>
+          <strong>Генерация тест-данных:</strong> <em>«Сгенерируй 20 наборов валидных и невалидных данных для регистрации: email, пароль, имя. Половина — граничные/невалидные случаи.»</em><br><br>
+          <strong>Рефакторинг в слои:</strong> вставь «простыню» из requests-вызовов → <em>«Преобразуй в client-слой с методами и тонкими тестами.»</em>
+        </div>
+
+        <p><strong>Дебаг 500, когда UI показывает только «Something went wrong».</strong> Классическая ситуация — клиент прячет детали, надо докопаться до причины:</p>
+        <ol style="padding-left:18px;">
+          <li><strong>Смотри реальный ответ API</strong>, а не UI: DevTools Network или прокси (Charles) — там часто есть тело ошибки с деталями</li>
+          <li><strong>Возьми <code>X-Request-ID</code></strong> из заголовков ответа — по нему найдёшь запрос в логах сервиса</li>
+          <li><strong>Логи сервиса</strong> в централизованной системе (Kibana / Datadog / Grafana Loki) — поиск по request-id даёт стектрейс, где именно упало</li>
+          <li><strong>Трейсинг</strong> (Jaeger) — если микросервисы, видно, на каком сервисе в цепочке сломалось</li>
+          <li><strong>Sentry</strong> — необработанные исключения с полным контекстом часто уже там</li>
+          <li><strong>Воспроизведи напрямую</strong>: тот же запрос через <code>curl</code>/Postman, поиграй с входными данными — локализуй, что именно вызывает 500</li>
+        </ol>
+        <div class="hl"><span class="hl-label">Суть</span>500 без деталей в UI — это не «нет информации», а «информация в другом месте». Цепочка: ответ API → request-id → логи → трейс → стектрейс. Senior знает этот путь и не гадает.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как проверить, что API не сломается при изменении бэка?» — Не только функциональными тестами. Нужны: 1) <strong>проверка схемы</strong> (JSON Schema / OpenAPI validation) — ловит изменения структуры, 2) <strong>контрактные тесты</strong> (Pact) — ловят breaking changes между сервисами до деплоя, 3) <strong>schemathesis</strong> — генерит тысячи запросов по спеке. См. следующий раздел.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 13. КОНТРАКТЫ И MOCKING ─────── -->
+  <section class="section" id="contract">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <span class="section-title">Контрактное тестирование и mocking</span>
+      <span class="section-badge">contracts & mocks</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Часто тестируемый сервис зависит от других: платёжного шлюза, сервиса доставки, внешнего API. Гонять их по-настоящему в тестах — медленно, дорого и нестабильно. Решение — <strong>mock</strong>: подменяем зависимость на заглушку с заранее известным ответом.</p>
+        <div class="code-block"><span class="cm"># responses — мокаем HTTP-вызов на уровне Python</span>
+<span class="kw">import</span> responses
+
+<span class="hdr">@responses.activate</span>
+<span class="kw">def</span> <span class="fn">test_order_with_mocked_payment</span>():
+    responses.add(
+        responses.POST,
+        <span class="st">'https://payments.com/charge'</span>,
+        json={<span class="st">'status'</span>: <span class="st">'success'</span>},
+        status=<span class="val">200</span>
+    )
+    <span class="cm"># Теперь наш код, вызывая платёжку, получит этот ответ</span>
+    result = create_order_and_pay(...)
+    <span class="kw">assert</span> result.paid <span class="kw">is</span> <span class="kw">True</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Mock как <code>stub</code>-функция в unit-тесте: вместо реального обращения к БД или сети подставляешь <code>def get_user(): return {'id': 42}</code>. Тестируешь свою логику в изоляции, не завися от того, работает ли сейчас внешний сервис.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Mock / Stub / Fake / Spy / Dummy</strong> — терминология, которую часто путают:</p>
+        <table>
+          <thead><tr><th>Тип</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Dummy</strong></td><td>Пустышка для заполнения параметра. Не используется, просто чтоб код не падал</td></tr>
+            <tr><td><strong>Stub</strong></td><td>Возвращает заранее заданные ответы. «На любой вызов верни 200 OK»</td></tr>
+            <tr><td><strong>Mock</strong></td><td>Stub + <em>проверяет, как его вызвали</em>: с какими аргументами, сколько раз</td></tr>
+            <tr><td><strong>Spy</strong></td><td>Оборачивает <em>реальный</em> объект и записывает вызовы. Реальная логика работает, но мы видим, что вызвалось</td></tr>
+            <tr><td><strong>Fake</strong></td><td>Рабочая, но упрощённая реализация. In-memory словарь вместо реальной БД</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Уровни мокинга API:</strong></p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">На уровне кода (Python)</div>
+            <code>responses</code>, <code>requests-mock</code> — перехватывают HTTP-вызовы внутри процесса. Быстро, для unit/integration тестов.
+          </div>
+          <div class="card">
+            <div class="card-title">Мок-сервер (отдельный процесс)</div>
+            <code>WireMock</code>, <code>mountebank</code>, <code>Prism</code> — поднимают настоящий HTTP-сервер, отдающий заданные ответы. Для E2E, когда нужно мокать внешний сервис целиком.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Валидация схемы (JSON Schema)</strong> — проверяем, что структура ответа не сломалась:</p>
+        <div class="code-block"><span class="kw">from</span> jsonschema <span class="kw">import</span> validate
+
+schema = {
+    <span class="st">'type'</span>: <span class="st">'object'</span>,
+    <span class="st">'properties'</span>: {
+        <span class="st">'id'</span>: {<span class="st">'type'</span>: <span class="st">'integer'</span>},
+        <span class="st">'name'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>},
+        <span class="st">'email'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>, <span class="st">'format'</span>: <span class="st">'email'</span>}
+    },
+    <span class="st">'required'</span>: [<span class="st">'id'</span>, <span class="st">'name'</span>]
+}
+validate(instance=response.json(), schema=schema)</div>
+        <p>Схему можно не писать руками, а взять из <strong>OpenAPI / Swagger</strong> — единого описания API. Тогда тесты проверяют ответ против официального контракта.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Контрактное тестирование (Pact)</strong> — решает проблему «сервис A обновился и сломал сервис B». Подход <em>consumer-driven contracts</em>:</p>
+        <ol style="padding-left:18px;">
+          <li><strong>Consumer</strong> (сервис B) описывает, что он ожидает от <strong>Provider</strong> (сервиса A): «на <code>GET /users/42</code> жду поле <code>name</code> типа string»</li>
+          <li>Из этого генерируется <strong>pact-файл</strong> (контракт)</li>
+          <li><strong>Provider</strong> прогоняется против pact-файла на своём CI</li>
+          <li>Если A убрал поле <code>name</code> — его тесты <em>краснеют до деплоя</em>, не дожидаясь, пока B сломается в проде</li>
+        </ol>
+        <div class="hl"><span class="hl-label">Зачем это в микросервисах</span>Полноценные integration-тесты между всеми сервисами — медленно и хрупко. Контрактные тесты дают 80% уверенности за 20% стоимости: каждый сервис тестируется изолированно, но контракт между ними гарантирован.</div>
+
+        <p style="margin-top:14px;"><strong>schemathesis</strong> — property-based тестирование API. Берёт OpenAPI-спеку и <em>сам генерирует тысячи запросов</em>, ища: 500-е ошибки, ответы, не соответствующие схеме, падения на граничных данных. Находит то, что вручную не догадаешься проверить.</p>
+
+        <p style="margin-top:14px;"><strong>Backward compatibility — как тестировать.</strong> API меняется, но старые клиенты (мобильные приложения, партнёры) не обновляются мгновенно. Изменение не должно их ломать:</p>
+        <ul>
+          <li><strong>Что НЕ ломает</strong> (backward compatible): добавить новое <em>опциональное</em> поле, добавить новый эндпоинт, добавить новое значение enum (если клиент его игнорирует)</li>
+          <li><strong>Что ЛОМАЕТ</strong> (breaking change): удалить/переименовать поле, сделать опциональное поле обязательным, изменить тип поля, изменить структуру ответа, ужесточить валидацию</li>
+          <li><strong>Как проверять</strong>: прогнать тесты <em>старого</em> клиента против <em>новой</em> версии API. Сравнить старую и новую OpenAPI-спеку диффером (есть инструменты вроде <code>oasdiff</code>). Контрактные тесты (Pact) краснеют на breaking changes автоматически</li>
+          <li><strong>Если breaking change неизбежен</strong> — версионирование (<code>/v2/</code>), параллельная поддержка старой версии, период депрекации с уведомлением клиентов</li>
+        </ul>
+
+        <div class="hl orange"><span class="hl-label">Когда мок вредит</span>Замокать можно так, что тесты зелёные, а в проде инцидент. Риски: 1) <strong>мок устарел</strong> — реальный API изменился, а мок отдаёт старый формат, 2) <strong>замокали то, что надо было тестировать</strong> — мок собственной БД скрывает реальные баги SQL, 3) <strong>over-mocking</strong> — тест проверяет моки, а не систему. Правило: мокай <em>чужое</em> и <em>дорогое</em>, не мокай <em>своё ядро</em>.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современный стек проверки контрактов: <strong>OpenAPI 3</strong> как единый источник правды → авто-валидация ответов против него → <strong>Pact</strong> для межсервисных контрактов в CI → <strong>schemathesis</strong> для фаззинга по спеке. Мок-серверы (<strong>Prism</strong>, <strong>WireMock</strong>) часто поднимают прямо из OpenAPI-спеки — фронтенд начинает работать против мока ещё до того, как бэкенд написан (parallel development).</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация JSON Schema:</strong> вставь пример ответа API → <em>«Сгенерируй JSON Schema для валидации этого ответа, с правильными типами и required-полями.»</em><br><br>
+          <strong>Генерация моков:</strong> <em>«По этой OpenAPI-спеке сгенерируй WireMock-стабы для всех эндпоинтов с реалистичными ответами.»</em><br><br>
+          <strong>Разбор контракта:</strong> вставь два pact-файла → <em>«Найди breaking changes между этими версиями контракта.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница между mock и stub?» — <strong>Stub</strong> просто возвращает заданный ответ — ты проверяешь <em>состояние</em> (что вернула твоя функция). <strong>Mock</strong> дополнительно проверяет <em>взаимодействие</em> — что внешний сервис был вызван правильно: с теми аргументами, столько раз. Грубо: stub отвечает на «что вернулось?», mock — на «правильно ли я вызвал зависимость?».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 15. ИНСТРУМЕНТЫ ─────── -->
+  <section class="section" id="tools">
+    <div class="section-header">
+      <span class="section-num">15</span>
+      <span class="section-title">Инструменты: Postman, Charles, Swagger</span>
+      <span class="section-badge">tooling</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Три категории инструментов, которые QA по API использует ежедневно:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">Postman</div>
+            Клиент для ручной работы с API: отправить запрос, посмотреть ответ, собрать коллекцию запросов, написать проверки. Самый популярный.
+          </div>
+          <div class="card">
+            <div class="card-title">Charles / прокси</div>
+            Перехват и <strong>подмена трафика</strong> между приложением и сервером. Видишь, что реально уходит по сети, и можешь это изменить на лету.
+          </div>
+          <div class="card">
+            <div class="card-title">Swagger / OpenAPI</div>
+            Документация и спецификация API. Описывает все эндпоинты, параметры и ответы. Источник правды о контракте.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><strong>Postman</strong> = REPL для API: пробуешь запросы интерактивно, как команды в консоли Python. <strong>Charles</strong> = breakpoint в дебаггере, но для сетевого трафика: останавливаешь запрос, смотришь и меняешь. <strong>Swagger</strong> = автодокументация типа docstrings, только для всего API сразу, с возможностью тут же дёрнуть метод.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Postman</strong> — больше, чем «отправить запрос»:</p>
+        <ul>
+          <li><strong>Коллекции</strong> — сохранённые наборы запросов, сгруппированные по фиче / сервису</li>
+          <li><strong>Окружения (environments)</strong> — переменные <code>{{base_url}}</code>, <code>{{token}}</code> для dev / staging / prod. Один клик — и та же коллекция бьёт по другому стенду</li>
+          <li><strong>Тесты на JS</strong> — после запроса можно проверить ответ: <code>pm.test("status 200", () => pm.response.to.have.status(200))</code></li>
+          <li><strong>Pre-request scripts</strong> — код перед запросом: получить токен, сгенерировать данные</li>
+          <li><strong>Newman</strong> — CLI-runner: гоняет Postman-коллекции в CI/CD</li>
+          <li><strong>Мок-серверы</strong> — Postman поднимает мок по твоим примерам ответов</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Charles и подмена трафика</strong> — что это вообще. Прокси встаёт <em>между</em> приложением и сервером, весь трафик идёт через него:</p>
+        <div class="code-block">Приложение  →  [ Charles / прокси ]  →  Сервер
+                      ↑
+              видит и может изменить
+              запрос и ответ</div>
+        <p>Что это даёт QA:</p>
+        <table>
+          <thead><tr><th>Возможность</th><th>Зачем</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Inspect</strong></td><td>Посмотреть реальные запросы/ответы — особенно у мобильного приложения, где DevTools нет</td></tr>
+            <tr><td><strong>Breakpoints</strong></td><td>Остановить запрос/ответ, изменить и отпустить дальше</td></tr>
+            <tr><td><strong>Map Local</strong></td><td>Подменить ответ сервера локальным файлом</td></tr>
+            <tr><td><strong>Map Remote</strong></td><td>Перенаправить запрос на другой сервер (например, на staging)</td></tr>
+            <tr><td><strong>Throttling</strong></td><td>Эмуляция медленной сети (3G) — как ведёт себя приложение</td></tr>
+            <tr><td><strong>Rewrite</strong></td><td>Автоматически менять заголовки / тело по правилу</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Главный сценарий QA</span>Протестировать, как клиент реагирует на разные ответы сервера, <em>не трогая бэкенд</em>. Подменил ответ на <code>500</code> — приложение показывает ошибку красиво? Подменил на пустой список — отрисовывается «ничего не найдено»? Замедлил сеть — крутится лоадер? Всё это без единой строчки изменений на сервере.</div>
+
+        <p style="margin-top:14px;"><strong>Swagger / OpenAPI</strong> — экосистема вокруг описания API:</p>
+        <ul>
+          <li><strong>OpenAPI</strong> — сам формат спецификации (YAML/JSON), описывающий все эндпоинты. Раньше назывался Swagger, с версии 3.0 — OpenAPI</li>
+          <li><strong>Swagger UI</strong> — интерактивная страница документации: видишь все методы и можешь дёрнуть их прямо из браузера</li>
+          <li><strong>Swagger Editor</strong> — редактор спеки с превью</li>
+          <li><strong>Swagger Codegen / OpenAPI Generator</strong> — генерация клиентов и серверных заглушек из спеки</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>HTTPS и подмена трафика.</strong> «Как прокси видит зашифрованный HTTPS?» Сам по себе — никак. Charles работает как <em>man-in-the-middle</em>: 1) на устройство ставится <strong>корневой сертификат Charles</strong>, 2) приложение доверяет ему, 3) Charles расшифровывает трафик, показывает/меняет, заново шифрует и шлёт серверу. Без установленного сертификата увидишь только зашифрованные байты.</p>
+
+        <div class="hl orange"><span class="hl-label">Нюанс мобильного тестирования</span>С Android 7+ приложения по умолчанию <em>не доверяют</em> пользовательским сертификатам — нужен <code>networkSecurityConfig</code> в debug-сборке или root. Многие банковские приложения используют <strong>certificate pinning</strong> — намеренно отказываются работать через любой прокси (защита от перехвата). Это не баг, это by design — на собесе можно упомянуть как пример осознанной защиты от MITM.</div>
+
+        <p><strong>Инструменты подмены трафика — не только Charles:</strong></p>
+        <table>
+          <thead><tr><th>Инструмент</th><th>Особенность</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Charles</strong></td><td>Платный, популярный, удобный UI. Кросс-платформенный</td></tr>
+            <tr><td><strong>Fiddler</strong></td><td>Бесплатный, исторически Windows-ориентированный</td></tr>
+            <tr><td><strong>Proxyman</strong></td><td>Современный, macOS/iOS, приятный UI</td></tr>
+            <tr><td><strong>mitmproxy</strong></td><td>Open-source, CLI + скриптинг на Python — можно автоматизировать подмену в тестах</td></tr>
+            <tr><td><strong>Burp Suite</strong></td><td>Тот же принцип, но заточен под security-тестирование</td></tr>
+          </tbody>
+        </table>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Связка инструментов у современного API-QA: <strong>Swagger/OpenAPI</strong> как источник правды → импортируешь спеку в <strong>Postman</strong> (он строит коллекцию автоматически) → ручная отладка в Postman → автотесты на <strong>pytest + requests</strong>, а Postman-коллекции гоняются в CI через <strong>Newman</strong>. Альтернативы Postman, которые набирают популярность: <strong>Bruno</strong> (хранит коллекции локально в git, без облака — важно для приватности) и <strong>Hoppscotch</strong> (веб, open-source). Прокси (Charles/Proxyman) — в основном для мобильного и отладки «что реально ушло по сети».</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Postman-коллекция из спеки:</strong> <em>«По этой OpenAPI-спеке сгенерируй структуру Postman-коллекции с примерами запросов и тестами на статус и схему.»</em><br><br>
+          <strong>Скрипт mitmproxy:</strong> <em>«Напиши mitmproxy-скрипт на Python, который подменяет ответ /api/balance на 0, чтобы протестировать UI при нулевом балансе.»</em><br><br>
+          <strong>Тесты в Postman:</strong> <em>«Напиши JS-тесты для Postman: проверить статус 200, наличие поля token, время ответа меньше 500мс.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как протестировать, что приложение правильно обрабатывает ошибку 500, если сервер её никогда не отдаёт?» — Через подмену трафика. Ставишь прокси (Charles/mitmproxy), настраиваешь Map Local или breakpoint, подменяешь реальный ответ на <code>500</code> → смотришь, как приложение реагирует. Не нужно ломать бэкенд или просить разработчиков — меняешь ответ на лету у себя.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 16. SENIOR-КЕЙСЫ ПО API ─────── -->
+  <section class="section" id="senior-api">
+    <div class="section-header">
+      <span class="section-num">16</span>
+      <span class="section-title">Senior-кейсы по API</span>
+      <span class="section-badge">design questions</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Открытые вопросы вроде <em>«Спроектируй стратегию тестирования для этого API»</em>, <em>«Построй фреймворк API-тестов с нуля»</em>, <em>«Как тестировать платёжный API?»</em> проверяют <strong>структурированное мышление</strong>, а не заученный ответ.</p>
+        <div class="hl green"><span class="hl-label">Шаблон ответа</span>1) Уточни (что за API, кто потребители, SLA, критичность). 2) Разбей по уровням пирамиды (unit → contract → integration → E2E). 3) Назови инструменты. 4) Объясни trade-offs. 5) Скажи, что автоматизируешь, а что оставишь ручным.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Дизайн API-test фреймворка с нуля.</strong> Что назвать:</p>
+        <ul>
+          <li><strong>Слои</strong>: HTTP-обёртка → клиенты по доменам → тесты → фабрики данных (см. раздел 12)</li>
+          <li><strong>Конфигурация</strong>: окружения (dev/staging/prod) через переменные, секреты не в коде</li>
+          <li><strong>Авторизация</strong>: получение токена в фикстуре, переиспользование между тестами</li>
+          <li><strong>Тест-данные</strong>: factory_boy для генерации, очистка через teardown</li>
+          <li><strong>Отчётность</strong>: Allure с шагами, аттачами запросов/ответов</li>
+          <li><strong>CI</strong>: запуск на каждый PR, параллелизация (pytest-xdist), флак-контроль</li>
+          <li><strong>Контракты</strong>: проверка схемы + Pact в пайплайне</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Тест-пирамида для API:</strong></p>
+        <table>
+          <thead><tr><th>Уровень</th><th>Что проверяет</th><th>Скорость</th></tr></thead>
+          <tbody>
+            <tr><td>Schema validation</td><td>структура ответа против OpenAPI</td><td>мгновенно</td></tr>
+            <tr><td>Contract (Pact)</td><td>совместимость между сервисами</td><td>быстро</td></tr>
+            <tr><td>Component</td><td>один сервис + его БД, остальное замокано</td><td>средне</td></tr>
+            <tr><td>Integration</td><td>несколько реальных сервисов вместе</td><td>медленно</td></tr>
+            <tr><td>E2E</td><td>полный сценарий через все сервисы</td><td>очень медленно</td></tr>
+          </tbody>
+        </table>
+        <p>Чем ниже уровень — тем больше таких тестов. Большинство покрытия — на schema + contract + component, а не на дорогих E2E.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Кейс — «Протестируй платёжный API»</strong>. Структурированный разбор:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Функциональность</div>
+            Успешный платёж, отклонение (нет денег, fraud, expired card), частичный/полный refund, статусы транзакции.
+          </div>
+          <div class="card">
+            <div class="card-title">Идемпотентность</div>
+            Повтор с тем же Idempotency-Key → один платёж. С другим ключом → новый. Без ключа → как обрабатывается?
+          </div>
+          <div class="card">
+            <div class="card-title">Асинхронность</div>
+            Webhook о статусе: не пришёл / пришёл дважды (дедуп) / пришёл раньше нашего ответа. Eventual consistency — статус обновляется не сразу (polling в тестах).
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность</div>
+            PAN не в логах, PCI DSS, токенизация карты, чужой токен → 403, нельзя увидеть чужие транзакции (IDOR).
+          </div>
+          <div class="card">
+            <div class="card-title">Надёжность</div>
+            Сетевой обрыв на каждом шаге, retry, reconciliation с банком (сверка наших транзакций с реальными списаниями).
+          </div>
+          <div class="card">
+            <div class="card-title">Контракт</div>
+            Схема ответа, версионирование (платёжки часто меняют API), мок платёжного провайдера для тестов.
+          </div>
+        </div>
+
+        <div class="hl orange"><span class="hl-label">Что выделит Senior-ответ</span>Не перечисление «проверю успешный платёж и отклонение». А: <em>«Я бы попросил OpenAPI-спеку платёжного провайдера и архитектурную схему. Замокал бы провайдера через WireMock для функциональных тестов, реальную интеграцию проверял бы отдельно в sandbox-окружении. Особое внимание — идемпотентности и обработке webhook'ов, потому что это про деньги пользователя при ретраях.»</em></div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Senior QA по API половину времени тратит не на написание тестов, а на: 1) ревью контрактов (OpenAPI) на этапе дизайна — поймать проблему до кода, 2) настройку мониторинга API в проде (latency, error rate по эндпоинтам в Grafana), 3) synthetic monitoring — боты дёргают критичные эндпоинты каждые N минут. Функциональные автотесты — это база, но реальная ценность Senior — в стратегии и в shift-left/shift-right.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Дизайн стратегии:</strong> вставь OpenAPI-спеку → <em>«Спроектируй стратегию тестирования: что на уровне schema, что contract, что integration, что E2E. Обоснуй приоритеты по риску.»</em><br><br>
+          <strong>На собесе про AI:</strong> <em>«Я генерирую базовые API-тесты из OpenAPI через Claude за минуты, затем добавляю доменные сценарии — идемпотентность, race conditions, бизнес-логику, которую LLM не знает. Освободившееся время трачу на стратегию и contract-тесты.»</em>
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У тебя API из 200 эндпоинтов и неделя времени. Что делаешь?» — Не «покрою все 200». А: 1) risk-based — выделю revenue-critical (платежи, auth, заказы), 2) на них — полные функциональные + contract тесты, 3) на остальные — быструю schema-validation из OpenAPI (дёшево, ловит структурные поломки), 4) schemathesis по всей спеке для авто-фаззинга, 5) договорюсь о приоритетах с командой. Покрыть осознанно важное лучше, чем поверхностно всё.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+
+  // Scroll to top button
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>

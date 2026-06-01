@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Архитектура</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item active" href="#"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#strategy">01 · Quality strategy микросервисов</a>
+    <a href="#dependencies">02 · Сервис с зависимостями</a>
+    <a href="#resiliency">03 · Resiliency</a>
+    <a href="#observability">04 · Observability для QA</a>
+    <a href="#cases">05 · Senior-кейсы</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Архитектура</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Архитектура · Quality strategy</h1>
+    <p>// 5 подтем · микросервисы, resiliency, observability, payment</p>
+  </div>
+
+  <div style="max-width:920px;margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
+    <strong style="color:#fff;display:block;margin-bottom:4px;font-size:13px;">Зачем этот раздел</strong>
+    Для Senior это важнейший пласт: тебя проверяют не как «человека, который пишет тесты», а как <strong>инженера, снижающего риск системы</strong>. Здесь вопросы system-design уровня: как выстроить качество для платформы из десятков сервисов, а не для одной формы.
+  </div>
+
+  <!-- ─────── 01. QUALITY STRATEGY ─────── -->
+  <section class="section" id="strategy">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Quality strategy для микросервисов</span>
+      <span class="section-badge">strategy</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Quality strategy</strong> — это ответ на вопрос «где какие тесты ставить, чтобы поймать максимум багов за минимум усилий». В монолите всё в одном месте, в микросервисах — десятки сервисов, которые общаются по сети, и тестировать их сквозь E2E дорого и хрупко.</p>
+        <div class="hl green"><span class="hl-label">Что меняется в микросервисах</span>Монолит — один большой объект: проверил его целиком. Микросервисы — много мелких объектов, общающихся через сеть: появляются <em>новые точки отказа</em> (сеть, чужие контракты, асинхронность), которых в монолите не было. Поэтому фокус смещается с E2E на проверку <em>границ</em> между сервисами.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Где какие тесты ставить</strong> в распределённой системе:</p>
+        <table>
+          <thead><tr><th>Уровень</th><th>Что проверяет</th><th>Сколько</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Unit</strong></td><td>логика внутри одного сервиса (изолированно)</td><td>много, быстрые</td></tr>
+            <tr><td><strong>Integration</strong></td><td>сервис + его БД / очередь (через Testcontainers)</td><td>средне</td></tr>
+            <tr><td><strong>Contract</strong></td><td>совместимость между сервисами (без поднятия обоих)</td><td>на каждую связь</td></tr>
+            <tr><td><strong>E2E</strong></td><td>критичные сквозные пути через всю систему</td><td>мало, только revenue-critical</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Ключевая идея:</strong> contract-тесты заменяют значительную часть E2E. Вместо того чтобы поднимать 10 сервисов и гонять сквозной сценарий, проверяешь, что каждая пара сервисов «договорилась» о формате — дёшево и быстро (см. раздел API → контрактное тестирование).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Стратегия для платформы</strong> — как отвечать на «построй quality strategy для микросервисной платформы»:</p>
+        <ul>
+          <li><strong>Shift-left</strong> — основная масса проверок на уровне unit + contract в каждом сервисе, на каждый PR</li>
+          <li><strong>Contract-тесты</strong> на границах — ловят breaking changes между командами до деплоя</li>
+          <li><strong>E2E только на критичные пути</strong> — оплата, регистрация, ключевой поток — не пытаться покрыть всё</li>
+          <li><strong>Shift-right</strong> — observability, canary, synthetic monitoring в проде ловят то, что тесты пропустили</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Зрелая стратегия для распределённой системы — <strong>толстый слой unit+contract + тонкий слой E2E + сильная observability</strong>. Качество обеспечивается на границах (контракты) и в проде (наблюдаемость), а не большим набором сквозных прогонов. Почему именно так — в каверзном вопросе ниже.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему не покрыть всё E2E-тестами?» — E2E в микросервисах: 1) медленные (поднять всю систему), 2) хрупкие (упал любой из сервисов — все красные), 3) не локализуют проблему (где именно сломалось?), 4) флакают из-за сети и асинхронности. Они нужны, но в минимуме — только на критичные сквозные пути (оплата, регистрация). Основную проверку дают unit и contract на границах.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. СЕРВИС С ЗАВИСИМОСТЯМИ ─────── -->
+  <section class="section" id="dependencies">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Тестирование сервиса с зависимостями</span>
+      <span class="section-badge">isolation</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Сервис зависит от 10 других — как тестировать? <strong>Не поднимать все 10</strong>. Изолируешь свой сервис, а зависимости подменяешь.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Это та же изоляция, что в unit-тесте функции: тестируешь свою логику, а вызовы к другим модулям мокаешь. Только здесь «модули» — это сетевые сервисы, и подменяешь ты их HTTP/gRPC-ответы, а не функции.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Чем подменять зависимости:</strong></p>
+        <ul>
+          <li><strong>Свою БД / очередь</strong> — поднять реально через <strong>Testcontainers</strong> (раздел Bash): дёшево и близко к проду</li>
+          <li><strong>Чужие сервисы</strong> — замокать через <strong>service virtualization</strong>: WireMock, Mockoon, responses. Возвращают заранее заданные ответы</li>
+          <li><strong>Совместимость с чужими</strong> — <strong>contract-тесты</strong> (Pact) вместо реального поднятия</li>
+        </ul>
+        <div class="code-block"><span class="cm"># Тест своего сервиса: своя БД реальная, чужой сервис замокан</span>
+<span class="hdr">@responses.activate</span>
+<span class="kw">def</span> <span class="fn">test_create_order</span>():
+    <span class="cm"># мок чужого payment-сервиса</span>
+    responses.add(responses.POST, <span class="st">"https://payment/charge"</span>,
+                  json={<span class="st">"status"</span>: <span class="st">"ok"</span>}, status=<span class="val">200</span>)
+    <span class="cm"># свой сервис + своя БД (Testcontainers) работают по-настоящему</span>
+    result = order_service.create(amount=<span class="val">100</span>)
+    <span class="kw">assert</span> result.status == <span class="st">"paid"</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Уровни проверки зависимостей</strong> — пирамида для распределённой системы:</p>
+        <ul>
+          <li><strong>Своё ядро</strong> — реальное (unit + integration со своей БД)</li>
+          <li><strong>Границы с чужими</strong> — contract-тесты (проверяют формат без поднятия)</li>
+          <li><strong>Критичные сквозные пути</strong> — несколько E2E на реальном staging</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Sync vs async — что меняется для тестирования</span>Сервисы общаются двумя способами, и async сложнее проверять:
+          <ul style="margin:8px 0 0;">
+            <li><strong>Sync</strong> (HTTP/gRPC) — запрос-ответ здесь и сейчас; тестируется проще: позвал → проверил ответ</li>
+            <li><strong>Async</strong> (очереди, события — Kafka/RabbitMQ) — отправил и не ждёшь сразу. Проверять надо: <strong>задержку</strong> (результат появляется не мгновенно → polling), <strong>дубли сообщений</strong> (одно событие может прийти дважды), <strong>out-of-order</strong> (события приходят не по порядку), <strong>eventual consistency</strong> (данные сходятся со временем, не сразу)</li>
+          </ul>
+        </div>
+        <div class="hl"><span class="hl-label">Contract testing — ownership и версии</span><strong>Consumer-driven contracts</strong>: потребитель описывает, что ему нужно от API, провайдер проверяет, что он это даёт (<strong>provider verification</strong>). Контракт хранится между командами (например, Pact Broker). <strong>Версионирование/deprecation</strong>: менять контракт нельзя резко — старая версия живёт, пока потребители не перешли; breaking change проходит через депрекацию. Для QA это ответ на «как команды не ломают друг друга»: контракт — формальная граница ответственности.</div>
+        <div class="hl orange"><span class="hl-label">Подводный камень</span>Если замокать <em>все</em> зависимости и никогда не проверять реальную интеграцию — моки разойдутся с реальностью. Чужой сервис поменял формат ответа, а твой мок остался старым: тесты зелёные, а ошибка проявится в production. Поэтому моки страхуют contract-тестами (они краснеют при breaking change) и периодической проверкой в реальном окружении.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сервис зависит от 10 других. Как тестируешь, не поднимая все?» — 1) свою логику — unit, 2) свою БД/очередь — реально через Testcontainers, 3) каждую из 10 зависимостей — мок (WireMock/responses) с заранее заданными ответами + contract-тест на формат, 4) 1-2 критичных сквозных пути — E2E на staging. Не «поднять всё», а изолировать своё и проверить границы.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. RESILIENCY ─────── -->
+  <section class="section" id="resiliency">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Resiliency: retries, timeouts, circuit breakers</span>
+      <span class="section-badge">reliability</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Resiliency (устойчивость)</strong> — способность системы переживать сбои зависимостей, не падая целиком. В распределённой системе сбои неизбежны: кратковременный сетевой сбой, сервис перегружен. Три базовых механизма защиты:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">Retry (повтор)</div>
+            Запрос упал — повторить. Помогает при временных сбоях (кратковременный сетевой сбой). Но осторожно: повтор не должен дублировать действие.
+          </div>
+          <div class="card">
+            <div class="card-title">Timeout</div>
+            Не ждать ответа вечно. Если зависимость не ответила за N секунд — оборвать и не висеть, блокируя ресурсы.
+          </div>
+          <div class="card">
+            <div class="card-title">Circuit breaker</div>
+            Зависимость стабильно падает — перестать продолжать отправлять запросы на время, дать восстановиться.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <ul>
+          <li><strong>Retry с backoff</strong> — повторять не сразу и не бесконечно, а с растущей паузой (1с, 2с, 4с). Иначе лавина повторов добьёт уже упавший сервис</li>
+          <li><strong>Retry требует идемпотентности</strong> — если повторяем POST платежа, нужен <code>Idempotency-Key</code>, иначе спишем дважды (связка с разделом API)</li>
+          <li><strong>Timeout</strong> — должен быть на каждый внешний вызов. Без него один зависший сервис тормозит всю цепочку</li>
+          <li><strong>Circuit breaker</strong> — три состояния: closed (работает), open (зависимость упала, запросы не идут), half-open (пробуем восстановиться)</li>
+          <li><strong>Fallback</strong> — запасной ответ, когда зависимость недоступна (показать кэш, дефолт, заглушку)</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Circuit breaker — буквально автомат-предохранитель: при перегрузке размыкает цепь, чтобы не сгорела вся проводка. Сервис «размыкает» вызовы к упавшей зависимости, периодически проверяя, не ожила ли она.</div>
+        <div class="hl"><span class="hl-label">Ещё механизмы (зачем QA их проверяет)</span>
+          <ul style="margin:6px 0 0;">
+            <li><strong>Jitter</strong> — случайный разброс пауз retry, чтобы все клиенты не повторяли синхронно (иначе «толпа» добьёт сервис)</li>
+            <li><strong>Rate limiting</strong> — ограничение числа запросов; проверять поведение при достижении лимита (429, очередь)</li>
+            <li><strong>Bulkhead</strong> — изоляция ресурсов (пул на каждую зависимость), чтобы один зависший вызов не сожрал все потоки</li>
+            <li><strong>Retry budget</strong> — лимит на долю повторов, чтобы ретраи не превратились в DDoS своего же сервиса</li>
+          </ul>
+        </div>
+        <div class="hl orange"><span class="hl-label">Риск: cascading failures</span>Главная опасность бездумных retry — <strong>каскадный сбой</strong>: сервис перегружен → клиенты повторяют → нагрузка растёт → сервис падает совсем, и за ним соседние. Поэтому retry всегда с backoff + jitter + budget, а не «повторять, пока не ответит». QA проверяет, что retry не усиливает перегрузку.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как тестировать resiliency</strong> — отдельный и ценный навык:</p>
+        <ul>
+          <li><strong>Fault injection</strong> — намеренно ломать зависимость в тесте: вернуть 500, замедлить ответ, оборвать соединение. Проверить, что сервис не падает целиком</li>
+          <li><strong>Timeout</strong> — замокать медленный ответ, проверить, что вызов оборвётся за заданное время</li>
+          <li><strong>Circuit breaker</strong> — серия упавших ответов → проверить, что breaker «разомкнулся» и перестал слать запросы</li>
+          <li><strong>Chaos engineering</strong> (раздел теории) — то же, но шире: обычно начинается в контролируемых окружениях; в production — постепенно, с guardrails и быстрым rollback, а не сразу на всём трафике</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Идемпотентность в async</span>Для очередей retry превращается в повторную доставку сообщения. Защита — <strong>идемпотентный consumer</strong>: запоминать обработанные сообщения по <strong>deduplication key</strong> и игнорировать повторы. Проверять: одно и то же сообщение, доставленное дважды, не приводит к двойной обработке (двойному списанию, дублю заказа).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как проверить, что retry платежа не спишет деньги дважды?» — Ключевое — идемпотентность. Тест: 1) отправить платёж с <code>Idempotency-Key</code>, 2) повторить тот же запрос с тем же ключом (имитируя retry), 3) проверить, что списание <em>одно</em>, а второй запрос вернул тот же результат, не создав новую транзакцию. Без idempotency-ключа retry в платежах опасен — это классический баг «charged twice».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. OBSERVABILITY ─────── -->
+  <section class="section" id="observability">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Observability для QA</span>
+      <span class="section-badge">production</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Observability</strong> — способность понять, что происходит в системе, по её сигналам (telemetry signals). В распределённой системе без этого тестирование неполно: часть проблем видна только в проде. Три сигнала:</p>
+        <ul>
+          <li><strong>Logs</strong> — что произошло (текстовые записи событий)</li>
+          <li><strong>Metrics</strong> — сколько и как часто (числа во времени: latency, error rate, RPS)</li>
+          <li><strong>Traces</strong> — путь одного запроса через все сервисы</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Сигнал</th><th>Инструменты</th><th>Зачем QA</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Logs</strong></td><td>Kibana (ELK), Grafana Loki, Datadog</td><td>найти ошибку по request-id, разобрать инцидент</td></tr>
+            <tr><td><strong>Metrics</strong></td><td>Prometheus, Grafana, Datadog</td><td>p95/p99 latency, error rate по сервисам</td></tr>
+            <tr><td><strong>Traces</strong></td><td>Jaeger, Tempo</td><td>увидеть, какой сервис в цепочке тормозит/падает</td></tr>
+            <tr><td><strong>Alerts</strong></td><td>PagerDuty, Opsgenie</td><td>уведомление, когда метрика вышла за порог</td></tr>
+          </tbody>
+        </table>
+        <p>Связка: <strong>request-id</strong> проходит через все сервисы, по нему собираешь логи и трейс одного запроса (см. разделы Bash и API → дебаг 500). Это основной инструмент локализации в микросервисах.</p>
+        <div class="hl"><span class="hl-label">trace_id / span_id и OpenTelemetry</span>В трейсинге запрос имеет <strong>trace_id</strong> (весь путь через систему) и <strong>span_id</strong> на каждый участок (вызов конкретного сервиса). По ним собирается полная картина «где запрос провёл время и где упал». <strong>OpenTelemetry (OTel)</strong> — современный стандарт сбора всех трёх сигналов (logs/metrics/traces) единым способом, вендор-независимо. Знать как термин — плюс на собесе.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как организовать observability для QA</strong> — что отвечать:</p>
+        <ul>
+          <li><strong>Structured logging</strong> — логи в JSON с request-id, чтобы фильтровать по полям, а не grep по тексту</li>
+          <li><strong>QA-дашборд</strong> — pass rate автотестов, escape rate, p95 по критичным эндпоинтам, статус релизов</li>
+          <li><strong>Алерты на симптомы</strong> — рост error rate, падение SLO, всплеск latency — а не на «всё подряд»</li>
+          <li><strong>Synthetic monitoring</strong> — синтетические проверки регулярно выполняют критичные сценарии 24/7, алертят при поломке (E2E в проде)</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Чеклист testability архитектуры</span>Что делает систему тестируемой — полезно проговорить как влияние QA на дизайн:
+          <ul style="margin:6px 0 0;">
+            <li><strong>Health / readiness endpoints</strong> — сервис сообщает, готов ли он (для smoke и оркестрации)</li>
+            <li><strong>Sandbox внешних провайдеров</strong> — тестовые окружения платёжек/смс, а не прод</li>
+            <li><strong>Feature flags</strong> — включать/выключать фичу без передеплоя (тест на проде безопасно)</li>
+            <li><strong>Тестовые webhooks</strong> — возможность проверить входящие колбэки</li>
+            <li><strong>Управляемое время / clock</strong> — подменять время в тестах (TTL, расписания, дедлайны)</li>
+            <li><strong>request-id</strong> — сквозной идентификатор для трассировки</li>
+          </ul>
+        </div>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Для Senior QA observability — это shift-right: качество не заканчивается на «тесты зелёные перед релизом». После деплоя ты смотришь в метрики и логи, ловишь то, что не воспроизвелось на staging. Связка <strong>SLO + error budget</strong> (раздел теории) даёт объективный критерий: держим ли мы обещанное качество в проде. <strong>QA, который умеет работать с production-сигналами</strong>, ценится выше того, кто только пишет кейсы.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> по trace/логам предложить гипотезы, где узкое место; по схеме сервисов — найти риски; составить risk-based quality strategy.<br>
+          <strong>Пример промпта:</strong> <em>«Вот трейс запроса с временами по спанам [данные]. Где узкое место и какие гипотезы проверить?»</em><br>
+          <strong>Что проверить руками:</strong> гипотезы LLM — это направления, подтверждай их реальными метриками и логами, не принимай как факт.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как валидировать систему после production-деплоя?» — 1) <strong>Smoke в проде</strong> — критичные сценарии сразу после выката, 2) <strong>метрики</strong> — error rate и latency не выросли против baseline, 3) <strong>canary</strong> — выкатили на 5%, сравнили метрики с остальными 95%, 4) <strong>synthetic monitoring</strong> — боты подтверждают работу ключевых путей, 5) <strong>алерты</strong> — настроены на отклонения. Деплой не закончен в момент выката — он закончен, когда метрики подтвердили здоровье.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. SENIOR-КЕЙСЫ ─────── -->
+  <section class="section" id="cases">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Senior-кейсы</span>
+      <span class="section-badge">system design</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Как тестировать payment pipeline.</strong> Платёж проходит цепочку: создание → авторизация → списание (capture) → возврат (refund), часто через внешний провайдер и асинхронные webhook'и.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>На что смотреть в payment pipeline:</strong></p>
+        <ul>
+          <li><strong>Идемпотентность</strong> — повтор запроса (retry, двойной клик) не списывает дважды (<code>Idempotency-Key</code>)</li>
+          <li><strong>Webhooks</strong> — провайдер шлёт статус асинхронно: тестировать дубли, неверный порядок, повтор webhook'а</li>
+          <li><strong>Состояния</strong> — все переходы статусов (pending → authorized → captured → refunded) и невалидные переходы</li>
+          <li><strong>Деньги и валюты</strong> — округление, точность, разные валюты (хранить в минимальных единицах — копейках/центах)</li>
+          <li><strong>Конкурентность</strong> — два списания, два refund'а одновременно — не уйти в минус, не задвоить</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Fintech-риски кратко</span>Если домен финтех — добавь: <strong>reconciliation</strong> (сверка своих данных с данными провайдера/банка), <strong>double-entry ledger</strong> (каждая операция = две записи, дебет+кредит, сумма всегда сходится), <strong>chargebacks/disputes</strong> (оспаривание платежа), <strong>KYC/AML</strong> (проверка клиента). Это нишевое, но на финтех-собесе спрашивают.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>«Suite идёт 2 часа — ускорь» (архитектурно)</strong> — то же, что в CI/CD, но через призму стратегии:</p>
+        <ul>
+          <li>Параллелизация (xdist + шардинг по раннерам) — самый быстрый выигрыш</li>
+          <li><strong>Сдвиг по пирамиде</strong> — заменить тяжёлые E2E на дешёвые contract/integration. Это архитектурное решение, не просто оптимизация</li>
+          <li>Разделить на pre-merge (быстрые) и nightly (полный регресс)</li>
+          <li>Убрать дубли и flaky, кэш зависимостей, session-scope для дорогих фикстур</li>
+        </ul>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> накидать quality strategy, найти пробелы в покрытии, разобрать архитектурную схему.<br>
+          <strong>Пример промпта:</strong> <em>«Вот схема из 6 микросервисов с очередью и платёжным провайдером. Предложи quality strategy: где unit, где contract, где E2E, какие resiliency-риски проверить.»</em><br>
+          <strong>Что проверить руками:</strong> доменные риски и критичные пути — LLM не знает, что для <em>твоего</em> бизнеса дороже всего сломать.
+        </div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Спроектируй quality strategy для платёжной платформы.» — Структурно: 1) <strong>критичные пути</strong> — оплата, refund, баланс (тут максимум внимания), 2) <strong>уровни</strong> — unit на логику, integration со своей БД, contract с провайдером и между сервисами, E2E на оплату, 3) <strong>resiliency</strong> — idempotency, retry с backoff, timeout, поведение при недоступном провайдере, 4) <strong>данные</strong> — точность денег, конкурентность, reconciliation, 5) <strong>прод</strong> — observability, smoke после деплоя, алерты на error rate. Главное — приоритет по риску: деньги важнее косметики.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

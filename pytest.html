@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Pytest</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item active" href="#"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#basics">01 · Pytest: основы</a>
+    <a href="#fixtures">02 · Фикстуры</a>
+    <a href="#parametrize">03 · Параметризация</a>
+    <a href="#mocks">04 · Моки в pytest</a>
+    <a href="#framework">05 · Организация фреймворка</a>
+    <a href="#run">06 · Запуск, отчёты, CI</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Pytest</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Pytest</h1>
+    <p>// 6 подтем · фикстуры, параметризация, моки, фреймворк</p>
+  </div>
+
+
+  <!-- ─────── 01. ОСНОВЫ ─────── -->
+  <section class="section" id="basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Pytest: основы</span>
+      <span class="section-badge">basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>pytest</strong> — самый популярный фреймворк для тестов на Python. Тест — это обычная функция с <code>assert</code>:</p>
+        <div class="code-block"><span class="cm"># test_math.py</span>
+<span class="kw">def</span> <span class="fn">test_addition</span>():
+    <span class="kw">assert</span> <span class="val">2</span> + <span class="val">2</span> == <span class="val">4</span>
+
+<span class="kw">def</span> <span class="fn">test_string</span>():
+    <span class="kw">assert</span> <span class="st">"hello"</span>.upper() == <span class="st">"HELLO"</span></div>
+        <p>Запуск — команда <code>pytest</code> в терминале. Pytest сам находит файлы <code>test_*.py</code> и функции <code>test_*</code>.</p>
+        <div class="hl green"><span class="hl-label">Главное преимущество</span>Обычный <code>assert</code> вместо <code>assertEqual</code>/<code>assertTrue</code> из unittest. При падении pytest сам показывает, что было слева и справа: <code>assert 2 + 2 == 5</code> → видно <code>4 != 5</code>. Не нужно запоминать десятки методов проверки.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Соглашения об именах</strong> (pytest находит тесты по ним): файлы <code>test_*.py</code>, функции <code>test_*</code>, классы <code>Test*</code> (без <code>__init__</code>).</p>
+        <p><strong>Полезные флаги запуска:</strong></p>
+        <table>
+          <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><code>pytest -v</code></td><td>подробный вывод (имя каждого теста)</td></tr>
+            <tr><td><code>pytest -k "login"</code></td><td>запустить тесты, в имени которых есть login</td></tr>
+            <tr><td><code>pytest -x</code></td><td>остановиться на первом падении</td></tr>
+            <tr><td><code>pytest --maxfail=2</code></td><td>остановиться после 2 падений</td></tr>
+            <tr><td><code>pytest test_api.py::test_login</code></td><td>конкретный тест</td></tr>
+            <tr><td><code>pytest -s</code></td><td>показывать print (не перехватывать вывод)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Структура теста — AAA</strong> (Arrange-Act-Assert):</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_user_creation</span>():
+    data = {<span class="st">"name"</span>: <span class="st">"Иван"</span>}        <span class="cm"># Arrange</span>
+    user = create_user(data)          <span class="cm"># Act</span>
+    <span class="kw">assert</span> user.name == <span class="st">"Иван"</span>        <span class="cm"># Assert</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Проверка исключений:</strong></p>
+        <div class="code-block"><span class="kw">import</span> pytest
+
+<span class="kw">def</span> <span class="fn">test_divide_by_zero</span>():
+    <span class="kw">with</span> pytest.raises(ZeroDivisionError):
+        result = <span class="val">1</span> / <span class="val">0</span></div>
+        <div class="hl modern"><span class="hl-label">pytest vs unittest</span>unittest есть в стандартной библиотеке, но многословный (классы, <code>self.assertEqual</code>). pytest — внешний пакет, но удобнее: голый <code>assert</code>, фикстуры (мощнее setUp/tearDown), параметризация, огромная экосистема плагинов (xdist, allure, mock, cov). В современных проектах де-факто стандарт — pytest.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем pytest лучше unittest?» — Голый <code>assert</code> с понятным выводом вместо методов <code>assertEqual</code>; фикстуры гибче setUp/tearDown (scope, переиспользование, зависимости); параметризация одним декоратором; богатая экосистема плагинов. unittest хорош тем, что в стандартной библиотеке — не нужно ставить.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. ФИКСТУРЫ ─────── -->
+  <section class="section" id="fixtures">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Фикстуры</span>
+      <span class="section-badge">главная тема</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Фикстура (fixture)</strong> — подготовка того, что нужно тесту: данные, соединение с БД, авторизованный клиент. Объявляешь через <code>@pytest.fixture</code>, тест получает её как аргумент.</p>
+        <div class="code-block"><span class="kw">import</span> pytest
+
+<span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">user</span>():
+    <span class="kw">return</span> {<span class="st">"name"</span>: <span class="st">"Иван"</span>, <span class="st">"role"</span>: <span class="st">"admin"</span>}
+
+<span class="kw">def</span> <span class="fn">test_user_is_admin</span>(user):   <span class="cm"># fixture передаётся по имени</span>
+    <span class="kw">assert</span> user[<span class="st">"role"</span>] == <span class="st">"admin"</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Фикстура — это dependency injection для тестов: тест объявляет, что ему нужно (аргумент <code>user</code>), pytest сам создаёт и подставляет. Тест не занимается подготовкой — он просто получает готовое, как функция получает аргументы.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Setup/teardown через yield</strong> — код до <code>yield</code> это подготовка, после — очистка:</p>
+        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">db_connection</span>():
+    conn = connect_to_db()      <span class="cm"># setup</span>
+    <span class="kw">yield</span> conn                   <span class="cm"># отдаём тесту</span>
+    conn.close()                <span class="cm"># teardown (всегда выполнится)</span></div>
+        <p><strong>Scope</strong> — как часто пересоздавать фикстуру:</p>
+        <table>
+          <thead><tr><th>Scope</th><th>Создаётся</th></tr></thead>
+          <tbody>
+            <tr><td><code>function</code> (по умолчанию)</td><td>на каждый тест заново</td></tr>
+            <tr><td><code>class</code></td><td>один раз на класс тестов</td></tr>
+            <tr><td><code>module</code></td><td>один раз на файл</td></tr>
+            <tr><td><code>session</code></td><td>один раз на весь прогон (дорогие ресурсы: БД, токен)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>conftest.py</strong> — файл с общими фикстурами, доступными всем тестам в директории без импорта. Туда выносят переиспользуемое: клиент API, авторизацию, подключение к БД.</p>
+        <div class="code-block"><span class="cm"># conftest.py</span>
+<span class="hdr">@pytest.fixture(scope=<span class="st">"session"</span>)</span>
+<span class="kw">def</span> <span class="fn">api_client</span>():
+    client = APIClient(base_url=<span class="st">"..."</span>)
+    client.login(<span class="st">"user"</span>, <span class="st">"pass"</span>)
+    <span class="kw">return</span> client       <span class="cm"># один авторизованный клиент на весь прогон</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Фикстуры зависят от фикстур</strong> — выстраиваются в цепочку:</p>
+        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">order</span>(api_client, user):   <span class="cm"># использует две другие фикстуры</span>
+    <span class="kw">return</span> api_client.create_order(user_id=user.id)</div>
+        <p><strong>Фабрики</strong> — фикстура возвращает функцию, чтобы создавать объекты с разными параметрами:</p>
+        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">make_user</span>():
+    <span class="kw">def</span> <span class="fn">_make</span>(role=<span class="st">"user"</span>):
+        <span class="kw">return</span> create_user(role=role)
+    <span class="kw">return</span> _make          <span class="cm"># в тесте: make_user(role="admin")</span></div>
+        <p><strong>Встроенные фикстуры</strong> — даёт сам pytest, мини-примеры:</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_file</span>(tmp_path):              <span class="cm"># tmp_path — pathlib.Path, временная папка</span>
+    f = tmp_path / <span class="st">"data.txt"</span>
+    f.write_text(<span class="st">"hello"</span>)
+
+<span class="kw">def</span> <span class="fn">test_env</span>(monkeypatch):           <span class="cm"># подмена env/атрибутов</span>
+    monkeypatch.setenv(<span class="st">"API_URL"</span>, <span class="st">"http://test"</span>)
+
+<span class="kw">def</span> <span class="fn">test_logs</span>(caplog):               <span class="cm"># перехват логов для проверки</span>
+    do_something()
+    <span class="kw">assert</span> <span class="st">"ошибка"</span> <span class="kw">in</span> caplog.text</div>
+        <p>Используй <code>tmp_path</code> (на <code>pathlib.Path</code>), а не устаревший <code>tmpdir</code>.</p>
+        <div class="hl orange"><span class="hl-label">autouse-фикстуры</span><code>@pytest.fixture(autouse=True)</code> применяется ко всем тестам в области без явного указания в аргументах. <strong>Удобно</strong> для сквозной подготовки (сброс состояния, общий лог). <strong>Опасно</strong> — создаёт «неявную магию»: тест зависит от того, чего не видно в его сигнатуре. Применяй для действительно сквозного и очевидного, иначе тесты становится трудно читать и дебажить.</div>
+        <div class="hl orange"><span class="hl-label">Главное про teardown</span>Очистка через <code>yield</code> выполнится <em>даже если тест упал</em> — это важно для изоляции. Создал данные в БД → удалил после, независимо от результата. Тесты не должны оставлять данные, которые сломают следующий прогон (связка с разделом БД).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Фикстура со scope=session создаёт юзера, тесты его меняют. В чём риск?» — Тесты перестают быть изолированными: один тест поменял состояние общего юзера → следующий падает или зависит от порядка. Дорогие ресурсы (соединение, токен) шарить можно, а изменяемые данные лучше создавать на каждый тест (function scope) или откатывать в teardown.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. ПАРАМЕТРИЗАЦИЯ ─────── -->
+  <section class="section" id="parametrize">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Параметризация</span>
+      <span class="section-badge">parametrize</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Параметризация</strong> — один тест прогоняется на множестве входных данных. Не дублируешь код, не пишешь 10 почти одинаковых тестов:</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
+    (<span class="val">2</span>, <span class="val">4</span>),
+    (<span class="val">3</span>, <span class="val">9</span>),
+    (<span class="val">5</span>, <span class="val">25</span>),
+])</span>
+<span class="kw">def</span> <span class="fn">test_square</span>(value, expected):
+    <span class="kw">assert</span> value ** <span class="val">2</span> == expected
+<span class="cm"># pytest создаст 3 отдельных теста</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Параметризация — как цикл по тест-кейсам, но каждая итерация — <em>отдельный</em> тест в отчёте. Упал один набор данных — видно, какой именно, остальные прошли. Это лучше, чем цикл внутри одного теста (там первое падение прячет остальные).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>ids</strong> — читаемые имена для каждого набора (видны в отчёте):</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"email, valid"</span>, [
+    (<span class="st">"user@mail.com"</span>, <span class="kw">True</span>),
+    (<span class="st">"no-at-sign"</span>, <span class="kw">False</span>),
+    (<span class="st">""</span>, <span class="kw">False</span>),
+], ids=[<span class="st">"valid"</span>, <span class="st">"no_at"</span>, <span class="st">"empty"</span>])</span>
+<span class="kw">def</span> <span class="fn">test_email_validation</span>(email, valid):
+    <span class="kw">assert</span> is_valid_email(email) == valid</div>
+        <p>В отчёте будет <code>test_email_validation[valid]</code>, <code>[no_at]</code>, <code>[empty]</code> — сразу понятно, какой случай упал.</p>
+        <p><strong>pytest.param</strong> — современный способ задать id и пометить отдельный набор (например, известный баг через xfail):</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
+    pytest.param(<span class="val">2</span>, <span class="val">4</span>, id=<span class="st">"positive"</span>),
+    pytest.param(<span class="val">0</span>, <span class="val">0</span>, id=<span class="st">"zero"</span>),
+    pytest.param(-<span class="val">1</span>, <span class="val">1</span>, id=<span class="st">"negative"</span>, marks=pytest.mark.xfail),
+])</span>
+<span class="kw">def</span> <span class="fn">test_square</span>(value, expected): ...</div>
+        <p>Это прямое применение <strong>техник тест-дизайна</strong> (раздел теории): классы эквивалентности и граничные значения превращаются в наборы параметров.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Параметризованные фикстуры (indirect)</strong> — один тест прогоняется на разных конфигурациях (роли, окружения, клиенты). Особенно полезно для API-тестов:</p>
+        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">client</span>(request):
+    role = request.param          <span class="cm"># значение приходит из parametrize</span>
+    <span class="kw">return</span> make_client(role=role)
+
+<span class="hdr">@pytest.mark.parametrize(<span class="st">"client"</span>, [<span class="st">"admin"</span>, <span class="st">"user"</span>], indirect=<span class="kw">True</span>)</span>
+<span class="kw">def</span> <span class="fn">test_access</span>(client):       <span class="cm"># тест прогонится для admin и user</span>
+    ...</div>
+        <p><code>indirect=True</code> направляет параметр <em>в фикстуру</em>, а не в тест напрямую — фикстура успевает подготовить ресурс под каждый набор.</p>
+        <p><strong>Тест-данные</strong> — где брать:</p>
+        <ul>
+          <li><strong>Inline</strong> — прямо в parametrize (простые случаи)</li>
+          <li><strong>Фабрики</strong> — <code>factory_boy</code> для объектов с реалистичными полями</li>
+          <li><strong>Faker</strong> — фейковые данные (имена, email, адреса)</li>
+          <li><strong>Внешние файлы</strong> — JSON/CSV/YAML для больших датасетов</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Уникальность данных</span>При параллельном запуске тесты не должны конфликтовать за одни данные. Генерируй уникальное: <code>f"user_{uuid4()}@test.com"</code>, а не хардкод <code>"test@test.com"</code> — иначе два теста создадут юзера с одним email и один упадёт.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><em>«Сгенерируй parametrize-набор для теста валидации пароля: валидные, слишком короткие, без цифр, без спецсимволов, юникод, граничная длина. С ids через pytest.param.»</em><br><br>
+          LLM хорошо превращает описание правил валидации в готовые параметризованные наборы по классам эквивалентности.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. МОКИ ─────── -->
+  <section class="section" id="mocks">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Моки в pytest</span>
+      <span class="section-badge">mocking</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Мок подменяет внешнюю зависимость (API, БД, время) на управляемую заглушку, чтобы тест не зависел от внешнего мира. Базовые инструменты — <code>monkeypatch</code> (встроенный) и <code>mocker</code> (плагин pytest-mock).</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_with_monkeypatch</span>(monkeypatch):
+    <span class="cm"># подменить переменную окружения</span>
+    monkeypatch.setenv(<span class="st">"API_URL"</span>, <span class="st">"http://test"</span>)
+    <span class="cm"># подменить функцию</span>
+    monkeypatch.setattr(time, <span class="st">"time"</span>, <span class="kw">lambda</span>: <span class="val">12345</span>)</div>
+        <div class="hl green"><span class="hl-label">Зачем</span>Тест должен проверять <em>твою</em> логику, а не работу чужого сервиса. Если код ходит в платёжку — мокаешь её ответ, и тест не зависит от того, доступна ли платёжка сейчас. Это делает тесты быстрыми и стабильными (см. также раздел API → контрактное тестирование).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>pytest-mock</strong> — это <em>плагин</em> (не часть ядра pytest), даёт фикстуру <code>mocker</code> — обёртку над <code>unittest.mock</code>, удобнее в pytest:</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">test_order_payment</span>(mocker):
+    <span class="cm"># подменяем функцию, задаём что вернёт</span>
+    mock_pay = mocker.patch(<span class="st">"app.payment.charge"</span>)
+    mock_pay.return_value = {<span class="st">"status"</span>: <span class="st">"success"</span>}
+
+    result = create_order(amount=<span class="val">100</span>)
+
+    <span class="kw">assert</span> result.paid <span class="kw">is</span> <span class="kw">True</span>
+    mock_pay.assert_called_once()       <span class="cm"># проверка вызова</span>
+    mock_pay.assert_called_with(amount=<span class="val">100</span>)</div>
+        <p><strong>Мок HTTP-вызовов</strong> — через библиотеку <code>responses</code> (как в разделе API):</p>
+        <div class="code-block"><span class="hdr">@responses.activate</span>
+<span class="kw">def</span> <span class="fn">test_external_api</span>():
+    responses.add(responses.GET, <span class="st">"https://api.ext.com/data"</span>,
+                  json={<span class="st">"key"</span>: <span class="st">"value"</span>}, status=<span class="val">200</span>)
+    result = fetch_data()
+    <span class="kw">assert</span> result[<span class="st">"key"</span>] == <span class="st">"value"</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">Patch там, где используется</span>Классическая ошибка: мокать функцию там, где она <em>определена</em>, а не там, где <em>используется</em>. Если <code>app.service</code> делает <code>from app.payment import charge</code>, то патчить надо <code>app.service.charge</code>, а не <code>app.payment.charge</code>. Иначе мок не сработает, тест ходит в реальный код.</div>
+        <p><strong>Что мокать, а что нет</strong> (связка с разделом API):</p>
+        <ul>
+          <li><strong>Мокать</strong>: чужие внешние сервисы (платёжки, сторонние API), медленное (сеть), недетерминированное (время, random)</li>
+          <li><strong>Не мокать</strong>: своё ядро (бизнес-логику, которую и тестируешь), свою БД (лучше реальная через Testcontainers)</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Замокал всё, тесты зелёные — это хорошо?» — Не обязательно. Over-mocking опасен: тест проверяет моки, а не систему. Если замокал собственную бизнес-логику — тест зелёный, а реальный код сломан. Правило: мокай границы (внешнее, дорогое), а ядро тестируй по-настоящему. Зелёный тест на моках ≠ работающий код.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. ОРГАНИЗАЦИЯ ФРЕЙМВОРКА ─────── -->
+  <section class="section" id="framework">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Организация фреймворка</span>
+      <span class="section-badge">архитектура тестов</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>«Расскажи про свой автотест-фреймворк» — типовая структура E2E-проекта:</p>
+        <div class="code-block">project/
+├── tests/                  <span class="cm"># сами тесты, разбиты по доменам/фичам</span>
+│   ├── conftest.py         <span class="cm"># общие фикстуры (корневые)</span>
+│   ├── api/
+│   │   └── test_orders.py
+│   └── ui/
+│       └── test_checkout.py
+├── clients/                <span class="cm"># обёртки над API (Client Object)</span>
+│   └── order_client.py
+├── pages/                  <span class="cm"># Page Object для UI</span>
+│   └── checkout_page.py
+├── data/                   <span class="cm"># фабрики и тест-данные</span>
+│   └── factories.py
+├── config/                 <span class="cm"># настройки окружений (dev/stage/prod)</span>
+│   └── settings.py
+├── utils/                  <span class="cm"># хелперы: логирование, ожидания, форматтеры</span>
+├── conftest.py             <span class="cm"># корневой conftest</span>
+├── pytest.ini              <span class="cm"># конфиг pytest, маркеры</span>
+├── pyproject.toml          <span class="cm"># зависимости, ruff/mypy</span>
+├── .env.example            <span class="cm"># шаблон переменных (без секретов!)</span>
+└── README.md               <span class="cm"># как запустить</span></div>
+        <div class="hl green"><span class="hl-label">Главный принцип</span>Тест отвечает на вопрос <em>«что проверяем»</em>, всё остальное вынесено: <em>как ходить</em> (clients/pages), <em>с какими данными</em> (data), <em>куда</em> (config). Тест не должен содержать ни голых HTTP-запросов, ни селекторов, ни хардкода URL — он читается как бизнес-сценарий.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что куда класть</strong> — best practices:</p>
+        <table>
+          <thead><tr><th>Папка</th><th>Что лежит / правило</th></tr></thead>
+          <tbody>
+            <tr><td><code>tests/</code></td><td>только проверки и сценарии. Разбивка по доменам/фичам, не «свалка». Имя теста описывает поведение</td></tr>
+            <tr><td><code>clients/</code> <code>pages/</code></td><td>взаимодействие с системой (API/UI). Меняется эндпоинт/локатор — правишь здесь, тесты не трогаешь</td></tr>
+            <tr><td><code>data/</code></td><td>фабрики тест-данных, уникальные значения. Никаких хардкод-данных в тестах</td></tr>
+            <tr><td><code>config/</code></td><td>настройки окружений (base_url, таймауты) через переменные. Переключение dev/stage без правки кода</td></tr>
+            <tr><td><code>conftest.py</code></td><td>фикстуры: корневой — общие (сессия, авторизация), вложенные — для своей группы тестов</td></tr>
+            <tr><td><code>utils/</code></td><td>переиспользуемые хелперы — но не «склад всего подряд»</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Слои</strong> (отделяют тесты от деталей): <strong>Client/Page-слой</strong> (как взаимодействуем) → <strong>Test-слой</strong> (что проверяем) → <strong>Data-слой</strong> (с чем). Зависимости идут в одну сторону: тест использует клиент и данные, но клиент не знает про тесты.</p>
+        <p><strong>Маркеры</strong> — помечать и группировать:</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.smoke</span>
+<span class="kw">def</span> <span class="fn">test_critical_path</span>(): ...
+<span class="cm"># pytest -m smoke  /  pytest -m "not slow"</span></div>
+        <p><strong>Config и секреты:</strong> окружения через переменные (<code>.env</code> локально, secrets в CI), <code>.env</code> в <code>.gitignore</code>, в репо только <code>.env.example</code>. Секреты — никогда в код (связка с разделом Безопасность).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Паттерны проектирования автотестов</strong> — частый senior-вопрос «какие паттерны используешь и зачем»:</p>
+        <table>
+          <thead><tr><th>Паттерн</th><th>Суть и зачем</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Page Object</strong> (POM)</td><td>страница = класс с локаторами и методами. Тесты не знают про селекторы; поменялась вёрстка — правишь в одном месте. Для UI</td></tr>
+            <tr><td><strong>Client / Service Object</strong></td><td>то же для API: класс-обёртка над эндпоинтами домена. Тесты работают с <code>client.create_order()</code>, не с HTTP. Аналог POM для бэкенда</td></tr>
+            <tr><td><strong>Factory / Builder</strong></td><td>создание тест-данных: фабрика генерит объект с дефолтами + уникальными полями, builder собирает сложный объект по частям. Убирает копипасту setup</td></tr>
+            <tr><td><strong>Fixture / DI</strong></td><td>встроен в pytest: подготовка и очистка ресурсов, внедрение зависимостей в тест через аргументы. Замена setup/teardown</td></tr>
+            <tr><td><strong>Singleton</strong></td><td>один экземпляр на прогон (конфиг, сессия). Осторожно с общим состоянием при параллели</td></tr>
+          </tbody>
+        </table>
+        <p>Реже: <strong>Screenplay</strong> и <strong>Fluent interface</strong> — достаточно знать названия.</p>
+        <div class="hl green"><span class="hl-label">Общий принцип всех паттернов</span>Все они про одно — <strong>разделение ответственности и убирание дублирования</strong>: что проверяем (тест) отделено от как взаимодействуем (Page/Client Object) и с какими данными (Factory). Не нужно знать все паттерны наизусть — нужно понимать <em>зачем</em>: чтобы тесты читались как сценарии и менялись в одном месте, а не в пятидесяти.</div>
+        <div class="hl"><span class="hl-label">Каркас ответа «расскажи про свой фреймворк»</span>Структурируй так: 1) <strong>стек</strong> — pytest + requests, Allure для отчётов; 2) <strong>слои</strong> — клиенты по доменам (Client Object), тесты не знают про HTTP; 3) <strong>фикстуры</strong> — авторизация и тест-данные в conftest, очистка через teardown; 4) <strong>данные</strong> — фабрики, уникальные значения; 5) <strong>маркеры</strong> — smoke/regression для разделения прогонов; 6) <strong>CI</strong> — параллельный запуск, Allure-отчёт, gate на merge. Заверши тем, <em>что улучшил</em>: «сократил флак с X до Y», «ускорил прогон вдвое».</div>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Хороший фреймворк оценивают не по «красоте», а по тому, легко ли в нём <em>писать</em> новые тесты и <em>читать</em> чужие. Если для нового теста надо скопировать 20 строк настройки — слои плохие. Если тест читается как бизнес-сценарий (<code>order = client.create(); assert order.status == "paid"</code>) — фреймворк удался.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем client-слой, если можно просто requests в тесте?» — При росте до сотен тестов голые requests превращаются в ад поддержки: поменялся эндпоинт — правишь в 50 местах. Client-слой = единая точка: меняешь в одном месте. Плюс тесты читаются как сценарии, а не как HTTP-запросы. Это та же причина, по которой для UI делают Page Object.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как ты организуешь E2E-проект, чтобы он не превратился в хаос?» — Best practices: 1) <strong>разделение слоёв</strong> — тесты (что), clients/pages (как), data (с чем), config (где); 2) <strong>тесты независимы</strong> — каждый сам готовит данные и убирает за собой, не зависит от порядка и от других тестов; 3) <strong>изоляция данных</strong> — уникальные значения через фабрики, setup через API (не через UI); 4) <strong>окружения через config</strong>, секреты вне кода; 5) <strong>E2E мало</strong> — только критичные сквозные пути, логику вниз по пирамиде на API; 6) <strong>стабильность</strong> — явные ожидания вместо sleep, борьба с flaky. Главный критерий зрелости: новый тест пишется быстро и читается без расшифровки.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> разложить прототип в нормальную структуру фреймворка.<br>
+          <strong>Пример промпта:</strong> <em>«Вот тест с голыми requests [код]. Разнеси по слоям: вынеси HTTP в client-слой, данные в фабрики, предложи фикстуры и маркеры. Покажи итоговую структуру папок.»</em><br>
+          <strong>Что проверить руками:</strong> где тесты не изолированы (общее состояние, зависимость от порядка) — LLM это часто пропускает, а именно тут рождается flaky.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. ЗАПУСК, ОТЧЁТЫ, CI ─────── -->
+  <section class="section" id="run">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Запуск, отчёты, CI</span>
+      <span class="section-badge">execution</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Тесты должны гоняться автоматически в CI на каждый PR (см. раздел CI/CD) и давать понятный отчёт. Базовые инструменты:</p>
+        <ul>
+          <li><strong>pytest-xdist</strong> — параллельный запуск</li>
+          <li><strong>pytest-cov</strong> — покрытие кода</li>
+          <li><strong>Allure</strong> — красивые отчёты с шагами и аттачами</li>
+        </ul>
+        <p><strong>Где конфигурируется pytest</strong> — частый вопрос. В <code>pytest.ini</code> или <code>pyproject.toml</code> (современнее, всё в одном файле):</p>
+        <div class="code-block"><span class="cm"># pyproject.toml</span>
+[tool.pytest.ini_options]
+testpaths = [<span class="st">"tests"</span>]          <span class="cm"># где искать тесты</span>
+python_files = <span class="st">"test_*.py"</span>      <span class="cm"># шаблон файлов с тестами</span>
+addopts = <span class="st">"-v --strict-markers"</span>  <span class="cm"># опции по умолчанию</span>
+markers = [
+    <span class="st">"smoke: быстрые критичные тесты"</span>,
+    <span class="st">"slow: долгие тесты"</span>,
+]</span></div>
+        <p><code>--strict-markers</code> — заставляет регистрировать все маркеры (защита от опечаток в <code>@pytest.mark</code>).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Параллельный запуск</strong> — главный способ ускорить:</p>
+        <div class="code-block">pytest -n 4         <span class="cm"># в 4 процесса (pytest-xdist)</span>
+pytest -n auto      <span class="cm"># по числу ядер</span></div>
+        <p>Требование — <strong>изоляция тестов</strong>: не зависят друг от друга и от общих данных, иначе при параллели начнут конфликтовать.</p>
+        <p><strong>Разделение прогонов маркерами</strong> (связка с CI/CD):</p>
+        <div class="code-block">pytest -m smoke           <span class="cm"># быстрые на каждый PR</span>
+pytest -m regression      <span class="cm"># полный набор ночью</span></div>
+        <p><strong>Flaky-тесты</strong> — <code>pytest-rerunfailures</code> позволяет перезапускать упавшие (<code>--reruns 2</code>), но это <em>костыль, не лечение</em>: прячет проблему, а не решает (см. CI/CD).</p>
+        <p><strong>skip / xfail</strong> — управление «непроходящими» тестами:</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.skip(reason=<span class="st">"фича в разработке"</span>)</span>
+<span class="kw">def</span> <span class="fn">test_new</span>(): ...
+
+<span class="hdr">@pytest.mark.skipif(sys.platform == <span class="st">"win32"</span>, reason=<span class="st">"только Linux"</span>)</span>
+<span class="kw">def</span> <span class="fn">test_linux_only</span>(): ...
+
+<span class="hdr">@pytest.mark.xfail(reason=<span class="st">"известный баг JIRA-123"</span>)</span>
+<span class="kw">def</span> <span class="fn">test_known_bug</span>(): ...   <span class="cm"># ожидаем падение</span></div>
+        <div class="hl orange"><span class="hl-label">xfail — не способ прятать плохой тест</span><code>xfail</code> = «знаем, что падает, есть заведённый баг» — тест помечен честно, и если он вдруг <em>пройдёт</em>, pytest подсветит это (XPASS — баг починили). Это не то же, что закомментировать или <code>skip</code> сломанный тест, чтобы «не мешал». Используй xfail только с указанием реальной причины/тикета, иначе это маскировка проблемы.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Ускорить медленный suite</strong> на стороне pytest: параллелизация (<code>-n auto</code>), переиспользование дорогих фикстур (<code>session</code> scope), убрать <code>sleep</code> → явные ожидания. Процессная часть (разделить на pre-merge/nightly, сдвиг по пирамиде, value автотестов) — в разделе CI/CD.</p>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> генерация каркаса тестов по функции, конвертация ручных кейсов в код.<br>
+          <strong>Пример промпта:</strong> <em>«Напиши pytest-тесты для функции [код]: позитив, негатив, граничные, исключения. Используй parametrize и фикстуры.»</em><br>
+          <strong>Что проверить руками:</strong> доменные кейсы и приоритизацию — их LLM не знает.
+        </div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тест иногда падает, иногда проходит. Что делаешь?» — Не <code>--reruns</code> и забыть. Ищу причину flaky: гонки/тайминги (<code>sleep</code> вместо ожидания), зависимость от порядка тестов, общие тест-данные при параллели, нестабильный внешний сервис (мокать), недетерминизм (время, random). retry — временная мера, пока чиню корень.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

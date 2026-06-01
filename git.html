@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Git</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item active" href="#"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#basics">01 · Основы и базовые команды</a>
+    <a href="#branches">02 · Ветки</a>
+    <a href="#merge-rebase">03 · Merge, Rebase, Fast-forward</a>
+    <a href="#conflicts">04 · Конфликты</a>
+    <a href="#strategies">05 · Branching strategies</a>
+    <a href="#useful">06 · Полезные команды</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Git</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Git</h1>
+    <p>// 6 подтем · команды, ветки, merge/rebase, стратегии</p>
+  </div>
+
+
+  <!-- ─────── 01. ОСНОВЫ ─────── -->
+  <section class="section" id="basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Основы и базовые команды</span>
+      <span class="section-badge">basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Git</strong> — система контроля версий: хранит всю историю изменений кода, позволяет откатываться и работать команде параллельно. Базовый цикл из трёх команд:</p>
+        <div class="code-block">git add file.py      <span class="cm"># добавить изменения в staging</span>
+git commit -m <span class="st">"fix login"</span>  <span class="cm"># зафиксировать снимок</span>
+git push             <span class="cm"># отправить на сервер (origin)</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Commit — как точка сохранения в игре: снимок всего проекта в этот момент, к которому можно вернуться. Staging area — это «корзина перед оформлением»: складываешь туда изменения, которые войдут в следующий снимок, остальное остаётся не зафиксированным.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Три состояния файла</strong> и где они живут:</p>
+        <ul>
+          <li><strong>Modified</strong> — изменён в рабочей директории, ещё не отмечен</li>
+          <li><strong>Staged</strong> — добавлен в staging (index) через <code>git add</code>, войдёт в следующий коммит</li>
+          <li><strong>Committed</strong> — зафиксирован в локальном репозитории</li>
+        </ul>
+        <p><strong>Команды, которые нужны каждый день:</strong></p>
+        <table>
+          <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><code>git clone url</code></td><td>склонировать репозиторий</td></tr>
+            <tr><td><code>git status</code></td><td>что изменено, что в staging</td></tr>
+            <tr><td><code>git add .</code></td><td>добавить все изменения в staging</td></tr>
+            <tr><td><code>git commit -m "..."</code></td><td>зафиксировать снимок</td></tr>
+            <tr><td><code>git push / pull</code></td><td>отправить / забрать с сервера</td></tr>
+            <tr><td><code>git log</code></td><td>история коммитов</td></tr>
+            <tr><td><code>git diff</code></td><td>что именно изменилось</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что такое коммит на самом деле:</strong> снимок состояния всех файлов + уникальный хеш (по умолчанию SHA-1; Git также поддерживает переход на SHA-256), автор, время, ссылка на родительский коммит. Git хранит <em>снимки целиком</em> (с дедупликацией неизменённых файлов), а не дельты.</p>
+        <p><strong>HEAD</strong> — указатель на текущий коммит / ветку, где ты сейчас находишься. <strong>origin</strong> — стандартное имя удалённого репозитория.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатору хватает уверенного владения базовым циклом + ветками + разрешением конфликтов + PR. Глубокое устройство Git (объектная модель, blob/tree/commit) знать не обязательно — спрашивают редко. Зато <code>git log</code>, <code>git diff</code> и умение разобраться, «какой коммит внёс регрессию», — ежедневный инструмент.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>git fetch</code> отличается от <code>git pull</code>?» — <code>fetch</code> только скачивает изменения с сервера, но не трогает твою рабочую ветку. <code>pull</code> = <code>fetch</code> + <code>merge</code> (сразу вливает в текущую ветку). <code>fetch</code> безопаснее: сначала посмотреть, что прилетело, потом решить, как влить.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. ВЕТКИ ─────── -->
+  <section class="section" id="branches">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Ветки</span>
+      <span class="section-badge">branches</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Ветка (branch)</strong> — параллельная линия разработки. Делаешь фичу в своей ветке, не мешая main, потом вливаешь обратно.</p>
+        <div class="code-block">git branch feature-login        <span class="cm"># создать ветку</span>
+git switch feature-login        <span class="cm"># переключиться (или git checkout)</span>
+git switch -c feature-login     <span class="cm"># создать и переключиться сразу</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Ветка — это просто указатель (ссылка) на коммит, как переменная, хранящая адрес. <code>main</code> и <code>feature</code> — две ссылки на разные коммиты. Переключение ветки — это смена того, на что смотрит HEAD. Создать ветку дёшево: это новая ссылка, а не копия всего проекта.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Типичный рабочий цикл с веткой:</strong></p>
+        <div class="code-block">git switch -c feature-x      <span class="cm"># 1. создал ветку от main</span>
+<span class="cm"># ... делаешь изменения, коммитишь ...</span>
+git push -u origin feature-x <span class="cm"># 2. запушил ветку на сервер</span>
+<span class="cm"># 3. открыл Pull Request на GitHub/GitLab</span>
+<span class="cm"># 4. ревью → merge в main</span>
+git switch main
+git pull                     <span class="cm"># 5. забрал обновлённый main</span>
+git branch -d feature-x      <span class="cm"># 6. удалил локальную ветку</span></div>
+        <p><strong>Полезное про ветки:</strong></p>
+        <ul>
+          <li><code>git branch</code> — список локальных веток</li>
+          <li><code>git branch -a</code> — включая удалённые</li>
+          <li><code>git branch -d name</code> — удалить ветку</li>
+          <li><code>origin/main</code> — remote-tracking ветка: где main на сервере по последним данным</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Detached HEAD</strong> — состояние, когда ты переключился не на ветку, а на конкретный коммит (<code>git checkout abc123</code>). Коммиты в этом состоянии «висят в воздухе» — без ветки их легко потерять. Выход: создать ветку отсюда (<code>git switch -c new-branch</code>).</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современный workflow: короткоживущие feature-ветки (1–2 дня) → PR → merge в main. Долгие ветки на недели повышают риск конфликтов и поздней интеграции: чем дольше живёт ветка, тем больнее потом конфликты при слиянии. Это прямая связь с trunk-based development (раздел 05).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>switch</code> отличается от <code>checkout</code>?» — <code>checkout</code> перегружен: и ветки переключает, и файлы восстанавливает, и на коммиты прыгает. В новых версиях Git его разделили: <code>switch</code> — только для веток, <code>restore</code> — для восстановления файлов. Логика та же, но <code>switch</code>/<code>restore</code> понятнее и безопаснее.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. MERGE / REBASE / FAST-FORWARD ─────── -->
+  <section class="section" id="merge-rebase">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Merge, Rebase, Fast-forward</span>
+      <span class="section-badge">главная тема</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Три способа объединить изменения из одной ветки в другую:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">Merge</div>
+            Объединяет две ветки, создавая <strong>merge-коммит</strong>. История сохраняется как есть, со всеми ответвлениями.
+          </div>
+          <div class="card">
+            <div class="card-title">Rebase</div>
+            Переносит коммиты твоей ветки <strong>поверх</strong> другой, как будто ты ответвился от неё только что. История <strong>линейная</strong>.
+          </div>
+          <div class="card">
+            <div class="card-title">Fast-forward</div>
+            Частный случай merge: если в main не было новых коммитов, Git просто <strong>перематывает указатель</strong> вперёд, без merge-коммита.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Merge — соединить две линии истории в одну точку, оставив развилку видимой. Rebase — переписать свою историю так, будто ты начал работу от самой свежей версии main: коммиты «перевешиваются» на новое основание. Fast-forward — просто сдвинуть закладку вперёд, потому что развилки и не было.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Merge</strong> — вливаем feature в main:</p>
+        <div class="code-block">git switch main
+git merge feature-x   <span class="cm"># создаст merge-коммит (если были расхождения)</span></div>
+        <p><strong>Rebase</strong> — переносим свои коммиты поверх свежего main:</p>
+        <div class="code-block">git switch feature-x
+git rebase main       <span class="cm"># коммиты feature-x встают ПОВЕРХ main</span></div>
+
+        <p><strong>Когда что использовать:</strong></p>
+        <table>
+          <thead><tr><th></th><th>Merge</th><th>Rebase</th></tr></thead>
+          <tbody>
+            <tr><td>История</td><td>сохраняется со всеми развилками</td><td>линейная, чистая</td></tr>
+            <tr><td>Merge-коммит</td><td>создаётся</td><td>нет</td></tr>
+            <tr><td>Когда</td><td>вливание feature в main, общие ветки</td><td>подтянуть свежий main в свою личную ветку</td></tr>
+            <tr><td>Риск</td><td>безопасно</td><td>переписывает историю — опасно для общих веток</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Fast-forward</strong> происходит автоматически, когда возможно. Заставить создать merge-коммит всегда: <code>git merge --no-ff</code>. Это частая настройка в командах — чтобы в истории было видно, где была feature-ветка.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl red"><span class="hl-label">Золотое правило rebase</span>Никогда не делай rebase ветки, которой пользуется кто-то ещё (например, общий <code>main</code> или ветка, которую кто-то уже забрал). Rebase <em>переписывает историю</em> — меняет хеши коммитов. Если ветка публичная, у других сломается история, и у команды возникнут расхождения в истории. Rebase — только для <strong>своих локальных</strong> веток до пуша.</div>
+        <p><strong>Interactive rebase</strong> (<code>git rebase -i</code>) — переписать историю своих коммитов перед PR: объединить (squash), переименовать, переупорядочить, удалить. Часто перед мержем «схлопывают» пачку мелких коммитов в один осмысленный.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Холивар merge vs rebase решается командной договорённостью. Частый компромисс: <strong>rebase для подтягивания main в свою ветку</strong> (чистая локальная история) + <strong>squash-merge при вливании PR</strong> (одна фича = один коммит в main). Главное — единые правила в команде, а не «индивидуальные предпочтения без общей договорённости».</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница merge и rebase?» — Merge объединяет ветки и сохраняет историю как было, создавая merge-коммит (видна развилка). Rebase переносит твои коммиты поверх другой ветки, делая историю линейной, но переписывая хеши. Merge безопасен для общих веток, rebase — только для личных. Простыми словами: merge честно показывает «как было», rebase делает «как будто было красиво».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. КОНФЛИКТЫ ─────── -->
+  <section class="section" id="conflicts">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Конфликты слияния</span>
+      <span class="section-badge">conflicts</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Конфликт</strong> возникает, когда две ветки изменили <em>одно и то же место</em> в файле, и Git не может решить сам, какую версию оставить. В файле появляются маркеры:</p>
+        <div class="code-block"><span class="cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+твоя версия строки
+<span class="cm">=======</span>
+версия из вливаемой ветки
+<span class="cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-x</span></div>
+        <p>Нужно вручную выбрать правильный вариант (или скомбинировать), убрать маркеры и сохранить.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Как разрешить конфликт по шагам:</strong></p>
+        <div class="code-block">git merge feature-x          <span class="cm"># возник конфликт</span>
+<span class="cm"># 1. открываешь файл, видишь маркеры &lt;&lt;&lt; === &gt;&gt;&gt;</span>
+<span class="cm"># 2. редактируешь: оставляешь нужное, убираешь маркеры</span>
+git add file.py              <span class="cm"># 3. помечаешь как разрешённый</span>
+git commit                   <span class="cm"># 4. завершаешь merge</span>
+<span class="cm"># (при rebase вместо commit — git rebase --continue)</span></div>
+        <ul>
+          <li><strong>IDE решают конфликты удобнее</strong> — VS Code, IntelliJ показывают обе версии side-by-side с кнопками «accept current / incoming / both»</li>
+          <li><code>git merge --abort</code> / <code>git rebase --abort</code> — отменить и вернуться как было, если запутался</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как избегать конфликтов</strong> (лучше, чем уметь их разруливать):</p>
+        <ul>
+          <li><strong>Мелкие частые мержи</strong> — чаще подтягивай main в свою ветку, чем реже — тем больше расхождений накопится</li>
+          <li><strong>Короткие ветки</strong> — фича на 1–2 дня конфликтует меньше, чем на 2 недели</li>
+          <li><strong>Не форматируй чужой код заодно</strong> — массовый реформат = конфликт в каждой строке</li>
+          <li><strong>Договорённости о структуре</strong> — если все правят один большой файл, конфликты неизбежны</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Запутался в конфликте при rebase, история или рабочая директория оказались в неконсистентном состоянии. Как откатиться?» — <code>git rebase --abort</code> вернёт в состояние до rebase. Если уже завершил и нужно откатиться — <code>git reflog</code> покажет, где ты был до операции, и <code>git reset --hard HEAD@{N}</code> вернёт туда. reflog — спасательный круг (см. раздел 06).</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. BRANCHING STRATEGIES ─────── -->
+  <section class="section" id="strategies">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Branching strategies</span>
+      <span class="section-badge">workflows</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Стратегия ветвления — договорённость команды о том, как организованы ветки и как код попадает в прод. Три популярных подхода:</p>
+        <div class="grid3">
+          <div class="card">
+            <div class="card-title">Git Flow</div>
+            Много веток: main, develop, feature, release, hotfix. Мощно, но сложно. Для релизов по расписанию.
+          </div>
+          <div class="card">
+            <div class="card-title">GitHub Flow</div>
+            Просто: main + короткие feature-ветки → PR → merge. Для continuous deployment.
+          </div>
+          <div class="card">
+            <div class="card-title">Trunk-based</div>
+            Всё в main, очень короткие ветки, незаконченное прячут за feature flags. Для CI/CD и частых релизов.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Стратегия</th><th>Ветки</th><th>Когда подходит</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Git Flow</strong></td><td>main + develop + feature/* + release/* + hotfix/*</td><td>продукты с версиями и релизами по расписанию (десктоп, мобайл-стор)</td></tr>
+            <tr><td><strong>GitHub Flow</strong></td><td>main + feature-ветки</td><td>веб-сервисы, частые деплои, небольшие команды</td></tr>
+            <tr><td><strong>Trunk-based</strong></td><td>main + очень короткие ветки</td><td>зрелые команды с сильным CI/CD, релизы много раз в день</td></tr>
+          </tbody>
+        </table>
+        <p><strong>GitHub Flow</strong> (самый частый сегодня): ответвился от main → сделал фичу → PR → автотесты + ревью → merge → деплой. Просто и достаточно для большинства команд.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Тренд — от сложного Git Flow к простому GitHub Flow / trunk-based. Git Flow с его develop и release-ветками всё чаще считают избыточным для веб-сервисов: он создан под эпоху редких релизов. Современный дефолт — короткие ветки от main + сильный CI + feature flags для незаконченного. Чем проще модель ветвления, тем меньше конфликтов и быстрее доставка (прямая связь с CI/CD и DORA-метриками).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем нужны feature flags, если есть ветки?» — Долгая feature-ветка = сложное и рискованное слияние и поздняя интеграция. Feature flag позволяет влить незаконченный код в main <em>сразу</em> (спрятав за флагом), интегрировать его постоянно, а включить — когда готово. Это и есть суть trunk-based: интеграция через флаги, а не через долгоживущие ветки.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. ПОЛЕЗНЫЕ КОМАНДЫ ─────── -->
+  <section class="section" id="useful">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Полезные команды</span>
+      <span class="section-badge">toolbox</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Команды, которые выручают в типичных ситуациях:</p>
+        <div class="code-block">git stash            <span class="cm"># отложить незакоммиченные изменения «в карман»</span>
+git stash pop        <span class="cm"># вернуть их обратно</span>
+git cherry-pick abc  <span class="cm"># взять один конкретный коммит в свою ветку</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><code>stash</code> — как буфер обмена для незавершённой работы: сложил изменения в карман, переключился на срочную задачу, потом достал обратно. <code>cherry-pick</code> — скопировать один коммит из другой ветки, как взять одну строку из чужого файла, а не весь файл.</div>
+        <div class="hl"><span class="hl-label">Pull Request workflow — ежедневная рутина</span>Для QA это встречается чаще, чем <code>rebase -i</code>. Типичный цикл: 1) открыть PR (feature → main), 2) дождаться <strong>CI</strong> (тесты, линт — зелёные), 3) пройти <strong>code review</strong>, 4) исправить замечания (новые коммиты в ту же ветку), 5) <strong>squash & merge</strong> (слить в один коммит) или обычный merge, 6) удалить ветку после слияния. CI + review — это и есть quality gate перед попаданием в main.</div>
+        <div class="hl"><span class="hl-label">restore — безопасная отмена изменений</span>Современная замена перегруженного <code>checkout</code> для файлов: <code>git restore file.py</code> — откатить изменения в файле к последнему коммиту; <code>git restore --staged file.py</code> — убрать файл из staging (не теряя правок). Понятнее, чем старый <code>git checkout -- file.py</code>.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>stash</strong> — когда нужно срочно переключиться, но коммитить полуготовое не хочется:</p>
+        <div class="code-block">git stash            <span class="cm"># временно сохранил незакоммиченные изменения, рабочая директория чистая</span>
+git switch main      <span class="cm"># переключился, сделал срочное</span>
+git switch feature-x
+git stash pop        <span class="cm"># вернул отложенное</span></div>
+        <p><strong>cherry-pick</strong> — перенести конкретный коммит (например, хотфикс) в другую ветку без полного мержа.</p>
+        <p><strong>reset vs revert</strong> — два способа «отменить», принципиально разные:</p>
+        <table>
+          <thead><tr><th></th><th>reset</th><th>revert</th></tr></thead>
+          <tbody>
+            <tr><td>Что делает</td><td>двигает указатель назад, убирает коммиты</td><td>создаёт новый коммит, отменяющий изменения</td></tr>
+            <tr><td>История</td><td>переписывает (коммиты исчезают)</td><td>сохраняет (добавляет «обратный» коммит)</td></tr>
+            <tr><td>Безопасность</td><td>опасно для общих веток</td><td>безопасно для общих веток</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>reset с режимами:</strong></p>
+        <ul>
+          <li><code>--soft</code> — убрать коммит, изменения остаются в staging</li>
+          <li><code>--mixed</code> (по умолчанию) — убрать коммит, изменения в рабочей директории</li>
+          <li><code>--hard</code> — убрать коммит и изменения совсем (<strong>опасно</strong>, данные теряются)</li>
+        </ul>
+        <p><strong>git commit --amend</strong> — поправить последний коммит (сообщение или забытый файл). Тоже переписывает историю — не делай для запушенных коммитов.</p>
+        <div class="hl red"><span class="hl-label">reflog — спасательный круг</span><code>git reflog</code> показывает историю <em>всех</em> перемещений HEAD — даже после reset --hard, неудачного rebase или «потерянных» коммитов. Почти всё, что кажется удалённым, можно восстановить: найди нужное состояние в reflog и <code>git reset --hard HEAD@{N}</code>. Запомни эту команду — она помогает восстановиться после ошибочных операций.</div>
+        <div class="hl orange"><span class="hl-label">Правило безопасности</span>Всё, что <em>переписывает историю</em> (reset, rebase, amend, push --force), безопасно только для <strong>локальных</strong> коммитов, которые ещё никто не забрал. Для уже запушенного в общую ветку — только <code>revert</code> (новый коммит). Это то же золотое правило, что для rebase.</div>
+        <div class="hl"><span class="hl-label">Как найти, какой коммит внёс регрессию</span>Частая QA-задача — «тест/фича сломались, когда?»:
+          <ul style="margin:8px 0 0;">
+            <li><code>git log --oneline</code> — список коммитов кратко, посмотреть что менялось недавно</li>
+            <li><code>git show &lt;commit&gt;</code> — что именно изменил конкретный коммит</li>
+            <li><code>git diff main...feature</code> — разница между ветками</li>
+            <li><code>git blame file.py</code> — кто и в каком коммите менял каждую строку файла</li>
+            <li><code>git bisect</code> (L3/optional) — <strong>бинарный поиск</strong> коммита с багом: помечаешь «хороший» и «плохой» коммиты, Git делит диапазон пополам, ты проверяешь — за log(N) шагов находишь виновный коммит</li>
+          </ul>
+        </div>
+        <div class="hl orange"><span class="hl-label">Force push безопасно</span>Если после rebase <em>своей</em> ветки нужен форс-пуш — используй <code>git push --force-with-lease</code>, а не голый <code>--force</code>. Разница: <code>--force-with-lease</code> проверяет, что в удалённой ветке нет чужих новых коммитов, которые ты не видел, и откажется перезаписывать их. Голый <code>--force</code> затрёт чужую работу без предупреждения.</div>
+        <div class="hl"><span class="hl-label">.gitignore и секреты</span>В <code>.gitignore</code> кладут то, что не должно попадать в репозиторий: <code>.env</code> и файлы с секретами, артефакты сборки, кэши, отчёты тестов, виртуальные окружения (<code>.venv</code>). Правило: <strong>секрет, попавший в Git, считается скомпрометированным</strong> — даже если удалить его следующим коммитом, он останется в истории.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Закоммитил пароль в репозиторий. Что делать?» — Не просто <code>git rm</code> в новом коммите — он останется в истории. Нужно: 1) <strong>немедленно отозвать/сменить сам секрет</strong> (он уже скомпрометирован), 2) вычистить из истории (<code>git filter-repo</code> — современный предпочтительный инструмент, BFG — альтернатива; устаревший <code>filter-branch</code> использовать не стоит), 3) форс-пуш. Но главное — секрет считается скомпрометированным в момент пуша, поэтому первым делом его меняют.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

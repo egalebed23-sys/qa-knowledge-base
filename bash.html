@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Bash, Docker, K8s</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item active" href="#"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#bash-basics">01 · Bash: команды и навигация</a>
+    <a href="#logs">02 · Логи и текст</a>
+    <a href="#processes">03 · Процессы, порты, сеть</a>
+    <a href="#scripts">04 · Bash-скрипты</a>
+    <a href="#docker">05 · Docker</a>
+    <a href="#k8s">06 · Kubernetes</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Bash · Docker · K8s</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Bash, Docker, Kubernetes</h1>
+    <p>// 6 подтем · командная строка, контейнеры, оркестрация</p>
+  </div>
+
+
+  <!-- ─────── 01. BASH БАЗА ─────── -->
+  <section class="section" id="bash-basics">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Bash: команды и навигация</span>
+      <span class="section-badge">cli basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Почти все серверы и CI-раннеры работают на Linux, а общение с ними — через <strong>shell</strong> (чаще bash). QA заходит в консоль, чтобы посмотреть логи, проверить сервис, запустить тесты. Базовая навигация:</p>
+        <div class="code-block">pwd              <span class="cm"># где я сейчас (путь)</span>
+ls -la           <span class="cm"># список файлов, включая скрытые и права</span>
+cd /var/log      <span class="cm"># перейти в директорию</span>
+cat app.log      <span class="cm"># вывести содержимое файла</span>
+cp / mv / rm     <span class="cm"># копировать / переместить / удалить</span>
+mkdir tests      <span class="cm"># создать директорию</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Shell — это REPL операционной системы: вводишь команду, получаешь результат, как в интерактивном Python. Файловая система — дерево: <code>/</code> корень, ветки — директории, листья — файлы. <code>cd</code> — переход по дереву, <code>ls</code> — посмотреть, что в текущем узле.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Пути:</strong> <code>/</code> — корень (абсолютный путь), <code>~</code> — домашняя директория, <code>.</code> — текущая, <code>..</code> — родительская.</p>
+        <p><strong>Права доступа</strong> (<code>ls -l</code> показывает <code>rwxr-xr-x</code>):</p>
+        <ul>
+          <li><strong>r</strong> (read=4), <strong>w</strong> (write=2), <strong>x</strong> (execute=1) — для владельца, группы, остальных</li>
+          <li><code>chmod 755 file</code> — владельцу всё (7=rwx), остальным чтение+выполнение (5=r-x)</li>
+          <li><code>chmod +x script.sh</code> — сделать файл исполняемым</li>
+          <li><code>chown user file</code> — сменить владельца</li>
+        </ul>
+        <p><strong>find</strong> — поиск файлов:</p>
+        <div class="code-block">find . -name <span class="st">"*.log"</span>           <span class="cm"># все .log в текущем дереве</span>
+find /var -mtime -1            <span class="cm"># изменённые за последний день</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Пайпы и редиректы</strong> — основа мощи shell: соединяешь простые команды в цепочки.</p>
+        <div class="code-block">command > file.txt      <span class="cm"># вывод в файл (перезапись)</span>
+command >> file.txt     <span class="cm"># дописать в конец</span>
+command 2> errors.txt   <span class="cm"># перенаправить ошибки (stderr)</span>
+command 2>&1            <span class="cm"># stderr вместе со stdout</span>
+cmd1 | cmd2             <span class="cm"># вывод cmd1 на вход cmd2 (пайп)</span>
+cmd1 && cmd2            <span class="cm"># cmd2 только если cmd1 успешна</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Пайп <code>|</code> — это композиция функций: <code>cmd2(cmd1(input))</code>. Выход одной команды становится входом следующей, как в функциональном программировании. <code>cat log | grep error | wc -l</code> = «возьми лог → отфильтруй ошибки → посчитай» — конвейер обработки данных.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что значит <code>2>&1</code>?» — Перенаправить stderr (поток ошибок, дескриптор 2) туда же, куда идёт stdout (вывод, дескриптор 1). Нужно, чтобы поймать <em>и</em> обычный вывод, <em>и</em> ошибки в один файл/пайп: <code>./script.sh > all.log 2>&1</code>.</div>
+        <div class="hl red"><span class="hl-label">Безопасная работа в консоли</span>CLI не прощает ошибок — особенно на чужих/боевых машинах:
+          <ul style="margin:8px 0 0;">
+            <li>Перед <code>rm</code> — проверь, где ты: <code>pwd</code> и <code>ls</code>, что именно удаляешь</li>
+            <li><code>rm -rf</code> — осознанно: один неверный путь сносит дерево без корзины и без отмены</li>
+            <li><code>cp -i</code>, <code>mv -i</code> — режим с подтверждением перезаписи (safer)</li>
+            <li>Не запускать <code>curl ... | bash</code> из интернета, не прочитав, что внутри — это выполнение чужого кода</li>
+            <li>На production — сначала <strong>read-only диагностика</strong> (смотреть логи/статус), а не команды, меняющие состояние</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. ЛОГИ И ТЕКСТ ─────── -->
+  <section class="section" id="logs">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Логи и текст</span>
+      <span class="section-badge">главное для QA</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Главное, зачем QA в консоли — <strong>разбирать логи</strong>. Когда тест упал или сервис ведёт себя странно, ответ обычно в логах. Базовый инструментарий:</p>
+        <div class="code-block">grep <span class="st">"error"</span> app.log     <span class="cm"># найти строки со словом error</span>
+tail -f app.log            <span class="cm"># следить за логом в реальном времени</span>
+tail -n 100 app.log        <span class="cm"># последние 100 строк</span>
+head app.log               <span class="cm"># первые строки</span>
+less app.log               <span class="cm"># листать большой файл</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span><code>grep</code> — это <code>filter()</code> по строкам файла: оставляет только те, что подходят под условие. <code>tail -f</code> — как подписка на поток событий: новые строки появляются на экране по мере записи, как live-лента.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>grep с флагами</strong> — рабочая лошадка:</p>
+        <table>
+          <thead><tr><th>Флаг</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><code>-i</code></td><td>игнорировать регистр (Error = error)</td></tr>
+            <tr><td><code>-r</code></td><td>рекурсивно по всем файлам в директории</td></tr>
+            <tr><td><code>-v</code></td><td>инвертировать — строки БЕЗ совпадения</td></tr>
+            <tr><td><code>-n</code></td><td>показать номера строк</td></tr>
+            <tr><td><code>-c</code></td><td>посчитать количество совпадений</td></tr>
+            <tr><td><code>-A 3 / -B 3 / -C 3</code></td><td>3 строки после / до / вокруг совпадения</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Пайпы для фильтрации логов</strong> — комбинируешь команды:</p>
+        <div class="code-block"><span class="cm"># посчитать, сколько ошибок в логе</span>
+grep -c <span class="st">"ERROR"</span> app.log
+
+<span class="cm"># следить за логом, но только за строками с ошибками</span>
+tail -f app.log | grep -i error
+
+<span class="cm"># найти ошибки и показать 5 строк контекста вокруг</span>
+grep -C 5 <span class="st">"Exception"</span> app.log</div>
+        <p><strong>Обработка текста:</strong> <code>wc -l</code> (посчитать строки), <code>sort</code> (сортировать), <code>uniq -c</code> (уникальные + счётчик).</p>
+        <div class="code-block"><span class="cm"># топ-10 самых частых ошибок в логе</span>
+grep <span class="st">"ERROR"</span> app.log | sort | uniq -c | sort -rn | head</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>awk и sed</strong> — для более сложной обработки (знать базово):</p>
+        <ul>
+          <li><code>awk '{print $1}'</code> — вывести первый столбец каждой строки</li>
+          <li><code>sed 's/old/new/g'</code> — заменить текст</li>
+        </ul>
+        <div class="hl"><span class="hl-label">jq — работа с JSON (важнее awk/sed для QA)</span>API отдаёт JSON, structured-логи в JSON — <code>jq</code> вытаскивает поля без регулярок:
+        <div class="code-block"><span class="cm"># достать поле из ответа API</span>
+curl -s api/orders/1 | jq <span class="st">'.status'</span>
+
+<span class="cm"># отфильтровать массив: только неуспешные</span>
+curl -s api/orders | jq <span class="st">'.[] | select(.status != "paid")'</span>
+
+<span class="cm"># из structured-логов вытащить request_id ошибок</span>
+cat app.log | jq <span class="st">'select(.level=="error") | .request_id'</span></div>
+        Полезнее, чем углублять awk/sed: большинство данных у QA — это JSON (API, логи).</div>
+        <p style="margin-top:14px;"><strong>Реальный кейс — найти ошибку по request-id</strong> (связка с дебагом 500 из раздела API):</p>
+        <div class="code-block"><span class="cm"># 1. из ответа API взял X-Request-ID: abc-123</span>
+<span class="cm"># 2. ищем все логи этого запроса через все сервисы</span>
+grep -r <span class="st">"abc-123"</span> /var/log/services/
+
+<span class="cm"># 3. нашли строку с трейсом — видно, где упало</span></div>
+        <p style="margin-top:14px;"><strong>Централизованное логирование</strong> — на реальном проде grep по файлам почти не используют. Логи всех сервисов стекаются в одну систему с поиском через UI (сервисов десятки, логи в контейнерах исчезают при перезапуске). Основные системы — одной таблицей:</p>
+        <table>
+          <thead><tr><th>Система</th><th>Кратко</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ELK / Kibana</strong></td><td>Elasticsearch + Kibana-UI. Классика, часто self-hosted</td></tr>
+            <tr><td><strong>Grafana Loki</strong></td><td>логи рядом с метриками в Grafana, популярен с Kubernetes</td></tr>
+            <tr><td><strong>Datadog</strong></td><td>облачный all-in-one (логи + метрики + трейсы + APM), платный</td></tr>
+            <tr><td><strong>Splunk</strong></td><td>энтерпрайз, мощный язык запросов, дорогой</td></tr>
+          </tbody>
+        </table>
+        <p>Принцип у всех один — тот же, что у grep, но через UI и по всем сервисам сразу: поиск по тексту, фильтр по полям (<code>service:payment AND level:error</code>), time range, дашборды/алерты, корреляция по <code>request-id</code>.</p>
+        <div class="hl"><span class="hl-label">Structured logging</span>Современные сервисы пишут логи не строками, а <strong>JSON</strong>: <code>{"level":"error","service":"payment","request_id":"abc-123","msg":"..."}</code>. Это позволяет фильтровать по полям (<code>level:error</code>), а не парсить текст регулярками. Для QA — намного удобнее искать: точечные фильтры вместо grep по сырому тексту.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатор использует <em>оба</em> подхода. <strong>Kibana / Datadog / Grafana</strong> — для дебага в проде и на staging: найти ошибку по request-id, посмотреть всплеск 500-х, собрать путь запроса через микросервисы. <strong>grep / tail</strong> на сервере — когда централизованного сбора нет: CI-раннер, локальный контейнер, быстрый дебаг. Принцип одинаковый (поиск → фильтр → контекст), меняется только инструмент. Знать стоит и то, и другое.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация команд:</strong> <em>«Напиши команду: найти в app.log все строки с ERROR за сегодня, сгруппировать по тексту ошибки и показать топ-5 по частоте.»</em><br><br>
+          <strong>Разбор awk/sed:</strong> вставь непонятную команду → <em>«Объясни, что делает эта awk-команда построчно.»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. ПРОЦЕССЫ, ПОРТЫ, СЕТЬ ─────── -->
+  <section class="section" id="processes">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Процессы, порты, сеть</span>
+      <span class="section-badge">diagnostics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Вторая частая задача — проверить, <strong>жив ли сервис</strong> и что с ним. Процессы:</p>
+        <div class="code-block">ps aux | grep python    <span class="cm"># найти процессы python</span>
+top   <span class="cm"># или htop — что потребляет CPU/память в реальном времени</span>
+kill 1234               <span class="cm"># мягко остановить процесс по PID</span>
+kill 1234               <span class="cm"># обычное завершение (SIGTERM) — сначала пробуем это</span>
+kill -9 1234            <span class="cm"># принудительное (SIGKILL) — только если не завершается</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Процесс — это запущенный экземпляр программы, как объект — экземпляр класса. У каждого свой PID (как id объекта). <code>kill</code> — отправить сигнал процессу; <code>kill -9</code> — жёсткое завершение, как принудительно завершить зависший поток.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Порты</strong> — какой процесс на каком порту слушает (частая проверка «занят ли порт», «поднялся ли сервис»):</p>
+        <div class="code-block">lsof -i :5432          <span class="cm"># кто слушает порт 5432</span>
+ss -tlnp               <span class="cm"># все слушающие TCP-порты + процессы</span>
+<span class="cm"># (netstat — старый аналог ss)</span></div>
+        <p><strong>Сеть и диагностика:</strong></p>
+        <table>
+          <thead><tr><th>Команда</th><th>Зачем</th></tr></thead>
+          <tbody>
+            <tr><td><code>curl url</code></td><td>выполнить запрос к API из консоли, посмотреть ответ</td></tr>
+            <tr><td><code>curl -v</code></td><td>с деталями: заголовки, статус, TLS</td></tr>
+            <tr><td><code>ping host</code></td><td>доступен ли хост по сети</td></tr>
+            <tr><td><code>dig / nslookup</code></td><td>резолвится ли домен в IP (DNS)</td></tr>
+            <tr><td><code>nc -zv host 443</code></td><td>открыт ли порт на хосте</td></tr>
+          </tbody>
+        </table>
+        <div class="code-block"><span class="cm"># проверить API прямо из консоли</span>
+curl -X POST https://api.shop.com/orders \
+  -H <span class="st">"Authorization: Bearer token"</span> \
+  -H <span class="st">"Content-Type: application/json"</span> \
+  -d <span class="st">'{"product_id": 42}'</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>SSH</strong> — подключиться к удалённому серверу (смотреть логи, проверить сервис):</p>
+        <div class="code-block">ssh user@server.com          <span class="cm"># подключиться (по ключу, не паролю)</span>
+scp file.txt user@server:/tmp <span class="cm"># скопировать файл на сервер</span></div>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Для QA-автоматизатора этот набор — must-have: <code>curl</code> (проверить API), <code>grep</code>/<code>tail</code> (логи), <code>lsof</code>/<code>ss</code> (порты), <code>ssh</code> (на сервер). Это не «системное администрирование», а ежедневный дебаг. Глубокое системное администрирование (настройка демонов, iptables, тюнинг ядра) знать не нужно — это зона DevOps/SRE.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сервис не отвечает. Как по шагам диагностируешь в консоли?» — 1) процесс жив? <code>ps aux | grep service</code>, 2) слушает порт? <code>ss -tlnp | grep :8080</code>, 3) отвечает локально? <code>curl localhost:8080/health</code>, 4) что в логах? <code>tail -n 100 app.log | grep -i error</code>, 5) если в другом сервисе — DNS/сеть: <code>dig</code>, <code>nc</code>. Идёшь от процесса к сети к логам.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. BASH-СКРИПТЫ ─────── -->
+  <section class="section" id="scripts">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Bash-скрипты</span>
+      <span class="section-badge">scripting</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Скрипт — набор команд в файле, чтобы не вводить их каждый раз. Для QA — автоматизация рутины: поднять окружение, прогнать тесты, собрать логи.</p>
+        <div class="code-block"><span class="cm">#!/bin/bash</span>          <span class="cm"># shebang — чем исполнять</span>
+echo <span class="st">"Running tests..."</span>
+pytest tests/
+echo <span class="st">"Done"</span></div>
+        <p>Запуск: <code>chmod +x run.sh</code> (сделать исполняемым) → <code>./run.sh</code>.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Переменные, условия, циклы:</strong></p>
+        <div class="code-block"><span class="cm">#!/bin/bash</span>
+NAME=<span class="st">"staging"</span>            <span class="cm"># переменная (без пробелов вокруг =)</span>
+echo <span class="st">"Env: $NAME"</span>          <span class="cm"># использование через $</span>
+
+<span class="kw">if</span> [ <span class="st">"$NAME"</span> = <span class="st">"prod"</span> ]; <span class="kw">then</span>
+  echo <span class="st">"Production environment selected"</span>
+<span class="kw">fi</span>
+
+<span class="kw">for</span> file <span class="kw">in</span> *.log; <span class="kw">do</span>   <span class="cm"># цикл по файлам</span>
+  echo <span class="st">"Processing $file"</span>
+<span class="kw">done</span></div>
+        <p><strong>Спецпеременные:</strong> <code>$1, $2</code> — аргументы скрипта, <code>$?</code> — код возврата последней команды (0 = успех), <code>$#</code> — число аргументов.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Реальный кейс QA</strong> — скрипт поднимает окружение, ждёт сервис, гоняет тесты:</p>
+        <div class="code-block"><span class="cm">#!/bin/bash</span>
+<span class="kw">set</span> -e                      <span class="cm"># падать сразу при первой ошибке</span>
+
+docker compose up -d        <span class="cm"># поднять зависимости</span>
+
+<span class="cm"># ждём, пока БД ответит (polling вместо sleep)</span>
+<span class="kw">until</span> nc -z localhost 5432; <span class="kw">do</span>
+  echo <span class="st">"Ждём БД..."</span>; sleep 1
+<span class="kw">done</span>
+
+pytest tests/ --maxfail=1
+RESULT=$?                    <span class="cm"># сохранили код возврата</span>
+
+docker compose down         <span class="cm"># остановили окружение</span>
+<span class="kw">exit</span> $RESULT</div>
+        <div class="hl orange"><span class="hl-label">Полезные привычки</span><code>set -e</code> — скрипт падает при первой ошибке (а не идёт дальше на сломанном). <code>set -u</code> — падать при использовании необъявленной переменной. <code>set -o pipefail</code> — без него пайп возвращает код <em>последней</em> команды и может скрыть ошибку ранней: в <code>failing_cmd | tee log</code> упадёт первая, но код будет 0 от tee. Together: <code>set -euo pipefail</code> — стандартная защитная шапка скрипта. Ожидание сервиса — через <strong>polling</strong> (<code>until nc -z</code>), а не <code>sleep 30</code> наугад.</div>
+        <div class="hl"><span class="hl-label">Exit codes — почему CI «видит» падение</span>Каждая команда возвращает код: <strong>0 = успех, не 0 = ошибка</strong>. CI считает шаг проваленным, если команда вернула non-zero — поэтому <code>pytest</code> с упавшими тестами возвращает не 0, и пайплайн краснеет. Проверить код последней команды: <code>echo $?</code>. В скрипте именно поэтому сохраняют <code>RESULT=$?</code> и пробрасывают через <code>exit $RESULT</code>.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>Bash-синтаксис легко забывается — отличная задача для LLM:<br><br>
+          <em>«Напиши bash-скрипт: поднять docker compose, дождаться готовности Postgres на 5432, прогнать pytest, в конце остановить compose и вернуть код тестов.»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. DOCKER ─────── -->
+  <section class="section" id="docker">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Docker</span>
+      <span class="section-badge">containers</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Docker</strong> упаковывает приложение со всем окружением в изолированный <em>контейнер</em>, который одинаково работает везде. Для QA — поднять БД/сервис для тестов одной командой. Базовые команды:</p>
+        <div class="code-block">docker ps                    <span class="cm"># запущенные контейнеры</span>
+docker ps -a                 <span class="cm"># все, включая остановленные</span>
+docker logs container_id     <span class="cm"># логи контейнера</span>
+docker run -e POSTGRES_PASSWORD=test postgres:16   <span class="cm"># запустить (Postgres без пароля не стартует)</span>
+docker stop &lt;container&gt;    <span class="cm"># остановить контейнер</span>
+docker rm &lt;container&gt;      <span class="cm"># удалить остановленный контейнер</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Контейнер — как <code>venv</code>, но для всего окружения: ОС, библиотеки, сама программа. <strong>Образ</strong> (image) = класс, <strong>контейнер</strong> = объект (запущенный экземпляр). Один образ → много контейнеров.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Запуск с параметрами:</strong></p>
+        <div class="code-block"><span class="cm"># поднять Postgres для тестов</span>
+docker run -d \                       <span class="cm"># -d = в фоне</span>
+  -p 5432:5432 \                       <span class="cm"># проброс порта host:container</span>
+  -e POSTGRES_PASSWORD=test \          <span class="cm"># переменная окружения</span>
+  --name test-db \                     <span class="cm"># имя контейнера</span>
+  postgres:16</div>
+        <p><strong>docker compose</strong> (V2 — единая команда, не старый <code>docker-compose</code>) — поднять несколько сервисов вместе (app + БД + Redis) одним файлом:</p>
+        <div class="code-block">docker compose up -d     <span class="cm"># поднять всё из docker-compose.yml</span>
+docker compose down      <span class="cm"># остановить и удалить ресурсы</span>
+docker compose logs -f   <span class="cm"># логи всех сервисов</span></div>
+        <p><strong>Dockerfile</strong> — рецепт сборки образа:</p>
+        <div class="code-block"><span class="kw">FROM</span> python:3.12
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install -r requirements.txt
+<span class="kw">COPY</span> . .
+<span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Дебаг контейнера</strong> — частая задача, когда «в контейнере не работает»:</p>
+        <div class="code-block">docker exec -it container bash   <span class="cm"># зайти ВНУТРЬ контейнера</span>
+docker logs -f --tail 100 cont   <span class="cm"># смотреть логи в реальном времени</span>
+docker inspect container         <span class="cm"># детали: сеть, env, volumes</span></div>
+        <p>Зайдя внутрь через <code>exec</code>, проверяешь изнутри: переменные окружения (<code>env</code>), доступность других сервисов (<code>curl</code>, <code>nc</code>), файлы конфигов.</p>
+        <p><strong>Testcontainers</strong> — библиотека, поднимает реальные зависимости (Postgres, Kafka) в Docker прямо из автотеста и останавливает после теста. Тест работает с настоящей БД, а не моком. Это связка раздела с CI/CD (раздел 06).</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Контейнер сразу падает после запуска. Как дебажить?» — 1) <code>docker logs container</code> — чаще всего причина видна в логах (упал процесс, не найден файл, нет env), 2) <code>docker ps -a</code> — посмотреть exit code, 3) запустить с переопределением команды на <code>bash</code> и зайти внутрь контейнера и проверить состояние, 4) проверить <code>docker inspect</code> — правильные ли env и volumes. Контейнер живёт, пока жив его главный процесс — если процесс упал, контейнер останавливается.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. KUBERNETES ─────── -->
+  <section class="section" id="k8s">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Kubernetes</span>
+      <span class="section-badge">orchestration</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Kubernetes (k8s)</strong> — оркестратор контейнеров. Когда контейнеров десятки и сотни, кто-то должен их запускать, перезапускать упавшие, масштабировать, распределять по серверам. Это и делает k8s.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Docker запускает один контейнер на одной машине. Kubernetes — как оркестратор/супервизор для целого парка: следит, чтобы нужное число копий всегда работало, перезапускает упавшие, распределяет нагрузку. Как process manager (типа supervisord), но для контейнеров на кластере машин.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Ключевые понятия:</strong></p>
+        <ul>
+          <li><strong>Pod</strong> — минимальная единица, один или несколько контейнеров вместе. Обычно = один экземпляр сервиса</li>
+          <li><strong>Deployment</strong> — управляет репликами подов: «держи 3 копии сервиса всегда живыми»</li>
+          <li><strong>Service</strong> — стабильная точка доступа к подам (поды меняются, адрес остаётся)</li>
+          <li><strong>Namespace</strong> — логическое разделение (dev / staging / prod в одном кластере)</li>
+        </ul>
+        <p><strong>kubectl</strong> — команда для общения с кластером, основное для QA:</p>
+        <div class="code-block">kubectl get pods                  <span class="cm"># список подов</span>
+kubectl logs pod-name             <span class="cm"># логи пода</span>
+kubectl logs -f pod-name          <span class="cm"># следить за логами</span>
+kubectl describe pod pod-name     <span class="cm"># детали, события, почему не стартует</span></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что реально нужно QA в k8s</strong> — не писать манифесты, а уметь диагностировать:</p>
+        <div class="code-block">kubectl exec -it pod -- bash      <span class="cm"># зайти внутрь пода</span>
+kubectl get pods -w               <span class="cm"># следить за статусами подов</span>
+kubectl port-forward pod 8080:80  <span class="cm"># пробросить порт пода к себе</span></div>
+        <p><code>port-forward</code> особенно полезен — пробрасываешь порт сервиса из кластера на свою машину и тестируешь его локально через curl/Postman.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Kubernetes — зона DevOps/SRE, QA редко настраивает его сам. От QA-автоматизатора ждут понимания «что это и зачем» + умения <code>kubectl logs</code>, <code>kubectl describe</code> (посмотреть, почему под не поднялся), <code>kubectl exec</code> (зайти внутрь), <code>port-forward</code> (протестировать сервис локально). Писать YAML-манифесты и настраивать кластер — не задача QA.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Под в статусе CrashLoopBackOff. Что это и что делать?» — Под постоянно падает и перезапускается по кругу. Действия: <code>kubectl logs &lt;pod&gt; --previous</code> (логи <em>упавшего</em> контейнера — текущий мог уже перезапуститься, поэтому важен --previous), <code>kubectl describe pod</code> (события: нехватка ресурсов, не прошёл health-check, не скачался образ), <code>kubectl get events</code> (события неймспейса — проблемы scheduling/probe/image pull). Частые причины: ошибка в коде при старте, неверный конфиг/env, failed liveness probe.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

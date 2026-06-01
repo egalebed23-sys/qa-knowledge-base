@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · Безопасность</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item active" href="#"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#why">01 · Зачем QA про безопасность + OWASP</a>
+    <a href="#injections">02 · Инъекции (SQL, XSS)</a>
+    <a href="#auth">03 · Auth и секреты</a>
+    <a href="#practice">04 · Безопасность на практике QA</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Безопасность</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Безопасность</h1>
+    <p>// 4 подтемы · OWASP, инъекции, auth, практика</p>
+  </div>
+
+  <div style="max-width:920px;margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
+    <strong style="color:#fff;display:block;margin-bottom:4px;font-size:13px;">Уровень этого раздела</strong>
+    QA-автоматизатор — не пентестер. Цель — <strong>понимать основные угрозы и уметь о них поговорить</strong>, а не находить 0-day. На собесах безопасность обычно спрашивают по верхам: что такое инъекции, XSS, как безопасно хранить токены. Этого блока хватает, чтобы отвечать предметно.
+  </div>
+
+  <!-- ─────── 01. ЗАЧЕМ + OWASP ─────── -->
+  <section class="section" id="why">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Зачем QA про безопасность + OWASP</span>
+      <span class="section-badge">overview</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Безопасность — часть качества. QA <strong>держит в голове базовые угрозы</strong> и проверяет очевидное: что пользователь не получит доступ к чужой сессии или данным, что чувствительные данные не попадут в ответы, логи, URL или клиентское хранилище, что ввод не сломает систему.</p>
+        <p><strong>OWASP Top 10</strong> — список самых распространённых веб-уязвимостей, обновляется раз в несколько лет. Знать его существование и пару пунктов — стандартный минимум для собеса.</p>
+        <div class="hl green"><span class="hl-label">Что знать про OWASP</span>OWASP Top 10 сам себя называет <em>awareness document</em> — это не стандарт для сертификации и не compliance-чеклист, но на него часто опираются как на отраслевой ориентир «куда смотреть в первую очередь». Ходовые пункты, которые стоит назвать: <strong>инъекции</strong>, <strong>broken access control</strong> (доступ к чужому), <strong>authentication failures</strong>, <strong>cryptographic failures</strong> (утечки и слабая криптография). XSS как пункт входит в инъекции, но как тема для собеса разбирается отдельно.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p>Основные категории угроз, которые стоит понимать:</p>
+        <table>
+          <thead><tr><th>Угроза</th><th>Суть</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Injection</strong></td><td>пользовательский ввод исполняется как код/запрос (SQL, команды)</td></tr>
+            <tr><td><strong>Broken access control</strong></td><td>можно зайти туда, куда не должен (чужой заказ по id в URL)</td></tr>
+            <tr><td><strong>Authentication Failures</strong></td><td>слабая защита входа: получение доступа к сессии, перебор паролей</td></tr>
+            <tr><td><strong>XSS</strong></td><td>чужой скрипт исполняется в браузере жертвы</td></tr>
+            <tr><td><strong>Cryptographic Failures</strong></td><td>утечки и слабая криптография: пароли/токены/PII в логах, URL, без шифрования</td></tr>
+            <tr><td><strong>Security misconfiguration</strong></td><td>дефолтные пароли, открытые порты, debug в проде</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Для большинства QA безопасность на практике сводится к нескольким вещам: проверка access control (доступ к чужим данным по id), валидация ввода, отсутствие секретов в логах/ответах. Senior QA ценен тем, что <em>держит security-мышление в обычном тестировании</em>: завёл фичу — подумал «а что, если подставить чужой id / отправить скрипт в поле / убрать токен».</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как бы ты протестировал фичу на безопасность, не будучи security-экспертом?» — Базовый чек-лист: 1) <strong>access control</strong> — могу ли я открыть чужие данные, поменяв id в запросе, 2) <strong>авторизация</strong> — работает ли эндпоинт без токена / с чужим токеном, 3) <strong>валидация ввода</strong> — что будет от спецсимволов, скриптов, очень длинных строк, 4) <strong>утечки</strong> — нет ли в ответе/логах лишних данных (пароли, внутренние поля). Это не пентест, но покрывает наиболее типичные риски.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. ИНЪЕКЦИИ ─────── -->
+  <section class="section" id="injections">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Инъекции: SQL, XSS</span>
+      <span class="section-badge">самое спрашиваемое</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Инъекция</strong> — когда пользовательский ввод попадает туда, где исполняется как код. Два, которые спрашивают чаще всего:</p>
+        <ul>
+          <li><strong>SQL-инъекция</strong> — ввод подставляется в SQL-запрос и меняет его логику</li>
+          <li><strong>XSS</strong> (Cross-Site Scripting) — ввод отображается на странице и исполняется как JS в браузере другого пользователя</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Инъекция — когда данные принимаются за команды. Классика SQL-инъекции: ввод <code>' OR '1'='1</code> в поле логина меняет логику запроса, и вход проходит без пароля.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>SQL-инъекция</strong> — как возникает и как защищаются:</p>
+        <div class="code-block"><span class="cm"># УЯЗВИМО: ввод склеивается со строкой запроса</span>
+query = f<span class="st">"SELECT * FROM users WHERE name = '{user_input}'"</span>
+<span class="cm"># ввод: ' OR '1'='1  → запрос вернёт всех пользователей</span>
+
+<span class="cm"># БЕЗОПАСНО: параметризованный запрос (плейсхолдеры)</span>
+cursor.execute(<span class="st">"SELECT * FROM users WHERE name = %s"</span>, (user_input,))</div>
+        <p>Защита — <strong>параметризованные запросы</strong> (prepared statements): ввод всегда трактуется как данные, не как часть SQL. ORM (SQLAlchemy, Django ORM) делают это по умолчанию.</p>
+
+        <p style="margin-top:12px;"><strong>XSS</strong> — три типа: <em>stored</em> (скрипт сохранён в БД, бьёт по всем, кто откроет страницу), <em>reflected</em> (скрипт в ссылке/параметре), <em>DOM-based</em> (через клиентский JS). Защита — <strong>экранирование вывода</strong> (любой пользовательский текст на странице обезвреживается) + Content Security Policy.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как тестировать на инъекции</strong> (базово, для QA):</p>
+        <ul>
+          <li>В каждое текстовое поле и параметр пробовать спецсимволы: <code>'</code>, <code>"</code>, <code>&lt;script&gt;</code>, <code>; DROP</code>, <code>OR 1=1</code></li>
+          <li>Проверять не только формы, но и <strong>параметры URL, заголовки, JSON-поля</strong> — везде, где ввод доходит до бэкенда</li>
+          <li>Признак уязвимости: ввод <code>'</code> ломает запрос (ошибка 500, SQL в ответе) — значит не параметризовано</li>
+          <li>Для XSS: ввести <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> в поле → если выполнился при отображении, есть уязвимость</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современные фреймворки и ORM закрывают большинство инъекций «из коробки» — параметризация и автоэкранирование по умолчанию. Поэтому классическая SQL-инъекция в новом коде встречается реже, чем кажется по собесам. Но на стыках (сырой SQL, динамические запросы, старый код, конкатенация строк) — всё ещё реальна. Автоматический скан (OWASP ZAP, Burp) ловит типовое; QA добавляет ручные проверки на бизнес-логику.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как одной проверкой быстро понять, есть ли SQL-инъекция?» — Вставить одинарную кавычку <code>'</code> в поле/параметр. Если в ответ прилетает ошибка БД (500, текст SQL-исключения) — ввод доходит до запроса неэкранированным, инъекция вероятна. Если обрабатывается штатно (валидация, экранирование) — скорее защищено. Это первый быстрый зонд, не доказательство, но сигнал куда копать.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. AUTH И СЕКРЕТЫ ─────── -->
+  <section class="section" id="auth">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Auth и работа с секретами</span>
+      <span class="section-badge">access</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Две частые и понятные темы: <strong>аутентификация</strong> (кто ты) и <strong>авторизация</strong> (что тебе можно). Подробно механика — в разделе API; здесь — с угла безопасности.</p>
+        <ul>
+          <li><strong>Broken access control</strong> — самое частое и опасное: можешь открыть чужие данные, поменяв id в запросе (<code>/orders/123</code> → <code>/orders/124</code>)</li>
+          <li><strong>Секреты</strong> (пароли, токены, ключи) не должны попадать в логи, URL, код, ответы API</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что проверять в access control</strong> (это реально ловит баги):</p>
+        <ul>
+          <li><strong>IDOR</strong> (Insecure Direct Object Reference) — подставить чужой id и получить чужие данные. Классика. Проверять на каждом эндпоинте «по id»</li>
+          <li><strong>Без токена</strong> — работает ли защищённый эндпоинт без авторизации (должен вернуть 401)</li>
+          <li><strong>С чужим токеном</strong> — токен обычного юзера на админский эндпоинт (должен вернуть 403)</li>
+          <li><strong>Горизонтальная эскалация</strong> — юзер A видит данные юзера B</li>
+        </ul>
+        <p><strong>Хранение секретов</strong> — частый вопрос:</p>
+        <ul>
+          <li>Токены — не в <code>localStorage</code> (доступен из JS, уязвим к XSS), лучше httpOnly cookie</li>
+          <li>Секреты не в коде/гите — переменные окружения, secret manager</li>
+          <li>Пароли в БД — только хеш (bcrypt/argon2), не открытым текстом</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl orange"><span class="hl-label">IDOR — главный практический навык</span>Большинство «security-багов», которые реально находит QA, — это broken access control, а не хитрые инъекции. Привычка: тестируя любой эндпоинт с id, спросить «а что вернётся, если подставить чужой id или id несуществующего объекта?». Дёшево проверить, часто находит уязвимость. Для систем с деньгами/персональными данными — критично.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему хранить JWT в localStorage — плохо?» — localStorage доступен любому JS на странице. Если есть XSS-уязвимость, чужой скрипт прочитает токен и получит доступ к сессии. httpOnly cookie недоступна из JS — её XSS не достанет. Trade-off: cookie уязвимее к CSRF (лечится SameSite и CSRF-токенами). Идеального варианта нет, но localStorage для токенов — частая и опасная ошибка.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. ПРАКТИКА QA ─────── -->
+  <section class="section" id="practice">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Безопасность на практике QA</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Что реально входит в работу QA по безопасности (без пентеста):</p>
+        <ul>
+          <li>Проверять access control (чужие id, без токена, чужой токен)</li>
+          <li>Валидировать ввод (спецсимволы, скрипты, длинные строки)</li>
+          <li>Следить, чтобы в ответах и логах не было лишних данных (секреты, внутренние поля)</li>
+          <li>Поднимать security-вопросы на ревью спеки («а как тут с доступом?»)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Инструменты</strong>, которые встречаются у QA:</p>
+        <ul>
+          <li><strong>OWASP ZAP</strong> — бесплатный сканер уязвимостей, можно встроить в CI для базового скана</li>
+          <li><strong>Burp Suite</strong> — перехват и модификация запросов (есть free-версия), удобно для ручных проверок access control</li>
+          <li><strong>Dependency scanning</strong> — проверка библиотек на известные уязвимости (Dependabot, Snyk, <code>pip-audit</code>)</li>
+        </ul>
+        <p><strong>Типы автоматического анализа безопасности</strong> — стандартный вопрос на собесе (чем отличаются):</p>
+        <table>
+          <thead><tr><th>Тип</th><th>Что делает</th><th>Инструменты</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SAST</strong></td><td>статический анализ <em>исходного кода</em> без запуска — ищет уязвимые паттерны</td><td>SonarQube, Semgrep, Bandit (Python)</td></tr>
+            <tr><td><strong>DAST</strong></td><td>динамический анализ <em>запущенного</em> приложения снаружи, как атакующий</td><td>OWASP ZAP, Burp</td></tr>
+            <tr><td><strong>SCA</strong></td><td>анализ <em>зависимостей</em> на известные уязвимости (это и есть dependency scan)</td><td>Snyk, Dependabot, <code>pip-audit</code></td></tr>
+            <tr><td><strong>Secret scanning</strong></td><td>поиск утёкших ключей/паролей в коде и истории гита</td><td>gitleaks, GitHub secret scanning</td></tr>
+          </tbody>
+        </table>
+        <p>Коротко: <strong>SAST</strong> смотрит код изнутри (раньше и дешевле, но больше ложных срабатываний), <strong>DAST</strong> — поведение снаружи (позже, ближе к реальной атаке). Их используют вместе, не вместо друг друга.</p>
+        <p><strong>Abuse / fraud vectors</strong> (базово) — злоупотребление логикой, а не технический взлом: можно ли применить промокод дважды, обойти лимиты, получить бонус накруткой, отменить транзакцию после получения товара. Это тестирование <em>злоупотреблений бизнес-логикой</em> — частый и ценный навык, особенно в финтехе.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Security shift-left: подключать проверки в CI (SAST — анализ кода, dependency scan, secret scanning — чтобы ключи не утекли в гит). Глубокий пентест — отдельная роль или внешний аудит, обычно перед крупным релизом или по регуляторным требованиям. Роль QA — <em>встроить security-мышление в обычное тестирование</em> и не пропустить очевидное (открытый доступ, утечка в логах, необработанный ввод), а не подменять собой AppSec-команду.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем SAST отличается от DAST?» — SAST анализирует <em>исходный код</em> без запуска приложения: видит уязвимые паттерны рано (на этапе разработки), дёшево, но даёт ложные срабатывания и не видит проблем времени выполнения. DAST тестирует <em>запущенное</em> приложение снаружи, как атакующий: ловит реальное поведение и конфигурацию, но позже и не показывает, где именно в коде проблема. SAST — «изнутри и рано», DAST — «снаружи и ближе к бою». Зрелый процесс использует оба плюс SCA (зависимости) и secret scanning.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем abuse/fraud отличается от уязвимости?» — Уязвимость — технический дефект (инъекция, XSS): система работает не так, как задумано. Abuse/fraud — злоупотребление логикой, которая работает <em>как задумано</em>, но её можно использовать во вред: применить скидку многократно, накрутить реферальные бонусы, вывести деньги до проверки. Первое чинят разработчики кодом, второе — продукт и QA через правила и лимиты. В финтехе fraud-тестирование часто важнее классических уязвимостей.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

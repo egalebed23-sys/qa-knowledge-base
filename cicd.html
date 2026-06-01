@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · CI/CD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ─── PIPELINE VIS ─── */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .pipe-stage {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .pipe-stage.gate { border-color: #f0a050; color: #f0b090; }
+  .pipe-stage.deploy { border-color: #5de0b0; color: #5de0b0; }
+  .pipe-arr { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item active" href="#"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#what">01 · CI/CD: что это</a>
+    <a href="#pipeline">02 · Pipeline и стадии</a>
+    <a href="#gates">03 · Автотесты и quality gates</a>
+    <a href="#deploy">04 · Стратегии деплоя</a>
+    <a href="#docker">05 · Docker для QA</a>
+    <a href="#qa-cicd">06 · CI/CD в работе QA</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>CI/CD</span></div>
+    <div class="level-switch" role="tablist">
+      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
+      <button class="level-btn active" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
+      <button class="level-btn" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>CI/CD</h1>
+    <p>// 6 подтем · пайплайны, quality gates, деплой, Docker</p>
+  </div>
+
+
+  <!-- ─────── 01. ЧТО ТАКОЕ CI/CD ─────── -->
+  <section class="section" id="what">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">CI/CD: что это</span>
+      <span class="section-badge">basics</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>CI/CD</strong> — автоматизация сборки, тестирования и доставки кода. Три понятия, которые часто путают:</p>
+        <ul>
+          <li><strong>CI</strong> (Continuous Integration) — каждый коммит автоматически собирается и прогоняется через тесты. Баги ловятся сразу, а не «под релиз»</li>
+          <li><strong>CD</strong> (Continuous Delivery) — код всегда готов к деплою, выкатка — по кнопке (ручное подтверждение)</li>
+          <li><strong>CD</strong> (Continuous Deployment) — деплой в прод полностью автоматический, без ручного шага</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>CI — как автопрогон тестов при каждом сохранении файла, только для всей команды: каждый коммит сразу проверяется. Pipeline — конвейер функций, где выход одной стадии (собранный билд) идёт на вход следующей (тесты → деплой).</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Зачем это нужно:</strong></p>
+        <ul>
+          <li>Каждый разработчик делает мелкие изолированные коммиты — меньше конфликтов при слиянии</li>
+          <li>Фокус на бизнес-логике, а не на ручном деплое (он автоматизирован)</li>
+          <li>Стандартизация: каждый коммит проходит одни и те же стадии (build, lint, тесты)</li>
+          <li>Ранний поиск дефектов — баг виден через минуты после коммита, а не через неделю</li>
+        </ul>
+        <p><strong>Delivery vs Deployment</strong> — разница в последнем шаге: Delivery доводит до состояния «готово, нажми кнопку», Deployment жмёт кнопку сам. Большинство команд — на Delivery (ручное подтверждение прод-релиза).</p>
+        <p><strong>Инструменты:</strong> GitHub Actions, GitLab CI, Jenkins, CircleCI, TeamCity. Принцип у всех один — описываешь стадии в конфиге, система их выполняет на каждый коммит/PR.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>CI/CD неразрывно связан с <strong>trunk-based development</strong> (см. раздел теории): мелкие частые коммиты в main, автотесты на каждый PR, релизы несколько раз в день. Здоровье процесса меряют <strong>DORA-метриками</strong>: deployment frequency, lead time for changes, change failure rate и failed deployment recovery time (раньше назывался MTTR). В последние годы DORA добавила пятую — rework / failed deployment recovery — суть та же: как быстро и надёжно команда доставляет изменения. Для QA это значит одно главное требование к автотестам — они должны быть <em>быстрыми и стабильными</em>, иначе становятся тормозом всего пайплайна.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница Continuous Delivery и Continuous Deployment?» — В обоих случаях код автоматически проходит все стадии и готов к проду. Разница в финале: Delivery требует <em>ручного нажатия</em> кнопки «выкатить», Deployment выкатывает в прод <em>автоматически</em>, без человека. Deployment требует очень зрелого тестирования и мониторинга.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 02. PIPELINE И СТАДИИ ─────── -->
+  <section class="section" id="pipeline">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Pipeline и стадии</span>
+      <span class="section-badge">pipeline</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Pipeline</strong> — последовательность стадий, через которые проходит код от коммита до прода. Если стадия упала — пайплайн останавливается, дальше код не идёт.</p>
+        <div class="pipeline">
+          <span class="pipe-stage">build</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage">lint</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage">unit</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage">integration</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage deploy">deploy</span>
+        </div>
+        <p>Типичные стадии: собрать (build) → проверить стиль кода (lint) → быстрые тесты (unit) → тесты посложнее (integration) → выкатить (deploy).</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>На что запускается пайплайн</strong> (триггеры):</p>
+        <ul>
+          <li><strong>push</strong> — на каждый коммит в ветку</li>
+          <li><strong>pull/merge request</strong> — при создании или обновлении PR (главный момент для прогона тестов)</li>
+          <li><strong>schedule</strong> — по расписанию (ночной полный регресс)</li>
+          <li><strong>manual</strong> — по кнопке (деплой в прод)</li>
+        </ul>
+        <p><strong>Артефакты</strong> — то, что передаётся между стадиями или сохраняется: собранный билд, отчёты тестов, логи, скриншоты. Стадия deploy берёт артефакт стадии build.</p>
+        <p>Простой пример конфига (GitHub Actions):</p>
+        <div class="code-block"><span class="hdr">name:</span> CI
+<span class="hdr">on:</span> [push, pull_request]
+<span class="hdr">jobs:</span>
+  test:
+    <span class="hdr">runs-on:</span> ubuntu-latest
+    <span class="hdr">steps:</span>
+      - <span class="hdr">uses:</span> actions/checkout@v4
+      - <span class="hdr">uses:</span> actions/setup-python@v5
+        <span class="hdr">with:</span>
+          <span class="hdr">python-version:</span> <span class="st">'3.12'</span>
+          <span class="hdr">cache:</span> <span class="st">'pip'</span>          <span class="cm"># кэш зависимостей между прогонами</span>
+      - <span class="hdr">run:</span> pip install -r requirements.txt
+      - <span class="hdr">run:</span> python -m pytest --maxfail=1</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Оптимизация пайплайна:</strong></p>
+        <ul>
+          <li><strong>Кэширование зависимостей</strong> — не качать пакеты заново каждый раз (кэш pip/npm)</li>
+          <li><strong>Параллельные стадии</strong> — lint и unit могут бежать одновременно</li>
+          <li><strong>Матричные сборки</strong> — прогнать на разных версиях (Python 3.10/3.11/3.12) параллельно</li>
+          <li><strong>Fail fast</strong> — <code>--maxfail=1</code>, чтобы не ждать весь прогон, если уже большая часть набора уже падает</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Главная метрика пайплайна для команды — <strong>время от коммита до зелёного билда</strong>. Если CI идёт 40 минут, разработчики переключаются на другие задачи и теряют контекст. Цель — держать основной прогон в пределах 10–15 минут: быстрые тесты на каждый PR, тяжёлый полный регресс — ночью по расписанию.</div>
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация конфига:</strong> <em>«Напиши GitHub Actions workflow: на каждый PR установить зависимости, прогнать pytest с параллелизацией и собрать Allure-отчёт.»</em><br><br>
+          <strong>Дебаг пайплайна:</strong> вставь лог упавшей стадии → <em>«Почему упало и как починить?»</em>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 03. QUALITY GATES ─────── -->
+  <section class="section" id="gates">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Автотесты и quality gates</span>
+      <span class="section-badge">quality gates</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Автотесты встраиваются в пайплайн как стадия. <strong>Quality gate</strong> — условие, которое должно выполниться, чтобы код прошёл дальше (например, в merge или deploy).</p>
+        <div class="pipeline">
+          <span class="pipe-stage">tests</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage gate">quality gate</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage deploy">merge / deploy</span>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Quality gate — это <code>if</code> в пайплайне, который пускает дальше только при выполнении условий. Не прошёл тесты или упало покрытие — <code>return</code>, merge заблокирован. Как assert перед критичной операцией.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Где какие тесты гонять</strong> (по скорости и стоимости):</p>
+        <table>
+          <thead><tr><th>Когда</th><th>Что гоняем</th></tr></thead>
+          <tbody>
+            <tr><td>На каждый коммит/PR</td><td>lint + unit + быстрые integration (должны быть быстрыми, 5–10 мин)</td></tr>
+            <tr><td>После merge в main</td><td>полный integration, smoke на staging</td></tr>
+            <tr><td>Ночью по расписанию</td><td>полный regression, E2E, нагрузочные</td></tr>
+            <tr><td>Перед prod-деплоем</td><td>smoke на prod-like окружении</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Типичные quality gates перед merge:</strong></p>
+        <ul>
+          <li>Все тесты прошли (зелёные)</li>
+          <li>Code coverage не упал ниже порога</li>
+          <li>Линтер и форматтер чисты</li>
+          <li>Нет critical/high уязвимостей (security scan)</li>
+          <li>Код-ревью одобрено (минимум N апрувов)</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Smoke / sanity / regression в CI</strong> — когда что:</p>
+        <ul>
+          <li><strong>Smoke</strong> — 5–10 критичных проверок, гоняются на каждый деплой. «Сервис вообще жив?»</li>
+          <li><strong>Sanity</strong> — проверка конкретной зоны после фикса</li>
+          <li><strong>Regression</strong> — полный набор, тяжёлый. Ночью или перед релизом, не на каждый PR</li>
+        </ul>
+        <p><strong>Pre-merge vs post-merge:</strong> быстрые тесты — <em>до</em> merge (блокируют вливание сломанного кода). Тяжёлые E2E — часто <em>после</em> merge, чтобы не тормозить разработчиков, но с алертом, если что-то упало.</p>
+        <div class="hl orange"><span class="hl-label">Баланс</span>Слишком строгие gates → у команды появляется сопротивление процессу, пайплайн медленный, появляется соблазн «обойти». Слишком слабые → дефекты попадают в production. Senior ищет баланс: быстрый и обязательный pre-merge (unit, lint, smoke) + полный, но не блокирующий post-merge (E2E, regression).</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тесты идут 40 минут на каждый PR, разработчики жалуются. Что делаешь?» — Не «убрать тесты». А: 1) разделить на быстрые (pre-merge) и медленные (post-merge/ночью), 2) параллелизация (pytest-xdist, шардинг), 3) кэш зависимостей, 4) убрать дубли и flaky, 5) часть E2E заменить на более дешёвые contract/integration тесты.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. СТРАТЕГИИ ДЕПЛОЯ ─────── -->
+  <section class="section" id="deploy">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Стратегии деплоя</span>
+      <span class="section-badge">deployment</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Как выкатить новую версию, не уронив всё для всех пользователей сразу. Четыре подхода:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Blue / Green</div>
+            Две одинаковые среды. На «blue» работает текущая версия, на «green» разворачивают новую. Когда готово — переключают весь трафик на green. Откат = переключить обратно.
+          </div>
+          <div class="card">
+            <div class="card-title">Canary</div>
+            Новую версию выкатывают на маленький % пользователей (5%), наблюдают метрики. Всё ок → постепенно 50% → 100%. Проблема → откат, затронуты немногие.
+          </div>
+          <div class="card">
+            <div class="card-title">Rolling</div>
+            Обновляют инстансы по очереди: пока часть на новой версии, остальные ещё на старой. Без простоя, но обе версии какое-то время работают вместе.
+          </div>
+          <div class="card">
+            <div class="card-title">Feature flags</div>
+            Код новой фичи уже в проде, но спрятан за флагом. Включают для части юзеров без передеплоя. Выключают мгновенно, если что-то не так.
+          </div>
+        </div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Blue/green — как переключение симлинка между двумя папками: <code>current → v1</code> или <code>current → v2</code>, мгновенно туда и обратно. Feature flag — обычный <code>if feature_enabled:</code> в коде, который решает, показывать фичу или нет.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Rollback (откат)</strong> — возврат на предыдущую рабочую версию, когда новая сломалась. Чем быстрее и надёжнее откат, тем смелее можно выкатывать.</p>
+        <p><strong>Как тестировать каждую стратегию:</strong></p>
+        <ul>
+          <li><strong>Feature flag</strong> — проверить <em>обе</em> ветки: фича включена работает правильно, выключена — не ломает остальное и не видна</li>
+          <li><strong>Canary</strong> — на канареечной версии гоняют smoke + следят за метриками (error rate, latency). Рост ошибок → авто-откат</li>
+          <li><strong>Blue/green</strong> — прогнать тесты на green до переключения трафика</li>
+          <li><strong>Rollback</strong> — проверить, что откат реально возвращает рабочее состояние, данные не теряются</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Связь с теорией</span>Это shift-right тестирование: проверяем поведение уже в проде, на реальных пользователях, но контролируемо. Canary + feature flags + быстрый rollback — основа безопасных частых релизов.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Основной риск — миграции БД при rollback.</strong> Код откатить легко, а схему БД — нет. Если новая версия добавила/изменила колонку, откат кода на старую версию может сломаться о новую схему.</p>
+        <ul>
+          <li><strong>Решение</strong>: backward-compatible миграции. Сначала добавить колонку (старый код её игнорирует), потом выкатить код, который её использует. Удалять старое — только через несколько релизов</li>
+          <li>Это называется <strong>expand-contract</strong> (или parallel change): расширяем схему → мигрируем → сужаем</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных командах базовый набор — <strong>feature flags + canary + быстрый rollback</strong>. Флаги управляются через сервисы вроде LaunchDarkly, Unleash, Flagsmith. Часто фичу катят «тёмным запуском» (dark launch): код работает в проде, но результат скрыт от пользователя — так тестируют производительность и корректность на реальном трафике до публичного включения.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как тестировать rollback?» — Не только «нажали откат — вернулось». Проверить: 1) приложение реально откатилось на прошлую версию, 2) данные, созданные на новой версии, не потерялись и читаются старой, 3) миграции БД обратно совместимы (старый код работает с новой схемой), 4) время отката укладывается в требования (RTO). Rollback, который теряет данные — хуже бага, который чинили.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 05. DOCKER ─────── -->
+  <section class="section" id="docker">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Docker для QA</span>
+      <span class="section-badge">containers</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>Docker</strong> упаковывает приложение со всем окружением (ОС, библиотеки, зависимости) в <em>контейнер</em> — изолированную коробку, которая одинаково работает на любой машине. «У меня работает, а на сервере нет» — Docker решает эту проблему.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Контейнер — как <code>venv</code> в Python, но не только для пакетов, а для всего окружения целиком: ОС, системные библиотеки, сама программа. Запускается одинаково на ноутбуке и на сервере, потому что несёт окружение с собой.</div>
+        <p>Зачем QA: поднять БД или сервис для тестов одной командой, иметь одинаковое окружение локально и в CI, не засорять свою машину.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Ключевые понятия:</strong></p>
+        <ul>
+          <li><strong>Образ (image)</strong> — шаблон, «рецепт» с приложением и окружением</li>
+          <li><strong>Контейнер (container)</strong> — запущенный экземпляр образа (образ : контейнер = класс : объект)</li>
+          <li><strong>Dockerfile</strong> — инструкция, как собрать образ</li>
+          <li><strong>docker-compose</strong> — поднять несколько контейнеров вместе (app + БД + Redis) одной командой</li>
+        </ul>
+        <div class="code-block"><span class="cm"># Поднять Postgres для тестов одной командой</span>
+docker run -d -p 5432:5432 \
+  -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test \
+  postgres:16
+
+<span class="cm"># Или несколько сервисов через compose</span>
+docker compose up -d</div>
+        <p><strong>Testcontainers</strong> — библиотека, которая поднимает реальные зависимости (Postgres, Kafka, Redis) в Docker прямо из автотеста и останавливает после. Тест работает с настоящей БД, а не с моком.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Docker в CI</strong> — пайплайн поднимает контейнеры с зависимостями, гоняет интеграционные тесты против них, останавливает. Изолированное чистое окружение на каждый прогон — нет данных, оставшихся от предыдущих прогонов.</p>
+        <p><strong>Kubernetes (k8s)</strong> — оркестратор контейнеров: запускает, масштабирует, перезапускает упавшие, распределяет по серверам. QA напрямую трогает редко, но знать стоит:</p>
+        <ul>
+          <li><strong>Pod</strong> — минимальная единица, один или несколько контейнеров</li>
+          <li><strong>Deployment</strong> — управляет репликами подов (сколько копий держать)</li>
+          <li><strong>Service</strong> — стабильная точка доступа к подам</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатору достаточно уметь: запустить контейнер, прочитать docker-compose, поднять зависимости для тестов, посмотреть логи (<code>docker logs</code>). Kubernetes — это уже зона DevOps; от QA ждут понимания «что это и зачем», а не умения писать манифесты. Testcontainers — самый практичный навык: реальные зависимости в тестах без ручного поднятия.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем поднимать реальную БД в Docker, если можно замокать?» — Мок проверяет твою логику, но не ловит реальные проблемы: SQL-синтаксис, схему, поведение транзакций, особенности конкретной СУБД. Testcontainers даёт настоящую БД — тесты ближе к проду. Мокать стоит <em>чужие внешние</em> сервисы, а свою БД лучше поднимать реальную.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 06. CI/CD В РАБОТЕ QA ─────── -->
+  <section class="section" id="qa-cicd">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">CI/CD в работе QA</span>
+      <span class="section-badge">practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Главные задачи QA-автоматизатора в CI/CD:</p>
+        <ul>
+          <li>Встроить автотесты в пайплайн как стадию</li>
+          <li>Настроить quality gates (что блокирует merge/deploy)</li>
+          <li>Держать тесты быстрыми и стабильными</li>
+          <li>Настроить отчёты, чтобы падения было легко разбирать</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Что QA смотрит в CI после падения</span>Когда билд красный, разбор идёт по порядку: <strong>failed stage</strong> (на какой стадии упало — lint/unit/e2e), <strong>test report</strong> (какие тесты, с какой ошибкой), <strong>artifacts</strong> (скриншоты, видео, request/response, browser traces — для UI-тестов незаменимо), <strong>logs</strong> приложения и теста, <strong>commit diff</strong> (что менялось — часто причина там), <strong>flaky history</strong> (падал ли этот тест раньше нестабильно), <strong>owner / assignee</strong> (кто отвечает за фикс). Хороший CI даёт всё это из коробки — иначе разбор превращается в чтение сырых логов.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Flaky-тест в main pipeline</strong> — тест, который иногда падает без причины. Это типичная проблема CI, потому что подрывает доверие к тестам («опять упало, перезапусти»). Что делать:</p>
+        <ul>
+          <li><strong>Не игнорировать</strong> — flaky-тест хуже отсутствия теста, он учит команду игнорировать красное</li>
+          <li><strong>Изолировать</strong> — пометить (quarantine), убрать из блокирующих, чинить отдельно</li>
+          <li><strong>Найти причину</strong>: гонки, зависимость от порядка тестов, sleep вместо ожиданий, общие тест-данные, внешние сервисы</li>
+          <li><strong>retry — временная мера, а не устранение причины</strong>: <code>pytest-rerunfailures</code> прячет проблему, но не решает</li>
+        </ul>
+        <p><strong>Параллелизация</strong> — главный способ ускорить suite:</p>
+        <ul>
+          <li><code>pytest-xdist</code> — запуск тестов в несколько процессов (<code>pytest -n 4</code>)</li>
+          <li><strong>Шардинг</strong> — разбить тесты на части и гонять на разных раннерах CI параллельно</li>
+          <li>Требование: тесты должны быть <em>изолированы</em> (не зависеть друг от друга и от общих данных)</li>
+        </ul>
+        <div class="hl"><span class="hl-label">Environments (окружения)</span>Типичная цепочка: <strong>dev → test/qa → staging → pre-prod → prod</strong>. Staging — максимально похож на prod (та же конфигурация, близкие данные), но <em>«у нас на staging зелёное» не гарантирует prod</em>: отличаются объём и реальность данных, нагрузка, сторонние интеграции (в staging часто моки/sandbox), секреты и фича-флаги. Поэтому после деплоя в prod всё равно нужны проверки (smoke, мониторинг), а не только зелёный staging.</div>
+        <div class="hl orange"><span class="hl-label">Quarantine policy для flaky — формализуй</span>Карантин flaky-теста — не «убрал и забыл», а процесс: 1) flaky временно <em>не блокирует merge</em> (вынесен из gate), 2) <strong>сразу заводится задача</strong> на исправление, 3) есть <strong>SLA на починку</strong> (например, неделя), 4) <strong>нельзя держать в карантине бесконечно</strong> — иначе карантин становится свалкой мёртвых тестов. Без правил «временно отключим» превращается в «навсегда».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Как ускорить suite, который идёт 2 часа</strong> — частый Senior-вопрос:</p>
+        <ul>
+          <li><strong>Параллелизация</strong> — xdist + шардинг по раннерам (самый большой выигрыш)</li>
+          <li><strong>Разделить по уровням</strong> — быстрые на каждый PR, медленные E2E ночью</li>
+          <li><strong>Убрать дубли</strong> — E2E, повторяющие то, что уже покрыто integration</li>
+          <li><strong>Сдвинуть вниз по пирамиде</strong> — заменить часть медленных E2E на быстрые contract/integration</li>
+          <li><strong>Кэш</strong> зависимостей и тестовых данных</li>
+          <li><strong>Убрать <code>sleep</code></strong> — заменить на явные ожидания с polling</li>
+        </ul>
+        <p><strong>Allure</strong> — главный инструмент отчётности в CI: показывает прошедшие/упавшие тесты, шаги, прикладывает запросы, ответы, скриншоты, логи. Без хорошего отчёта разбор падений в CI превращается в чтение сырых логов.</p>
+        <div class="hl"><span class="hl-label">Test impact / selective testing</span>Современная идея для больших suite: запускать не всё подряд, а <em>релевантный набор</em> — тесты, затронутые изменёнными файлами/сервисами. Экономит время на каждом PR. Полный регресс при этом гоняют по расписанию (ночью) или перед релизом. Не обязательно к собесу, но знать концепцию — плюс.</div>
+        <div class="hl"><span class="hl-label">Deployment verification — связка с observability</span>После деплоя проверка не заканчивается. Что делают: <strong>smoke</strong> (критичные сценарии сразу после выката), <strong>health checks</strong> (сервис поднялся и отвечает), <strong>synthetic checks</strong> (боты гоняют ключевые пути), <strong>error rate / latency</strong> (метрики не выросли против baseline), <strong>rollback criteria</strong> (заранее заданные пороги: если error rate &gt; X% — откат). Это мост между CI/CD и observability (раздел Архитектура): деплой «закончен», когда метрики подтвердили здоровье, а не в момент выката.</div>
+        <div class="hl orange"><span class="hl-label">Главная мысль про value</span>Зелёный пайплайн ≠ качество. Автотесты дают ценность, только если: ловят реальные баги (не просто «зелёная галочка»), стабильны (им доверяют), быстры (не тормозят разработку). Suite из 5000 flaky-тестов, которые все перезапускают не глядя, — такой набор снижает доверие к автоматизации и требует пересмотра.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как понять, что автотесты реально дают value, а не просто зелёную галочку?» — Смотреть на: 1) <strong>escape rate</strong> — сколько багов прошло тесты и нашлось в проде (мало = тесты ловят), 2) <strong>доверие команды</strong> — красный билд реально останавливает релиз или его игнорируют, 3) <strong>flaky rate</strong> — низкий, 4) тесты падали на <em>реальных</em> регрессиях, а не только на своих изменениях. Если suite всегда зелёный, но дефекты попадают в production — он ничего не проверяет.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>

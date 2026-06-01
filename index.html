@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Senior · База для подготовки к собесам</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: 920px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+  .level-switch {
+    margin-left: auto;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .level-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+  }
+  .level-btn:hover { color: var(--text); }
+  .level-btn.active { background: var(--accent); color: #fff; }
+  .level-btn .lbl { font-weight: 600; }
+  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 920px;
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── LEVEL BLOCKS ─── */
+  .lvl { margin-bottom: 18px; position: relative; }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
+  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
+  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
+  body[data-level="1"] .lvl-2,
+  body[data-level="1"] .lvl-3 { display: none; }
+  body[data-level="2"] .lvl-3 { display: none; }
+  .lvl-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+  .code-block .kw { color: #79b8ff; }
+  .code-block .fn { color: #b5bd68; }
+  .code-block .cm { color: #586480; font-style: italic; }
+  .code-block .st { color: #f0a050; }
+  .code-block .hdr { color: #c79af5; }
+  .code-block .val { color: #5de0b0; }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── HTTP METHOD BADGES ─── */
+  .http-method {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+    letter-spacing: 0.3px;
+  }
+  .m-get { background: #0d2a1f; color: #5de0b0; }
+  .m-post { background: #1a2a0d; color: #b0e05a; }
+  .m-put { background: #1a1a0d; color: #e0c05a; }
+  .m-patch { background: #2a1a0d; color: #f0a050; }
+  .m-delete { background: #2a0d0d; color: #f05a5a; }
+  .m-head { background: #1a1a2a; color: #a0a0e0; }
+  .m-options { background: #2a1a2a; color: #d09ae0; }
+
+  /* ─── STATUS CODES ─── */
+  .status-grp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .s1 { color: #6aa3f5; }
+  .s2 { color: #5de0b0; }
+  .s3 { color: #e0c05a; }
+  .s4 { color: #f0a050; }
+  .s5 { color: #f05a5a; }
+  .status-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .status-code.c2 { background: #0d2a1f; color: #5de0b0; }
+  .status-code.c3 { background: #2a2a0d; color: #e0c05a; }
+  .status-code.c4 { background: #2a1a0d; color: #f0a050; }
+  .status-code.c5 { background: #2a0d0d; color: #f05a5a; }
+
+  /* ─── REQUEST/RESPONSE VIEWER ─── */
+  .req-resp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .req-resp .code-block { margin-top: 0; }
+  .rr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .level-switch { margin-left: 0; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ─── HOME ─── */
+  .home-hero { max-width: 920px; margin: 0 auto 28px; }
+  .home-hero h1 { font-size: 34px; margin-bottom: 8px; }
+  .home-hero .tagline { color: var(--muted); font-size: 15px; line-height: 1.6; }
+  .section-cards {
+    max-width: 920px; margin: 0 auto 40px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+  }
+  .sec-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; text-decoration: none; color: var(--text); transition: all 0.15s;
+    display: block;
+  }
+  .sec-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .sec-card.soon { opacity: 0.5; pointer-events: none; }
+  .sec-card .num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); }
+  .sec-card .name { font-weight: 700; font-size: 15px; margin: 4px 0; }
+  .sec-card .desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .home-block { max-width: 920px; margin: 0 auto 28px; }
+  .home-block h2 { font-size: 20px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .format-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .format-badge {
+    flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+    padding: 4px 10px; border-radius: 6px; min-width: 92px; text-align: center;
+  }
+  .gloss-grid { display: flex; flex-direction: column; gap: 10px; }
+  .gloss-card {
+    background: linear-gradient(180deg, var(--surface), rgba(20,32,46,0.4));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 9px;
+    padding: 14px 18px;
+    transition: all 0.15s;
+  }
+  .gloss-card:hover { border-left-width: 5px; padding-left: 16px; transform: translateX(2px); }
+  .gloss-card .g-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 6px; }
+  .gloss-card .g-term { font-size: 15px; font-weight: 700; color: #fff; }
+  .gloss-card .g-en { font-size: 11px; color: var(--muted); font-style: italic; font-family: 'JetBrains Mono', monospace; }
+  .gloss-card .g-body { font-size: 13px; color: var(--text); line-height: 1.62; }
+  .gloss-card .g-body strong { color: #cfe0f5; }
+</style>
+</head>
+<body data-level="2">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item active" href="#"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#how">Как читать базу</a>
+    <a href="#sections">Разделы</a>
+    <a href="#glossary">Глоссарий современных терминов</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Старт</span></div>
+  </div>
+
+  <div class="home-hero">
+    <h1>База для подготовки к собесам</h1>
+    <p class="tagline">QA Senior с автоматизацией на Python. Структурированный конспект по всем темам, которые спрашивают на собеседованиях — от классической теории до микросервисов, CI/CD и поведенческих вопросов.</p>
+  </div>
+
+  <!-- КАК ЧИТАТЬ -->
+  <div class="home-block" id="how">
+    <h2>Как читать эту базу</h2>
+    <p style="color:var(--text);font-size:14px;line-height:1.7;margin-bottom:18px;">
+      Классическая теория QA местами устарела — её писали под waterfall и большие отделы тестирования. Но на собесах её всё ещё спрашивают, поэтому каждый раздел держит <strong>три слоя</strong>. Переключатель <strong>L1 / L2 / L3</strong> вверху страницы управляет глубиной: уровни кумулятивные — L2 показывает L1 + детали, L3 показывает всё.
+    </p>
+
+    <div class="format-row">
+      <span class="format-badge" style="background:rgba(93,224,176,0.15);color:#5de0b0;">L1 / L2 / L3</span>
+      <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
+        <strong>То, что ждут на собесе.</strong> L1 — базовое определение, которое должен знать любой. L2 — детали и нюансы уровня middle. L3 — то, что отличает Senior: пограничные случаи, trade-offs, каверзные вопросы. Начинай с L2, переключайся на L3 перед собесом на сильную роль.
+      </div>
+    </div>
+
+    <div class="format-row">
+      <span class="format-badge" style="background:rgba(93,138,181,0.18);color:#a8c5e8;">В реальном мире</span>
+      <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
+        <strong>Как это работает в современных командах.</strong> Где классическая теория расходится с практикой команд на CI/CD и DevOps. Здесь живут вещи, которые реально встречаются: trunk-based, feature flags, canary, observability. Это контекст, который выделяет Senior-ответ.
+      </div>
+    </div>
+
+    <div class="format-row">
+      <span class="format-badge" style="background:rgba(217,122,255,0.15);color:#e8b8ff;">Делегируй LLM</span>
+      <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
+        <strong>Где AI экономит часы.</strong> Каждый такой блок устроен одинаково: <em>где помогает</em> → <em>пример промпта</em> → <em>что проверить руками</em>. LLM хорош для рутины (генерация кейсов, тестов, конфигов), но доменную специфику, приоритизацию и оценку риска оставляет тебе.
+      </div>
+    </div>
+  </div>
+
+  <!-- РАЗДЕЛЫ -->
+  <div class="home-block" id="sections">
+    <h2>Разделы</h2>
+    <div class="section-cards">
+      <a class="sec-card" href="theory.html"><div class="num">01</div><div class="name">Теория</div><div class="desc">SDLC, тест-дизайн, пирамида, метрики, Senior-кейсы</div></a>
+      <a class="sec-card" href="api.html"><div class="num">02</div><div class="name">Backend и API</div><div class="desc">HTTP, REST, аутентификация, брокеры, тестирование API</div></a>
+      <a class="sec-card" href="db.html"><div class="num">03</div><div class="name">Базы данных</div><div class="desc">SQL, JOIN, задачи, БД в работе QA</div></a>
+      <a class="sec-card" href="python.html"><div class="num">04</div><div class="name">Python</div><div class="desc">Задачи на кодинг, структуры, сложность</div></a>
+      <a class="sec-card" href="pytest.html"><div class="num">05</div><div class="name">Pytest</div><div class="desc">Фикстуры, параметризация, моки, фреймворк</div></a>
+      <a class="sec-card" href="ui.html"><div class="num">06</div><div class="name">UI и E2E</div><div class="desc">Ручное UI/UX, Playwright, локаторы, POM</div></a>
+      <a class="sec-card" href="cicd.html"><div class="num">07</div><div class="name">CI/CD</div><div class="desc">Пайплайны, quality gates, деплой, Docker</div></a>
+      <a class="sec-card" href="git.html"><div class="num">08</div><div class="name">Git</div><div class="desc">Ветки, merge/rebase, стратегии, команды</div></a>
+      <a class="sec-card" href="bash.html"><div class="num">09</div><div class="name">Bash · Docker · K8s</div><div class="desc">Консоль, логи, контейнеры, оркестрация</div></a>
+      <a class="sec-card" href="load.html"><div class="num">10</div><div class="name">Нагрузка</div><div class="desc">Виды, перцентили, инструменты, bottleneck</div></a>
+      <a class="sec-card" href="softskills.html"><div class="num">11</div><div class="name">Soft skills</div><div class="desc">STAR, конфликты, решения, лидерство</div></a>
+      <a class="sec-card" href="architecture.html"><div class="num">12</div><div class="name">Архитектура</div><div class="desc">Quality strategy, микросервисы, resiliency</div></a>
+      <a class="sec-card" href="security.html"><div class="num">13</div><div class="name">Безопасность</div><div class="desc">OWASP, инъекции, auth, abuse/fraud</div></a>
+    </div>
+  </div>
+
+  <!-- ГЛОССАРИЙ -->
+  <div class="home-block" id="glossary">
+    <h2>Глоссарий современных терминов</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:8px;">Термины, которые часто звучат на собесах в командах с CI/CD и DevOps, но редко объясняются. Если что-то встретилось в разделах и осталось непонятным — оно здесь.</p>
+    <div class="gloss-grid">
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">DORA-метрики</span><span class="g-en">DevOps Research and Assessment</span></div>
+        <div class="g-body">Четыре метрики, которыми измеряют здоровье процесса доставки кода (ввела исследовательская группа Google): <strong>Deployment Frequency</strong> — как часто релизим, <strong>Lead Time for Changes</strong> — время от коммита до прода, <strong>Change Failure Rate</strong> — % релизов, ломающих прод, <strong>MTTR</strong> — как быстро чиним после сбоя. Идея: сильные команды релизят часто и мелко, а не редко и большими кусками. На собесе достаточно: «4 метрики скорости и надёжности доставки».</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Observability</span><span class="g-en">наблюдаемость</span></div>
+        <div class="g-body">Способность понять, что происходит внутри системы в проде, по её внешним сигналам. Три «столпа»: <strong>логи</strong> (что случилось), <strong>метрики</strong> (числа во времени — latency, error rate), <strong>трейсы</strong> (путь запроса через сервисы). Для QA — источник сигналов качества уже после релиза (shift-right).</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">SLI / SLO / SLA</span></div>
+        <div class="g-body"><strong>SLI</strong> (Indicator) — что измеряем (% успешных запросов). <strong>SLO</strong> (Objective) — внутренняя цель («99.9% запросов быстрее 300мс»). <strong>SLA</strong> (Agreement) — обещание клиенту с последствиями за нарушение (деньги, штрафы). Коротко: SLI измеряет, SLO — цель, SLA — контракт.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Error budget</span><span class="g-en">бюджет ошибок</span></div>
+        <div class="g-body">Если SLO = 99.9% аптайма, то 0.1% — это «бюджет» на сбои, который можно потратить. Пока бюджет есть — катим фичи смело. Кончился — замораживаем релизы и чиним стабильность. Способ балансировать скорость и надёжность цифрами, а не спорами.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Trunk-based development</span></div>
+        <div class="g-body">Все коммитят в главную ветку маленькими частыми кусками, ветки живут часы, а не недели. Незаконченное прячут за feature flags. Противоположность долгим feature-веткам. Основа быстрых релизов и CI/CD.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Feature flags</span><span class="g-en">фиче-флаги</span></div>
+        <div class="g-body">Переключатель в коде (<code>if feature_enabled:</code>), включающий/выключающий фичу без передеплоя. Позволяет влить незаконченный код в прод (спрятав за флагом), включить для части пользователей, мгновенно выключить при проблеме.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Canary / Blue-green</span><span class="g-en">стратегии деплоя</span></div>
+        <div class="g-body"><strong>Canary</strong> — новую версию сначала видят 5% пользователей, следим за метриками, потом раскатываем на всех. <strong>Blue-green</strong> — две одинаковые среды, переключаем трафик со старой на новую целиком (откат = переключить обратно).</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Shift-left / Shift-right</span></div>
+        <div class="g-body"><strong>Shift-left</strong> — тестировать раньше (ревью требований, unit-тесты, статанализ): дешевле ловить баги в начале. <strong>Shift-right</strong> — тестировать в проде (canary, мониторинг, synthetic): ловить то, что воспроизводится только на реальном трафике. Современный подход — и то, и другое.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Flaky-тест</span></div>
+        <div class="g-body">Тест, который то проходит, то падает без изменений в коде. Главная боль автоматизации: подрывает доверие («опять упало, перезапусти»). Причины — гонки, тайминги, общие данные, нестабильные внешние сервисы. Лечится поиском причины, а не перезапусками.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Idempotency</span><span class="g-en">идемпотентность</span></div>
+        <div class="g-body">Свойство операции: повторный вызов даёт тот же результат, что и первый. Критично для платежей — нажал «оплатить» дважды, а деньги списались один раз. Реализуется через <code>Idempotency-Key</code>: сервер запоминает ключ и не выполняет операцию повторно.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Eventual consistency</span><span class="g-en">согласованность со временем</span></div>
+        <div class="g-body">В распределённых системах данные обновляются не мгновенно во всех местах, а «со временем». Создал заказ → склад узнает через секунду. Главная причина flaky-тестов в микросервисах: результат проверять с ожиданием (polling), а не сразу.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">Contract testing</span><span class="g-en">контрактное тестирование</span></div>
+        <div class="g-body">Проверка, что два сервиса «договорились» о формате обмена. Потребитель описывает, что ждёт от поставщика; поставщик проверяется против контракта на своём CI. Ловит поломки совместимости <em>до</em> деплоя, без полных integration-тестов. Инструмент — Pact.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">p95 / p99</span><span class="g-en">перцентили</span></div>
+        <div class="g-body">Способ честно мерить время ответа. <strong>p95 = 200мс</strong> значит: 95% запросов быстрее 200мс, 5% — медленнее. Перцентили показывают реальную картину, в отличие от среднего, которое прячет выбросы (один запрос на 5 секунд «теряется» в среднем, но виден в p99).</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">APM</span><span class="g-en">Application Performance Monitoring</span></div>
+        <div class="g-body">Инструменты (Datadog, New Relic), которые показывают, где в коде теряется время: в каком методе, запросе к БД, внешнем вызове. Главный помощник при поиске узких мест (bottleneck) под нагрузкой и в проде.</div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="g-head"><span class="g-term">MTTR</span><span class="g-en">Mean Time To Recovery</span></div>
+        <div class="g-body">Среднее время восстановления после сбоя, одна из DORA-метрик. Зрелые команды ценят не «никогда не падать» (невозможно), а «быстро подниматься» — низкий MTTR важнее редких инцидентов.</div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  const buttons = document.querySelectorAll('.level-btn');
+  const body = document.body;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      body.setAttribute('data-level', btn.dataset.lvl);
+    });
+  });
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+</script>
+
+</body>
+</html>
