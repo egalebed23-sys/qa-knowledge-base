@@ -526,7 +526,7 @@
 
   <div class="header">
     <h1>Блокчейн · Кошельки · Telegram Mini Apps</h1>
-    <p>// отдельный модуль · теория блокчейна + QA-специфика · 13 подтем</p>
+    <p>// отдельный модуль · теория блокчейна + QA-специфика · 16 подтем</p>
   </div>
 
   <div style="max-width:var(--content-max);margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
@@ -1256,6 +1256,269 @@
         <p><strong>Production monitoring</strong> (в вакансии — Sentry, OpenSearch): крипто-приложение особенно требует мониторинга прода, потому что баг = потерянные деньги. Что отслеживать: всплески failed-транзакций, ошибки подписи/подключения кошелька, расхождения балансов UI vs сеть, аномалии в выводах средств (возможный фрод). Реакция на инцидент в крипте критичнее по времени.</p>
         <div class="hl modern"><span class="hl-label">Как показать себя на собесе под эту вакансию</span>Связывай крипто-специфику с product-mindset: не «прокликал кошелёк», а «защитил пользователя от необратимой потери средств». Сильные акценты: тестирование на testnet, сверка с explorer (не верю UI), фокус на необратимых операциях и предпросмотре, валидация initData в TMA, fraud-векторы, мониторинг прода. Покажи, что ты <em>сам пользуешься</em> крипто-кошельками (в требованиях — «experienced blockchain user»).</div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как бы ты выстроил quality strategy для крипто-кошелька в Telegram?» — По слоям риска: 1) <strong>адреса и сеть</strong> — формат, bounceable/non-bounceable, testnet vs mainnet; 2) <strong>необратимые операции</strong> (отправка) — предпросмотр, защита от двойной отправки, seqno, testnet + сверка с explorer (hash/amount/status); 3) <strong>доступ</strong> — seed/восстановление; 4) <strong>TMA/WebView</strong> — cross-client, валидация initData, reconnect; 5) <strong>безопасность/фрод</strong> — подмена адреса, опасные dApp, abuse-векторы; 6) <strong>прод</strong> — мониторинг failed tx и расхождений балансов (Sentry/OpenSearch). Приоритет — туда, где цена ошибки = реальные деньги пользователя.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 14. ПЛАТЕЖНЫЕ ИНСТРУМЕНТЫ ─────── -->
+  <section class="section" id="payment-methods">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <span class="section-title">Платежные инструменты</span>
+      <span class="section-badge">payments</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Платежный инструмент — это <em>способ</em>, которым пользователь двигает деньги. У продуктового QA в финтехе/wallet в голове должна быть карта всех инструментов и их особенностей.</p>
+        <ul>
+          <li><strong>Банковские карты</strong> — Visa, Mastercard, МИР; дебет/кредит, 3-D Secure</li>
+          <li><strong>Faster payments</strong> — СБП (РФ), SEPA Instant (EU), FedNow (US)</li>
+          <li><strong>Mobile wallets</strong> — Apple Pay, Google Pay, Yandex Pay, Wallet, Mir Pay</li>
+          <li><strong>P2P-переводы</strong> — между пользователями внутри платформы</li>
+          <li><strong>On-ramp / off-ramp</strong> — обмен фиата на крипту и обратно</li>
+          <li><strong>Stablecoins</strong> — USDT, USDC; мост между фиатом и крипто</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Каждый инструмент — это «дверь», через которую деньги входят/выходят. У каждой двери свой замок (auth), своё время прохождения, свои правила возврата. QA должен знать сравнительные характеристики, чтобы понимать, где какие баги ждать.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что важно QA знать о каждом инструменте:</strong></p>
+        <table>
+          <thead><tr><th>Инструмент</th><th>Скорость</th><th>Возвратность</th><th>Что специфично тестировать</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Карта</strong></td><td>секунды–минуты</td><td>chargeback ~120 дней</td><td>3DS challenge / frictionless, маскирование PAN, hold vs charge</td></tr>
+            <tr><td><strong>СБП</strong></td><td>мгновенно</td><td>нет (только через банк)</td><td>лимиты (100k/день default, 1M по заявлению), резолв по телефону, банк-получатель</td></tr>
+            <tr><td><strong>Apple/Google Pay</strong></td><td>как карта</td><td>как карта</td><td>токенизация (DPAN ≠ PAN), биометрия, fallback на CVV</td></tr>
+            <tr><td><strong>Wallet-баланс</strong></td><td>мгновенно</td><td>сами решаем</td><td>internal-перевод vs внешний, лимиты, заморозка средств</td></tr>
+            <tr><td><strong>On-ramp</strong></td><td>минуты</td><td>зависит от провайдера</td><td>KYC, лимиты, fixed vs floating курс, slippage</td></tr>
+            <tr><td><strong>Stablecoin</strong></td><td>как блокчейн</td><td>необратимо</td><td>сеть (USDT-TRC20 vs ERC20 vs TON), depeg-риск, gas</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Sandbox-окружения, где реально тестировать:</strong></p>
+        <ul>
+          <li><strong>Карты</strong> — тестовые карты Visa/Mastercard (<code>4242 4242 4242 4242</code> у Stripe, у каждого провайдера свои), все 3DS-сценарии без реальных денег</li>
+          <li><strong>СБП</strong> — sandbox НСПК, тестовые счета банков-участников</li>
+          <li><strong>Apple Pay</strong> — Apple Pay Sandbox, тестовый Apple ID; <strong>Google Pay</strong> — Test Suite</li>
+          <li><strong>Crypto</strong> — testnet (TON testnet, Sepolia для ETH), faucet для получения тестовых монет</li>
+        </ul>
+
+        <div class="hl"><span class="hl-label">PCI DSS — что значит для QA</span>Если приложение касается данных карты (даже UI-полей ввода) — попадает в скоуп PCI DSS. Что НЕ должно происходить: полный PAN в логах / Sentry / БД / тестовых артефактах, CVV не хранится <em>нигде</em>, в скриншотах автотестов карта замаскирована. Проверяй: что отправляется в analytics, что в Sentry-breadcrumbs, что в network-логах. Утечка карты — критический баг и compliance-инцидент.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Регуляторика, которую упоминают на собесах в финтех:</strong></p>
+        <ul>
+          <li><strong>ФЗ-115</strong> (РФ) — противодействие отмыванию: KYC, лимиты на анонимные кошельки (15k/40k/60k руб), идентификация при превышении</li>
+          <li><strong>AML / KYC</strong> — Know Your Customer: уровни верификации (full / simplified), source of funds, PEP-чек</li>
+          <li><strong>Travel Rule (FATF)</strong> — для крипто-переводов выше порога (~$1–3K) обязательна передача данных отправителя/получателя</li>
+          <li><strong>PCI DSS</strong> — стандарт безопасности карточных данных (см. L2)</li>
+          <li><strong>3-D Secure 2.x</strong> — risk-based auth: frictionless (без челленджа, если low-risk) vs challenge (OTP / биометрия)</li>
+        </ul>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем тестирование internal-перевода между двумя пользователями платформы отличается от внешнего вывода на карту?» — <strong>Internal:</strong> атомарная операция в одной БД, моментально, реверсабельно (мы сами рулим), нет внешних зависимостей, идемпотентность через DB-транзакцию. <strong>Внешний вывод:</strong> асинхронный, многошаговый (acquirer → платёжная система → банк-эмитент), долгие pending-состояния, нужны webhooks для финального статуса, чарджбэки, и главное — если деньги ушли, вернуть их можно только через регламенты, а не SQL-апдейтом. Это две принципиально разные модели надёжности.</div>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span>«У нас в тестах есть тест-карта, всё работает». На проде ломается следующее, что в sandbox не воспроизводится: 1) реальные банки-эмитенты отвечают по-разному, 2) реальные 3DS-флоу через SMS/push реального банка, 3) реальные комиссии и округления, 4) реальные network-флуктуации между acquirer и эмитентом. Sandbox — необходимое, но недостаточное условие. Поэтому в финтехе важны canary-релизы и production smoke с реальной мелкой суммой.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В финтех-продукте 2026 года QA редко тестирует «один платёжный метод». Тестируется <em>композиция</em>: пользователь пополнил картой → перевёл другу через wallet-баланс → друг вывел на СБП. Это разные системы с разной семантикой, и баги живут на стыках (например, hold от карты ещё не снят, а баланс уже разрешил вывод — переплата). Думай связками, а не методами.</div>
+
+        <div class="hl llm"><span class="hl-label">AI-эпоха</span>Conversational payments (оплата через чат-бота / голосового агента), agent-to-agent платежи (один AI-агент платит другому от имени пользователя) — растущая ниша. QA-вопросы: как валидировать намерение, как подтверждать платёж голосом (риск injection), как ограничивать лимиты для агентов, как обрабатывать неоднозначные команды. Если позиция в продвинутой команде — ожидать обсуждения этих сценариев.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 15. ТРАНЗАКЦИОННЫЕ UX-СЦЕНАРИИ ─────── -->
+  <section class="section" id="tx-ux">
+    <div class="section-header">
+      <span class="section-num">15</span>
+      <span class="section-title">Транзакционные UX-сценарии</span>
+      <span class="section-badge">user flows</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Транзакция глазами пользователя — это <em>не один клик</em>, а последовательность состояний, в каждом из которых UI должен честно показывать, что происходит. Главный принцип: <strong>пользователь не должен бояться, что деньги пропали</strong>.</p>
+        <p><strong>Жизненный цикл транзакции в UI:</strong></p>
+        <div class="flow">
+          <div class="flow-step">Initiate</div><span class="flow-arr">→</span>
+          <div class="flow-step">Validate</div><span class="flow-arr">→</span>
+          <div class="flow-step">Confirm</div><span class="flow-arr">→</span>
+          <div class="flow-step">Pending</div><span class="flow-arr">→</span>
+          <div class="flow-step">Success / Failed / Timeout</div>
+        </div>
+        <div class="hl green"><span class="hl-label">Ключевой тезис</span>Каждое состояние должно быть <em>видимым</em> и <em>возобновляемым</em>. Если юзер закрыл приложение в Pending — открыв снова, он должен увидеть актуальный статус, а не «вечный спиннер» или пустой экран.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что проверять в каждом состоянии:</strong></p>
+        <table>
+          <thead><tr><th>Состояние</th><th>Что проверять</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Idle</strong></td><td>дефолты, минимальная/максимальная сумма, выбранный инструмент, доступный баланс</td></tr>
+            <tr><td><strong>Validating</strong></td><td>формат адреса/телефона/карты, маскирование PAN, debounce валидации</td></tr>
+            <tr><td><strong>Confirm</strong></td><td>amount + комиссия + получатель крупно и однозначно, нельзя «случайно» подтвердить</td></tr>
+            <tr><td><strong>Pending</strong></td><td>прогресс/спиннер, оценка времени, что приложение можно свернуть и не потерять контекст</td></tr>
+            <tr><td><strong>Success</strong></td><td>чёткое подтверждение, сумма, получатель, ссылка на детали/чек, share</td></tr>
+            <tr><td><strong>Failed</strong></td><td>понятная причина (не «error 500»), retry-кнопка, явное «деньги не списались»</td></tr>
+            <tr><td><strong>Timeout</strong></td><td>что показывать через 30s, 1m, 5m; куда вести пользователя (история транзакций)</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Идемпотентность с UX-стороны:</strong></p>
+        <ul>
+          <li>Кнопка submit становится <code>disabled</code> после нажатия — нельзя задвоить кликом</li>
+          <li>На бэк отправляется <strong>idempotency key</strong> — повторный запрос с тем же ключом не создаёт вторую транзакцию</li>
+          <li>Refresh страницы / возврат back — не приводит к повторной транзакции</li>
+          <li>Двойной submit с двух устройств — обрабатывается как одна операция</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Retry-логика — две модели:</strong></p>
+        <ul>
+          <li><strong>Auto-retry</strong> (для сетевых ошибок до отправки): окей, юзер не заметил</li>
+          <li><strong>Manual retry</strong> (после failure): только если 100% уверены, что деньги не списались; иначе — двойное списание</li>
+        </ul>
+
+        <div class="hl"><span class="hl-label">Источник правды</span>UI-состояние транзакции — это <em>отображение</em> бэка, а не локальное состояние клиента. После любого reconnect / cold start приложение должно подтянуть актуальный статус с сервера. Локальный кэш — только для оптимистичных апдейтов, не для решений «можно ли свайпнуть».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Граничные состояния, которые обычно ловят синьоры на собесе:</strong></p>
+        <ul>
+          <li>Приложение убили во время Pending → при следующем старте показать актуальный статус (success/failed/still pending), а не «вечный спиннер»</li>
+          <li>Сеть пропала <em>после</em> подписи/отправки, но <em>до</em> ответа от сервера → не делать второй запрос, проверить идемпотентным GET «что там с моей tx»</li>
+          <li>Push о статусе пришёл раньше, чем UI обновился → не показывать «всё ещё в обработке» при наличии финального push</li>
+          <li>Серверное время и клиентское разошлись → не блокировать транзакцию по «срокам» только по клиентским часам</li>
+          <li>Юзер свайпнул на другую страницу в Pending → вернулся через 10 минут → ожидает финальный статус, а не повторение всего флоу</li>
+          <li>Двойной submit с двух устройств одновременно (race) → только одна транзакция; вторая получает «уже выполнено»</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Антифрод-UX:</strong> часть транзакционного флоу — это не баги UX, а защитные механизмы:</p>
+        <ul>
+          <li><strong>Cooldown</strong> между транзакциями (нельзя 100 переводов в минуту)</li>
+          <li><strong>Step-up auth</strong> на риск-кейсах: новый получатель, крупная сумма, новое устройство → дополнительная 3DS / OTP / биометрия</li>
+          <li><strong>Velocity-лимиты</strong>: дневные/недельные/месячные суммы по инструменту</li>
+          <li><strong>Manual review</strong>: некоторые транзакции уходят на ручную проверку — UI должен показывать «на проверке», а не «failed»</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Рефанды / возвраты — отдельный флоу:</strong></p>
+        <table>
+          <thead><tr><th>Тип</th><th>Время</th><th>Что проверять</th></tr></thead>
+          <tbody>
+            <tr><td>Full refund (карта)</td><td>1–5 рабочих дней</td><td>попадает на ту же карту, статус в истории, чек</td></tr>
+            <tr><td>Partial refund</td><td>как full</td><td>остаток корректный, нельзя refund больше, чем платёж</td></tr>
+            <tr><td>Refund внутри платформы</td><td>мгновенно</td><td>атомарность с откатом баланса</td></tr>
+            <tr><td>Chargeback (карта)</td><td>до 120 дней</td><td>уведомление продавцу, dispute-флоу, заморозка</td></tr>
+          </tbody>
+        </table>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Пользователь подтвердил перевод, увидел спиннер, через 10 секунд закрыл приложение, через час открывает — что должен увидеть?» — <strong>Актуальный статус с бэка</strong>: success / failed / pending. Никаких stale-spinner'ов и никакого «попробуйте ещё раз». Если транзакция всё ещё pending через час — это уже не норма UX, но и тут нельзя показывать «failed» (деньги могут списаться позже). Правильный ответ: «Транзакция всё ещё в обработке, статус обновится автоматически». Источник правды — бэк, локальный state можно сбросить.</div>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«Спиннер до победного».</strong> UI крутит лоадер, бэк давно ответил failed/success, push отослан, но клиент не подписан на обновления и не делает poll. Юзер видит вечный спиннер, паникует, делает второй submit. Лечение: либо push с обновлением статуса, либо WebSocket-канал, либо polling каждые 2–5s в активном экране.</div>
+
+        <div class="hl modern"><span class="hl-label">Production monitoring</span>Для каждой транзакции в проде должен существовать <strong>trace</strong>: <code>user_id ↔ tx_id ↔ provider_tx_id ↔ webhook_id</code>. Когда юзер пишет в саппорт «у меня деньги пропали» — должно быть одно поле для поиска, по которому видна вся цепочка. Если такой связности нет — это первое, что чинит senior QA, потому что без неё инциденты не разбираются.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 16. ENGAGEMENT-МЕХАНИКИ ─────── -->
+  <section class="section" id="engagement">
+    <div class="section-header">
+      <span class="section-num">16</span>
+      <span class="section-title">Engagement-механики</span>
+      <span class="section-badge">retention</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>Engagement-механики — это всё, что заставляет пользователя <em>вернуться</em> в продукт после первой транзакции. В wallet/finтех-приложениях это критично: продукт скучный, без механик удержания юзер открывает раз в месяц.</p>
+        <ul>
+          <li><strong>Гейм-механики</strong> — квесты, level-up, ачивки, прогресс-бары</li>
+          <li><strong>Реферальная программа</strong> — «пригласи друга, получи N»</li>
+          <li><strong>Push / in-app уведомления</strong> — статусы, напоминания, промо</li>
+          <li><strong>Streak / daily</strong> — серия ежедневных действий</li>
+          <li><strong>Бонусы / cashback</strong> — финансовый возврат за активность</li>
+          <li><strong>A/B-тесты</strong> — механика проверки, что вообще работает</li>
+        </ul>
+        <div class="hl green"><span class="hl-label">Главная метрика</span>Главное число в engagement — <strong>retention</strong> (D1 / D7 / D30): какая доля юзеров возвращается на следующий день / неделю / месяц. Все механики делаются ради этого. QA должен понимать, как механика влияет на эту метрику, а не только «работает кнопка».</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Что специфично тестировать в каждой механике:</strong></p>
+        <table>
+          <thead><tr><th>Механика</th><th>Что проверять (помимо «работает»)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Реферал</strong></td><td>атрибуция (кто пригласил), задержка зачисления, мульти-аккаунт детект, что если рефаунд первой транзакции — отозвать ли бонус</td></tr>
+            <tr><td><strong>Push</strong></td><td>deep links (открывают нужный экран и в killed-state, и в background), OS-permissions, badging, доставляемость на iOS/Android, поведение при выключенных push</td></tr>
+            <tr><td><strong>Бонусы / cashback</strong></td><td>триггер начисления, expiration, можно ли получить дважды, отображение в балансе vs «бонусном» кошельке, условия вывода</td></tr>
+            <tr><td><strong>Streak / daily</strong></td><td>таймзона пользователя vs сервера, что если юзер меняет время устройства, что если самолёт через date-line</td></tr>
+            <tr><td><strong>Quests / achievements</strong></td><td>прогресс сохраняется между сессиями, ретроактивный учёт (юзер сделал действие до запуска квеста), нельзя получить награду дважды</td></tr>
+            <tr><td><strong>A/B-тесты</strong></td><td>bucket assignment стабилен (sticky по user_id), что увидит юзер при смене группы, корректный экспозур-логгинг</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top:14px;"><strong>Feature flags</strong> — инструмент, без которого engagement не катят:</p>
+        <ul>
+          <li>Продакт включает фичу без релиза на нужный сегмент (страна, % юзеров, версия приложения)</li>
+          <li>QA проверяет: флаг ON → новое поведение, OFF → старое поведение полностью; нет «полу-включения»</li>
+          <li>Что показать юзеру, если флаг выключили посреди его флоу: не падать, корректно деградировать</li>
+          <li>Кэш флагов на клиенте: какой TTL, что если бэк недоступен (defaults)</li>
+        </ul>
+
+        <div class="hl"><span class="hl-label">Push-нотификация — это мини-продукт</span>Свой жизненный цикл: <em>отправка</em> (бэк → APNs/FCM), <em>доставка</em> (зависит от OS, состояния устройства), <em>отображение</em> (формат, badging), <em>тап</em> (deep link, open from killed-state vs background), <em>дедупликация</em> (не отправлять одно и то же дважды). Каждый шаг — отдельный кейс. Особо: что если push пришёл, юзер тапнул, deep link ведёт на экран, который требует auth, а юзер разлогинен → понятный redirect, а не падение.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Антифрод в engagement</strong> — отдельный пласт, который часто проваливают:</p>
+        <ul>
+          <li><strong>Реф-фрод:</strong> одно устройство → много аккаунтов через смену IMEI/IDFA/email; детект по device fingerprint, IP, поведению</li>
+          <li><strong>Бонус-фрод:</strong> получил бонус → вывел → повторил через новый аккаунт; защита — KYC, лимиты на инструмент, velocity</li>
+          <li><strong>Cashback-фрод:</strong> circular payments (А → В → А), накрутка оборота; детект по графу транзакций</li>
+          <li><strong>Manual review queue</strong> для подозрительных случаев — UI должен корректно показывать «на проверке», не «failed»</li>
+          <li>Тестирование <em>детекта</em>: создать фрод-сценарий в staging, убедиться, что система ловит</li>
+        </ul>
+
+        <p style="margin-top:14px;"><strong>Метрики, на которые смотрит синьор-QA (не только баги):</strong></p>
+        <ul>
+          <li><strong>Conversion</strong> на каждом шаге воронки: open → tap CTA → start → finish</li>
+          <li><strong>Drop-off</strong>: где конкретно люди уходят — это UX-баг даже без падения</li>
+          <li><strong>Time-to-first-transaction</strong> у нового юзера</li>
+          <li><strong>D1 / D7 / D30 retention</strong></li>
+          <li><strong>Push CTR</strong>: тапают ли уведомления; низкий CTR = нерелевантные пуши = со временем юзеры выключают</li>
+          <li><strong>Bonus burn rate</strong>: сколько бонусов выплачено vs сколько в фоне приводят к транзакции</li>
+        </ul>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как ты протестируешь запуск новой бонусной механики "получи 100 руб за первый перевод"?» — Не «нажал, получил». Полный план: 1) <strong>бэк-логика</strong> начисления (триггер только на первый перевод, идемпотентность, антифрод); 2) <strong>UI-видимость</strong> бонуса во всех состояниях (доступен, активирован, использован, истёк); 3) <strong>граничные кейсы</strong>: рефаунд первой транзакции — отозвать ли бонус; что если юзер удалил аккаунт; что если несколько устройств; 4) <strong>feature flag</strong> отключения посреди акции; 5) <strong>метрики</strong> и A/B — как поймём, что зашло (conversion в перевод, retention D7); 6) <strong>антифрод</strong>: мульти-аккаунты, KYC-обход; 7) <strong>коммуникация</strong>: push, email, in-app, лендинг. Это уже product-mindset, а не «прокликал».</div>
+
+        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«Накрутили DAU за счёт push-спама».</strong> Краткосрочно метрики растут, долгосрочно — юзеры выключают пуши или удаляют приложение. QA в продуктовой команде должен <em>замечать</em> такие решения и говорить про trade-off, а не только проверять, что technically push доставляется.</div>
+
+        <div class="hl modern"><span class="hl-label">A/B-тесты — что проверяет QA</span>1) <strong>Корректность бакетинга</strong> — юзер стабильно попадает в одну группу (sticky по user_id, не по сессии); 2) <strong>экспозур-логгинг</strong> — событие «увидел вариант B» отправляется ровно один раз и до самого действия; 3) <strong>SRM</strong> (sample ratio mismatch) — если в A 50%, в B 30% — что-то сломалось в раздаче, эксперимент невалиден; 4) <strong>guardrail-метрики</strong> — что вариант B не ломает критичное (например, конверсию в платёж); 5) <strong>graceful fallback</strong> — что если сервис экспериментов лёг, юзер видит дефолтный вариант, а не белый экран.</div>
+
+        <div class="hl llm"><span class="hl-label">AI-эпоха</span>Персонализация engagement — растущее направление: <em>какой</em> квест показать <em>этому</em> юзеру в <em>этот</em> момент. LLM генерирует тексты пушей, AI выбирает таймслот, ML предсказывает риск churn. QA-вопросы: как проверить, что персонализация не предлагает unsuitable контент (например, азартный квест юзеру, отказавшемуся от gambling-категории), как тестировать LLM-генерированные тексты на качество и compliance, как мерить fairness между сегментами. На senior-позиции в продуктовой команде такие сценарии всё чаще ожидают обсуждения.</div>
       </div>
 
     </div>
