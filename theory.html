@@ -521,9 +521,9 @@
   </div>
   <div class="toc-inner">
     <div class="nav-group-title">На этой странице</div>
-        <a href="#what-is-testing">01 · Что такое тестирование</a>
-    <a href="#sdlc">02 · SDLC, STLC и роль QA</a>
-    <a href="#qa-qc">03 · QA vs QC vs Testing</a>
+    <a href="#what-is-testing">01 · Что такое тестирование</a>
+    <a href="#qa-qc">02 · QA vs QC vs Testing</a>
+    <a href="#sdlc">03 · SDLC, STLC и роль QA</a>
     <a href="#types">04 · Виды тестирования</a>
     <a href="#levels">05 · Уровни тестирования</a>
     <a href="#pyramid">06 · Пирамида тестирования</a>
@@ -587,7 +587,6 @@
             <tr><td>проверяет соответствие модели</td><td>не «создаёт качество» — качество закладывается при разработке</td></tr>
           </tbody>
         </table>
-        <div class="hl"><span class="hl-label">Дейкстра, 1969</span><em>«Testing shows the presence, not the absence of bugs»</em> — любая партия тестов проверяет конечное подмножество поведений; полностью доказать корректность тестами нельзя. Для абсолютных гарантий существует formal verification — но это другой инструмент и другая цена.</div>
         <p style="margin-top:14px;"><strong>Два уровня цели тестирования:</strong></p>
         <ul>
           <li><strong>Тактический</strong> — найти и зарепортить конкретные баги в конкретной фиче (задача мидла)</li>
@@ -599,7 +598,7 @@
 
       <div class="lvl lvl-3">
         <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Полное тестирование невозможно.</strong> Простая форма регистрации с 5 полями и 10 валидными значениями у каждого — уже 10⁵ комбинаций. Добавь порядок ввода, разные браузеры, состояния сети, время суток — числа взрывные. Работа QA — не «проверить всё», а <em>выбрать, что важно проверить</em>. Это и есть risk-based мышление, фундамент синьорства.</p>
+        <p><strong>Полное тестирование невозможно.</strong> Простая форма регистрации с 5 полями и 10 валидными значениями у каждого — уже 10⁵ комбинаций. Добавь порядок ввода, разные браузеры, состояния сети, время суток — числа взрывные. Работа QA — не «проверить всё», а <em>выбрать, что важно проверить</em>. Это и есть risk-based мышление.</p>
 
         <p style="margin-top:14px;"><strong>Семь принципов тестирования (ISTQB)</strong> — каркас, на котором держится всё остальное:</p>
         <ol style="padding-left:20px; margin: 6px 0; font-size: 14px;">
@@ -614,16 +613,12 @@
 
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Если разработчик пишет чистый код и unit-тесты, зачем нужен QA?» — За тем, что <strong>качество кода ≠ качество продукта</strong>. Код может быть идеальным, но: 1) фича не решает проблему пользователя, 2) не интегрируется с соседним сервисом, 3) роняет систему под нагрузкой, 4) нарушает требования закона / GDPR. QA смотрит на продукт глазами пользователя и бизнеса — это другая роль и другой угол атаки, чем у разработчика.</div>
 
-        <div class="hl orange"><span class="hl-label">Антипаттерн</span><strong>«QA — последний рубеж перед прод».</strong> Если тестирование начинается после того, как код написан — уже поздно. Boehm в 1981 году показал: дефект в требованиях обходится в 100× дороже починить в проде, чем поймать на старте. Поэтому senior QA приходит в задачу <em>до</em> кода, а не <em>после</em>.</div>
-
-        <div class="hl modern"><span class="hl-label">Школа RST (Bach / Bolton)</span>«Testing is the process of <strong>evaluating</strong> a product by <strong>learning</strong> about it through <strong>exploration</strong> and <strong>experimentation</strong>». Ключевая мысль: testing — это <em>investigation</em>, а не <em>check</em> (галочки в чек-листе). Checks можно автоматизировать; testing — это критическое мышление, и его автоматизировать нельзя.</div>
-
         <div class="hl llm"><span class="hl-label">AI-эпоха</span>С появлением LLM-копайлотов классические «галочки» — генерация тест-кейсов из требований, типовые edge cases, шаблоны баг-репортов — автоматизируются за минуты. То, что остаётся за инженером и растёт в цене — <em>что именно тестировать</em>: оценка рисков, дизайн стратегии, понимание домена, разговор с пользователем. Тестирование как «нажал кнопку и сверил результат» уходит; тестирование как «определил, какие сигналы нам нужны от системы» — становится главной ценностью.</div>
 
         <p style="margin-top:14px;"><strong>Как отвечать на этот вопрос на собесе как синьор</strong> (схема ответа на 60–90 секунд):</p>
         <ol style="padding-left:20px; margin: 6px 0; font-size: 14px;">
           <li>Дать определение через <em>цель</em>, а не через <em>действие</em>: «процесс сбора информации о качестве для принятия решений»</li>
-          <li>Развести понятия: <em>testing ≠ debugging ≠ quality assurance ≠ verification</em></li>
+          <li>Развести понятия: <em>testing ≠ debugging ≠ quality assurance ≠ verification ≠ validation</em></li>
           <li>Упомянуть ограничение: полное тестирование невозможно → отсюда risk-based мышление</li>
           <li>Закончить уровнем своей ответственности: «как синьор, я отвечаю не за поиск багов, а за то, чтобы команда могла принимать обоснованные решения о релизе»</li>
         </ol>
@@ -632,11 +627,70 @@
     </div>
   </section>
 
-
-  <!-- ─────── 02. SDLC, STLC, РОЛЬ QA ─────── -->
-  <section class="section" id="sdlc">
+<!-- ─────── 02. QA vs QC vs TESTING ─────── -->
+  <section class="section" id="qa-qc">
     <div class="section-header">
       <span class="section-num">02</span>
+      <span class="section-title">QA vs QC vs Testing</span>
+      <span class="section-badge">terminology</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <table>
+          <thead><tr><th>Термин</th><th>Суть</th><th>Когда</th></tr></thead>
+          <tbody>
+            <tr><td><strong>QA</strong> — Quality Assurance</td><td>обеспечение качества: процессы, ревью, стандарты</td><td>до и во время разработки</td></tr>
+            <tr><td><strong>QC</strong> — Quality Control</td><td>контроль качества: поиск дефектов в готовом продукте</td><td>после разработки</td></tr>
+            <tr><td><strong>Testing</strong></td><td>конкретные действия по запуску проверок</td><td>часть QC</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Аналогия</span>QA — это про <em>процесс</em>: настройка CI/CD, code review правила, coding standards, автоматические линтеры. QC — про <em>продукт</em>: финальная проверка билда перед релизом — все ли автотесты прошли, корректен ли deploy. Testing — конкретные действия: запустить test suite, посмотреть отчёт, открыть баг.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>QA = превентивно.</strong> Ревью требований, тест-планы, code review, статический анализ, CI-стандарты, обучение команды.</p>
+        <p><strong>QC = реактивно.</strong> Запуск тестов, регресс, проверка фикса, баг-репорты.</p>
+
+        <p style="margin-top:14px;"><strong>Verification vs Validation</strong> — соседняя пара понятий, которую часто спрашивают рядом с QA/QC:</p>
+        <table>
+          <thead><tr><th>Понятие</th><th>Главный вопрос</th><th>Примеры</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Verification</strong></td><td>правильно ли строим продукт по спецификации?</td><td>ревью требований, code review, статический анализ, тесты по acceptance criteria</td></tr>
+            <tr><td><strong>Validation</strong></td><td>тот ли продукт строим для пользователя и бизнеса?</td><td>UAT, демо заказчику, usability-сессии, beta, обратная связь от пользователей и продаж</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Формула</span>Verification: <em>are we building the product right?</em> Validation: <em>are we building the right product?</em></div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Что делает Senior QA, чего не делает Middle:</strong></p>
+        <ul>
+          <li>Влияет на процессы — не просто тестирует, а меняет, как команда тестирует</li>
+          <li>Дизайн тест-стратегии на проект / релиз</li>
+          <li>Решения о trade-off: что автоматизировать, что оставить ручным, что вообще не тестировать</li>
+          <li>Менторство, ревью кода тестов, найм</li>
+          <li>Метрики качества → разговор с менеджментом на их языке</li>
+        </ul>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«QA — это часть разработки или отдельная функция?» — Современный ответ: часть. Команда отвечает за качество целиком (shared ownership), QA — фасилитатор, а не «отдел приёмки».</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных командах границы QA / QC часто размыты — отдельного «отдела приёмки» обычно нет. Многие продуктовые команды говорят <strong>Quality Engineering (QE)</strong>: embedded-инженер в команде, который пишет тесты как код, ревьюит PR и отвечает за CI-инфру наравне с фичами. Если на собесе слышишь «у нас QE, а не QA» — это про культуру встроенного качества, а не про переименование.</div>
+      </div>
+
+    </div>
+  </section>
+
+<!-- ─────── 03. SDLC, STLC, РОЛЬ QA ─────── -->
+  <section class="section" id="sdlc">
+    <div class="section-header">
+      <span class="section-num">03</span>
       <span class="section-title">SDLC, STLC и роль QA в процессе</span>
       <span class="section-badge">process</span>
     </div>
@@ -724,59 +778,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 03. QA vs QC vs TESTING ─────── -->
-  <section class="section" id="qa-qc">
-    <div class="section-header">
-      <span class="section-num">03</span>
-      <span class="section-title">QA vs QC vs Testing</span>
-      <span class="section-badge">terminology</span>
-    </div>
-    <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <table>
-          <thead><tr><th>Термин</th><th>Суть</th><th>Когда</th></tr></thead>
-          <tbody>
-            <tr><td><strong>QA</strong> — Quality Assurance</td><td>обеспечение качества: процессы, ревью, стандарты</td><td>до и во время разработки</td></tr>
-            <tr><td><strong>QC</strong> — Quality Control</td><td>контроль качества: поиск дефектов в готовом продукте</td><td>после разработки</td></tr>
-            <tr><td><strong>Testing</strong></td><td>конкретные действия по запуску проверок</td><td>часть QC</td></tr>
-          </tbody>
-        </table>
-        <div class="hl green"><span class="hl-label">Аналогия</span>QA — это про <em>процесс</em>: настройка CI/CD, code review правила, coding standards, автоматические линтеры. QC — про <em>продукт</em>: финальная проверка билда перед релизом — все ли автотесты прошли, корректен ли deploy. Testing — конкретные действия: запустить test suite, посмотреть отчёт, открыть баг.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>QA = превентивно.</strong> Ревью требований, тест-планы, code review, статический анализ, CI-стандарты, обучение команды.</p>
-        <p><strong>QC = реактивно.</strong> Запуск тестов, регресс, проверка фикса, баг-репорты.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Что делает Senior QA, чего не делает Middle:</strong></p>
-        <ul>
-          <li>Влияет на процессы — не просто тестирует, а меняет, как команда тестирует</li>
-          <li>Дизайн тест-стратегии на проект / релиз</li>
-          <li>Решения о trade-off: что автоматизировать, что оставить ручным, что вообще не тестировать</li>
-          <li>Менторство, ревью кода тестов, найм</li>
-          <li>Метрики качества → разговор с менеджментом на их языке</li>
-        </ul>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«QA — это часть разработки или отдельная функция?» — Современный ответ: часть. Команда отвечает за качество целиком (shared ownership), QA — фасилитатор, а не «отдел приёмки».</div>
-
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных командах границы QA / QC часто размыты — отдельного «отдела приёмки» обычно нет. Многие продуктовые команды говорят <strong>Quality Engineering (QE)</strong>: embedded-инженер в команде, который пишет тесты как код, ревьюит PR и отвечает за CI-инфру наравне с фичами. Если на собесе слышишь «у нас QE, а не QA» — это про культуру встроенного качества, а не про переименование.</div>
-      </div>
-
-    </div>
-  </section>
-
-
-  <!-- ─────── 04. ВИДЫ ТЕСТИРОВАНИЯ ─────── -->
+<!-- ─────── 04. ВИДЫ ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="types">
     <div class="section-header">
       <span class="section-num">04</span>
@@ -837,8 +839,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 05. УРОВНИ ТЕСТИРОВАНИЯ ─────── -->
+<!-- ─────── 05. УРОВНИ ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="levels">
     <div class="section-header">
       <span class="section-num">05</span>
@@ -886,8 +887,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 06. ПИРАМИДА ТЕСТИРОВАНИЯ ─────── -->
+<!-- ─────── 06. ПИРАМИДА ТЕСТИРОВАНИЯ ─────── -->
   <section class="section" id="pyramid">
     <div class="section-header">
       <span class="section-num">06</span>
@@ -951,8 +951,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 07. ТЕХНИКИ ТЕСТ-ДИЗАЙНА ─────── -->
+<!-- ─────── 07. ТЕХНИКИ ТЕСТ-ДИЗАЙНА ─────── -->
   <section class="section" id="design">
     <div class="section-header">
       <span class="section-num">07</span>
@@ -1024,8 +1023,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 08. ТЕСТОВАЯ ДОКУМЕНТАЦИЯ ─────── -->
+<!-- ─────── 08. ТЕСТОВАЯ ДОКУМЕНТАЦИЯ ─────── -->
   <section class="section" id="docs">
     <div class="section-header">
       <span class="section-num">08</span>
@@ -1102,8 +1100,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 09. ДИЗАЙН КЕЙСОВ НА ПРАКТИКЕ ─────── -->
+<!-- ─────── 09. ДИЗАЙН КЕЙСОВ НА ПРАКТИКЕ ─────── -->
   <section class="section" id="practice">
     <div class="section-header">
       <span class="section-num">09</span>
@@ -1334,8 +1331,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 10. ЖИЗНЕННЫЙ ЦИКЛ БАГА ─────── -->
+<!-- ─────── 10. ЖИЗНЕННЫЙ ЦИКЛ БАГА ─────── -->
   <section class="section" id="bug-life">
     <div class="section-header">
       <span class="section-num">10</span>
@@ -1398,8 +1394,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 11. SEVERITY vs PRIORITY ─────── -->
+<!-- ─────── 11. SEVERITY vs PRIORITY ─────── -->
   <section class="section" id="sev-prio">
     <div class="section-header">
       <span class="section-num">11</span>
@@ -1453,8 +1448,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 12. МЕТРИКИ QA ─────── -->
+<!-- ─────── 12. МЕТРИКИ QA ─────── -->
   <section class="section" id="metrics">
     <div class="section-header">
       <span class="section-num">12</span>
@@ -1518,8 +1512,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 13. RISK-BASED, SHIFT-LEFT/RIGHT ─────── -->
+<!-- ─────── 13. RISK-BASED, SHIFT-LEFT/RIGHT ─────── -->
   <section class="section" id="risk">
     <div class="section-header">
       <span class="section-num">13</span>
@@ -1578,8 +1571,7 @@
     </div>
   </section>
 
-
-  <!-- ─────── 14. SENIOR-КЕЙСЫ ─────── -->
+<!-- ─────── 14. SENIOR-КЕЙСЫ ─────── -->
   <section class="section" id="senior">
     <div class="section-header">
       <span class="section-num">14</span>
@@ -1681,7 +1673,7 @@
     </div>
   </section>
 
-  <!-- ─────── 15. ДОП. ВОПРОСЫ ─────── -->
+<!-- ─────── 15. ДОП. ВОПРОСЫ ─────── -->
   <section class="section" id="extra">
     <div class="section-header">
       <span class="section-num">15</span>
