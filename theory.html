@@ -1032,8 +1032,6 @@
             Если форма простая, релиз горит, а риски низкие — обычные классы эквивалентности, границы и чек-лист быстрее. Инструмент не должен быть сложнее риска.
           </div>
         </div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Поле принимает email. Сколько тест-кейсов напишешь?» — не «100 кейсов», а по категориям: пустое, без <code>@</code>, без домена, юникод, очень длинный адрес, спецформаты (<code>a@b.c</code>, адрес с точками), нормализация регистра (<code>User@x.com</code> = <code>user@x.com</code>?). Итого ~10–15 кейсов с обоснованием — важно показать <em>категории</em>, а не число.</div>
-
         <div class="hl modern"><span class="hl-label">В реальном мире</span>Да, это используют, но не в каждой команде и не каждый день. <strong>Pairwise</strong> чаще встречается там, где много конфигураций: браузер × ОС × тариф × роль × feature flag × локаль. <strong>Property-based</strong> чаще живёт у разработчиков и QA-автоматизаторов в библиотеках, API, финтех-расчётах, парсерах, сериализации, где есть понятные инварианты. На обычном CRUD-проекте можно годами не увидеть ни PICT, ни <code>hypothesis</code> — это нормально. Senior-ответ: «вручную почти не делал, но понимаю, где это даёт ROI и какими инструментами можно применить».</div>
 
         <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> генерация pairwise-таблиц, классов эквивалентности, decision tables.<br>
@@ -1485,54 +1483,120 @@
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
-        <ul>
-          <li><strong>Test coverage</strong> — % кода / требований, покрытого тестами</li>
-          <li><strong>Pass / Fail rate</strong> — соотношение зелёных и красных тестов</li>
-          <li><strong>Defect density</strong> — кол-во багов на единицу кода (на 1000 строк / на фичу)</li>
-          <li><strong>Escape rate</strong> — % багов, ушедших в прод (нашли пользователи, а не мы)</li>
-        </ul>
+        <p><strong>Метрика</strong> — это число, по которому QA судит, насколько хорошо работает тестирование или продукт. Не для красоты дашборда — для принятия решений: куда вложить силы, что чинить, что показать менеджменту.</p>
+        <p style="margin-top:10px;"><strong>4 базовых метрики</strong>, которые надо знать на L1:</p>
+
+        <div class="grid2" style="margin-top:8px;">
+          <div class="card">
+            <div class="card-title">Escape rate (defect escape rate)</div>
+            <strong>Что:</strong> доля багов, «убежавших» в прод — нашли пользователи, а не QA.<br>
+            <strong>Формула:</strong> <code>bugs_in_prod / (bugs_in_prod + bugs_pre_prod) × 100%</code><br>
+            <strong>Пример:</strong> за квартал 80 багов поймали до релиза, 20 пришли от юзеров → <strong>20 / 100 = 20%</strong>.<br>
+            <strong>Зачем:</strong> главный показатель того, насколько хорошо мы ловим баги <em>до</em> пользователя.<br>
+            <strong>Хорошо:</strong> &lt;5% для зрелого продукта, &lt;10% — при активной разработке.
+          </div>
+          <div class="card">
+            <div class="card-title">Test coverage</div>
+            <strong>Что:</strong> % покрытого тестами кода или требований.<br>
+            <strong>Формула (code):</strong> <code>покрытые LOC / всего LOC × 100%</code><br>
+            <strong>Формула (req):</strong> <code>покрытые требования / всего × 100%</code><br>
+            <strong>Зачем:</strong> искать слепые зоны.<br>
+            <strong>Хорошо:</strong> 70–80% для core domain. 100% — почти всегда вредная цель (см. Goodhart в L3).
+          </div>
+          <div class="card">
+            <div class="card-title">Pass rate</div>
+            <strong>Что:</strong> % зелёных тестов из всех прогонов.<br>
+            <strong>Формула:</strong> <code>passed / total × 100%</code><br>
+            <strong>Зачем:</strong> индикатор стабильности фреймворка (<em>не</em> качества кода).<br>
+            <strong>Хорошо:</strong> &gt;95% на main. Если ниже — нестабильные тесты замусоривают сигнал, ничему уже не верят.
+          </div>
+          <div class="card">
+            <div class="card-title">Defect density</div>
+            <strong>Что:</strong> сколько багов на единицу кода или фичу.<br>
+            <strong>Формула:</strong> <code>багов / 1000 LOC</code> или <code>багов / фичу</code><br>
+            <strong>Зачем:</strong> сравнивать модули/команды, находить «горячие» участки.<br>
+            <strong>Подвох:</strong> не использовать как KPI отдельного QA — поощряет «находить больше» в ущерб важности.
+          </div>
+        </div>
+
+        <div class="hl green" style="margin-top:14px;"><span class="hl-label">Escape rate — простыми словами</span>Представь QA как сеть, через которую идут баги от разработки к пользователю. <strong>Escape rate = доля багов, которые сквозь сеть проскочили.</strong> Это главная метрика самого тестирования: не про код и не про продукт — про то, насколько хороша ваша сеть. 5% — отличная сеть, 30% — сеть в дырах. На собесе часто это первая метрика, о которой просят рассказать.</div>
       </div>
 
       <hr class="lvl-divider">
 
       <div class="lvl lvl-2">
         <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Расширенный набор</strong> — что ещё спрашивают и используют в работе:</p>
         <table>
-          <thead><tr><th>Метрика</th><th>Формула / смысл</th><th>Для кого</th></tr></thead>
+          <thead><tr><th>Метрика</th><th>Формула</th><th>Хорошо / плохо</th><th>Зачем</th></tr></thead>
           <tbody>
-            <tr><td>Code coverage</td><td>% строк / веток кода, выполняемых тестами</td><td>команда</td></tr>
-            <tr><td>Requirements coverage</td><td>% требований, покрытых хотя бы одним тестом</td><td>PM</td></tr>
-            <tr><td>MTTR</td><td>Mean Time To Repair — среднее время от падения теста до фикса</td><td>тимлид</td></tr>
-            <tr><td>Flaky rate</td><td>% тестов, которые иногда падают без причины</td><td>QA-автоматизатор</td></tr>
-            <tr><td>Bug reopen rate</td><td>% багов, которые пришлось переоткрывать</td><td>тимлид разработки</td></tr>
+            <tr><td><strong>DRE</strong> (Defect Removal Efficiency)</td><td><code>1 − escape_rate</code></td><td>&gt;90% хорошо</td><td>обратная сторона escape rate, на собесе спрашивают как синоним</td></tr>
+            <tr><td><strong>MTTR для бага</strong></td><td>среднее время <em>заведение → фикс</em></td><td>зависит от severity</td><td>скорость реакции: critical — часы, minor — спринт</td></tr>
+            <tr><td><strong>Flaky rate</strong></td><td><code>flaky / total × 100%</code></td><td>&lt;2% хорошо, &gt;10% катастрофа</td><td>хрупкость фреймворка; flaky убивают доверие к CI</td></tr>
+            <tr><td><strong>Bug reopen rate</strong></td><td><code>переоткрытые / закрытые × 100%</code></td><td>&lt;5%</td><td>качество фиксов и баг-репортов; высокий = плохо общаемся или плохо чиним</td></tr>
+            <tr><td><strong>Test execution time</strong></td><td>длительность полного прогона</td><td>e2e &lt;15 мин на PR</td><td>скорость обратной связи; долгие тесты команда перестаёт ждать</td></tr>
+            <tr><td><strong>Test maintenance cost</strong></td><td>часы поддержки / часы спринта</td><td>&lt;20% ок, &gt;30% болен</td><td>сколько времени уходит «не на новые тесты, а на починку старых»</td></tr>
+            <tr><td><strong>Test automation ROI</strong></td><td><code>(время_ручного × запуски − время_автоматизации) / время_автоматизации</code></td><td>&gt;200% за квартал</td><td>обоснование менеджменту, что автоматизация окупится</td></tr>
+            <tr><td><strong>Coverage by risk</strong></td><td>% high-risk требований с тестами</td><td>100% high-risk покрыто</td><td>важнее общего coverage — фокус туда, где ущерб критичный</td></tr>
           </tbody>
         </table>
+
+        <div class="hl"><span class="hl-label">Две оси, по которым стоит думать про метрики</span>
+          · <strong>Process vs Product.</strong> Escape rate, flaky rate — про процесс QA. Retention, conversion — про продукт. Senior смотрит на обе оси и не путает их между собой.<br>
+          · <strong>Leading vs Lagging.</strong> Leading (опережающие) показывают проблему <em>до</em> того, как она стала катастрофой — flaky rate растёт → грядут пропущенные баги. Lagging (запаздывающие) — констатируют факт постфактум — escape rate за квартал. Управляй по leading, отчитывайся по lagging.
+        </div>
       </div>
 
       <hr class="lvl-divider">
 
       <div class="lvl lvl-3">
         <span class="lvl-tag">L3 · Senior</span>
-        <div class="hl orange"><span class="hl-label">Антипаттерны метрик</span><strong>Coverage 100%</strong> как самоцель — приводит к бесполезным тестам, которые покрывают строки, но не проверяют логику.<br><strong>Кол-во написанных тест-кейсов</strong> как KPI — мотивирует писать тесты ради количества.<br><strong>Кол-во найденных багов</strong> как KPI QA — мотивирует заводить «баги» из требований.</div>
-        <p><strong>Что измерять Senior:</strong></p>
-        <ul>
-          <li><strong>Escape rate</strong> — главная метрика качества тестирования</li>
-          <li><strong>Lead time для бага</strong> — от заведения до фикса в проде</li>
-          <li><strong>Стабильность пайплайна</strong> — % зелёных билдов</li>
-          <li><strong>Время выполнения тестов</strong> — feedback loop для разработки</li>
-          <li><strong>Test Automation ROI</strong> — выгода от автоматизации: <code>(время ручного × запуски − время автоматизации) / время автоматизации</code>. Чем спрашивают: «как обосновать менеджменту, что автоматизация окупится?»</li>
-          <li><strong>Test Maintenance cost</strong> — сколько времени в спринт уходит на починку упавших / переписывание устаревших тестов. Если &gt;30% — фреймворк болен.</li>
-        </ul>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Классические QA-метрики (defect density, test coverage) ушли в тень. Современные команды живут на <strong>DORA-метриках</strong> — это здоровье всего процесса, а не отдельно QA: Deployment Frequency, Lead Time, Change Failure Rate, MTTR. Качество тут — не отдельная метрика, а свойство всего потока.</div>
 
-        <p style="margin-top:14px;"><strong>SRE-практики в работе QA.</strong> Senior смотрит не только в тест-репорты, но и в продакшен:</p>
+        <p><strong>DORA-метрики</strong> — стандарт зрелых команд (Google, DevOps Research and Assessment). Не «QA-метрики» напрямую, но именно через них в проде измеряют здоровье потока. Senior QA <em>обязан</em> понимать и оперировать:</p>
+        <table>
+          <thead><tr><th>Метрика</th><th>Что измеряет</th><th>Elite</th><th>Low</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Deployment Frequency</strong></td><td>как часто катим в прод</td><td>несколько раз в день</td><td>раз в полгода и реже</td></tr>
+            <tr><td><strong>Lead Time for Changes</strong></td><td>от коммита до прода</td><td>&lt;1 час</td><td>&gt;6 месяцев</td></tr>
+            <tr><td><strong>Change Failure Rate</strong></td><td>% деплоев, вызвавших инцидент / откат</td><td>0–15%</td><td>&gt;45%</td></tr>
+            <tr><td><strong>MTTR (Time to Restore)</strong></td><td>время восстановления сервиса после сбоя</td><td>&lt;1 час</td><td>&gt;1 месяц</td></tr>
+          </tbody>
+        </table>
+        <p>Бакеты — из <em>State of DevOps Report</em>. Команды попадают в Elite / High / Medium / Low. Качество в этой модели — не отдельная метрика, а <strong>свойство всего потока</strong>: высокая Frequency + низкий CFR = быстро катим, редко падаем = тестирование работает.</p>
+
+        <p style="margin-top:14px;"><strong>SLI / SLO / SLA — SRE-фундамент</strong> (важно не путать):</p>
         <ul>
-          <li><strong>SLI / SLO / SLA</strong> — что измеряем (latency, error rate) / внутренняя цель / обещание клиенту. Senior участвует в определении SLO и проверяет, держит ли система их</li>
-          <li><strong>Error budget</strong> — если SLO 99.9%, то 0.1% — бюджет на сбои: есть бюджет → катим фичи, кончился → силы на стабильность</li>
-          <li><strong>Observability</strong> как источник сигналов качества — логи, метрики, трейсы (подробнее в разделах Bash и Нагрузка)</li>
+          <li><strong>SLI</strong> (Service Level <em>Indicator</em>) — что мы <em>измеряем</em>. Пример: latency P95 на <code>/checkout</code>.</li>
+          <li><strong>SLO</strong> (<em>Objective</em>) — внутренняя <em>цель</em>. Пример: P95 latency &lt; 300ms за 30 дней.</li>
+          <li><strong>SLA</strong> (<em>Agreement</em>) — обещание клиенту с финансовыми последствиями. Пример: 99.5% доступность или возврат денег.</li>
+        </ul>
+        <p>Правило строгости: <strong>SLA &lt; SLO &lt; SLI</strong>. SLA клиенту мягче, SLO внутрь команды строже — чтобы был запас на ошибки.</p>
+
+        <div class="hl"><span class="hl-label">Error budget — как им жить</span>Если SLO = 99.9% uptime за месяц, то <strong>error budget = 0.1% × 30 дней ≈ 43 минуты</strong> допустимого простоя.<br>· Бюджет есть → катим фичи рискованно, экспериментируем, делаем canary.<br>· Бюджет кончается → стоп новым фичам, силы на стабильность.<br>· Бюджет в минусе → blameless post-mortem, retro, разбор без поиска виноватых.<br>Это «culture-friendly» способ управлять trade-off скорость vs стабильность <em>через число</em>, а не через споры на ретро.</div>
+
+        <p style="margin-top:14px;"><strong>Продуктовые метрики, которые senior QA уже не игнорирует:</strong></p>
+        <ul>
+          <li><strong>Activation rate</strong> — % новых юзеров, совершивших ключевое действие (зарегистрировался → сделал первый перевод). Низкий = onboarding-проблема, а это уже UX-баг</li>
+          <li><strong>Retention D1 / D7 / D30</strong> — кто вернулся на следующий день / неделю / месяц. Падает после релиза = что-то сломали в опыте, даже без crash</li>
+          <li><strong>Funnel conversion</strong> — % прохождения каждого шага воронки. QA смотрит, где падает — баг или UX-затык?</li>
+          <li><strong>Error rate в проде</strong> — 5xx-ответы, JS-ошибки, failed transactions. <em>Leading</em>-сигнал перед escape rate: появились ошибки → жди багов в саппорте</li>
         </ul>
 
-        <div class="hl purple"><span class="hl-label">Goodhart's Law</span>«Когда мера становится целью, она перестаёт быть хорошей мерой». Любую метрику можно обмануть — следи, какое поведение она поощряет. Senior смотрит на <em>качество процесса</em>, а не только на количество багов.</div>
+        <div class="hl orange"><span class="hl-label">Антипаттерны метрик</span>
+          · <strong>Coverage 100% как цель</strong> → бесполезные тесты, покрывающие строки, но не логику<br>
+          · <strong>Количество тест-кейсов как KPI</strong> → тесты ради количества, не покрытия рисков<br>
+          · <strong>Количество найденных багов как KPI QA</strong> → «баги» из требований, надуманные репорты<br>
+          · <strong>Pass rate как KPI качества</strong> → отключают «неудобные» тесты ради зелёного цвета<br>
+          · <strong>Velocity как метрика качества</strong> → катим больше тикетов в ущерб тестированию
+        </div>
+
+        <div class="hl purple"><span class="hl-label">Goodhart's Law</span>«Когда мера становится целью, она перестаёт быть хорошей мерой». Любую метрику можно обмануть — следи, какое поведение она поощряет. Senior смотрит не на одну цифру, а на <strong>связку leading + lagging</strong>: если escape rate растёт <em>и</em> flaky rate растёт — причина в фреймворке, а не «команда плохо тестирует».</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современная команда смотрит на <strong>DORA + SLO/error budget + продуктовые метрики</strong> единой панелью. «Чистые QA-метрики» (defect density, coverage) — диагностика для самой QA-команды. Когда продакт спрашивает «как у нас с качеством?», ответ синьора: «escape rate 4%, CFR за квартал 8%, error budget за май использован на 40%, retention D7 не просел». Это разговор на языке бизнеса.</div>
+
+        <div class="hl llm"><span class="hl-label">AI-эпоха</span>LLM хорошо генерируют тесты по требованиям, но плохо отличают важное от рутинного. Появляющаяся метрика — <strong>useful-test ratio</strong>: доля автогенерённых тестов, реально поймавших хотя бы один баг за квартал. Если &lt;20% — генерация добавляет шум и затраты на поддержку, а не сигнал. Будь готов на собесе обсуждать: как фильтруем сгенерённое, чтобы не утонуть в maintenance.</div>
+
+        <div class="hl purple" style="margin-top:14px;"><span class="hl-label">Каверзный вопрос</span>«Какая одна метрика лучше всего описывает качество вашего тестирования?» — ловушка: одна не описывает. Сильный ответ: «Не одна, а связка. <strong>Escape rate</strong> как lagging-показатель результата + <strong>flaky rate</strong> и <strong>test execution time</strong> как leading-показатели здоровья фреймворка. Плюс <strong>CFR</strong> из DORA — насколько часто наши релизы ломают прод. По одному числу легко обмануть и себя, и команду».</div>
       </div>
 
     </div>
