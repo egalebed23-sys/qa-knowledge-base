@@ -1306,7 +1306,7 @@
           </div>
           <div class="card">
             <div class="card-title">Валидация карты</div>
-            Luhn-алгоритм для номера, CVV (3 или 4 цифры), expiry date (не в прошлом, не слишком далеко в будущем). PAN не хранится открыто (PCI DSS) — только токен.
+            <strong>Luhn-алгоритм</strong> для номера (контрольная сумма, ловит опечатки на клиенте; не безопасность). <strong>CVV</strong> (3 цифры на обороте у Visa/Mastercard, 4 цифры на лице у Amex). <strong>Expiry date</strong> — не в прошлом, не дальше ~5 лет. <strong>PAN</strong> (Primary Account Number — сам 16-значный номер карты) не хранится открыто — правила <strong>PCI DSS</strong>: только токен или маска вида <code>4242 **** **** 4242</code>. Подробнее — в глоссарии.
           </div>
           <div class="card">
             <div class="card-title">3DS authentication</div>
