@@ -567,9 +567,20 @@
 
       <div class="lvl lvl-2">
         <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>API бывают не только веб-овые:</strong> Web API (по сети, обычно HTTP), Library API (функции библиотеки — <code>requests.get()</code>), OS API (системные вызовы). В контексте Backend-тестирования «API» почти всегда значит <strong>Web API поверх HTTP</strong> — о нём и речь.</p>
-        <p>По доступу Web API делят на <strong>public</strong> (любой разработчик), <strong>partner</strong> (по договору, с ключом) и <strong>private/internal</strong> (между своими сервисами).</p>
-        <div class="hl"><span class="hl-label">Клиент-сервер</span><strong>Клиент</strong> отправляет запрос (браузер, приложение, другой сервис), <strong>сервер</strong> отвечает. QA обычно в роли клиента: шлёт запросы и проверяет ответы.</div>
+        <p><strong>Из чего состоит API-контракт</strong> — то, что QA реально проверяет на каждом эндпоинте:</p>
+        <ul>
+          <li><strong>Endpoint</strong> — URL + HTTP-метод: <code>POST /users</code>, <code>GET /orders/42</code></li>
+          <li><strong>Запрос</strong> — headers (auth, content-type) + body (payload в JSON)</li>
+          <li><strong>Ответ</strong> — status code + headers + body</li>
+          <li><strong>Контракт ошибок</strong> — какие коды и формат ошибок возможны, что они означают</li>
+        </ul>
+        <div class="hl"><span class="hl-label">OpenAPI / Swagger — источник правды</span>Современные команды описывают контракт в <strong>OpenAPI-спецификации</strong> (YAML/JSON). Для QA это: 1) единая правда о том, как API должен работать, 2) основа для автогенерации клиентов и тестов, 3) база для contract testing (см. §14). Если в команде нет OpenAPI — это первое, на что senior QA обращает внимание: тестировать недокументированный API — значит угадывать.</div>
+        <p style="margin-top:14px;"><strong>Версионирование.</strong> Любое breaking change ломает клиентов, поэтому новые версии вводятся явно — старая живёт параллельно, пока клиенты мигрируют. Три типичных способа:</p>
+        <ul>
+          <li>В пути: <code>/v1/users</code> → <code>/v2/users</code> (самый частый)</li>
+          <li>В заголовке: <code>API-Version: 2</code></li>
+          <li>На subdomain: <code>v2.api.example.com</code></li>
+        </ul>
       </div>
 
       <hr class="lvl-divider">
