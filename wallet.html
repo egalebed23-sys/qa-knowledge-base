@@ -514,6 +514,10 @@
     <a class="nav-item" href="#tx-ux"><span class="nav-num">15</span> Транзакционные UX</a>
     <a class="nav-item" href="#engagement"><span class="nav-num">16</span> Engagement-механики</a>
   </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Практика</div>
+    <a class="nav-item" href="#tx-practice"><span class="nav-num">17</span> Тест-кейс на собесе</a>
+  </div>
   <div class="toc-inner">
     <div class="nav-group-title">Заметка</div>
     <a href="#" style="font-size:11px;color:var(--muted);line-height:1.5;">Отдельный модуль под крипто-вакансии (Wallet in Telegram и т.п.). Не входит в общую базу.</a>
@@ -532,7 +536,7 @@
 
   <div class="header">
     <h1>Блокчейн · Кошельки · Telegram Mini Apps</h1>
-    <p>// отдельный модуль · теория блокчейна + QA-специфика · 16 подтем</p>
+    <p>// отдельный модуль · теория блокчейна + QA-специфика · 17 подтем</p>
   </div>
 
   <div style="max-width:var(--content-max);margin:0 auto 36px;padding:14px 18px;background:linear-gradient(90deg,#14202e,#1f0d2e);border:1px solid #2a3548;border-radius:10px;font-size:13px;color:#a8c5e8;line-height:1.65;">
@@ -1525,6 +1529,163 @@
         <div class="hl modern"><span class="hl-label">A/B-тесты — что проверяет QA</span>1) <strong>Корректность бакетинга</strong> — юзер стабильно попадает в одну группу (sticky по user_id, не по сессии); 2) <strong>экспозур-логгинг</strong> — событие «увидел вариант B» отправляется ровно один раз и до самого действия; 3) <strong>SRM</strong> (sample ratio mismatch) — если в A 50%, в B 30% — что-то сломалось в раздаче, эксперимент невалиден; 4) <strong>guardrail-метрики</strong> — что вариант B не ломает критичное (например, конверсию в платёж); 5) <strong>graceful fallback</strong> — что если сервис экспериментов лёг, юзер видит дефолтный вариант, а не белый экран.</div>
 
         <div class="hl llm"><span class="hl-label">AI-эпоха</span>Персонализация engagement — растущее направление: <em>какой</em> квест показать <em>этому</em> юзеру в <em>этот</em> момент. LLM генерирует тексты пушей, AI выбирает таймслот, ML предсказывает риск churn. QA-вопросы: как проверить, что персонализация не предлагает unsuitable контент (например, азартный квест юзеру, отказавшемуся от gambling-категории), как тестировать LLM-генерированные тексты на качество и compliance, как мерить fairness между сегментами. На senior-позиции в продуктовой команде такие сценарии всё чаще ожидают обсуждения.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 17. ПРАКТИКА: ТЕСТ-КЕЙС НА СОБЕСЕ ─────── -->
+  <section class="section" id="tx-practice">
+    <div class="section-header">
+      <span class="section-num">17</span>
+      <span class="section-title">Тест-кейс на собесе: протестируй транзакцию</span>
+      <span class="section-badge">interview practice</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p>В крипто/wallet-собесах любят «протестируй отправку» или «протестируй wallet». Правильный ответ — <strong>не список «введу адрес, нажму отправить»</strong>, а структурированный подход по категориям, с уточняющими вопросами в начале.</p>
+        <div class="hl green"><span class="hl-label">Подход</span>1) Уточни контекст: custodial / self-custodial? Какая сеть? Внутренний перевод или on-chain? Mainnet или testnet? 2) Разбей по категориям. 3) В крипте обязательно: формат адреса, выбор сети, fee, подпись, состояния транзакции, explorer-сверка. 4) Не забудь UX-состояния (pending / failed / timeout) и необратимость on-chain операций.</div>
+
+        <p style="margin-top:14px;"><strong>Разминка — «Протестируй поле ввода адреса получателя».</strong> Узкий объект, но проверяет crypto-mindset:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Формат адреса</div>
+            Валидный / невалидный, опечатка в середине, кириллица, разные форматы одной сети (raw vs user-friendly для TON), checksum, bounceable vs non-bounceable.
+          </div>
+          <div class="card">
+            <div class="card-title">Сеть</div>
+            USDT-ERC20 ≠ USDT-TRC20 ≠ USDT-TON, mainnet-адрес в testnet и наоборот, выбранная сеть не соответствует адресу.
+          </div>
+          <div class="card">
+            <div class="card-title">UX ввода</div>
+            Paste из буфера, QR-скан, выбор из истории / контактов, ENS / TON DNS-домен, ручной ввод с ошибкой.
+          </div>
+          <div class="card">
+            <div class="card-title">Безопасность</div>
+            Подмена адреса в буфере (clipboard-малварь), <em>address poisoning</em> (похожий адрес в истории), скрытие части адреса в UI (видны только первые/последние символы — атаковать может среднюю часть).
+          </div>
+          <div class="card">
+            <div class="card-title">Свой адрес / blacklist</div>
+            Отправка на свой адрес — разрешать или предупреждать. Адрес из санкционного / blacklist-списка — блокировка.
+          </div>
+          <div class="card">
+            <div class="card-title">A11y</div>
+            Tab-навигация по форме, скринридер озвучивает поле и тип ошибки, контраст текста ошибки, фокус-индикатор виден.
+          </div>
+        </div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+
+        <p><strong>Кейс — «Протестируй полный send-flow» (от ввода до подтверждения).</strong> Разбиваем по этапам пути пользователя:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Шаг 1 — Адрес</div>
+            Все кейсы из разминки (см. L1). Плюс: ENS / TON DNS резолвинг, contact book, copy/paste из мессенджера, deep link <code>ton://</code>.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 2 — Сумма</div>
+            0, 1 (минимум сети), весь баланс <em>с учётом fee</em>, больше баланса, точка vs запятая, локали (en/ru/ar), эмодзи, очень много знаков после запятой, отрицательная сумма через инспектор.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 3 — Fee</div>
+            Auto vs custom, заниженный → застрявшая tx, завышенный → потеря денег, fee в одной монете и перевод в другой (gas в ETH, перевод USDT), нет средств на gas при наличии USDT.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 4 — Preview</div>
+            Адрес получателя <em>полностью</em> виден (а не «0x123…abc»), сумма крупно, fee, total, сеть, токен — всё на одном экране. Нельзя «случайно» подтвердить — confirm требует явного действия (slide, double-tap).
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 5 — Auth / Sign</div>
+            Биометрия / PIN / passphrase. Биометрия не сработала → fallback на PIN. Три неверных PIN → блокировка. После идли — снова авторизация.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 6 — Broadcast</div>
+            Нет сети → понятная ошибка, retry. RPC недоступен → fallback на другой узел. Tx отправлена → переход в pending.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 7 — Pending</div>
+            Прогресс / спиннер, оценка времени, app можно свернуть и не потерять контекст, push при подтверждении на чейне, deep link из push открывает детали tx.
+          </div>
+          <div class="card">
+            <div class="card-title">Шаг 8 — Success / Fail</div>
+            Tx hash + ссылка на explorer, явное «успешно» (или «отклонено»), история обновилась, баланс обновился. На fail — причина (out of gas, slippage, replaced), не списались ли деньги, retry-кнопка.
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>Категории, которые надо явно проговорить</strong> на любом «протестируй транзакцию» — это синьорский сигнал:</p>
+        <ul>
+          <li><strong>Сеть / окружение</strong> — mainnet vs testnet, нет сети, нет RPC, разный RPC отвечает разное</li>
+          <li><strong>Состояния транзакции</strong> — idle → pending → success / failed / timeout, каждое возобновляемо</li>
+          <li><strong>Безопасность</strong> — подмена адреса, фишинг, опасные подписи dApp (см. §13)</li>
+          <li><strong>UX переходов</strong> — что если юзер свернул, закрыл, перезагрузил телефон в pending</li>
+          <li><strong>A11y</strong> — клавиатура, скринридер (крипто-аудиторию недооценивают)</li>
+          <li><strong>Observability</strong> — что мы увидим в Sentry/мониторинге, если что-то сломается</li>
+        </ul>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+
+        <p><strong>Senior-кейс — «Протестируй полный жизненный цикл on-chain транзакции в self-custodial wallet».</strong> Сразу видно, кто работал с настоящей крипто-разработкой: упомянул seqno/nonce, idempotency, reconcile с чейном — +1 уровень разговора.</p>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Защита от replay (seqno / nonce)</div>
+            Каждая tx содержит уникальный seqno (TON) / nonce (EVM). Повторная отправка той же tx — не двойное списание, а отказ от сети. Race: UI отправил с устаревшим seqno (параллельно ушла другая tx) — что должно произойти.
+          </div>
+          <div class="card">
+            <div class="card-title">Идемпотентность UI → chain</div>
+            Юзер дважды нажал «Send» (плохая сеть, спиннер не успел) — отправлена ли tx один раз или две? Disabled-кнопка + idempotency key для backend; для self-custodial — один и тот же seqno гарантирует, что вторая улетит в null.
+          </div>
+          <div class="card">
+            <div class="card-title">Explorer как арбитр</div>
+            UI говорит «отправлено» — но действительно ли tx в блокчейне? Источник правды — explorer (Tonviewer, Etherscan), не UI. Сверка: tx hash, адреса, amount, status, lt/block — всё должно совпадать.
+          </div>
+          <div class="card">
+            <div class="card-title">Reconnect / app killed</div>
+            App убит во время pending → cold start → подтянулся статус с чейна, а не «вечный спиннер» из локального state. Сеть пропала после подписи, но до broadcast — повторный broadcast той же tx (тот же seqno) идемпотентен.
+          </div>
+          <div class="card">
+            <div class="card-title">Network mismatch</div>
+            Tx подписана для mainnet, broadcasted в testnet → отклонение узлом. Адрес валидный для одной сети, но кошелёк в другой → блокировка отправки в UI, а не silent failure.
+          </div>
+          <div class="card">
+            <div class="card-title">Address poisoning</div>
+            В истории появился адрес, очень похожий на «свой частый» (первые/последние совпадают, средина другая) — атака на привычку копировать из истории. Wallet должен подсвечивать различия, скрывать неподтверждённые tx из истории.
+          </div>
+          <div class="card">
+            <div class="card-title">Fee — manipulation и UX</div>
+            Заниженный fee → tx висит в mempool часами; что показывает UI? Опция ускорить (RBF / speed-up). Аномально высокий fee → confirm-предупреждение «комиссия больше суммы, точно?».
+          </div>
+          <div class="card">
+            <div class="card-title">Mismatch preview ↔ подпись</div>
+            Атака для dApp: UI показывает одно, в данные подписи зашито другое (другой получатель, другой amount). Wallet обязан показывать <em>именно то, что подпишется</em>, и пользователь видит финальные данные перед биометрией.
+          </div>
+          <div class="card">
+            <div class="card-title">Multi-device race</div>
+            Один seed подключён на телефоне и на десктопе. Одновременная отправка → один seqno, одна tx уйдёт, вторая reject. Что показать «проигравшему» устройству — понятное «уже отправлено с другого», не «failed».
+          </div>
+          <div class="card">
+            <div class="card-title">Observability</div>
+            Что мониторим в проде: failed-broadcast rate, среднее время до confirmation, разрыв UI vs explorer, аномалии fee. В Sentry — tx_hash в breadcrumbs (<em>без приватных ключей</em>!). OpenSearch — поиск инцидента по tx_hash от саппорта.
+          </div>
+        </div>
+
+        <div class="hl orange"><span class="hl-label">Что выделит Senior-ответ</span>На «протестируй транзакцию» все начинают с «введу адрес, нажму отправить». Если упомянешь <strong>seqno/nonce и replay-защиту, идемпотентность между UI и chain, сверку с explorer как источник правды, address poisoning, network mismatch, observability с tx_hash</strong> — это сразу +1 уровень. Финальный мостик: <em>«я бы попросил архитектурную схему и testnet — без них тестировать необратимые операции вслепую нельзя»</em>.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как ты отделяешь "проблема нашего UI" от "проблемы сети"?» — <strong>Через explorer.</strong><br>· UI показывает <em>failed</em>, в explorer tx есть и статус success → баг UI / индексатора.<br>· UI показывает <em>success</em>, в explorer ничего нет → баг broadcast или отображения.<br>· UI показывает <em>pending</em> больше часа, в explorer уже failed → проблема обновления статуса.<br>Explorer — арбитр, и QA в крипте обязан этим арбитром пользоваться.</div>
+
+        <div class="hl modern"><span class="hl-label">Мостик к §13 «Кейсы и риски»</span>Этот синьорский кейс — это <em>как</em> отвечать на собесе. §13 — <em>что</em> мониторить и какие риски не упустить в проде. На собесе после кейса часто спрашивают «а как у вас с фродом / реакцией на инциденты» — туда и переходим.</div>
+
+        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>LLM хорошо генерирует базу кейсов по категориям (адрес, сумма, fee, состояния), особенно для не-крипто-методов оплаты. <strong>Что не делегируется:</strong> специфика конкретного протокола (TON vs EVM vs Solana), реальное поведение mempool, конкретные атаки текущего месяца — проверяй руками и читай security-advisory сети.</div>
       </div>
 
     </div>
