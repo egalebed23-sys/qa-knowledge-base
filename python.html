@@ -510,15 +510,16 @@
     <div class="nav-group-title">На этой странице</div>
     <a href="#basics">01 · Структуры данных</a>
     <a href="#syntax">02 · Синтаксис и особенности</a>
-    <a href="#oop">03 · ООП в Python</a>
-    <a href="#str-regex">04 · Строки и регулярные выражения</a>
-    <a href="#diffs">05 · Частые вопросы «в чём разница»</a>
-    <a href="#qa-python">06 · Python для QA-фреймворка</a>
-    <a href="#complexity">07 · Сложность (Big O)</a>
-    <a href="#strings">08 · Задачи: строки</a>
-    <a href="#collections">09 · Задачи: коллекции</a>
-    <a href="#quality">10 · Качество кода и тестирование</a>
-    <a href="#real-tasks">11 · Реальные задачи с собеса</a>
+    <a href="#gotchas">03 · Мелочи, на которых ловят</a>
+    <a href="#oop">04 · ООП в Python</a>
+    <a href="#str-regex">05 · Строки и регулярные выражения</a>
+    <a href="#diffs">06 · Частые вопросы «в чём разница»</a>
+    <a href="#qa-python">07 · Python для QA-фреймворка</a>
+    <a href="#complexity">08 · Сложность (Big O)</a>
+    <a href="#strings">09 · Задачи: строки</a>
+    <a href="#collections">10 · Задачи: коллекции</a>
+    <a href="#quality">11 · Качество кода и тестирование</a>
+    <a href="#real-tasks">12 · Реальные задачи с собеса</a>
   </div>
 </aside>
 
@@ -534,7 +535,7 @@
 
   <div class="header">
     <h1>Python</h1>
-    <p>// 11 подтем · синтаксис, QA-практика, regex, задачи</p>
+    <p>// 12 подтем · синтаксис, QA-практика, regex, задачи</p>
   </div>
 
   <!-- ─────── 01. СТРУКТУРЫ ДАННЫХ ─────── -->
@@ -664,10 +665,32 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
     </div>
   </section>
 
-  <!-- ─────── 03. ООП ─────── -->
-  <section class="section" id="oop">
+  <!-- ─────── 03. МЕЛОЧИ, НА КОТОРЫХ ЛОВЯТ ─────── -->
+  <section class="section" id="gotchas">
     <div class="section-header">
       <span class="section-num">03</span>
+      <span class="section-title">Мелочи, на которых ловят</span>
+      <span class="section-badge">quick recall</span>
+    </div>
+    <div class="section-body">
+      <p>Копилка мелких вопросов по синтаксису, на которых легко «поплыть» на собесе. Не теория — просто быстро освежить перед интервью. Показывается на всех уровнях.</p>
+
+      <!-- item: print sep/end -->
+      <p style="margin-top:16px;"><strong><code>print()</code> — параметры <code>sep</code> и <code>end</code>.</strong> <code>sep</code> — что ставить <em>между</em> аргументами (по умолчанию пробел), <code>end</code> — чем <em>закончить</em> вывод (по умолчанию <code>\n</code>, перенос строки).</p>
+      <div class="code-block"><span class="fn">print</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>)              <span class="cm"># a b c   — sep=" " по умолчанию</span>
+<span class="fn">print</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>, sep=<span class="st">"-"</span>)     <span class="cm"># a-b-c   — разделитель между аргументами</span>
+<span class="fn">print</span>(<span class="st">"a"</span>, end=<span class="st">""</span>)                <span class="cm"># a       — без переноса строки в конце</span>
+<span class="fn">print</span>(<span class="st">"a"</span>, end=<span class="st">" | "</span>)             <span class="cm"># a |     — свой «хвост» вместо \n</span>
+<span class="fn">print</span>(*[<span class="st">"a"</span>, <span class="st">"b"</span>], sep=<span class="st">", "</span>)      <span class="cm"># a, b    — распаковка списка + sep</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span><code>sep</code> — <em>между</em>, <code>end</code> — <em>в конце</em>. Классика: <em>«как напечатать список через запятую в одну строку?»</em> → <code>print(*items, sep=", ")</code>.</div>
+
+    </div>
+  </section>
+
+  <!-- ─────── 04. ООП ─────── -->
+  <section class="section" id="oop">
+    <div class="section-header">
+      <span class="section-num">04</span>
       <span class="section-title">ООП в Python</span>
       <span class="section-badge">oop</span>
     </div>
@@ -731,7 +754,7 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
   <!-- ─────── СТРОКИ И REGEX ─────── -->
   <section class="section" id="str-regex">
     <div class="section-header">
-      <span class="section-num">04</span>
+      <span class="section-num">05</span>
       <span class="section-title">Строки и регулярные выражения</span>
       <span class="section-badge">часто на собесе</span>
     </div>
@@ -811,7 +834,7 @@ bool(re.search(r<span class="st">"[A-Z]"</span>, s))   <span class="cm"># ест
   <!-- ─────── В ЧЁМ РАЗНИЦА ─────── -->
   <section class="section" id="diffs">
     <div class="section-header">
-      <span class="section-num">05</span>
+      <span class="section-num">06</span>
       <span class="section-title">Частые вопросы «в чём разница»</span>
       <span class="section-badge">tricky</span>
     </div>
@@ -867,7 +890,7 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
   <!-- ─────── PYTHON ДЛЯ QA-ФРЕЙМВОРКА ─────── -->
   <section class="section" id="qa-python">
     <div class="section-header">
-      <span class="section-num">06</span>
+      <span class="section-num">07</span>
       <span class="section-title">Python для QA-фреймворка</span>
       <span class="section-badge">практика</span>
     </div>
@@ -958,7 +981,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── СЛОЖНОСТЬ ─────── -->
   <section class="section" id="complexity">
     <div class="section-header">
-      <span class="section-num">07</span>
+      <span class="section-num">08</span>
       <span class="section-title">Сложность (Big O)</span>
       <span class="section-badge">complexity</span>
     </div>
@@ -1015,7 +1038,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 03. ЗАДАЧИ: СТРОКИ ─────── -->
   <section class="section" id="strings">
     <div class="section-header">
-      <span class="section-num">08</span>
+      <span class="section-num">09</span>
       <span class="section-title">Задачи: строки</span>
       <span class="section-badge">practice</span>
     </div>
@@ -1077,7 +1100,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 04. ЗАДАЧИ: КОЛЛЕКЦИИ ─────── -->
   <section class="section" id="collections">
     <div class="section-header">
-      <span class="section-num">09</span>
+      <span class="section-num">10</span>
       <span class="section-title">Задачи: коллекции</span>
       <span class="section-badge">practice</span>
     </div>
@@ -1150,7 +1173,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 05. КАЧЕСТВО КОДА ─────── -->
   <section class="section" id="quality">
     <div class="section-header">
-      <span class="section-num">10</span>
+      <span class="section-num">11</span>
       <span class="section-title">Качество кода и тестирование</span>
       <span class="section-badge">code quality</span>
     </div>
@@ -1220,7 +1243,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── РЕАЛЬНЫЕ ЗАДАЧИ ─────── -->
   <section class="section" id="real-tasks">
     <div class="section-header">
-      <span class="section-num">11</span>
+      <span class="section-num">12</span>
       <span class="section-title">Реальные задачи с собеса</span>
       <span class="section-badge">формат «почини класс»</span>
     </div>
