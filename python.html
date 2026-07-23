@@ -684,6 +684,16 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
 <span class="fn">print</span>(*[<span class="st">"a"</span>, <span class="st">"b"</span>], sep=<span class="st">", "</span>)      <span class="cm"># a, b    — распаковка списка + sep</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span><code>sep</code> — <em>между</em>, <code>end</code> — <em>в конце</em>. Классика: <em>«как напечатать список через запятую в одну строку?»</em> → <code>print(*items, sep=", ")</code>.</div>
 
+      <!-- item: возведение в степень ** и знак -->
+      <p style="margin-top:16px;"><strong>Степень <code>**</code> и знак минуса.</strong> Оператор возведения в степень — <code>**</code> (не <code>^</code>, это XOR!). Главная ловушка: <code>**</code> <em>приоритетнее</em> унарного минуса, поэтому <code>-10**2</code> читается как <code>-(10**2)</code>.</p>
+      <div class="code-block">(-<span class="val">10</span>)**<span class="val">2</span>    <span class="cm"># 100     — минус в скобках → степень от -10, чётная → плюс</span>
+(-<span class="val">10</span>)**<span class="val">3</span>    <span class="cm"># -1000   — нечётная степень → знак сохраняется</span>
+-<span class="val">10</span>**<span class="val">2</span>      <span class="cm"># -100    ⚠ без скобок: это -(10**2), а не (-10)**2</span>
+<span class="val">2</span>**<span class="val">10</span>       <span class="cm"># 1024</span>
+<span class="val">2</span>**<span class="val">0.5</span>      <span class="cm"># 1.414… — дробная степень = корень</span>
+<span class="val">10</span>^<span class="val">2</span>       <span class="cm"># 8       ⚠ ^ это XOR, а не степень!</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Отрицательное число в <em>чётной</em> степени → плюс, в <em>нечётной</em> → минус. Но только если минус <strong>в скобках</strong>: <code>-10**2 == -100</code>, а <code>(-10)**2 == 100</code>. И <code>^</code> — это XOR, степень — <code>**</code>.</div>
+
     </div>
   </section>
 
