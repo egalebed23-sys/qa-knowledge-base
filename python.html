@@ -694,6 +694,20 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
 <span class="val">10</span>^<span class="val">2</span>       <span class="cm"># 8       ⚠ ^ это XOR, а не степень!</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span>Отрицательное число в <em>чётной</em> степени → плюс, в <em>нечётной</em> → минус. Но только если минус <strong>в скобках</strong>: <code>-10**2 == -100</code>, а <code>(-10)**2 == 100</code>. И <code>^</code> — это XOR, степень — <code>**</code>.</div>
 
+      <!-- item: разбор числа на цифры -->
+      <p style="margin-top:16px;"><strong>Разбор числа на цифры: <code>% 10</code> и <code>// 10</code>.</strong> Два «кирпича»: <code>% 10</code> берёт <em>последнюю</em> цифру, <code>// 10</code> <em>отбрасывает</em> её. Всё остальное — их комбинации. k-я цифра справа (с нуля) = <code>(num // 10**k) % 10</code>.</p>
+      <div class="code-block">num = <span class="val">4827</span>
+num % <span class="val">10</span>            <span class="cm"># 7    — последняя цифра</span>
+num // <span class="val">10</span>           <span class="cm"># 482  — число без последней цифры</span>
+(num // <span class="val">100</span>) % <span class="val">10</span>    <span class="cm"># 8    — 3-я справа (k=2): (num // 10**k) % 10</span>
+[<span class="fn">int</span>(d) <span class="kw">for</span> d <span class="kw">in</span> <span class="fn">str</span>(num)]   <span class="cm"># [4, 8, 2, 7] — по-питоновски, если str разрешён</span>
+
+<span class="cm"># перебрать все цифры справа налево:</span>
+<span class="kw">while</span> num > <span class="val">0</span>:
+    d = num % <span class="val">10</span>       <span class="cm"># взять последнюю</span>
+    num //= <span class="val">10</span>         <span class="cm"># отбросить её</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span><code>% 10</code> — взять последнюю, <code>// 10</code> — убрать последнюю; цикл <code>while num &gt; 0</code> проходит все цифры. Ловушка: у отрицательных <code>%</code> в Python даёт положительный остаток (<code>-27 % 10 == 3</code>, не <code>-7</code>) — для разбора цифр бери <code>abs(num)</code>.</div>
+
     </div>
   </section>
 
