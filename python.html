@@ -708,6 +708,21 @@ num // <span class="val">10</span>           <span class="cm"># 482  — чис�
     num //= <span class="val">10</span>         <span class="cm"># отбросить её</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span><code>% 10</code> — взять последнюю, <code>// 10</code> — убрать последнюю; цикл <code>while num &gt; 0</code> проходит все цифры. Ловушка: у отрицательных <code>%</code> в Python даёт положительный остаток (<code>-27 % 10 == 3</code>, не <code>-7</code>) — для разбора цифр бери <code>abs(num)</code>.</div>
 
+      <!-- item: множественное присваивание -->
+      <p style="margin-top:16px;"><strong>Множественное присваивание <code>a, b = b, a + b</code>.</strong> Правая часть вычисляется <em>целиком</em> (собирается кортеж из <strong>старых</strong> значений), и только потом распаковывается в левую. Отсюда и обмен без временной переменной, и однострочный Фибоначчи.</p>
+      <div class="code-block">a, b = <span class="val">0</span>, <span class="val">1</span>
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>):
+    <span class="fn">print</span>(a, end=<span class="st">" "</span>)     <span class="cm"># 0 1 1 2 3 5 8 13 21 34</span>
+    a, b = b, a + b       <span class="cm"># справа берутся СТАРЫЕ a и b</span>
+
+<span class="cm"># ⚠ в две строки то же самое НЕ работает:</span>
+a = b                     <span class="cm"># a уже перезаписано</span>
+b = a + b                 <span class="cm"># сюда попало новое a → последовательность сломана</span>
+
+a, b = b, a               <span class="cm"># обмен значений без temp-переменной</span>
+x = y = <span class="val">0</span>                 <span class="cm"># цепочка: обе переменные = 0</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Сначала <em>вся</em> правая часть → потом присваивание. Поэтому <code>a, b = b, a + b</code> корректно, а те же две операции по строкам — нет. Ловушка с цепочкой: <code>a = b = []</code> — это <strong>один</strong> список на две переменные, <code>a.append(1)</code> изменит и <code>b</code>.</div>
+
     </div>
   </section>
 
