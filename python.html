@@ -723,6 +723,23 @@ a, b = b, a               <span class="cm"># обмен значений без 
 x = y = <span class="val">0</span>                 <span class="cm"># цепочка: обе переменные = 0</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span>Сначала <em>вся</em> правая часть → потом присваивание. Поэтому <code>a, b = b, a + b</code> корректно, а те же две операции по строкам — нет. Ловушка с цепочкой: <code>a = b = []</code> — это <strong>один</strong> список на две переменные, <code>a.append(1)</code> изменит и <code>b</code>.</div>
 
+      <!-- item: составные операторы присваивания -->
+      <p style="margin-top:16px;"><strong>Составные операторы: <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>//=</code>, <code>%=</code>, <code>**=</code>.</strong> Каждый — сокращение от <code>x = x &lt;оп&gt; y</code>. Работают и со строками/списками (<code>s += "abc"</code>).</p>
+      <div class="code-block">x += <span class="val">5</span>       <span class="cm"># x = x + 5        так же -=  *=  //=  %=  **=</span>
+
+x = <span class="val">8</span>
+x /= <span class="val">4</span>       <span class="cm"># 2.0  ⚠ / и /= ВСЕГДА дают float, даже когда делится нацело</span>
+x = <span class="val">8</span>
+x //= <span class="val">4</span>      <span class="cm"># 2    целочисленное деление — тип int сохраняется</span>
+
+x++            <span class="cm"># ⚠ SyntaxError — в Python НЕТ ++ и --, только x += 1</span>
+
+<span class="cm"># ⚠ для списков += меняет ТОТ ЖЕ объект (in-place), а + создаёт новый:</span>
+a = [<span class="val">1</span>]; b = a
+a += [<span class="val">2</span>]     <span class="cm"># a и b → [1, 2]           b тоже изменился!</span>
+a = a + [<span class="val">3</span>]  <span class="cm"># a → [1,2,3], b → [1,2]   теперь это разные списки</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Три ловушки: 1) <code>/=</code> всегда даёт <code>float</code> — для целого нужен <code>//=</code>; 2) <code>++</code> и <code>--</code> в Python <strong>не существует</strong> (частая ошибка после C/Java) — только <code>x += 1</code>; 3) для мутабельных <code>+=</code> меняет объект <em>на месте</em> (задевает все ссылки на него), а <code>+</code> создаёт новый.</div>
+
     </div>
   </section>
 
