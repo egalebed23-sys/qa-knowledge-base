@@ -754,6 +754,27 @@ a = a + [<span class="val">3</span>]  <span class="cm"># a → [1,2,3], b → [1
 [y <span class="kw">for</span> v <span class="kw">in</span> data <span class="kw">if</span> (y := f(v)) > <span class="val">0</span>]  <span class="cm"># f() вызывается 1 раз, а не 2</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span><code>:=</code> присваивает <em>и возвращает</em> — тем и отличается от <code>=</code>. Ловушки: 1) <strong>скобки обязательны</strong> — <code>while x := x + 1 &lt; 10</code> разберётся как <code>x := (x + 1 &lt; 10)</code>, и в <code>x</code> попадёт <code>bool</code>; 2) <code>x := 5</code> отдельной строкой — <code>SyntaxError</code>, нужно <code>(x := 5)</code>; 3) только Python 3.8+.</div>
 
+      <!-- item: break / continue / for-else -->
+      <p style="margin-top:16px;"><strong><code>break</code> и <code>continue</code>.</strong> <code>break</code> — выйти из цикла совсем, <code>continue</code> — бросить текущую итерацию и перейти к следующей. Плюс питон-специфика, о которой мало кто помнит: <code>for ... else</code>.</p>
+      <div class="code-block"><span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>):
+    <span class="kw">if</span> x == <span class="val">3</span>: <span class="kw">continue</span>     <span class="cm"># пропустить только эту итерацию</span>
+    <span class="kw">if</span> x == <span class="val">6</span>: <span class="kw">break</span>        <span class="cm"># выйти из цикла целиком</span>
+    <span class="fn">print</span>(x)                <span class="cm"># 0 1 2 4 5</span>
+
+<span class="cm"># for/else: else срабатывает, ТОЛЬКО если break не сработал</span>
+<span class="kw">for</span> item <span class="kw">in</span> items:
+    <span class="kw">if</span> item == target:
+        <span class="kw">break</span>
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"не найдено"</span>)      <span class="cm"># цикл дошёл до конца без break</span>
+
+<span class="cm"># ⚠ continue в while легко пропускает инкремент → вечный цикл</span>
+i = <span class="val">0</span>
+<span class="kw">while</span> i &lt; <span class="val">5</span>:
+    <span class="kw">if</span> i == <span class="val">2</span>: <span class="kw">continue</span>     <span class="cm"># ⚠ i не растёт → зависли навсегда</span>
+    i += <span class="val">1</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Три ловушки: 1) <code>break</code>/<code>continue</code> действуют только на <strong>ближайший</strong> цикл — из вложенного одним <code>break</code> не выпрыгнуть (нужен флаг или вынести во функцию с <code>return</code>); 2) <code>for/else</code> — <code>else</code> выполняется, <em>если <code>break</code> НЕ случился</em> (читается как «no break», а не «иначе»); 3) <code>continue</code> в <code>while</code> перепрыгивает инкремент — классический бесконечный цикл.</div>
+
     </div>
   </section>
 
