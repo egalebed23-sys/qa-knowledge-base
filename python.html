@@ -740,6 +740,20 @@ a += [<span class="val">2</span>]     <span class="cm"># a и b → [1, 2]      
 a = a + [<span class="val">3</span>]  <span class="cm"># a → [1,2,3], b → [1,2]   теперь это разные списки</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span>Три ловушки: 1) <code>/=</code> всегда даёт <code>float</code> — для целого нужен <code>//=</code>; 2) <code>++</code> и <code>--</code> в Python <strong>не существует</strong> (частая ошибка после C/Java) — только <code>x += 1</code>; 3) для мутабельных <code>+=</code> меняет объект <em>на месте</em> (задевает все ссылки на него), а <code>+</code> создаёт новый.</div>
 
+      <!-- item: моржовый оператор := -->
+      <p style="margin-top:16px;"><strong>Моржовый оператор <code>:=</code> (walrus, Python 3.8+).</strong> Обычное <code>=</code> — это <em>инструкция</em>, её нельзя вставить в условие. <code>:=</code> — <em>выражение</em>: присваивает <strong>и</strong> сразу возвращает значение, поэтому работает прямо внутри <code>while</code>, <code>if</code> и comprehension.</p>
+      <div class="code-block">x = <span class="val">0</span>
+<span class="kw">while</span> (x := x + <span class="val">1</span>) &lt; <span class="val">10</span>:      <span class="cm"># присвоили и тут же сравнили</span>
+    <span class="fn">print</span>(x)                    <span class="cm"># 1 2 3 ... 9</span>
+
+<span class="cm"># типичные применения:</span>
+<span class="kw">while</span> (line := f.readline()):        <span class="cm"># читаем и проверяем за один шаг</span>
+    process(line)
+<span class="kw">if</span> (m := re.search(<span class="st">r"\d+"</span>, s)):     <span class="cm"># нашли и сразу используем результат</span>
+    <span class="fn">print</span>(m.group())
+[y <span class="kw">for</span> v <span class="kw">in</span> data <span class="kw">if</span> (y := f(v)) > <span class="val">0</span>]  <span class="cm"># f() вызывается 1 раз, а не 2</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span><code>:=</code> присваивает <em>и возвращает</em> — тем и отличается от <code>=</code>. Ловушки: 1) <strong>скобки обязательны</strong> — <code>while x := x + 1 &lt; 10</code> разберётся как <code>x := (x + 1 &lt; 10)</code>, и в <code>x</code> попадёт <code>bool</code>; 2) <code>x := 5</code> отдельной строкой — <code>SyntaxError</code>, нужно <code>(x := 5)</code>; 3) только Python 3.8+.</div>
+
     </div>
   </section>
 
