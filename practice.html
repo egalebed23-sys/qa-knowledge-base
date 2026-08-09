@@ -239,6 +239,11 @@
     margin-top: 8px;
     white-space: pre;
   }
+  .code-block .kw,  .editor-hl .kw  { color: #79b8ff; }
+  .code-block .fn,  .editor-hl .fn  { color: #b5bd68; }
+  .code-block .cm,  .editor-hl .cm  { color: #586480; font-style: italic; }
+  .code-block .st,  .editor-hl .st  { color: #f0a050; }
+  .code-block .val, .editor-hl .val { color: #5de0b0; }
 
   /* ─── HIGHLIGHTS ─── */
   .hl {
@@ -462,15 +467,10 @@
     letter-spacing: 0.5px;
   }
   .editor-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2f3d; }
-  .editor {
-    display: block;
-    width: 100%;
-    min-height: 150px;
-    background: transparent;
-    border: none;
-    outline: none;
-    resize: vertical;
-    color: #c9d1e8;
+  /* редактор с подсветкой: <pre> снизу, прозрачная textarea сверху —
+     метрики обеих должны совпадать до пикселя */
+  .editor-stack { position: relative; }
+  .editor, .editor-hl {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12.5px;
     line-height: 1.75;
@@ -478,8 +478,37 @@
     tab-size: 4;
     white-space: pre;
     overflow-wrap: normal;
+    letter-spacing: normal;
+    border: 0;
+    margin: 0;
+    /* без лигатур: человек напечатал <=, он и должен видеть <=,
+       а не ≤ — заодно снимает любой риск расхождения с кареткой */
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
+  }
+  .editor-hl {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    color: #c9d1e8;
+    pointer-events: none;
+    background: transparent;
+  }
+  .editor {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    background: transparent;
+    outline: none;
+    resize: vertical;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: #e8eaf0;
     overflow-x: auto;
   }
+  .editor::selection { background: rgba(0, 91, 255, 0.45); }
+  .editor::-moz-selection { background: rgba(0, 91, 255, 0.45); }
 
   .task-actions {
     display: flex;
@@ -564,6 +593,22 @@
     border-top: 1px dashed var(--border);
     padding-top: 6px;
   }
+  details.all-cases { margin-top: 2px; }
+  details.all-cases summary {
+    cursor: pointer;
+    padding: 5px 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    list-style: none;
+    user-select: none;
+  }
+  details.all-cases summary::-webkit-details-marker { display: none; }
+  details.all-cases summary::before { content: '▸ '; }
+  details.all-cases[open] summary::before { content: '▾ '; }
+  details.all-cases summary:hover { color: var(--muted); }
+  details.all-cases .inner { padding-top: 4px; }
+
   .case-out .oh {
     display: block;
     font-size: 10px;
@@ -2199,6 +2244,36 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/* ── подсветка Python ──
+   Порядок веток важен: комментарии и строки съедают всё внутри себя,
+   двоичные литералы должны победить обычные числа. */
+const PY_KEYWORDS = 'False|None|True|and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield';
+const PY_BUILTINS = 'abs|divmod|enumerate|float|format|input|int|len|list|max|min|open|pow|print|range|repr|round|sorted|str|sum|tuple|type|zip';
+const PY_TOKEN = new RegExp(
+  '(#[^\\n]*)' +                                              // 1 комментарий
+  '|([fFrRbBuU]{0,2}(?:' +
+      "'''[\\s\\S]*?'''|\"\"\"[\\s\\S]*?\"\"\"" +             //   тройные кавычки
+      "|'(?:\\\\.|[^'\\\\\\n])*'|\"(?:\\\\.|[^\"\\\\\\n])*\"" + //  обычные
+    '))' +                                                    // 2 строка
+  '|(\\b0[bBxXoO][0-9a-fA-F_]+\\b|\\b\\d+\\.?\\d*(?:[eE][+-]?\\d+)?\\b)' + // 3 число
+  '|(\\b(?:' + PY_KEYWORDS + ')\\b)' +                        // 4 ключевое слово
+  '|(\\b(?:' + PY_BUILTINS + ')\\b)',                         // 5 встроенная функция
+  'g'
+);
+
+function highlightPython(src) {
+  let out = '', last = 0, m;
+  PY_TOKEN.lastIndex = 0;
+  while ((m = PY_TOKEN.exec(src)) !== null) {
+    out += esc(src.slice(last, m.index));
+    const cls = m[1] ? 'cm' : m[2] ? 'st' : m[3] ? 'val' : m[4] ? 'kw' : 'fn';
+    out += '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+    last = m.index + m[0].length;
+  }
+  // хвостовой перевод строки нужен, иначе последняя пустая строка схлопнется
+  return out + esc(src.slice(last)) + '\n';
+}
+
 const root = document.getElementById('practice-root');
 const toc = document.getElementById('toc');
 let allTasks = [];
@@ -2223,7 +2298,10 @@ CHAPTERS.forEach((ch) => {
         <details class="hint"><summary>Подсказка</summary><div class="inner">${t.hint}</div></details>
         <div class="editor-wrap">
           <div class="editor-bar"><span class="dot"></span> solution.py</div>
-          <textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          <div class="editor-stack">
+            <pre class="editor-hl" aria-hidden="true"></pre>
+            <textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          </div>
         </div>
         <div class="task-actions">
           <button class="btn btn-run">▶ Запустить и проверить</button>
@@ -2271,22 +2349,32 @@ document.getElementById('p-total').textContent = allTasks.length;
 allTasks.forEach((task) => {
   const el = root.querySelector(`[data-task="${task.id}"]`);
   const editor = el.querySelector('.editor');
+  const hl = el.querySelector('.editor-hl');
   const results = el.querySelector('.results');
   const runBtn = el.querySelector('.btn-run');
   const resetBtn = el.querySelector('.btn-reset');
   const solBtn = el.querySelector('.btn-toggle-solution');
   const solution = el.querySelector('.solution');
 
-  editor.value = loadCode(task.id) !== null ? loadCode(task.id) : task.starter;
-  autoSize(editor);
+  function sync() {
+    hl.innerHTML = highlightPython(editor.value);
+    autoSize(editor);
+  }
 
-  editor.addEventListener('input', () => { saveCode(task.id, editor.value); autoSize(editor); });
+  editor.value = loadCode(task.id) !== null ? loadCode(task.id) : task.starter;
+  sync();
+
+  editor.addEventListener('input', () => { saveCode(task.id, editor.value); sync(); });
   editor.addEventListener('keydown', (e) => handleEditorKeys(e, editor, () => run()));
+  editor.addEventListener('scroll', () => {
+    hl.scrollTop = editor.scrollTop;
+    hl.scrollLeft = editor.scrollLeft;
+  });
 
   resetBtn.addEventListener('click', () => {
     editor.value = task.starter;
     saveCode(task.id, editor.value);
-    autoSize(editor);
+    sync();
     results.innerHTML = '';
   });
 
@@ -2336,8 +2424,11 @@ allTasks.forEach((task) => {
     const cases = payload.results || [];
     const passed = cases.filter((c) => c.ok).length;
     const allOk = passed === cases.length && cases.length > 0;
+    const firstBad = cases.find((c) => !c.ok);
 
-    const rows = cases.map((c) => `
+    // Показываем либо «всё прошло», либо первую упавшую проверку — остальные
+    // прячем в details, чтобы список из двадцати кейсов не заливал страницу.
+    const caseHtml = (c) => `
       <div class="case ${c.ok ? 'pass' : 'fail'}">
         <div class="case-head">
           <span class="case-mark">${c.ok ? '✓' : '✗'}</span>
@@ -2345,12 +2436,20 @@ allTasks.forEach((task) => {
         </div>
         ${c.msg ? `<div class="case-msg">${c.kind === 'error' ? 'Ошибка при выполнении — ' : ''}${esc(c.msg)}</div>` : ''}
         ${c.out ? `<div class="case-out"><span class="oh">ВЫВОД</span>${esc(c.out.replace(/\n$/, ''))}</div>` : ''}
-      </div>`).join('');
+      </div>`;
 
     results.innerHTML = `
       <div class="verdict ${allOk ? 'ok' : 'bad'}">
-        ${allOk ? `Задача решена — пройдено ${passed} из ${cases.length}` : `Пройдено ${passed} из ${cases.length}`}
-      </div>${rows}`;
+        ${allOk
+          ? `Задача решена — пройдены все проверки (${cases.length})`
+          : `Пройдено ${passed} из ${cases.length} · первая непройденная:`}
+      </div>
+      ${!allOk && firstBad ? caseHtml(firstBad) : ''}
+      ${cases.length > 1 ? `
+        <details class="all-cases">
+          <summary>${allOk ? 'Показать все проверки' : `Показать все проверки (${cases.length})`}</summary>
+          <div class="inner">${cases.map(caseHtml).join('')}</div>
+        </details>` : ''}`;
 
     if (allOk) markSolved(task.id, true);
     else if (solved.has(task.id)) markSolved(task.id, false);
