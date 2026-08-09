@@ -675,6 +675,7 @@
       <p><strong>Правило раздела: решение должно опираться только на то, что разобрано в книге к этой главе.</strong> Если в главе про <code>while</code> тянет написать <code>for</code> — значит, задача решается не тем инструментом. Блок «Можно использовать» перед задачами держит эту границу явной.</p>
       <div class="hl green"><span class="hl-label">Где выполняется код</span>Прямо в браузере. Внутри страницы поднимается <strong>Pyodide</strong> — настоящий CPython 3.12, скомпилированный в WebAssembly. Никакого сервера: ничего не отправляется наружу, всё работает на статике GitHub Pages и одинаково локально из файла.</div>
       <div class="hl"><span class="hl-label">Первый запуск</span>При первом нажатии «Запустить» браузер скачает интерпретатор (~10 МБ). Это разово: дальше он лежит в кеше и стартует за пару секунд.</div>
+      <div class="hl orange"><span class="hl-label">Входные данные</span>Переменные из условия (<code>price</code>, <code>status</code>, <code>names</code> и прочие) <strong>подставляет проверка</strong> — своё значение на каждый прогон. Объявлять их в своём коде не надо: так решение окажется прибито к одному набору данных и упадёт на остальных.</div>
       <div class="hl purple"><span class="hl-label">Проверка</span>Решение прогоняется на нескольких наборах входных данных — не только на том, что в условии. Проверяется и результат в переменных, и то, что напечатано в консоль. Код выполняется в отдельном потоке с лимитом 10 секунд, поэтому бесконечный цикл не повесит страницу — он просто вернёт ошибку.</div>
       <ul>
         <li><strong>Ctrl + Enter</strong> — запустить проверку, не отрывая рук от клавиатуры</li>
@@ -752,11 +753,8 @@ year = <span class="val">1</span>
       io: `price = 199.99   count = 3   discount = 0.15
 →  Итого: 509.97`,
       hint: 'Скидка 15% значит, что платим 85% от суммы: множитель <code>(1 - discount)</code>. Два знака после запятой — спецификатор <code>0.2f</code> внутри фигурных скобок f-строки.',
-      starter: `price = 199.99
-count = 3
-discount = 0.15
+      starter: `# price, count и discount уже заданы — просто используй их
 
-# твой код ниже
 `,
       solution: `total = price * count * (1 - discount)
 print(f'Итого: {total:0.2f}')`,
@@ -764,29 +762,32 @@ print(f'Итого: {total:0.2f}')`,
         { label: 'price=199.99, count=3, discount=0.15',
           setup: `price = 199.99
 count = 3
-discount = 0.15`,
+discount = 0.15
+_pr0, _ct0, _ds0 = price, count, discount`,
           check: `assert 'total' in globals(), 'Не создана переменная total'
-_exp = price * count * (1 - discount)
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_exp = _pr0 * _ct0 * (1 - _ds0)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 assert _lines, 'Ничего не выведено — нужен print()'
 _e = f'Итого: {_exp:0.2f}'
 assert _lines[-1] == _e, 'Последняя строка вывода: ' + repr(_lines[-1]) + ', ожидалось ' + repr(_e)` },
         { label: 'price=100, count=1, discount=0 (без скидки)',
           setup: `price = 100
 count = 1
-discount = 0`,
+discount = 0
+_pr0, _ct0, _ds0 = price, count, discount`,
           check: `assert 'total' in globals(), 'Не создана переменная total'
-_exp = price * count * (1 - discount)
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_exp = _pr0 * _ct0 * (1 - _ds0)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 _e = f'Итого: {_exp:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
         { label: 'price=50.5, count=4, discount=0.5',
           setup: `price = 50.5
 count = 4
-discount = 0.5`,
+discount = 0.5
+_pr0, _ct0, _ds0 = price, count, discount`,
           check: `assert 'total' in globals(), 'Не создана переменная total'
-_exp = price * count * (1 - discount)
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_exp = _pr0 * _ct0 * (1 - _ds0)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 _e = f'Итого: {_exp:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
       ]
@@ -804,11 +805,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
      4 1215.51
      5 1276.28`,
       hint: 'Заведи счётчик <code>year = 1</code>, крути <code>while year &lt;= numyears</code>, внутри сначала пересчитай <code>principal</code>, потом печатай, в конце <code>year += 1</code>. Формат — <code>f\'{year:&gt;3d} {principal:0.2f}\'</code>.',
-      starter: `principal = 1000
-rate = 0.05
-numyears = 5
+      starter: `# principal, rate и numyears уже заданы
 
-# твой код ниже
 `,
       solution: `year = 1
 while year <= numyears:
@@ -868,10 +866,8 @@ assert _lines == _exp, 'Ожидался вывод:' + _nl + _nl.join(_exp) + _
       io: `principal = 1000   rate = 0.05
 →  Удвоение через 15 лет`,
       hint: 'Начальную сумму надо запомнить <em>до</em> цикла в отдельной переменной, иначе граница «вдвое больше» будет ехать вместе с самой суммой. <code>years</code> начинай с нуля и увеличивай на каждой итерации.',
-      starter: `principal = 1000
-rate = 0.05
+      starter: `# principal и rate уже заданы
 
-# твой код ниже
 `,
       solution: `start = principal
 years = 0
@@ -968,9 +964,8 @@ x = (a &amp; mask) &gt;&gt; <span class="val">4</span>    <span class="cm"># x =
       io: `seconds = 9907
 →  Прогон: 2 ч 45 мин 7 с`,
       hint: 'Часы — это <code>seconds // 3600</code>. Дальше работай с остатком: <code>seconds % 3600</code> — это то, что не уложилось в целые часы. Тот же приём повторяется для минут. Можно и через <code>divmod()</code>, который сразу возвращает частное и остаток.',
-      starter: `seconds = 9907
+      starter: `# seconds уже задан
 
-# твой код ниже
 `,
       solution: `hours = seconds // 3600
 minutes = seconds % 3600 // 60
@@ -1021,9 +1016,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
       io: `year = 2024  →  2024: True
 year = 1900  →  1900: False`,
       hint: '<code>year % 4 == 0</code> — уже готовое булево значение. Осталось соединить три такие проверки через <code>and</code>, <code>or</code> и <code>not</code>, не забыв про скобки: <code>and</code> связывает сильнее, чем <code>or</code>.',
-      starter: `year = 2024
+      starter: `# year уже задан
 
-# твой код ниже
 `,
       solution: `is_leap = (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
 print(f'{year}: {is_leap}')`,
@@ -1070,9 +1064,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
       io: `a = 0b11001001   (это 201)
 →  high=12 low=9`,
       hint: 'Маска для четырёх младших битов — <code>0b1111</code> (то же самое, что 15). Младшая половина: <code>a &amp; 0b1111</code>. Для старшей сначала сдвинь число вправо на 4 позиции, потом наложи ту же маску.',
-      starter: `a = 0b11001001
+      starter: `# a уже задан
 
-# твой код ниже
 `,
       solution: `high = (a >> 4) & 0b1111
 low = a & 0b1111
@@ -1163,9 +1156,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
       io: `status = 404  →  404 -> client error
 status = 999  →  999 -> unknown`,
       hint: 'Цепочка <code>if</code> / <code>elif</code> / <code>else</code>. Границы удобно проверять двойным сравнением: <code>if 200 &lt;= status &lt; 300:</code> — Python понимает такую запись напрямую.',
-      starter: `status = 404
+      starter: `# status уже задан
 
-# твой код ниже
 `,
       solution: `if 100 <= status < 200:
     category = 'informational'
@@ -1238,11 +1230,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 →  Максимум: 9`,
       hint: 'Условные выражения можно вкладывать друг в друга или применять в два шага: сначала найди больший из <code>a</code> и <code>b</code>, положи в промежуточную переменную, потом сравни её с <code>c</code>. Второй вариант читается лучше.',
       forbid: [['max(', 'В этой задаче нельзя пользоваться max() — она про условное выражение.']],
-      starter: `a = 3
-b = 9
-c = 5
+      starter: `# a, b и c уже заданы
 
-# твой код ниже
 `,
       solution: `ab = a if a > b else b
 biggest = ab if ab > c else c
@@ -1307,10 +1296,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 n = 100  limit = 50
 →  Сумма: 61`,
       hint: 'Крути <code>while</code> со счётчиком. Увеличивай счётчик <strong>в начале</strong> тела цикла — иначе <code>continue</code> перепрыгнет через увеличение и цикл зависнет навсегда. Это классическая ловушка связки <code>while</code> + <code>continue</code>.',
-      starter: `n = 10
-limit = 100
+      starter: `# n и limit уже заданы
 
-# твой код ниже
 `,
       solution: `total = 0
 i = 0
@@ -1453,9 +1440,8 @@ z = <span class="fn">int</span>(x) + <span class="fn">int</span>(y)    <span cla
       io: `pan = '4242424242424242'
 →  Карта: 424242******4242`,
       hint: 'Срез <code>pan[:6]</code> даёт начало, <code>pan[-4:]</code> — хвост от конца строки. Склеиваются срезы обычным <code>+</code>. Шесть звёздочек проще всего написать литералом.',
-      starter: `pan = '4242424242424242'
+      starter: `# pan уже задан
 
-# твой код ниже
 `,
       solution: `masked = pan[:6] + '******' + pan[-4:]
 print(f'Карта: {masked}')`,
@@ -1494,9 +1480,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
       io: `email = 'ivan.petrov@example.com'
 →  user=ivan.petrov domain=example.com`,
       hint: '<code>email.find(\'@\')</code> даёт индекс собаки. Всё до неё — срез <code>[:pos]</code>, всё после — <code>[pos + 1:]</code>. Единицу прибавляем, чтобы сама собака не попала в домен.',
-      starter: `email = 'ivan.petrov@example.com'
+      starter: `# email уже задан
 
-# твой код ниже
 `,
       solution: `pos = email.find('@')
 user = email[:pos]
@@ -1549,10 +1534,8 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 →  joined: 3742
    total: 79`,
       hint: 'Сначала <code>strip()</code> уберёт пробелы по краям. Дальше от одних и тех же очищенных строк идут две ветки: склейка через <code>+</code> — и сумма через <code>int()</code> от каждой.',
-      starter: `a = '  37 '
-b = ' 42'
+      starter: `# a и b уже заданы
 
-# твой код ниже
 `,
       solution: `sa = a.strip()
 sb = b.strip()
@@ -1641,9 +1624,7 @@ INFO done
 →  Строк: 3`,
       hint: 'Перебор <code>for line in file</code> отдаёт строки по одной. Заведи счётчик <strong>до</strong> открытия файла и увеличивай его в теле цикла — если завести внутри, для пустого файла переменной просто не окажется.',
       starter: `# файл log.txt уже существует
-count = 0
 
-# твой код ниже
 `,
       solution: `count = 0
 with open('log.txt') as file:
@@ -1701,7 +1682,6 @@ ERROR card declined`,
       hint: 'Два <code>with</code> можно вложить друг в друга: внешний открывает исходный файл на чтение, внутренний — <code>errors.txt</code> в режиме <code>\'w\'</code>. Строка из файла уже приходит с переводом строки на конце, так что <code>out.write(line)</code> достаточно.',
       starter: `# файл log.txt уже существует
 
-# твой код ниже
 `,
       solution: `with open('log.txt') as file:
     with open('errors.txt', 'w') as out:
@@ -1765,9 +1745,7 @@ assert _got == _exp, 'Отбирать надо только строки, ко�
 →  Сумма: 49.75`,
       hint: 'Строка из файла приходит вместе с переводом строки на конце — <code>strip()</code> уберёт и его, и лишние пробелы. Дальше <code>float()</code> превращает строку в число: <code>int()</code> здесь не подойдёт, он не переваривает <code>\'12.5\'</code>.',
       starter: `# файл numbers.txt уже существует
-total = 0
 
-# твой код ниже
 `,
       solution: `total = 0
 with open('numbers.txt') as file:
@@ -1787,7 +1765,7 @@ for _l in _data.splitlines():
     if _l.strip():
         _exp += float(_l.strip())
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 _e = f'Сумма: {_exp:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
         { label: 'целые числа, одно отрицательное',
@@ -1802,7 +1780,7 @@ for _l in _data.splitlines():
     if _l.strip():
         _exp += float(_l.strip())
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 _e = f'Сумма: {_exp:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
         { label: 'одно число в файле',
@@ -1815,7 +1793,7 @@ for _l in _data.splitlines():
     if _l.strip():
         _exp += float(_l.strip())
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+assert abs(total - _exp) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_exp, 6))
 _e = f'Сумма: {_exp:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
       ]
@@ -1879,9 +1857,8 @@ total = <span class="fn">sum</span>(values)</div>
    Lewis
    Alex`,
       hint: 'Замена по индексу — обычное присваивание <code>names[2] = ...</code>. Для вставки в середину есть <code>insert(индекс, значение)</code>, для добавления в конец — <code>append(значение)</code>. Порядок важен: <code>insert</code> сдвигает всё, что правее.',
-      starter: `names = ['Dave', 'Paula', 'Thomas', 'Lewis']
+      starter: `# names уже задан
 
-# твой код ниже
 `,
       solution: `names[2] = 'Tom'
 names.insert(2, 'Aya')
@@ -1928,9 +1905,8 @@ assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а по�
 →  squares = [9, 49, 100]
    Сумма квадратов: 158`,
       hint: 'Списковое включение записывается так: <code>[выражение for x in items]</code>. Строку надо сначала превратить в число через <code>int(x)</code>, а потом возвести в квадрат оператором <code>**</code>. Сумму даст встроенная <code>sum()</code>.',
-      starter: `items = ['3', '7', '10']
+      starter: `# items уже задан
 
-# твой код ниже
 `,
       solution: `squares = [int(x) ** 2 for x in items]
 total = sum(squares)
@@ -1978,9 +1954,7 @@ IBM,50,91.10
    Total cost: 7775.00`,
       hint: 'Количество приходит строкой — его надо превратить в <code>int</code>, цену — во <code>float</code>. Сумму можно собрать списковым включением: <code>sum([int(row[1]) * float(row[2]) for row in rows])</code>. Не забудь <code>strip()</code> — иначе перевод строки уедет в цену последней колонки.',
       starter: `# файл portfolio.csv уже существует
-rows = []
 
-# твой код ниже
 `,
       solution: `rows = []
 with open('portfolio.csv') as file:
@@ -2001,7 +1975,7 @@ _t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
 assert 'rows' in globals(), 'Не создана переменная rows'
 assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows) + ' (лишний перевод строки убирается через strip())'
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
 _e = f'Total cost: {_t:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
         { label: 'портфель из пяти позиций',
@@ -2018,7 +1992,7 @@ _t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
 assert 'rows' in globals(), 'Не создана переменная rows'
 assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows)
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
 _e = f'Total cost: {_t:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
         { label: 'одна позиция',
@@ -2031,7 +2005,7 @@ _t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
 assert 'rows' in globals(), 'Не создана переменная rows'
 assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows)
 assert 'total' in globals(), 'Не создана переменная total'
-assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
 _e = f'Total cost: {_t:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
       ]
@@ -2047,7 +2021,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 const PYODIDE_VER = 'v0.27.7';
 
 const HARNESS = [
-  "import io, sys, json, traceback",
+  "import io, os, sys, json, tempfile, traceback",
   "",
   "_FN = '<решение>'",
   "_NL = chr(10)",
@@ -2072,6 +2046,7 @@ const HARNESS = [
   "        return json.dumps({'syntax': 'строка ' + str(e.lineno or '?') + ':' + _NL + _NL.join(parts)})",
   "    out_all = []",
   "    for case in cases:",
+  "        os.chdir(tempfile.mkdtemp())",
   "        g = {'__name__': '__main__'}",
   "        buf = io.StringIO()",
   "        old = sys.stdout",
