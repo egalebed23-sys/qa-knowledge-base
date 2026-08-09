@@ -265,6 +265,52 @@
   }
   .hl code { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08); }
 
+  /* ─── PRACTICE: ТЕОРИЯ ─── */
+  .theory {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-purple);
+    border-radius: 0 10px 10px 0;
+    background: #12151d;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .theory-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: #171320;
+    border-bottom: 1px solid var(--border);
+  }
+  .theory-head .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: var(--accent-purple);
+  }
+  .theory-head .src {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    margin-left: auto;
+  }
+  .theory-body { padding: 16px 20px 18px; }
+  .theory-body h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 20px 0 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.2px;
+  }
+  .theory-body h4:first-child { margin-top: 0; }
+  .theory-body p { font-size: 13.5px; line-height: 1.7; }
+  .theory-body .code-block { margin-bottom: 10px; }
+  .theory-body table { margin-bottom: 10px; }
+  .theory-body ul li { font-size: 13.5px; }
+
   /* ─── PRACTICE: ПРОГРЕСС ─── */
   .progress-bar {
     max-width: var(--content-max);
@@ -609,7 +655,7 @@
 
   <div class="header">
     <h1>Практика Python</h1>
-    <p>// по главам книги «Python. Исчерпывающее руководство» · 1.3 — 1.8</p>
+    <p>// мини-курс по книге «Python. Исчерпывающее руководство» · главы 1.3 — 1.8 · теория и задачи</p>
   </div>
 
   <div class="progress-bar">
@@ -625,7 +671,8 @@
       <span class="section-title">Как это работает</span>
     </div>
     <div class="section-body">
-      <p>Каждая задача привязана к конкретной главе книги. <strong>Правило раздела: решение должно опираться только на то, что уже разобрано в книге к этой главе.</strong> В начале каждой главы есть список доступных конструкций — если тянет написать <code>for</code> в главе про <code>while</code>, значит, задача решается не тем инструментом.</p>
+      <p>Раздел устроен как мини-курс по книге. Каждая глава — это <strong>выжимка теории</strong>, затем список того, чем на этом этапе уже можно пользоваться, и затем 3 задачи на разобранный материал. Главы идут по порядку и опираются друг на друга, поэтому проходить их лучше подряд.</p>
+      <p><strong>Правило раздела: решение должно опираться только на то, что разобрано в книге к этой главе.</strong> Если в главе про <code>while</code> тянет написать <code>for</code> — значит, задача решается не тем инструментом. Блок «Можно использовать» перед задачами держит эту границу явной.</p>
       <div class="hl green"><span class="hl-label">Где выполняется код</span>Прямо в браузере. Внутри страницы поднимается <strong>Pyodide</strong> — настоящий CPython 3.12, скомпилированный в WebAssembly. Никакого сервера: ничего не отправляется наружу, всё работает на статике GitHub Pages и одинаково локально из файла.</div>
       <div class="hl"><span class="hl-label">Первый запуск</span>При первом нажатии «Запустить» браузер скачает интерпретатор (~10 МБ). Это разово: дальше он лежит в кеше и стартует за пару секунд.</div>
       <div class="hl purple"><span class="hl-label">Проверка</span>Решение прогоняется на нескольких наборах входных данных — не только на том, что в условии. Проверяется и результат в переменных, и то, что напечатано в консоль. Код выполняется в отдельном потоке с лимитом 10 секунд, поэтому бесконечный цикл не повесит страницу — он просто вернёт ошибку.</div>
@@ -662,6 +709,39 @@ const CHAPTERS = [
   id: 'ch13',
   num: '1.3',
   title: 'Примитивы, переменные и выражения',
+  theory: `
+    <h4>Примитивы и переменные</h4>
+    <p>Программа строится из нескольких базовых типов. Переменная — просто имя, указывающее на значение:</p>
+    <div class="code-block"><span class="val">42</span>            <span class="cm"># int — целое</span>
+<span class="val">4.2</span>           <span class="cm"># float — с плавающей точкой</span>
+<span class="st">'forty-two'</span>   <span class="cm"># str — строка</span>
+<span class="kw">True</span>          <span class="cm"># bool — логическое</span>
+
+x = <span class="val">42</span></div>
+    <p>Тип можно указать явно, но это <strong>только подсказка</strong> человеку и внешним анализаторам кода. Интерпретатор её игнорирует и не помешает положить в переменную что угодно другое:</p>
+    <div class="code-block">x: <span class="kw">int</span> = <span class="val">42</span>
+x = <span class="st">'теперь строка'</span>   <span class="cm"># ошибки не будет</span></div>
+    <div class="hl orange"><span class="hl-label">Важно для QA</span>Аннотации типов ничего не проверяют во время выполнения. Если функция рассчитывает на <code>int</code>, а туда пришла строка, упадёт не аннотация, а первая же арифметика — и часто далеко от места, где ошибка возникла. Типы проверяет отдельный инструмент (<code>mypy</code>), а не Python.</div>
+
+    <h4>Выражения и цикл while</h4>
+    <p>Выражение — комбинация значений, имён и операторов: <code>2 + 3 * 4</code> даёт 14. Команда <code>while</code> повторяет тело, пока условие истинно:</p>
+    <div class="code-block">principal = <span class="val">1000</span>
+rate = <span class="val">0.05</span>
+year = <span class="val">1</span>
+<span class="kw">while</span> year &lt;= <span class="val">5</span>:
+    principal = principal * (<span class="val">1</span> + rate)
+    <span class="fn">print</span>(year, principal)
+    year += <span class="val">1</span></div>
+    <p>Тело цикла обозначается <strong>отступом</strong> — фигурных скобок в Python нет. Размер отступа стандартом не задан, важно лишь, чтобы внутри блока он был одинаковым; общепринято — четыре пробела. Запись <code>year += 1</code> — сокращение для <code>year = year + 1</code>.</p>
+
+    <h4>f-строки</h4>
+    <p>Если перед кавычкой стоит <code>f</code>, всё в фигурных скобках вычисляется и подставляется в строку. После двоеточия задаётся формат:</p>
+    <div class="code-block"><span class="fn">print</span>(f<span class="st">'{year:&gt;3d} {principal:0.2f}'</span>)
+
+<span class="cm"># &gt;3d  — целое, ширина три знака, по правому краю</span>
+<span class="cm"># 0.2f — дробное, ровно два знака после точки</span>
+<span class="cm"># результат:  1 1050.00</span></div>
+    <p>В скобках допустимо любое выражение, не только имя переменной: <code>f'{base_year + year:&gt;4d}'</code>.</p>`,
   allowed: 'типы <code>int</code> / <code>float</code> / <code>str</code> / <code>bool</code>, переменные, арифметические выражения, цикл <code>while</code> с простым условием, <code>print()</code>, f-строки со спецификаторами вида <code>{x:&gt;3d}</code> и <code>{x:0.2f}</code>, сокращённое присваивание <code>+=</code>',
   tasks: [
     {
@@ -849,6 +929,34 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
   id: 'ch14',
   num: '1.4',
   title: 'Арифметические операторы',
+  theory: `
+    <h4>Деление и остаток</h4>
+    <p>Обычные <code>+</code>, <code>-</code>, <code>*</code> работают ожидаемо, а вот с делением есть нюансы:</p>
+    <table>
+      <thead><tr><th>Оператор</th><th>Что делает</th><th>Пример</th></tr></thead>
+      <tbody>
+        <tr><td><code>x / y</code></td><td>деление — <strong>всегда</strong> даёт float, даже для целых</td><td><code>7 / 4</code> → <code>1.75</code></td></tr>
+        <tr><td><code>x // y</code></td><td>целочисленное деление, отбрасывает дробную часть</td><td><code>7 // 4</code> → <code>1</code></td></tr>
+        <tr><td><code>x % y</code></td><td>остаток от деления</td><td><code>7 % 4</code> → <code>3</code></td></tr>
+        <tr><td><code>x ** y</code></td><td>возведение в степень</td><td><code>2 ** 10</code> → <code>1024</code></td></tr>
+      </tbody>
+    </table>
+    <p>Пара <code>//</code> и <code>%</code> — рабочая лошадка для «разложить число на части»: секунды на часы и минуты, копейки на рубли и копейки, номер страницы на смещение.</p>
+    <p>Из встроенных функций пригодятся <code>abs(x)</code> — модуль, <code>divmod(x, y)</code> — сразу частное и остаток одной операцией, <code>pow(x, y)</code> — степень, <code>round(x, n)</code> — округление до n знаков.</p>
+    <div class="hl orange"><span class="hl-label">Ловушка</span><code>round()</code> использует <strong>банковское округление</strong>: значение ровно посередине уходит к ближайшему <em>чётному</em>. <code>round(0.5)</code> даёт <code>0</code>, а <code>round(1.5)</code> — <code>2</code>. Классический источник расхождения на копейку между расчётом в коде и ожиданием в тест-кейсе.</div>
+
+    <h4>Битовые операции</h4>
+    <p>Для целых доступны <code>&amp;</code> (И), <code>|</code> (ИЛИ), <code>^</code> (исключающее ИЛИ), <code>~</code> (отрицание) и сдвиги <code>&lt;&lt;</code>, <code>&gt;&gt;</code>. Их достают, когда в одно число упакованы флаги или несколько мелких величин:</p>
+    <div class="code-block">a = <span class="val">0b11001001</span>        <span class="cm"># двоичный литерал; он же 201, он же 0xc9</span>
+mask = <span class="val">0b11110000</span>
+x = (a &amp; mask) &gt;&gt; <span class="val">4</span>    <span class="cm"># x = 0b1100 (12)</span></div>
+    <p>В отличие от C, Python не усекает биты и не переполняется — число просто растёт дальше. Следить за разрядностью приходится самому.</p>
+
+    <h4>Сравнения и логика</h4>
+    <p>Сравнения <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> возвращают <code>True</code> или <code>False</code>, а <code>and</code>, <code>or</code>, <code>not</code> собирают из них сложные условия. <code>and</code> связывает сильнее <code>or</code>, так что скобки лишними не бывают.</p>
+    <p>Ложными считаются <code>False</code>, <code>None</code>, числовой нуль и любое пустое значение. Всё остальное — истина.</p>
+    <div class="hl"><span class="hl-label">Нюанс</span><code>and</code> и <code>or</code> возвращают не булево значение, а <strong>один из операндов</strong>: <code>x or y</code> — это <code>x</code>, если <code>x</code> истинно, иначе <code>y</code>. Отсюда идиома <code>name = name or 'default'</code>.</div>
+    <p>Обновление значения записывают сокращённо: <code>x += 1</code>, <code>y *= n</code>. Так работает любой из операторов. Инкремента <code>++</code> и декремента <code>--</code> в Python нет.</p>`,
   allowed: 'всё из 1.3 плюс <code>//</code>, <code>%</code>, <code>**</code>, функции <code>abs()</code>, <code>divmod()</code>, <code>pow()</code>, <code>round()</code>, битовые операторы <code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code>, двоичные литералы <code>0b1100</code>, сравнения, <code>and</code> / <code>or</code> / <code>not</code>',
   tasks: [
     {
@@ -1011,6 +1119,32 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
   id: 'ch15',
   num: '1.5',
   title: 'Условные команды и управление логикой',
+  theory: `
+    <h4>if / elif / else</h4>
+    <div class="code-block"><span class="kw">if</span> suffix == <span class="st">'.htm'</span>:
+    content = <span class="st">'text/html'</span>
+<span class="kw">elif</span> suffix == <span class="st">'.jpg'</span>:
+    content = <span class="st">'image/jpeg'</span>
+<span class="kw">else</span>:
+    content = <span class="st">'application/octet-stream'</span></div>
+    <p>Ветка <code>else</code> необязательна, а <code>elif</code> может быть сколько угодно. Тела, как и у <code>while</code>, задаются отступом. Если по ветке делать ничего не нужно, но тело синтаксически требуется, ставят заглушку <code>pass</code>.</p>
+    <p>Попадание в диапазон удобно проверять двойным сравнением — Python понимает такую запись напрямую, в отличие от большинства языков:</p>
+    <div class="code-block"><span class="kw">if</span> <span class="val">200</span> &lt;= status &lt; <span class="val">300</span>:
+    ...</div>
+
+    <h4>Условное выражение</h4>
+    <p>Когда всё ветвление сводится к «присвоить одно или другое», четыре строки схлопываются в одну:</p>
+    <div class="code-block">maxval = a <span class="kw">if</span> a &gt; b <span class="kw">else</span> b</div>
+
+    <h4>Оператор := («морж»)</h4>
+    <p>Присваивает значение и тут же возвращает его, чтобы результат можно было сразу проверить в условии. Круглые скобки обязательны:</p>
+    <div class="code-block">x = <span class="val">0</span>
+<span class="kw">while</span> (x := x + <span class="val">1</span>) &lt; <span class="val">10</span>:
+    <span class="fn">print</span>(x)</div>
+
+    <h4>break и continue</h4>
+    <p><code>break</code> прерывает цикл целиком и передаёт управление за него, <code>continue</code> пропускает остаток тела и возвращается к началу. Оба действуют только на самый внутренний цикл.</p>
+    <div class="hl orange"><span class="hl-label">Ловушка</span>В связке <code>while</code> + <code>continue</code> счётчик надо увеличивать <strong>до</strong> проверки, из-за которой срабатывает <code>continue</code>. Иначе прыжок к началу цикла перескочит через увеличение, условие никогда не изменится и программа зависнет. У <code>for</code> такого не бывает — там счётчик двигает сам цикл.</div>`,
   allowed: 'всё из 1.3—1.4 плюс <code>if</code> / <code>elif</code> / <code>else</code>, <code>pass</code>, условное выражение <code>a if cond else b</code>, оператор <code>:=</code>, <code>break</code>, <code>continue</code>',
   tasks: [
     {
@@ -1267,6 +1401,48 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
   id: 'ch16',
   num: '1.6',
   title: 'Строки',
+  theory: `
+    <h4>Литералы и форматирование</h4>
+    <p>Строку задают одинарными, двойными или тройными кавычками. Тройные захватывают всё до закрывающей тройной кавычки — вместе с переводами строк:</p>
+    <div class="code-block">a = <span class="st">'Hello World'</span>
+b = <span class="st">"Python is groovy"</span>
+c = <span class="st">'''Текст, занимающий
+несколько строк'''</span></div>
+    <p>Литералы, записанные подряд, склеиваются автоматически. Для подстановки значений есть f-строки, а из старого кода можно встретить <code>.format()</code> и оператор <code>%</code> — они делают то же самое:</p>
+    <div class="code-block"><span class="fn">print</span>(f<span class="st">'{year:&gt;3d} {principal:0.2f}'</span>)
+<span class="fn">print</span>(<span class="st">'{0:&gt;3d} {1:0.2f}'</span>.<span class="fn">format</span>(year, principal))</div>
+
+    <h4>Индексы и срезы</h4>
+    <p>Строка — последовательность символов Юникода, пронумерованных с нуля; отрицательные индексы отсчитываются с конца. Срез <code>s[i:j]</code> берёт символы с индексами <code>i &lt;= k &lt; j</code> — правая граница не включается. Опущенная граница означает начало или конец строки:</p>
+    <div class="code-block">a = <span class="st">'Hello World'</span>
+<span class="fn">len</span>(a)      <span class="cm"># 11</span>
+a[<span class="val">4</span>]       <span class="cm"># 'o'</span>
+a[-<span class="val">1</span>]      <span class="cm"># 'd'  — последний символ</span>
+a[:<span class="val">5</span>]      <span class="cm"># 'Hello'</span>
+a[<span class="val">6</span>:]      <span class="cm"># 'World'</span>
+a[-<span class="val">5</span>:]     <span class="cm"># 'World' — последние пять</span></div>
+
+    <h4>Методы</h4>
+    <table>
+      <thead><tr><th>Метод</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td><code>s.strip()</code></td><td>убирает пробелы и переводы строк по краям</td></tr>
+        <tr><td><code>s.find(sub)</code></td><td>индекс первого вхождения, либо <code>-1</code>, если не найдено</td></tr>
+        <tr><td><code>s.replace(old, new)</code></td><td>замена подстроки</td></tr>
+        <tr><td><code>s.startswith(p)</code> · <code>s.endswith(p)</code></td><td>проверка начала и конца строки</td></tr>
+        <tr><td><code>s.upper()</code> · <code>s.lower()</code></td><td>смена регистра</td></tr>
+        <tr><td><code>s.split(sep)</code></td><td>разбить на части по разделителю <span style="color:var(--muted-2)">(вернёт список — это глава 1.8)</span></td></tr>
+      </tbody>
+    </table>
+    <div class="hl"><span class="hl-label">Ключевое</span>Строки <strong>неизменяемы</strong>. Ни один метод не правит строку на месте — все они возвращают новую. Строка <code>s.strip()</code> сама по себе не делает ничего: результат нужно куда-то присвоить.</div>
+
+    <h4>Строки и числа</h4>
+    <p>Python никогда не трактует содержимое строки как число, поэтому <code>+</code> для строк — всегда склейка:</p>
+    <div class="code-block">x = <span class="st">'37'</span>
+y = <span class="st">'42'</span>
+z = x + y              <span class="cm"># '3742' — склеились, а не сложились</span>
+z = <span class="fn">int</span>(x) + <span class="fn">int</span>(y)    <span class="cm"># 79</span></div>
+    <p>Обратно в строку значение переводят <code>str()</code>, <code>repr()</code> или <code>format()</code>. <code>str()</code> даёт то, что показал бы <code>print()</code>, а <code>repr()</code> — запись, по которой значение можно опознать: с кавычками и видимыми спецсимволами. Поэтому в отладке и в сообщениях об ошибках полезнее <code>repr()</code>: он покажет разницу между <code>42</code> и <code>'42'</code>, а также лишние пробелы по краям.</p>`,
   allowed: 'всё из 1.3—1.5 плюс строковые литералы, <code>len()</code>, индексы <code>s[i]</code> (в том числе отрицательные), срезы <code>s[i:j]</code>, конкатенация <code>+</code>, методы <code>find</code> / <code>replace</code> / <code>strip</code> / <code>upper</code> / <code>lower</code> / <code>startswith</code> / <code>endswith</code>, преобразования <code>int()</code>, <code>float()</code>, <code>str()</code>, <code>repr()</code>, <code>format()</code>',
   tasks: [
     {
@@ -1432,6 +1608,24 @@ assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а �
   id: 'ch17',
   num: '1.7',
   title: 'Файловый ввод и вывод',
+  theory: `
+    <h4>Чтение</h4>
+    <div class="code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="st">'data.txt'</span>) <span class="kw">as</span> file:
+    <span class="kw">for</span> line <span class="kw">in</span> file:
+        <span class="fn">print</span>(line, end=<span class="st">''</span>)</div>
+    <p>Команда <code>with</code> объявляет блок, внутри которого живёт файл: при выходе из блока — в том числе если внутри случилось исключение — файл закрывается сам. Без <code>with</code> пришлось бы звать <code>close()</code> вручную, а о нём легко забыть.</p>
+    <p>Цикл <code>for line in file</code> идёт по файлу построчно и не держит его целиком в памяти. Весь файл разом читает <code>read()</code>, а <code>read(n)</code> — блоками по n символов; на конце файла он возвращает пустую строку, что удобно ловить через <code>:=</code> или <code>break</code>.</p>
+    <div class="hl orange"><span class="hl-label">Мелочь, на которой ловят</span>Строка из файла приходит <strong>вместе с завершающим переводом строки</strong>. Из-за этого <code>print(line)</code> печатает лишний пропуск, а <code>float(line)</code> на последней колонке CSV может неожиданно сработать — но <code>int(line)</code> уже упадёт. Лечится через <code>end=''</code> при печати и <code>line.strip()</code> при разборе.</div>
+
+    <h4>Запись</h4>
+    <div class="code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="st">'out.txt'</span>, <span class="st">'wt'</span>) <span class="kw">as</span> out:
+    <span class="fn">print</span>(f<span class="st">'{year:&gt;3d} {principal:0.2f}'</span>, file=out)
+    out.<span class="fn">write</span>(<span class="st">'ещё строка'</span>)</div>
+    <p>Файл, переданный в <code>print()</code> аргументом <code>file=</code>, получает вывод вместо консоли; перевод строки <code>print</code> добавляет сам. Метод <code>write()</code> пишет ровно то, что дали, — перевод строки нужно ставить вручную.</p>
+    <p>Режим <code>'w'</code> создаёт файл заново и стирает прежнее содержимое. Текстовые файлы по умолчанию читаются и пишутся в UTF-8; другая кодировка задаётся аргументом <code>encoding</code>:</p>
+    <div class="code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="st">'data.txt'</span>, encoding=<span class="st">'latin-1'</span>) <span class="kw">as</span> file:
+    data = file.<span class="fn">read</span>()</div>
+    <p>Ввод с консоли даёт <code>input()</code> — она возвращает введённый текст без завершающего перевода строки.</p>`,
   allowed: 'всё из 1.3—1.6 плюс <code>open()</code>, команда <code>with</code>, перебор файла <code>for line in file</code>, <code>read()</code>, <code>write()</code>, <code>print(..., file=out)</code>, аргумент <code>encoding</code>',
   note: 'Файлы для задач уже созданы во временной файловой системе прямо в браузере — <code>open()</code> работает как обычно, никаких путей на диске.',
   tasks: [
@@ -1634,6 +1828,37 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
   id: 'ch18',
   num: '1.8',
   title: 'Списки',
+  theory: `
+    <h4>Список и операции над ним</h4>
+    <p>Список — упорядоченная изменяемая коллекция произвольных объектов. Индексируется с нуля, отрицательные индексы отсчитываются с конца:</p>
+    <div class="code-block">names = [<span class="st">'Dave'</span>, <span class="st">'Paula'</span>, <span class="st">'Thomas'</span>, <span class="st">'Lewis'</span>]
+names[<span class="val">2</span>]                 <span class="cm"># 'Thomas'</span>
+names[-<span class="val">1</span>]                <span class="cm"># 'Lewis' — последний</span>
+names[<span class="val">2</span>] = <span class="st">'Tom'</span>         <span class="cm"># замена по индексу</span>
+names.<span class="fn">append</span>(<span class="st">'Alex'</span>)      <span class="cm"># добавить в конец</span>
+names.<span class="fn">insert</span>(<span class="val">2</span>, <span class="st">'Aya'</span>)    <span class="cm"># вставить на позицию 2, остальное сдвинется</span></div>
+    <p>Перебирают список циклом <code>for</code> — тем же, что ходит по строкам файла:</p>
+    <div class="code-block"><span class="kw">for</span> name <span class="kw">in</span> names:
+    <span class="fn">print</span>(name)</div>
+    <p>Срезы работают как у строк, но списку срез можно ещё и <em>присвоить</em>, заменив разом кусок любой длины:</p>
+    <div class="code-block">b = names[<span class="val">0</span>:<span class="val">2</span>]                          <span class="cm"># копия первых двух</span>
+names[<span class="val">0</span>:<span class="val">2</span>] = [<span class="st">'Dave'</span>, <span class="st">'Mark'</span>, <span class="st">'Jeff'</span>]   <span class="cm"># два элемента стали тремя</span></div>
+    <p>Пустой список создают как <code>[]</code>. Форма <code>list()</code> чаще нужна для преобразования: <code>list('Dave')</code> даёт <code>['D', 'a', 'v', 'e']</code>. Хранить список может что угодно, включая другие списки — тогда индексы просто идут подряд: <code>a[3][2]</code>.</p>
+
+    <h4>split: строка → список</h4>
+    <p>Метод <code>split(sep)</code> разбивает строку по разделителю. Это основной способ разобрать строку CSV или лога:</p>
+    <div class="code-block"><span class="st">'SYM,123,456.78'</span>.<span class="fn">split</span>(<span class="st">','</span>)   <span class="cm"># ['SYM', '123', '456.78']</span></div>
+    <p>Обрати внимание: части остаются <strong>строками</strong>. Чтобы считать по ним что-то численное, каждую нужно провести через <code>int()</code> или <code>float()</code>.</p>
+
+    <h4>Списковое включение</h4>
+    <p>Списковое включение (list comprehension) строит новый список из существующей последовательности одним выражением:</p>
+    <div class="code-block">total = <span class="fn">sum</span>([<span class="fn">int</span>(row[<span class="val">1</span>]) * <span class="fn">float</span>(row[<span class="val">2</span>]) <span class="kw">for</span> row <span class="kw">in</span> rows])</div>
+    <p>Это ровно то же самое, что цикл с <code>append()</code>, только короче:</p>
+    <div class="code-block">values = []
+<span class="kw">for</span> row <span class="kw">in</span> rows:
+    values.<span class="fn">append</span>(<span class="fn">int</span>(row[<span class="val">1</span>]) * <span class="fn">float</span>(row[<span class="val">2</span>]))
+total = <span class="fn">sum</span>(values)</div>
+    <p>Для простых вычислений предпочитают первую форму. Встроенная <code>sum()</code> складывает все элементы последовательности; на пустом списке она честно возвращает <code>0</code>.</p>`,
   allowed: 'всё из 1.3—1.7 плюс списки <code>[]</code>, индексы и срезы списка, <code>append()</code>, <code>insert()</code>, <code>for x in items</code>, конкатенация списков <code>+</code>, <code>list()</code>, вложенные списки, <code>split()</code>, списковое включение и <code>sum()</code>',
   tasks: [
     {
@@ -2045,6 +2270,13 @@ CHAPTERS.forEach((ch) => {
       <span class="section-badge zero" data-chapter-badge="${ch.id}">0 / ${ch.tasks.length}</span>
     </div>
     <div class="section-body">
+      <div class="theory">
+        <div class="theory-head">
+          <span class="lbl">ТЕОРИЯ</span>
+          <span class="src">глава ${ch.num} · самое основное</span>
+        </div>
+        <div class="theory-body">${ch.theory}</div>
+      </div>
       <div class="hl green"><span class="hl-label">Можно использовать</span>${ch.allowed}</div>
       ${ch.note ? `<div class="hl orange"><span class="hl-label">Про файлы</span>${ch.note}</div>` : ''}
       ${tasksHtml}
