@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<title>QA Senior · Практика Python</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+    --content-max: 1280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+  .toc-inner a .done {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    float: right;
+  }
+  .toc-inner a .done.full { color: #5de0b0; }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+  .topbar {
+    max-width: var(--content-max);
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: var(--content-max);
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent2);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: var(--content-max);
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 30px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a3a2a;
+    color: #5de0b0;
+  }
+  .section-badge.partial { background: #2a2410; color: #e0c05a; }
+  .section-badge.zero { background: #1a1d26; color: var(--muted); }
+  .section-body { padding: 22px 26px; }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  ul li strong { color: #fff; font-weight: 700; }
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1e8;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre;
+  }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+  .hl code { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08); }
+
+  /* ─── PRACTICE: ПРОГРЕСС ─── */
+  .progress-bar {
+    max-width: var(--content-max);
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .progress-label b { color: #5de0b0; font-size: 14px; }
+  .progress-track {
+    flex: 1;
+    min-width: 160px;
+    height: 6px;
+    background: var(--tag-bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s;
+  }
+  .runtime-state {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted-2);
+  }
+  .runtime-state.loading { color: #e0c05a; }
+  .runtime-state.ready { color: #5de0b0; }
+  .runtime-state.failed { color: #f05a5a; }
+
+  /* ─── PRACTICE: ЗАДАЧА ─── */
+  .task {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .task:last-child { margin-bottom: 0; }
+  .task.solved { border-color: rgba(0, 201, 167, 0.45); }
+  .task-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #14171f;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .task-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .task-title { font-size: 14.5px; font-weight: 700; color: #fff; }
+  .task-status {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1a1d26;
+    color: var(--muted-2);
+  }
+  .task.solved .task-status { background: #0d2a1f; color: #5de0b0; }
+  .task-body { padding: 16px 18px; }
+  .task-statement { font-size: 14px; line-height: 1.72; margin-bottom: 12px; }
+  .task-statement p { margin-bottom: 7px; }
+  .task-statement ul { margin: 6px 0; }
+  .task-io {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-purple);
+    border-radius: 0 6px 6px 0;
+    padding: 9px 13px;
+    margin: 9px 0;
+    color: #c9d1e8;
+    white-space: pre-wrap;
+    line-height: 1.65;
+  }
+
+  details.hint, details.solution {
+    background: #14171f;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  details.hint summary, details.solution summary {
+    cursor: pointer;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    list-style: none;
+    user-select: none;
+  }
+  details.hint summary::-webkit-details-marker,
+  details.solution summary::-webkit-details-marker { display: none; }
+  details.hint summary::before, details.solution summary::before {
+    content: '▸ '; color: var(--muted-2);
+  }
+  details.hint[open] summary::before, details.solution[open] summary::before { content: '▾ '; }
+  details.hint summary:hover, details.solution summary:hover { color: var(--text); }
+  details.hint .inner, details.solution .inner {
+    padding: 0 14px 12px;
+    font-size: 13px;
+    color: #b0c8f0;
+    line-height: 1.65;
+  }
+  details.solution .inner { color: var(--text); }
+  details.solution .code-block { margin-top: 0; }
+
+  .editor-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a0c12;
+  }
+  .editor-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #101319;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.5px;
+  }
+  .editor-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2f3d; }
+  .editor {
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: vertical;
+    color: #c9d1e8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    padding: 12px 14px;
+    tab-size: 4;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+  }
+
+  .task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--tag-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { border-color: var(--accent); color: #fff; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:disabled:hover { border-color: var(--border); color: var(--text); }
+  .btn-run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn-run:hover { background: #0a6bff; }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .run-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    margin-left: auto;
+  }
+
+  .results { margin-top: 12px; }
+  .results:empty { display: none; }
+  .verdict {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 9px 13px;
+    border-radius: 7px;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .verdict.ok { background: #0d2a1f; color: #5de0b0; border: 1px solid rgba(93,224,176,0.25); }
+  .verdict.bad { background: #2a0d0d; color: #f0a0a0; border: 1px solid rgba(240,90,90,0.25); }
+  .verdict.warn { background: #2a1a0d; color: #f0b090; border: 1px solid rgba(255,107,53,0.25); }
+  .case {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #101319;
+    padding: 9px 13px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+  }
+  .case-head {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+  }
+  .case-mark { font-weight: 700; }
+  .case.pass .case-mark { color: #5de0b0; }
+  .case.fail .case-mark { color: #f05a5a; }
+  .case-label { color: var(--muted); }
+  .case-msg {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: #f0b090;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+  .case-out {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: #8b93a8;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    border-top: 1px dashed var(--border);
+    padding-top: 6px;
+  }
+  .case-out .oh {
+    display: block;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .run-note { margin-left: 0; width: 100%; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible { opacity: 1; pointer-events: auto; }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg { width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+    <a class="nav-item active" href="#"><span class="nav-num">14</span> Практика Python</a>
+  </div>
+  <div class="toc-inner" id="toc">
+    <div class="nav-group-title">Главы книги</div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Практика Python</span></div>
+  </div>
+
+  <div class="header">
+    <h1>Практика Python</h1>
+    <p>// по главам книги «Python. Исчерпывающее руководство» · 1.3 — 1.8</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-label">Решено <b id="p-done">0</b> из <span id="p-total">0</span></div>
+    <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
+    <div class="runtime-state" id="rt-state">Python загрузится при первом запуске</div>
+    <button class="btn btn-ghost" id="reset-progress" style="font-size:10.5px;padding:5px 10px;">Сбросить прогресс</button>
+  </div>
+
+  <section class="section" id="how">
+    <div class="section-header">
+      <span class="section-num">—</span>
+      <span class="section-title">Как это работает</span>
+    </div>
+    <div class="section-body">
+      <p>Каждая задача привязана к конкретной главе книги. <strong>Правило раздела: решение должно опираться только на то, что уже разобрано в книге к этой главе.</strong> В начале каждой главы есть список доступных конструкций — если тянет написать <code>for</code> в главе про <code>while</code>, значит, задача решается не тем инструментом.</p>
+      <div class="hl green"><span class="hl-label">Где выполняется код</span>Прямо в браузере. Внутри страницы поднимается <strong>Pyodide</strong> — настоящий CPython 3.12, скомпилированный в WebAssembly. Никакого сервера: ничего не отправляется наружу, всё работает на статике GitHub Pages и одинаково локально из файла.</div>
+      <div class="hl"><span class="hl-label">Первый запуск</span>При первом нажатии «Запустить» браузер скачает интерпретатор (~10 МБ). Это разово: дальше он лежит в кеше и стартует за пару секунд.</div>
+      <div class="hl purple"><span class="hl-label">Проверка</span>Решение прогоняется на нескольких наборах входных данных — не только на том, что в условии. Проверяется и результат в переменных, и то, что напечатано в консоль. Код выполняется в отдельном потоке с лимитом 10 секунд, поэтому бесконечный цикл не повесит страницу — он просто вернёт ошибку.</div>
+      <ul>
+        <li><strong>Ctrl + Enter</strong> — запустить проверку, не отрывая рук от клавиатуры</li>
+        <li><strong>Tab / Shift + Tab</strong> — отступ и снятие отступа, Enter продолжает отступ автоматически</li>
+        <li>Код и прогресс сохраняются в этом браузере — можно закрыть вкладку и вернуться</li>
+      </ul>
+    </div>
+  </section>
+
+  <div id="practice-root"></div>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ДАННЫЕ: главы и задачи
+   Каждый case: { label, setup, check }
+     setup — выполняется до кода решения, задаёт входные данные
+     check — выполняется после, видит переменные решения,
+             а также _out (весь stdout) и _lines (список строк)
+   ══════════════════════════════════════════════════════════════ */
+const CHAPTERS = [
+
+/* ─────────────────────────── 1.3 ─────────────────────────── */
+{
+  id: 'ch13',
+  num: '1.3',
+  title: 'Примитивы, переменные и выражения',
+  allowed: 'типы <code>int</code> / <code>float</code> / <code>str</code> / <code>bool</code>, переменные, арифметические выражения, цикл <code>while</code> с простым условием, <code>print()</code>, f-строки со спецификаторами вида <code>{x:&gt;3d}</code> и <code>{x:0.2f}</code>, сокращённое присваивание <code>+=</code>',
+  tasks: [
+    {
+      id: 't13-1',
+      title: 'Стоимость заказа',
+      statement: `<p>Даны переменные <code>price</code> (цена одной штуки), <code>count</code> (количество) и <code>discount</code> (доля скидки: <code>0.15</code> — это 15%).</p>
+        <p>Посчитай итоговую сумму в переменной <code>total</code> и выведи её f-строкой ровно с двумя знаками после запятой.</p>`,
+      io: `price = 199.99   count = 3   discount = 0.15
+→  Итого: 509.97`,
+      hint: 'Скидка 15% значит, что платим 85% от суммы: множитель <code>(1 - discount)</code>. Два знака после запятой — спецификатор <code>0.2f</code> внутри фигурных скобок f-строки.',
+      starter: `price = 199.99
+count = 3
+discount = 0.15
+
+# твой код ниже
+`,
+      solution: `total = price * count * (1 - discount)
+print(f'Итого: {total:0.2f}')`,
+      cases: [
+        { label: 'price=199.99, count=3, discount=0.15',
+          setup: `price = 199.99
+count = 3
+discount = 0.15`,
+          check: `assert 'total' in globals(), 'Не создана переменная total'
+_exp = price * count * (1 - discount)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+assert _lines, 'Ничего не выведено — нужен print()'
+_e = f'Итого: {_exp:0.2f}'
+assert _lines[-1] == _e, 'Последняя строка вывода: ' + repr(_lines[-1]) + ', ожидалось ' + repr(_e)` },
+        { label: 'price=100, count=1, discount=0 (без скидки)',
+          setup: `price = 100
+count = 1
+discount = 0`,
+          check: `assert 'total' in globals(), 'Не создана переменная total'
+_exp = price * count * (1 - discount)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_e = f'Итого: {_exp:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'price=50.5, count=4, discount=0.5',
+          setup: `price = 50.5
+count = 4
+discount = 0.5`,
+          check: `assert 'total' in globals(), 'Не создана переменная total'
+_exp = price * count * (1 - discount)
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_e = f'Итого: {_exp:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
+      ]
+    },
+    {
+      id: 't13-2',
+      title: 'Таблица роста вклада',
+      statement: `<p>Даны <code>principal</code> (начальная сумма), <code>rate</code> (годовая ставка) и <code>numyears</code> (сколько лет считать).</p>
+        <p>Каждый год сумма умножается на <code>(1 + rate)</code>. Выведи по одной строке на каждый год: <strong>номер года</strong> — целое число, выровненное по правому краю в три знака, затем пробел, затем <strong>сумма</strong> с двумя знаками после запятой.</p>
+        <p>Цикл — <code>while</code>: <code>for</code> в книге ещё не встречался.</p>`,
+      io: `principal = 1000   rate = 0.05   numyears = 5
+→    1 1050.00
+     2 1102.50
+     3 1157.62
+     4 1215.51
+     5 1276.28`,
+      hint: 'Заведи счётчик <code>year = 1</code>, крути <code>while year &lt;= numyears</code>, внутри сначала пересчитай <code>principal</code>, потом печатай, в конце <code>year += 1</code>. Формат — <code>f\'{year:&gt;3d} {principal:0.2f}\'</code>.',
+      starter: `principal = 1000
+rate = 0.05
+numyears = 5
+
+# твой код ниже
+`,
+      solution: `year = 1
+while year <= numyears:
+    principal = principal * (1 + rate)
+    print(f'{year:>3d} {principal:0.2f}')
+    year += 1`,
+      cases: [
+        { label: 'principal=1000, rate=0.05, 5 лет',
+          setup: `principal = 1000
+rate = 0.05
+numyears = 5
+_p0, _r0, _n0 = principal, rate, numyears`,
+          check: `_p = _p0
+_exp = []
+_y = 1
+while _y <= _n0:
+    _p = _p * (1 + _r0)
+    _exp.append(f'{_y:>3d} {_p:0.2f}')
+    _y += 1
+_nl = chr(10)
+assert _lines == _exp, 'Ожидался вывод:' + _nl + _nl.join(_exp) + _nl + 'а получилось:' + _nl + (_nl.join(_lines) if _lines else '(пусто)')` },
+        { label: 'principal=500, rate=0.1, 3 года',
+          setup: `principal = 500
+rate = 0.1
+numyears = 3
+_p0, _r0, _n0 = principal, rate, numyears`,
+          check: `_p = _p0
+_exp = []
+_y = 1
+while _y <= _n0:
+    _p = _p * (1 + _r0)
+    _exp.append(f'{_y:>3d} {_p:0.2f}')
+    _y += 1
+_nl = chr(10)
+assert _lines == _exp, 'Ожидался вывод:' + _nl + _nl.join(_exp) + _nl + 'а получилось:' + _nl + (_nl.join(_lines) if _lines else '(пусто)')` },
+        { label: 'principal=10000, rate=0.07, 1 год',
+          setup: `principal = 10000
+rate = 0.07
+numyears = 1
+_p0, _r0, _n0 = principal, rate, numyears`,
+          check: `_p = _p0
+_exp = []
+_y = 1
+while _y <= _n0:
+    _p = _p * (1 + _r0)
+    _exp.append(f'{_y:>3d} {_p:0.2f}')
+    _y += 1
+_nl = chr(10)
+assert _lines == _exp, 'Ожидался вывод:' + _nl + _nl.join(_exp) + _nl + 'а получилось:' + _nl + (_nl.join(_lines) if _lines else '(пусто)')` }
+      ]
+    },
+    {
+      id: 't13-3',
+      title: 'Когда вклад удвоится',
+      statement: `<p>Даны <code>principal</code> и <code>rate</code>. Начисляй проценты год за годом (<code>principal = principal * (1 + rate)</code>), пока сумма не станет <strong>больше или равна</strong> удвоенной начальной.</p>
+        <p>Число прошедших лет положи в переменную <code>years</code> и выведи одну строку.</p>`,
+      io: `principal = 1000   rate = 0.05
+→  Удвоение через 15 лет`,
+      hint: 'Начальную сумму надо запомнить <em>до</em> цикла в отдельной переменной, иначе граница «вдвое больше» будет ехать вместе с самой суммой. <code>years</code> начинай с нуля и увеличивай на каждой итерации.',
+      starter: `principal = 1000
+rate = 0.05
+
+# твой код ниже
+`,
+      solution: `start = principal
+years = 0
+while principal < 2 * start:
+    principal = principal * (1 + rate)
+    years += 1
+print(f'Удвоение через {years} лет')`,
+      cases: [
+        { label: 'principal=1000, rate=0.05',
+          setup: `principal = 1000
+rate = 0.05
+_p0, _r0 = principal, rate`,
+          check: `_p = _p0
+_y = 0
+while _p < 2 * _p0:
+    _p = _p * (1 + _r0)
+    _y += 1
+assert 'years' in globals(), 'Не создана переменная years'
+assert years == _y, 'years = ' + str(years) + ', ожидалось ' + str(_y)
+_e = 'Удвоение через ' + str(_y) + ' лет'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'principal=1000, rate=0.1',
+          setup: `principal = 1000
+rate = 0.1
+_p0, _r0 = principal, rate`,
+          check: `_p = _p0
+_y = 0
+while _p < 2 * _p0:
+    _p = _p * (1 + _r0)
+    _y += 1
+assert 'years' in globals(), 'Не создана переменная years'
+assert years == _y, 'years = ' + str(years) + ', ожидалось ' + str(_y)
+_e = 'Удвоение через ' + str(_y) + ' лет'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'principal=25000, rate=0.02 (медленный рост)',
+          setup: `principal = 25000
+rate = 0.02
+_p0, _r0 = principal, rate`,
+          check: `_p = _p0
+_y = 0
+while _p < 2 * _p0:
+    _p = _p * (1 + _r0)
+    _y += 1
+assert 'years' in globals(), 'Не создана переменная years'
+assert years == _y, 'years = ' + str(years) + ', ожидалось ' + str(_y)
+_e = 'Удвоение через ' + str(_y) + ' лет'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.4 ─────────────────────────── */
+{
+  id: 'ch14',
+  num: '1.4',
+  title: 'Арифметические операторы',
+  allowed: 'всё из 1.3 плюс <code>//</code>, <code>%</code>, <code>**</code>, функции <code>abs()</code>, <code>divmod()</code>, <code>pow()</code>, <code>round()</code>, битовые операторы <code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code>, двоичные литералы <code>0b1100</code>, сравнения, <code>and</code> / <code>or</code> / <code>not</code>',
+  tasks: [
+    {
+      id: 't14-1',
+      title: 'Длительность прогона',
+      statement: `<p>Дано <code>seconds</code> — целое число секунд, которое шёл прогон автотестов.</p>
+        <p>Разложи его на <code>hours</code>, <code>minutes</code> и <code>secs</code> (все — целые) и выведи одну строку.</p>
+        <p>Понадобятся целочисленное деление <code>//</code> и остаток <code>%</code>.</p>`,
+      io: `seconds = 9907
+→  Прогон: 2 ч 45 мин 7 с`,
+      hint: 'Часы — это <code>seconds // 3600</code>. Дальше работай с остатком: <code>seconds % 3600</code> — это то, что не уложилось в целые часы. Тот же приём повторяется для минут. Можно и через <code>divmod()</code>, который сразу возвращает частное и остаток.',
+      starter: `seconds = 9907
+
+# твой код ниже
+`,
+      solution: `hours = seconds // 3600
+minutes = seconds % 3600 // 60
+secs = seconds % 60
+print(f'Прогон: {hours} ч {minutes} мин {secs} с')`,
+      cases: [
+        { label: 'seconds = 9907',
+          setup: `seconds = 9907
+_s0 = seconds`,
+          check: `_h = _s0 // 3600
+_m = _s0 % 3600 // 60
+_c = _s0 % 60
+for _n, _v in (('hours', _h), ('minutes', _m), ('secs', _c)):
+    assert _n in globals(), 'Не создана переменная ' + _n
+    assert globals()[_n] == _v, _n + ' = ' + str(globals()[_n]) + ', ожидалось ' + str(_v)
+_e = 'Прогон: ' + str(_h) + ' ч ' + str(_m) + ' мин ' + str(_c) + ' с'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'seconds = 59 (меньше минуты)',
+          setup: `seconds = 59
+_s0 = seconds`,
+          check: `_h = _s0 // 3600
+_m = _s0 % 3600 // 60
+_c = _s0 % 60
+for _n, _v in (('hours', _h), ('minutes', _m), ('secs', _c)):
+    assert _n in globals(), 'Не создана переменная ' + _n
+    assert globals()[_n] == _v, _n + ' = ' + str(globals()[_n]) + ', ожидалось ' + str(_v)
+_e = 'Прогон: ' + str(_h) + ' ч ' + str(_m) + ' мин ' + str(_c) + ' с'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'seconds = 86400 (ровно сутки)',
+          setup: `seconds = 86400
+_s0 = seconds`,
+          check: `_h = _s0 // 3600
+_m = _s0 % 3600 // 60
+_c = _s0 % 60
+for _n, _v in (('hours', _h), ('minutes', _m), ('secs', _c)):
+    assert _n in globals(), 'Не создана переменная ' + _n
+    assert globals()[_n] == _v, _n + ' = ' + str(globals()[_n]) + ', ожидалось ' + str(_v)
+_e = 'Прогон: ' + str(_h) + ' ч ' + str(_m) + ' мин ' + str(_c) + ' с'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't14-2',
+      title: 'Високосный год',
+      statement: `<p>Дан <code>year</code>. Год високосный, если он делится на 4 и <strong>не</strong> делится на 100 — либо делится на 400.</p>
+        <p>Положи результат (<code>True</code> / <code>False</code>) в переменную <code>is_leap</code> и выведи строку.</p>
+        <p>Условных команд <code>if</code> в книге ещё не было — и они здесь не нужны: логическое выражение само даёт <code>True</code> или <code>False</code>.</p>`,
+      io: `year = 2024  →  2024: True
+year = 1900  →  1900: False`,
+      hint: '<code>year % 4 == 0</code> — уже готовое булево значение. Осталось соединить три такие проверки через <code>and</code>, <code>or</code> и <code>not</code>, не забыв про скобки: <code>and</code> связывает сильнее, чем <code>or</code>.',
+      starter: `year = 2024
+
+# твой код ниже
+`,
+      solution: `is_leap = (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+print(f'{year}: {is_leap}')`,
+      cases: [
+        { label: 'year = 2024',
+          setup: `year = 2024
+_y0 = year`,
+          check: `_exp = (_y0 % 4 == 0 and _y0 % 100 != 0) or _y0 % 400 == 0
+assert 'is_leap' in globals(), 'Не создана переменная is_leap'
+assert is_leap == _exp, 'is_leap = ' + str(is_leap) + ', ожидалось ' + str(_exp)
+_e = str(_y0) + ': ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'year = 1900 (делится на 100, но не на 400)',
+          setup: `year = 1900
+_y0 = year`,
+          check: `_exp = (_y0 % 4 == 0 and _y0 % 100 != 0) or _y0 % 400 == 0
+assert 'is_leap' in globals(), 'Не создана переменная is_leap'
+assert is_leap == _exp, 'is_leap = ' + str(is_leap) + ', ожидалось ' + str(_exp)
+_e = str(_y0) + ': ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'year = 2000 (делится на 400)',
+          setup: `year = 2000
+_y0 = year`,
+          check: `_exp = (_y0 % 4 == 0 and _y0 % 100 != 0) or _y0 % 400 == 0
+assert 'is_leap' in globals(), 'Не создана переменная is_leap'
+assert is_leap == _exp, 'is_leap = ' + str(is_leap) + ', ожидалось ' + str(_exp)
+_e = str(_y0) + ': ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'year = 2023',
+          setup: `year = 2023
+_y0 = year`,
+          check: `_exp = (_y0 % 4 == 0 and _y0 % 100 != 0) or _y0 % 400 == 0
+assert 'is_leap' in globals(), 'Не создана переменная is_leap'
+assert is_leap == _exp, 'is_leap = ' + str(is_leap) + ', ожидалось ' + str(_exp)
+_e = str(_y0) + ': ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't14-3',
+      title: 'Разбор байта на полубайты',
+      statement: `<p>Дано <code>a</code> — целое число, помещающееся в один байт (0…255). Такое встречается, когда в одно число упакованы флаги или две четырёхбитные величины.</p>
+        <p>Достань старшие 4 бита в <code>high</code> и младшие 4 бита в <code>low</code>, используя сдвиг <code>&gt;&gt;</code> и маску <code>&amp;</code>. Выведи одну строку.</p>`,
+      io: `a = 0b11001001   (это 201)
+→  high=12 low=9`,
+      hint: 'Маска для четырёх младших битов — <code>0b1111</code> (то же самое, что 15). Младшая половина: <code>a &amp; 0b1111</code>. Для старшей сначала сдвинь число вправо на 4 позиции, потом наложи ту же маску.',
+      starter: `a = 0b11001001
+
+# твой код ниже
+`,
+      solution: `high = (a >> 4) & 0b1111
+low = a & 0b1111
+print(f'high={high} low={low}')`,
+      cases: [
+        { label: 'a = 0b11001001 (201)',
+          setup: `a = 0b11001001
+_a0 = a`,
+          check: `_h = (_a0 >> 4) & 0b1111
+_l = _a0 & 0b1111
+assert 'high' in globals(), 'Не создана переменная high'
+assert 'low' in globals(), 'Не создана переменная low'
+assert high == _h, 'high = ' + str(high) + ', ожидалось ' + str(_h)
+assert low == _l, 'low = ' + str(low) + ', ожидалось ' + str(_l)
+_e = 'high=' + str(_h) + ' low=' + str(_l)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'a = 0xFF (255, все биты подняты)',
+          setup: `a = 0xFF
+_a0 = a`,
+          check: `_h = (_a0 >> 4) & 0b1111
+_l = _a0 & 0b1111
+assert 'high' in globals() and 'low' in globals(), 'Нужны переменные high и low'
+assert high == _h, 'high = ' + str(high) + ', ожидалось ' + str(_h)
+assert low == _l, 'low = ' + str(low) + ', ожидалось ' + str(_l)
+_e = 'high=' + str(_h) + ' low=' + str(_l)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'a = 0x0A (10, старшая половина пустая)',
+          setup: `a = 0x0A
+_a0 = a`,
+          check: `_h = (_a0 >> 4) & 0b1111
+_l = _a0 & 0b1111
+assert 'high' in globals() and 'low' in globals(), 'Нужны переменные high и low'
+assert high == _h, 'high = ' + str(high) + ', ожидалось ' + str(_h)
+assert low == _l, 'low = ' + str(low) + ', ожидалось ' + str(_l)
+_e = 'high=' + str(_h) + ' low=' + str(_l)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.5 ─────────────────────────── */
+{
+  id: 'ch15',
+  num: '1.5',
+  title: 'Условные команды и управление логикой',
+  allowed: 'всё из 1.3—1.4 плюс <code>if</code> / <code>elif</code> / <code>else</code>, <code>pass</code>, условное выражение <code>a if cond else b</code>, оператор <code>:=</code>, <code>break</code>, <code>continue</code>',
+  tasks: [
+    {
+      id: 't15-1',
+      title: 'Категория HTTP-статуса',
+      statement: `<p>Дан <code>status</code> — код ответа сервера. Определи его категорию и положи её в переменную <code>category</code>:</p>
+        <ul>
+          <li>1xx → <code>'informational'</code></li>
+          <li>2xx → <code>'success'</code></li>
+          <li>3xx → <code>'redirect'</code></li>
+          <li>4xx → <code>'client error'</code></li>
+          <li>5xx → <code>'server error'</code></li>
+          <li>всё остальное → <code>'unknown'</code></li>
+        </ul>
+        <p>Выведи одну строку.</p>`,
+      io: `status = 404  →  404 -> client error
+status = 999  →  999 -> unknown`,
+      hint: 'Цепочка <code>if</code> / <code>elif</code> / <code>else</code>. Границы удобно проверять двойным сравнением: <code>if 200 &lt;= status &lt; 300:</code> — Python понимает такую запись напрямую.',
+      starter: `status = 404
+
+# твой код ниже
+`,
+      solution: `if 100 <= status < 200:
+    category = 'informational'
+elif 200 <= status < 300:
+    category = 'success'
+elif 300 <= status < 400:
+    category = 'redirect'
+elif 400 <= status < 500:
+    category = 'client error'
+elif 500 <= status < 600:
+    category = 'server error'
+else:
+    category = 'unknown'
+print(f'{status} -> {category}')`,
+      cases: [
+        { label: 'status = 200',
+          setup: `status = 200
+_s0 = status`,
+          check: `_names = ['informational', 'success', 'redirect', 'client error', 'server error']
+_idx = _s0 // 100 - 1
+_exp = _names[_idx] if 100 <= _s0 < 600 else 'unknown'
+assert 'category' in globals(), 'Не создана переменная category'
+assert category == _exp, 'category = ' + repr(category) + ', ожидалось ' + repr(_exp)
+_e = str(_s0) + ' -> ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'status = 404',
+          setup: `status = 404
+_s0 = status`,
+          check: `_names = ['informational', 'success', 'redirect', 'client error', 'server error']
+_exp = _names[_s0 // 100 - 1] if 100 <= _s0 < 600 else 'unknown'
+assert 'category' in globals(), 'Не создана переменная category'
+assert category == _exp, 'category = ' + repr(category) + ', ожидалось ' + repr(_exp)
+_e = str(_s0) + ' -> ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'status = 503',
+          setup: `status = 503
+_s0 = status`,
+          check: `_names = ['informational', 'success', 'redirect', 'client error', 'server error']
+_exp = _names[_s0 // 100 - 1] if 100 <= _s0 < 600 else 'unknown'
+assert 'category' in globals(), 'Не создана переменная category'
+assert category == _exp, 'category = ' + repr(category) + ', ожидалось ' + repr(_exp)
+_e = str(_s0) + ' -> ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'status = 301',
+          setup: `status = 301
+_s0 = status`,
+          check: `_names = ['informational', 'success', 'redirect', 'client error', 'server error']
+_exp = _names[_s0 // 100 - 1] if 100 <= _s0 < 600 else 'unknown'
+assert 'category' in globals(), 'Не создана переменная category'
+assert category == _exp, 'category = ' + repr(category) + ', ожидалось ' + repr(_exp)
+_e = str(_s0) + ' -> ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'status = 999 (за границами)',
+          setup: `status = 999
+_s0 = status`,
+          check: `_names = ['informational', 'success', 'redirect', 'client error', 'server error']
+_exp = _names[_s0 // 100 - 1] if 100 <= _s0 < 600 else 'unknown'
+assert 'category' in globals(), 'Не создана переменная category'
+assert category == _exp, 'category = ' + repr(category) + ', ожидалось ' + repr(_exp)
+_e = str(_s0) + ' -> ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't15-2',
+      title: 'Максимум из трёх — условным выражением',
+      statement: `<p>Даны <code>a</code>, <code>b</code>, <code>c</code>. Найди наибольшее и положи его в <code>biggest</code>, затем выведи строку.</p>
+        <p><strong>Ограничение:</strong> встроенной функцией <code>max()</code> пользоваться нельзя — задача на условное выражение <code>x if условие else y</code> (в книге оно только что появилось).</p>`,
+      io: `a = 3   b = 9   c = 5
+→  Максимум: 9`,
+      hint: 'Условные выражения можно вкладывать друг в друга или применять в два шага: сначала найди больший из <code>a</code> и <code>b</code>, положи в промежуточную переменную, потом сравни её с <code>c</code>. Второй вариант читается лучше.',
+      forbid: [['max(', 'В этой задаче нельзя пользоваться max() — она про условное выражение.']],
+      starter: `a = 3
+b = 9
+c = 5
+
+# твой код ниже
+`,
+      solution: `ab = a if a > b else b
+biggest = ab if ab > c else c
+print(f'Максимум: {biggest}')`,
+      cases: [
+        { label: 'a=3, b=9, c=5',
+          setup: `a = 3
+b = 9
+c = 5
+_a0, _b0, _c0 = a, b, c`,
+          check: `_exp = _a0
+if _b0 > _exp:
+    _exp = _b0
+if _c0 > _exp:
+    _exp = _c0
+assert 'biggest' in globals(), 'Не создана переменная biggest'
+assert biggest == _exp, 'biggest = ' + str(biggest) + ', ожидалось ' + str(_exp)
+_e = 'Максимум: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'a=10, b=2, c=10 (максимум повторяется)',
+          setup: `a = 10
+b = 2
+c = 10
+_a0, _b0, _c0 = a, b, c`,
+          check: `_exp = _a0
+if _b0 > _exp:
+    _exp = _b0
+if _c0 > _exp:
+    _exp = _c0
+assert 'biggest' in globals(), 'Не создана переменная biggest'
+assert biggest == _exp, 'biggest = ' + str(biggest) + ', ожидалось ' + str(_exp)
+_e = 'Максимум: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'a=-5, b=-2, c=-9 (все отрицательные)',
+          setup: `a = -5
+b = -2
+c = -9
+_a0, _b0, _c0 = a, b, c`,
+          check: `_exp = _a0
+if _b0 > _exp:
+    _exp = _b0
+if _c0 > _exp:
+    _exp = _c0
+assert 'biggest' in globals(), 'Не создана переменная biggest'
+assert biggest == _exp, 'biggest = ' + str(biggest) + ', ожидалось ' + str(_exp)
+_e = 'Максимум: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't15-3',
+      title: 'Сумма с пропуском и досрочным выходом',
+      statement: `<p>Даны <code>n</code> и <code>limit</code>. Перебирай числа от <code>1</code> до <code>n</code> включительно и накапливай их в <code>total</code>, соблюдая два правила <strong>ровно в таком порядке</strong>:</p>
+        <ul>
+          <li>если число делится на 3 — пропусти его (<code>continue</code>), к сумме не прибавляй;</li>
+          <li>иначе прибавь его к <code>total</code>; если <strong>после прибавления</strong> сумма стала больше <code>limit</code> — прерви цикл (<code>break</code>).</li>
+        </ul>
+        <p>После цикла выведи одну строку.</p>`,
+      io: `n = 10   limit = 100   (лимит не достигнут)
+→  Сумма: 37
+
+n = 100  limit = 50
+→  Сумма: 61`,
+      hint: 'Крути <code>while</code> со счётчиком. Увеличивай счётчик <strong>в начале</strong> тела цикла — иначе <code>continue</code> перепрыгнет через увеличение и цикл зависнет навсегда. Это классическая ловушка связки <code>while</code> + <code>continue</code>.',
+      starter: `n = 10
+limit = 100
+
+# твой код ниже
+`,
+      solution: `total = 0
+i = 0
+while i < n:
+    i += 1
+    if i % 3 == 0:
+        continue
+    total += i
+    if total > limit:
+        break
+print(f'Сумма: {total}')`,
+      cases: [
+        { label: 'n=10, limit=100 (до break не доходит)',
+          setup: `n = 10
+limit = 100
+_n0, _l0 = n, limit`,
+          check: `_t = 0
+_i = 0
+while _i < _n0:
+    _i += 1
+    if _i % 3 == 0:
+        continue
+    _t += _i
+    if _t > _l0:
+        break
+assert 'total' in globals(), 'Не создана переменная total'
+assert total == _t, 'total = ' + str(total) + ', ожидалось ' + str(_t)
+_e = 'Сумма: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'n=100, limit=50 (срабатывает break)',
+          setup: `n = 100
+limit = 50
+_n0, _l0 = n, limit`,
+          check: `_t = 0
+_i = 0
+while _i < _n0:
+    _i += 1
+    if _i % 3 == 0:
+        continue
+    _t += _i
+    if _t > _l0:
+        break
+assert 'total' in globals(), 'Не создана переменная total'
+assert total == _t, 'total = ' + str(total) + ', ожидалось ' + str(_t)
+_e = 'Сумма: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'n=3, limit=1 (break на первом же шаге)',
+          setup: `n = 3
+limit = 1
+_n0, _l0 = n, limit`,
+          check: `_t = 0
+_i = 0
+while _i < _n0:
+    _i += 1
+    if _i % 3 == 0:
+        continue
+    _t += _i
+    if _t > _l0:
+        break
+assert 'total' in globals(), 'Не создана переменная total'
+assert total == _t, 'total = ' + str(total) + ', ожидалось ' + str(_t)
+_e = 'Сумма: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'n=0 (цикл не выполнится ни разу)',
+          setup: `n = 0
+limit = 10
+_n0, _l0 = n, limit`,
+          check: `_t = 0
+_i = 0
+while _i < _n0:
+    _i += 1
+    if _i % 3 == 0:
+        continue
+    _t += _i
+    if _t > _l0:
+        break
+assert 'total' in globals(), 'Не создана переменная total (её надо завести до цикла)'
+assert total == _t, 'total = ' + str(total) + ', ожидалось ' + str(_t)
+_e = 'Сумма: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.6 ─────────────────────────── */
+{
+  id: 'ch16',
+  num: '1.6',
+  title: 'Строки',
+  allowed: 'всё из 1.3—1.5 плюс строковые литералы, <code>len()</code>, индексы <code>s[i]</code> (в том числе отрицательные), срезы <code>s[i:j]</code>, конкатенация <code>+</code>, методы <code>find</code> / <code>replace</code> / <code>strip</code> / <code>upper</code> / <code>lower</code> / <code>startswith</code> / <code>endswith</code>, преобразования <code>int()</code>, <code>float()</code>, <code>str()</code>, <code>repr()</code>, <code>format()</code>',
+  tasks: [
+    {
+      id: 't16-1',
+      title: 'Маскирование номера карты',
+      statement: `<p>Дан <code>pan</code> — номер банковской карты, строка из 16 цифр. Показывать его целиком нельзя (см. <a href="index.html#glossary" style="color:var(--accent2)">PCI DSS</a> в глоссарии), поэтому в логах и на экране номер маскируют.</p>
+        <p>Собери в <code>masked</code> строку: <strong>первые 6 символов</strong> + <strong>шесть звёздочек</strong> + <strong>последние 4 символа</strong>. Выведи одну строку.</p>`,
+      io: `pan = '4242424242424242'
+→  Карта: 424242******4242`,
+      hint: 'Срез <code>pan[:6]</code> даёт начало, <code>pan[-4:]</code> — хвост от конца строки. Склеиваются срезы обычным <code>+</code>. Шесть звёздочек проще всего написать литералом.',
+      starter: `pan = '4242424242424242'
+
+# твой код ниже
+`,
+      solution: `masked = pan[:6] + '******' + pan[-4:]
+print(f'Карта: {masked}')`,
+      cases: [
+        { label: "pan = '4242424242424242'",
+          setup: `pan = '4242424242424242'
+_p0 = pan`,
+          check: `_exp = _p0[:6] + '******' + _p0[-4:]
+assert 'masked' in globals(), 'Не создана переменная masked'
+assert masked == _exp, 'masked = ' + repr(masked) + ', ожидалось ' + repr(_exp)
+_e = 'Карта: ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "pan = '5555555555554444'",
+          setup: `pan = '5555555555554444'
+_p0 = pan`,
+          check: `_exp = _p0[:6] + '******' + _p0[-4:]
+assert 'masked' in globals(), 'Не создана переменная masked'
+assert masked == _exp, 'masked = ' + repr(masked) + ', ожидалось ' + repr(_exp)
+_e = 'Карта: ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "pan = '4000056655665556'",
+          setup: `pan = '4000056655665556'
+_p0 = pan`,
+          check: `_exp = _p0[:6] + '******' + _p0[-4:]
+assert 'masked' in globals(), 'Не создана переменная masked'
+assert masked == _exp, 'masked = ' + repr(masked) + ', ожидалось ' + repr(_exp)
+_e = 'Карта: ' + _exp
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't16-2',
+      title: 'Разбор e-mail',
+      statement: `<p>Дан <code>email</code>. Раздели его по символу <code>@</code>: имя пользователя положи в <code>user</code>, домен (уже без собаки) — в <code>domain</code>. Выведи одну строку.</p>
+        <p>Метод <code>split()</code> возвращает список, а списки будут только в 1.8 — здесь работай через <code>find()</code> и срезы.</p>`,
+      io: `email = 'ivan.petrov@example.com'
+→  user=ivan.petrov domain=example.com`,
+      hint: '<code>email.find(\'@\')</code> даёт индекс собаки. Всё до неё — срез <code>[:pos]</code>, всё после — <code>[pos + 1:]</code>. Единицу прибавляем, чтобы сама собака не попала в домен.',
+      starter: `email = 'ivan.petrov@example.com'
+
+# твой код ниже
+`,
+      solution: `pos = email.find('@')
+user = email[:pos]
+domain = email[pos + 1:]
+print(f'user={user} domain={domain}')`,
+      cases: [
+        { label: "email = 'ivan.petrov@example.com'",
+          setup: `email = 'ivan.petrov@example.com'
+_e0 = email`,
+          check: `_p = _e0.find('@')
+_u, _d = _e0[:_p], _e0[_p + 1:]
+assert 'user' in globals() and 'domain' in globals(), 'Нужны переменные user и domain'
+assert user == _u, 'user = ' + repr(user) + ', ожидалось ' + repr(_u)
+assert domain == _d, 'domain = ' + repr(domain) + ', ожидалось ' + repr(_d)
+_e = 'user=' + _u + ' domain=' + _d
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "email = 'qa@ozon.ru'",
+          setup: `email = 'qa@ozon.ru'
+_e0 = email`,
+          check: `_p = _e0.find('@')
+_u, _d = _e0[:_p], _e0[_p + 1:]
+assert 'user' in globals() and 'domain' in globals(), 'Нужны переменные user и domain'
+assert user == _u, 'user = ' + repr(user) + ', ожидалось ' + repr(_u)
+assert domain == _d, 'domain = ' + repr(domain) + ', ожидалось ' + repr(_d)
+_e = 'user=' + _u + ' domain=' + _d
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "email = 'a@b.co.uk' (короткое имя, домен с точками)",
+          setup: `email = 'a@b.co.uk'
+_e0 = email`,
+          check: `_p = _e0.find('@')
+_u, _d = _e0[:_p], _e0[_p + 1:]
+assert 'user' in globals() and 'domain' in globals(), 'Нужны переменные user и domain'
+assert user == _u, 'user = ' + repr(user) + ', ожидалось ' + repr(_u)
+assert domain == _d, 'domain = ' + repr(domain) + ', ожидалось ' + repr(_d)
+_e = 'user=' + _u + ' domain=' + _d
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't16-3',
+      title: 'Строка или число',
+      statement: `<p>Даны две строки <code>a</code> и <code>b</code>, в которых записаны целые числа, но с лишними пробелами по краям.</p>
+        <p>Получи две вещи и выведи их двумя строками:</p>
+        <ul>
+          <li><code>joined</code> — строковая склейка значений без пробелов;</li>
+          <li><code>total</code> — их числовая сумма (целое число).</li>
+        </ul>
+        <p>Это та самая ловушка из книги: <code>'37' + '42'</code> даёт <code>'3742'</code>, а не 79. Один и тот же <code>+</code> ведёт себя по-разному в зависимости от типа.</p>`,
+      io: `a = '  37 '   b = ' 42'
+→  joined: 3742
+   total: 79`,
+      hint: 'Сначала <code>strip()</code> уберёт пробелы по краям. Дальше от одних и тех же очищенных строк идут две ветки: склейка через <code>+</code> — и сумма через <code>int()</code> от каждой.',
+      starter: `a = '  37 '
+b = ' 42'
+
+# твой код ниже
+`,
+      solution: `sa = a.strip()
+sb = b.strip()
+joined = sa + sb
+total = int(sa) + int(sb)
+print(f'joined: {joined}')
+print(f'total: {total}')`,
+      cases: [
+        { label: "a = '  37 ', b = ' 42'",
+          setup: `a = '  37 '
+b = ' 42'
+_a0, _b0 = a, b`,
+          check: `_sa, _sb = _a0.strip(), _b0.strip()
+_j = _sa + _sb
+_t = int(_sa) + int(_sb)
+assert 'joined' in globals() and 'total' in globals(), 'Нужны переменные joined и total'
+assert joined == _j, 'joined = ' + repr(joined) + ', ожидалось ' + repr(_j)
+assert total == _t, 'total = ' + repr(total) + ', ожидалось ' + repr(_t)
+assert isinstance(total, int), 'total должно быть целым числом, а сейчас это ' + type(total).__name__
+_exp = ['joined: ' + _j, 'total: ' + str(_t)]
+assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: "a = '1', b = '2'",
+          setup: `a = '1'
+b = '2'
+_a0, _b0 = a, b`,
+          check: `_sa, _sb = _a0.strip(), _b0.strip()
+_j = _sa + _sb
+_t = int(_sa) + int(_sb)
+assert 'joined' in globals() and 'total' in globals(), 'Нужны переменные joined и total'
+assert joined == _j, 'joined = ' + repr(joined) + ', ожидалось ' + repr(_j)
+assert total == _t, 'total = ' + repr(total) + ', ожидалось ' + repr(_t)
+_exp = ['joined: ' + _j, 'total: ' + str(_t)]
+assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: "a = ' 100 ', b = '  -5 ' (отрицательное число)",
+          setup: `a = ' 100 '
+b = '  -5 '
+_a0, _b0 = a, b`,
+          check: `_sa, _sb = _a0.strip(), _b0.strip()
+_j = _sa + _sb
+_t = int(_sa) + int(_sb)
+assert 'joined' in globals() and 'total' in globals(), 'Нужны переменные joined и total'
+assert joined == _j, 'joined = ' + repr(joined) + ', ожидалось ' + repr(_j)
+assert total == _t, 'total = ' + repr(total) + ', ожидалось ' + repr(_t)
+_exp = ['joined: ' + _j, 'total: ' + str(_t)]
+assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а получено ' + repr(_lines)` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.7 ─────────────────────────── */
+{
+  id: 'ch17',
+  num: '1.7',
+  title: 'Файловый ввод и вывод',
+  allowed: 'всё из 1.3—1.6 плюс <code>open()</code>, команда <code>with</code>, перебор файла <code>for line in file</code>, <code>read()</code>, <code>write()</code>, <code>print(..., file=out)</code>, аргумент <code>encoding</code>',
+  note: 'Файлы для задач уже созданы во временной файловой системе прямо в браузере — <code>open()</code> работает как обычно, никаких путей на диске.',
+  tasks: [
+    {
+      id: 't17-1',
+      title: 'Сколько строк в логе',
+      statement: `<p>В файле <code>log.txt</code> лежит лог прогона. Открой его через <code>with open(...)</code>, посчитай количество строк в переменной <code>count</code> и выведи одну строку.</p>
+        <p>Файл может оказаться и пустым — решение не должно на этом падать.</p>`,
+      io: `log.txt:
+2024-05-01 INFO start
+ERROR payment failed
+INFO done
+→  Строк: 3`,
+      hint: 'Перебор <code>for line in file</code> отдаёт строки по одной. Заведи счётчик <strong>до</strong> открытия файла и увеличивай его в теле цикла — если завести внутри, для пустого файла переменной просто не окажется.',
+      starter: `# файл log.txt уже существует
+count = 0
+
+# твой код ниже
+`,
+      solution: `count = 0
+with open('log.txt') as file:
+    for line in file:
+        count += 1
+print(f'Строк: {count}')`,
+      cases: [
+        { label: 'лог из 5 строк',
+          setup: `_data = """2024-05-01 10:00:01 INFO suite started
+ERROR payment gateway timeout
+2024-05-01 10:00:07 INFO retry
+ERROR card declined
+2024-05-01 10:00:12 INFO suite finished
+"""
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = len(_data.splitlines())
+assert 'count' in globals(), 'Не создана переменная count'
+assert count == _exp, 'count = ' + str(count) + ', ожидалось ' + str(_exp)
+_e = 'Строк: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'лог из одной строки',
+          setup: `_data = """ERROR single failure
+"""
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = len(_data.splitlines())
+assert 'count' in globals(), 'Не создана переменная count'
+assert count == _exp, 'count = ' + str(count) + ', ожидалось ' + str(_exp)
+_e = 'Строк: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'пустой файл',
+          setup: `_data = ''
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `assert 'count' in globals(), 'Не создана переменная count — для пустого файла тело цикла не выполнится ни разу'
+assert count == 0, 'count = ' + str(count) + ', ожидалось 0'
+assert _lines and _lines[-1] == 'Строк: 0', 'Ожидалась строка ' + repr('Строк: 0') + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't17-2',
+      title: 'Выгрузить ошибки в отдельный файл',
+      statement: `<p>Из <code>log.txt</code> перенеси в новый файл <code>errors.txt</code> только те строки, которые <strong>начинаются</strong> с <code>ERROR</code> (метод <code>startswith</code> из 1.6). Порядок строк сохрани, каждая строка — с переводом строки в конце.</p>
+        <p>В консоль в этой задаче печатать ничего не нужно — проверяется содержимое файла.</p>`,
+      io: `log.txt:
+INFO start
+ERROR payment gateway timeout
+INFO retry
+ERROR card declined
+
+errors.txt должен стать:
+ERROR payment gateway timeout
+ERROR card declined`,
+      hint: 'Два <code>with</code> можно вложить друг в друга: внешний открывает исходный файл на чтение, внутренний — <code>errors.txt</code> в режиме <code>\'w\'</code>. Строка из файла уже приходит с переводом строки на конце, так что <code>out.write(line)</code> достаточно.',
+      starter: `# файл log.txt уже существует
+
+# твой код ниже
+`,
+      solution: `with open('log.txt') as file:
+    with open('errors.txt', 'w') as out:
+        for line in file:
+            if line.startswith('ERROR'):
+                out.write(line)`,
+      cases: [
+        { label: 'две строки ERROR среди пяти',
+          setup: `_data = """2024-05-01 INFO suite started
+ERROR payment gateway timeout
+INFO retry
+ERROR card declined
+INFO suite finished
+"""
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [l for l in _data.splitlines() if l.startswith('ERROR')]
+try:
+    with open('errors.txt') as _f:
+        _got = _f.read().splitlines()
+except FileNotFoundError:
+    raise AssertionError('Файл errors.txt не создан')
+assert _got == _exp, 'В errors.txt ожидалось ' + repr(_exp) + ', а получилось ' + repr(_got)` },
+        { label: 'ни одной строки ERROR',
+          setup: `_data = """INFO start
+INFO all green
+"""
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [l for l in _data.splitlines() if l.startswith('ERROR')]
+try:
+    with open('errors.txt') as _f:
+        _got = _f.read().splitlines()
+except FileNotFoundError:
+    raise AssertionError('Файл errors.txt не создан — его надо создавать всегда, даже если ошибок нет')
+assert _got == _exp, 'errors.txt должен был остаться пустым, а в нём ' + repr(_got)` },
+        { label: 'слово ERROR внутри строки, но не в начале',
+          setup: `_data = """ERROR real failure
+INFO no ERROR here at all
+ERROR another one
+"""
+with open('log.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [l for l in _data.splitlines() if l.startswith('ERROR')]
+try:
+    with open('errors.txt') as _f:
+        _got = _f.read().splitlines()
+except FileNotFoundError:
+    raise AssertionError('Файл errors.txt не создан')
+assert _got == _exp, 'Отбирать надо только строки, которые НАЧИНАЮТСЯ с ERROR. Ожидалось ' + repr(_exp) + ', получено ' + repr(_got)` }
+      ]
+    },
+    {
+      id: 't17-3',
+      title: 'Сумма чисел из файла',
+      statement: `<p>В файле <code>numbers.txt</code> в каждой строке записано одно число (иногда с лишними пробелами). Посчитай их сумму в переменной <code>total</code> и выведи её с двумя знаками после запятой.</p>`,
+      io: `numbers.txt:
+12.5
+ 30
+ 7.25
+→  Сумма: 49.75`,
+      hint: 'Строка из файла приходит вместе с переводом строки на конце — <code>strip()</code> уберёт и его, и лишние пробелы. Дальше <code>float()</code> превращает строку в число: <code>int()</code> здесь не подойдёт, он не переваривает <code>\'12.5\'</code>.',
+      starter: `# файл numbers.txt уже существует
+total = 0
+
+# твой код ниже
+`,
+      solution: `total = 0
+with open('numbers.txt') as file:
+    for line in file:
+        total += float(line.strip())
+print(f'Сумма: {total:0.2f}')`,
+      cases: [
+        { label: 'три числа с пробелами',
+          setup: `_data = """12.5
+ 30
+ 7.25
+"""
+with open('numbers.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = 0.0
+for _l in _data.splitlines():
+    if _l.strip():
+        _exp += float(_l.strip())
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_e = f'Сумма: {_exp:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'целые числа, одно отрицательное',
+          setup: `_data = """100
+-25
+7
+"""
+with open('numbers.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = 0.0
+for _l in _data.splitlines():
+    if _l.strip():
+        _exp += float(_l.strip())
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_e = f'Сумма: {_exp:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'одно число в файле',
+          setup: `_data = """  0.5
+"""
+with open('numbers.txt', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = 0.0
+for _l in _data.splitlines():
+    if _l.strip():
+        _exp += float(_l.strip())
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _exp) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_exp, 6))
+_e = f'Сумма: {_exp:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.8 ─────────────────────────── */
+{
+  id: 'ch18',
+  num: '1.8',
+  title: 'Списки',
+  allowed: 'всё из 1.3—1.7 плюс списки <code>[]</code>, индексы и срезы списка, <code>append()</code>, <code>insert()</code>, <code>for x in items</code>, конкатенация списков <code>+</code>, <code>list()</code>, вложенные списки, <code>split()</code>, списковое включение и <code>sum()</code>',
+  tasks: [
+    {
+      id: 't18-1',
+      title: 'Правки в списке',
+      statement: `<p>Дан список <code>names</code>. Выполни над ним три операции <strong>ровно в этом порядке</strong>:</p>
+        <ul>
+          <li>замени третий элемент (индекс 2) на <code>'Tom'</code>;</li>
+          <li>вставь <code>'Aya'</code> на позицию 2;</li>
+          <li>добавь <code>'Alex'</code> в конец.</li>
+        </ul>
+        <p>Затем выведи получившийся список — по одному имени в строке, циклом <code>for</code>.</p>`,
+      io: `names = ['Dave', 'Paula', 'Thomas', 'Lewis']
+→  Dave
+   Paula
+   Aya
+   Tom
+   Lewis
+   Alex`,
+      hint: 'Замена по индексу — обычное присваивание <code>names[2] = ...</code>. Для вставки в середину есть <code>insert(индекс, значение)</code>, для добавления в конец — <code>append(значение)</code>. Порядок важен: <code>insert</code> сдвигает всё, что правее.',
+      starter: `names = ['Dave', 'Paula', 'Thomas', 'Lewis']
+
+# твой код ниже
+`,
+      solution: `names[2] = 'Tom'
+names.insert(2, 'Aya')
+names.append('Alex')
+for name in names:
+    print(name)`,
+      cases: [
+        { label: "names = ['Dave', 'Paula', 'Thomas', 'Lewis']",
+          setup: `names = ['Dave', 'Paula', 'Thomas', 'Lewis']
+_n0 = list(names)`,
+          check: `_exp = list(_n0)
+_exp[2] = 'Tom'
+_exp.insert(2, 'Aya')
+_exp.append('Alex')
+assert names == _exp, 'names = ' + repr(names) + ', ожидалось ' + repr(_exp)
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: "names = ['a', 'b', 'c', 'd', 'e']",
+          setup: `names = ['a', 'b', 'c', 'd', 'e']
+_n0 = list(names)`,
+          check: `_exp = list(_n0)
+_exp[2] = 'Tom'
+_exp.insert(2, 'Aya')
+_exp.append('Alex')
+assert names == _exp, 'names = ' + repr(names) + ', ожидалось ' + repr(_exp)
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: "names = ['x', 'y', 'z'] (третий элемент — последний)",
+          setup: `names = ['x', 'y', 'z']
+_n0 = list(names)`,
+          check: `_exp = list(_n0)
+_exp[2] = 'Tom'
+_exp.insert(2, 'Aya')
+_exp.append('Alex')
+assert names == _exp, 'names = ' + repr(names) + ', ожидалось ' + repr(_exp)
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` }
+      ]
+    },
+    {
+      id: 't18-2',
+      title: 'Списковое включение',
+      statement: `<p>Дан <code>items</code> — список строк, в каждой записано целое число.</p>
+        <p>Собери <strong>списковым включением</strong> новый список <code>squares</code> — квадраты этих чисел (уже как <code>int</code>), посчитай их сумму в <code>total</code> и выведи одну строку.</p>
+        <p>Список может оказаться пустым — тогда сумма равна нулю.</p>`,
+      io: `items = ['3', '7', '10']
+→  squares = [9, 49, 100]
+   Сумма квадратов: 158`,
+      hint: 'Списковое включение записывается так: <code>[выражение for x in items]</code>. Строку надо сначала превратить в число через <code>int(x)</code>, а потом возвести в квадрат оператором <code>**</code>. Сумму даст встроенная <code>sum()</code>.',
+      starter: `items = ['3', '7', '10']
+
+# твой код ниже
+`,
+      solution: `squares = [int(x) ** 2 for x in items]
+total = sum(squares)
+print(f'Сумма квадратов: {total}')`,
+      cases: [
+        { label: "items = ['3', '7', '10']",
+          setup: `items = ['3', '7', '10']
+_i0 = list(items)`,
+          check: `_sq = [int(x) ** 2 for x in _i0]
+_t = sum(_sq)
+assert 'squares' in globals() and 'total' in globals(), 'Нужны переменные squares и total'
+assert squares == _sq, 'squares = ' + repr(squares) + ', ожидалось ' + repr(_sq)
+assert total == _t, 'total = ' + repr(total) + ', ожидалось ' + repr(_t)
+_e = 'Сумма квадратов: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "items = ['5'] (один элемент)",
+          setup: `items = ['5']
+_i0 = list(items)`,
+          check: `_sq = [int(x) ** 2 for x in _i0]
+_t = sum(_sq)
+assert 'squares' in globals() and 'total' in globals(), 'Нужны переменные squares и total'
+assert squares == _sq, 'squares = ' + repr(squares) + ', ожидалось ' + repr(_sq)
+assert total == _t, 'total = ' + repr(total) + ', ожидалось ' + repr(_t)
+_e = 'Сумма квадратов: ' + str(_t)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'items = [] (пустой список)',
+          setup: `items = []
+_i0 = list(items)`,
+          check: `assert 'squares' in globals() and 'total' in globals(), 'Нужны переменные squares и total'
+assert squares == [], 'squares = ' + repr(squares) + ', для пустого списка ожидался []'
+assert total == 0, 'total = ' + repr(total) + ', для пустого списка ожидался 0'
+assert _lines and _lines[-1] == 'Сумма квадратов: 0', 'Ожидалась строка ' + repr('Сумма квадратов: 0') + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't18-3',
+      title: 'Разбор CSV: стоимость портфеля',
+      statement: `<p>Файл <code>portfolio.csv</code> содержит строки вида <code>НАЗВАНИЕ,КОЛИЧЕСТВО,ЦЕНА</code>, например <code>SYM,123,456.78</code>.</p>
+        <p>Прочитай файл, разбери каждую строку методом <code>split(',')</code> и сложи все строки-списки в <code>rows</code>. Затем посчитай <code>total</code> — сумму произведений количества на цену — и выведи её с двумя знаками после запятой.</p>
+        <p>Это задача из книги (<code>pcost.py</code>), собранная из двух последних глав: файлы из 1.7 и списки из 1.8.</p>`,
+      io: `portfolio.csv:
+AA,100,32.20
+IBM,50,91.10
+→  rows = [['AA', '100', '32.20'], ['IBM', '50', '91.10']]
+   Total cost: 7775.00`,
+      hint: 'Количество приходит строкой — его надо превратить в <code>int</code>, цену — во <code>float</code>. Сумму можно собрать списковым включением: <code>sum([int(row[1]) * float(row[2]) for row in rows])</code>. Не забудь <code>strip()</code> — иначе перевод строки уедет в цену последней колонки.',
+      starter: `# файл portfolio.csv уже существует
+rows = []
+
+# твой код ниже
+`,
+      solution: `rows = []
+with open('portfolio.csv') as file:
+    for line in file:
+        rows.append(line.strip().split(','))
+
+total = sum([int(row[1]) * float(row[2]) for row in rows])
+print(f'Total cost: {total:0.2f}')`,
+      cases: [
+        { label: 'портфель из двух позиций',
+          setup: `_data = """AA,100,32.20
+IBM,50,91.10
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp_rows = [l.split(',') for l in _data.splitlines() if l.strip()]
+_t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
+assert 'rows' in globals(), 'Не создана переменная rows'
+assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows) + ' (лишний перевод строки убирается через strip())'
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+_e = f'Total cost: {_t:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'портфель из пяти позиций',
+          setup: `_data = """AA,100,32.20
+IBM,50,91.10
+CAT,150,83.44
+MSFT,200,51.23
+GE,95,40.37
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp_rows = [l.split(',') for l in _data.splitlines() if l.strip()]
+_t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
+assert 'rows' in globals(), 'Не создана переменная rows'
+assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows)
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+_e = f'Total cost: {_t:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'одна позиция',
+          setup: `_data = """SYM,123,456.78
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp_rows = [l.split(',') for l in _data.splitlines() if l.strip()]
+_t = sum([int(r[1]) * float(r[2]) for r in _exp_rows])
+assert 'rows' in globals(), 'Не создана переменная rows'
+assert rows == _exp_rows, 'rows = ' + repr(rows) + ', ожидалось ' + repr(_exp_rows)
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _t) < 1e-9, 'total = ' + str(total) + ', ожидалось ' + str(round(_t, 6))
+_e = f'Total cost: {_t:0.2f}'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+}
+
+];
+
+/* ══════════════════════════════════════════════════════════════
+   PYODIDE В ВОРКЕРЕ
+   ══════════════════════════════════════════════════════════════ */
+const PYODIDE_VER = 'v0.27.7';
+
+const HARNESS = [
+  "import io, sys, json, traceback",
+  "",
+  "_FN = '<решение>'",
+  "_NL = chr(10)",
+  "",
+  "def _fmt(exc):",
+  "    tbe = traceback.TracebackException.from_exception(exc)",
+  "    head = ''.join(tbe.format_exception_only()).strip()",
+  "    nums = [f.lineno for f in tbe.stack if f.filename == _FN]",
+  "    if nums:",
+  "        return 'строка ' + str(nums[-1]) + ': ' + head",
+  "    return head",
+  "",
+  "def run_task(code, cases_json):",
+  "    cases = json.loads(cases_json)",
+  "    try:",
+  "        obj = compile(code, _FN, 'exec')",
+  "    except SyntaxError as e:",
+  "        raw = ''.join(traceback.format_exception_only(type(e), e)).rstrip()",
+  "        parts = raw.split(_NL)",
+  "        if parts and parts[0].lstrip().startswith('File '):",
+  "            parts = parts[1:]",
+  "        return json.dumps({'syntax': 'строка ' + str(e.lineno or '?') + ':' + _NL + _NL.join(parts)})",
+  "    out_all = []",
+  "    for case in cases:",
+  "        g = {'__name__': '__main__'}",
+  "        buf = io.StringIO()",
+  "        old = sys.stdout",
+  "        sys.stdout = buf",
+  "        ok, kind, msg = True, '', ''",
+  "        try:",
+  "            setup = case.get('setup') or ''",
+  "            if setup:",
+  "                exec(compile(setup, '<условие>', 'exec'), g)",
+  "            exec(obj, g)",
+  "        except Exception as e:",
+  "            ok, kind, msg = False, 'error', _fmt(e)",
+  "        finally:",
+  "            sys.stdout = old",
+  "        text = buf.getvalue()",
+  "        if ok:",
+  "            g['_out'] = text",
+  "            body = text.rstrip(_NL)",
+  "            g['_lines'] = body.split(_NL) if body != '' else []",
+  "            try:",
+  "                exec(compile(case['check'], '<проверка>', 'exec'), g)",
+  "            except AssertionError as e:",
+  "                ok, kind, msg = False, 'fail', (str(e) or 'проверка не прошла')",
+  "            except Exception as e:",
+  "                ok, kind, msg = False, 'error', _fmt(e)",
+  "        if len(text) > 3000:",
+  "            text = text[:3000] + _NL + '... (вывод обрезан)'",
+  "        out_all.append({'label': case.get('label', ''), 'ok': ok, 'kind': kind, 'msg': msg, 'out': text})",
+  "    return json.dumps({'results': out_all})"
+].join('\n');
+
+const WORKER_SRC = `
+let pyodide = null, runTask = null;
+
+async function boot() {
+  postMessage({ type: 'status', text: 'Скачиваю Python (~10 МБ)…' });
+  importScripts('https://cdn.jsdelivr.net/pyodide/${PYODIDE_VER}/full/pyodide.js');
+  pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/${PYODIDE_VER}/full/' });
+  postMessage({ type: 'status', text: 'Готовлю окружение…' });
+  pyodide.runPython(HARNESS_SRC);
+  runTask = pyodide.globals.get('run_task');
+  postMessage({ type: 'ready' });
+}
+
+const HARNESS_SRC = ${JSON.stringify(HARNESS)};
+let booting = null;
+
+self.onmessage = async (e) => {
+  const { id, code, cases } = e.data;
+  try {
+    if (!pyodide) {
+      if (!booting) booting = boot();
+      await booting;
+    }
+    postMessage({ type: 'running', id: id });
+    const raw = runTask(code, cases);
+    postMessage({ type: 'result', id: id, payload: JSON.parse(raw) });
+  } catch (err) {
+    postMessage({ type: 'fatal', id: id, text: String(err && err.message ? err.message : err) });
+  }
+};
+`;
+
+const EXEC_TIMEOUT_MS = 10000;
+
+let worker = null;
+let pending = null;
+const rtState = document.getElementById('rt-state');
+
+function setRtState(text, cls) {
+  rtState.textContent = text;
+  rtState.className = 'runtime-state' + (cls ? ' ' + cls : '');
+}
+
+function spawnWorker() {
+  const blob = new Blob([WORKER_SRC], { type: 'application/javascript' });
+  const w = new Worker(URL.createObjectURL(blob));
+  w.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'status') { setRtState(m.text, 'loading'); return; }
+    if (m.type === 'ready') { setRtState('Python готов', 'ready'); return; }
+    if (!pending || m.id !== pending.id) return;
+    if (m.type === 'running') {
+      pending.timer = setTimeout(() => {
+        killWorker();
+        settle({ timeout: true });
+      }, EXEC_TIMEOUT_MS);
+      return;
+    }
+    if (m.type === 'result') { settle(m.payload); return; }
+    if (m.type === 'fatal') { settle({ fatal: m.text }); return; }
+  };
+  w.onerror = () => {
+    setRtState('Не удалось загрузить Python', 'failed');
+    killWorker();
+    settle({ fatal: 'Не удалось загрузить интерпретатор. Проверь соединение — при первом запуске он скачивается с cdn.jsdelivr.net.' });
+  };
+  return w;
+}
+
+function killWorker() {
+  if (worker) { worker.terminate(); worker = null; }
+  setRtState('Python перезапустится при следующем запуске');
+}
+
+function settle(payload) {
+  if (!pending) return;
+  if (pending.timer) clearTimeout(pending.timer);
+  const done = pending.resolve;
+  pending = null;
+  done(payload);
+}
+
+let seq = 0;
+function runInPython(code, cases) {
+  return new Promise((resolve) => {
+    if (pending) { resolve({ fatal: 'Уже выполняется другая задача — подожди пару секунд.' }); return; }
+    if (!worker) { worker = spawnWorker(); setRtState('Загружаю Python…', 'loading'); }
+    pending = { id: ++seq, resolve, timer: null };
+    worker.postMessage({ id: pending.id, code: code, cases: JSON.stringify(cases) });
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ХРАНИЛИЩЕ
+   ══════════════════════════════════════════════════════════════ */
+const LS_CODE = 'qa-practice:code:';
+const LS_SOLVED = 'qa-practice:solved';
+
+function loadSolved() {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_SOLVED) || '[]')); }
+  catch (e) { return new Set(); }
+}
+function saveSolved(set) {
+  try { localStorage.setItem(LS_SOLVED, JSON.stringify([...set])); } catch (e) {}
+}
+function loadCode(id) {
+  try { return localStorage.getItem(LS_CODE + id); } catch (e) { return null; }
+}
+function saveCode(id, code) {
+  try { localStorage.setItem(LS_CODE + id, code); } catch (e) {}
+}
+
+const solved = loadSolved();
+
+/* ══════════════════════════════════════════════════════════════
+   РЕНДЕР
+   ══════════════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+const root = document.getElementById('practice-root');
+const toc = document.getElementById('toc');
+let allTasks = [];
+
+CHAPTERS.forEach((ch) => {
+  ch.tasks.forEach((t) => { t._chapter = ch; allTasks.push(t); });
+
+  const sec = document.createElement('section');
+  sec.className = 'section';
+  sec.id = ch.id;
+
+  const tasksHtml = ch.tasks.map((t, i) => `
+    <div class="task" data-task="${t.id}">
+      <div class="task-head">
+        <span class="task-num">ЗАДАЧА ${i + 1}</span>
+        <span class="task-title">${t.title}</span>
+        <span class="task-status">не решено</span>
+      </div>
+      <div class="task-body">
+        <div class="task-statement">${t.statement}</div>
+        ${t.io ? `<div class="task-io">${esc(t.io)}</div>` : ''}
+        <details class="hint"><summary>Подсказка</summary><div class="inner">${t.hint}</div></details>
+        <div class="editor-wrap">
+          <div class="editor-bar"><span class="dot"></span> solution.py</div>
+          <textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+        </div>
+        <div class="task-actions">
+          <button class="btn btn-run">▶ Запустить и проверить</button>
+          <button class="btn btn-ghost btn-reset">Сбросить код</button>
+          <button class="btn btn-ghost btn-toggle-solution">Показать решение</button>
+          <span class="run-note">Ctrl + Enter</span>
+        </div>
+        <div class="results"></div>
+        <details class="solution" hidden><summary>Разбор — эталонное решение</summary>
+          <div class="inner"><div class="code-block">${esc(t.solution)}</div></div>
+        </details>
+      </div>
+    </div>`).join('');
+
+  sec.innerHTML = `
+    <div class="section-header">
+      <span class="section-num">${ch.num}</span>
+      <span class="section-title">${ch.title}</span>
+      <span class="section-badge zero" data-chapter-badge="${ch.id}">0 / ${ch.tasks.length}</span>
+    </div>
+    <div class="section-body">
+      <div class="hl green"><span class="hl-label">Можно использовать</span>${ch.allowed}</div>
+      ${ch.note ? `<div class="hl orange"><span class="hl-label">Про файлы</span>${ch.note}</div>` : ''}
+      ${tasksHtml}
+    </div>`;
+
+  root.appendChild(sec);
+
+  const link = document.createElement('a');
+  link.href = '#' + ch.id;
+  link.innerHTML = `${ch.num} · ${ch.title}<span class="done" data-toc-done="${ch.id}">0/${ch.tasks.length}</span>`;
+  toc.appendChild(link);
+});
+
+document.getElementById('p-total').textContent = allTasks.length;
+
+/* ── подключение задач ── */
+allTasks.forEach((task) => {
+  const el = root.querySelector(`[data-task="${task.id}"]`);
+  const editor = el.querySelector('.editor');
+  const results = el.querySelector('.results');
+  const runBtn = el.querySelector('.btn-run');
+  const resetBtn = el.querySelector('.btn-reset');
+  const solBtn = el.querySelector('.btn-toggle-solution');
+  const solution = el.querySelector('.solution');
+
+  editor.value = loadCode(task.id) !== null ? loadCode(task.id) : task.starter;
+  autoSize(editor);
+
+  editor.addEventListener('input', () => { saveCode(task.id, editor.value); autoSize(editor); });
+  editor.addEventListener('keydown', (e) => handleEditorKeys(e, editor, () => run()));
+
+  resetBtn.addEventListener('click', () => {
+    editor.value = task.starter;
+    saveCode(task.id, editor.value);
+    autoSize(editor);
+    results.innerHTML = '';
+  });
+
+  solBtn.addEventListener('click', () => {
+    solution.hidden = !solution.hidden;
+    solution.open = !solution.hidden;
+    solBtn.textContent = solution.hidden ? 'Показать решение' : 'Скрыть решение';
+  });
+
+  runBtn.addEventListener('click', run);
+
+  async function run() {
+    const code = editor.value;
+
+    if (task.forbid) {
+      const hit = task.forbid.find(([needle]) => code.includes(needle));
+      if (hit) {
+        results.innerHTML = `<div class="verdict warn">Ограничение задачи: ${esc(hit[1])}</div>`;
+        return;
+      }
+    }
+
+    runBtn.disabled = true;
+    const prev = runBtn.textContent;
+    runBtn.textContent = 'Выполняю…';
+    results.innerHTML = `<div class="verdict warn">Выполняю проверки…</div>`;
+
+    const payload = await runInPython(code, task.cases);
+
+    runBtn.disabled = false;
+    runBtn.textContent = prev;
+
+    if (payload.timeout) {
+      results.innerHTML = `<div class="verdict bad">Превышено время выполнения (10 с). Скорее всего, где-то бесконечный цикл: проверь, что счётчик действительно меняется на каждой итерации — и что <code>continue</code> его не перепрыгивает.</div>`;
+      return;
+    }
+    if (payload.fatal) {
+      results.innerHTML = `<div class="verdict bad">${esc(payload.fatal)}</div>`;
+      return;
+    }
+    if (payload.syntax) {
+      results.innerHTML = `<div class="verdict bad">Синтаксическая ошибка — код даже не запустился.</div>
+        <div class="case fail"><div class="case-msg">${esc(payload.syntax)}</div></div>`;
+      return;
+    }
+
+    const cases = payload.results || [];
+    const passed = cases.filter((c) => c.ok).length;
+    const allOk = passed === cases.length && cases.length > 0;
+
+    const rows = cases.map((c) => `
+      <div class="case ${c.ok ? 'pass' : 'fail'}">
+        <div class="case-head">
+          <span class="case-mark">${c.ok ? '✓' : '✗'}</span>
+          <span class="case-label">${esc(c.label)}</span>
+        </div>
+        ${c.msg ? `<div class="case-msg">${c.kind === 'error' ? 'Ошибка при выполнении — ' : ''}${esc(c.msg)}</div>` : ''}
+        ${c.out ? `<div class="case-out"><span class="oh">ВЫВОД</span>${esc(c.out.replace(/\n$/, ''))}</div>` : ''}
+      </div>`).join('');
+
+    results.innerHTML = `
+      <div class="verdict ${allOk ? 'ok' : 'bad'}">
+        ${allOk ? `Задача решена — пройдено ${passed} из ${cases.length}` : `Пройдено ${passed} из ${cases.length}`}
+      </div>${rows}`;
+
+    if (allOk) markSolved(task.id, true);
+    else if (solved.has(task.id)) markSolved(task.id, false);
+  }
+
+  refreshTask(task.id);
+});
+
+function refreshTask(id) {
+  const el = root.querySelector(`[data-task="${id}"]`);
+  const isSolved = solved.has(id);
+  el.classList.toggle('solved', isSolved);
+  el.querySelector('.task-status').textContent = isSolved ? '✓ решено' : 'не решено';
+}
+
+function markSolved(id, value) {
+  if (value) solved.add(id); else solved.delete(id);
+  saveSolved(solved);
+  refreshTask(id);
+  refreshProgress();
+}
+
+function refreshProgress() {
+  const done = allTasks.filter((t) => solved.has(t.id)).length;
+  document.getElementById('p-done').textContent = done;
+  document.getElementById('p-fill').style.width = allTasks.length ? (done / allTasks.length * 100) + '%' : '0%';
+
+  CHAPTERS.forEach((ch) => {
+    const n = ch.tasks.filter((t) => solved.has(t.id)).length;
+    const badge = document.querySelector(`[data-chapter-badge="${ch.id}"]`);
+    badge.textContent = `${n} / ${ch.tasks.length}`;
+    badge.className = 'section-badge' + (n === 0 ? ' zero' : n < ch.tasks.length ? ' partial' : '');
+    const tocDone = document.querySelector(`[data-toc-done="${ch.id}"]`);
+    tocDone.textContent = `${n}/${ch.tasks.length}`;
+    tocDone.className = 'done' + (n === ch.tasks.length ? ' full' : '');
+  });
+}
+refreshProgress();
+
+document.getElementById('reset-progress').addEventListener('click', () => {
+  if (!confirm('Сбросить отметки о решённых задачах? Написанный код останется на месте.')) return;
+  solved.clear();
+  saveSolved(solved);
+  allTasks.forEach((t) => refreshTask(t.id));
+  refreshProgress();
+});
+
+/* ══════════════════════════════════════════════════════════════
+   РЕДАКТОР: Tab, авто-отступ, Ctrl+Enter
+   ══════════════════════════════════════════════════════════════ */
+function autoSize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(150, ta.scrollHeight + 4) + 'px';
+}
+
+function handleEditorKeys(e, ta, onRun) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    onRun();
+    return;
+  }
+
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const value = ta.value;
+    if (!e.shiftKey && start === end) {
+      ta.value = value.slice(0, start) + '    ' + value.slice(end);
+      ta.selectionStart = ta.selectionEnd = start + 4;
+    } else {
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+      const chunk = value.slice(lineStart, end);
+      const lines = chunk.split('\n');
+      let delta = 0;
+      const shifted = lines.map((ln) => {
+        if (e.shiftKey) {
+          const cut = ln.match(/^ {1,4}/);
+          if (cut) { delta -= cut[0].length; return ln.slice(cut[0].length); }
+          return ln;
+        }
+        delta += 4;
+        return '    ' + ln;
+      }).join('\n');
+      ta.value = value.slice(0, lineStart) + shifted + value.slice(end);
+      ta.selectionStart = lineStart;
+      ta.selectionEnd = end + delta;
+    }
+    ta.dispatchEvent(new Event('input'));
+    return;
+  }
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+    const start = ta.selectionStart;
+    if (start !== ta.selectionEnd) return;
+    const value = ta.value;
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    const line = value.slice(lineStart, start);
+    const indent = (line.match(/^[ \t]*/) || [''])[0];
+    const extra = /:\s*$/.test(line) ? '    ' : '';
+    if (!indent && !extra) return;
+    e.preventDefault();
+    const ins = '\n' + indent + extra;
+    ta.value = value.slice(0, start) + ins + value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = start + ins.length;
+    ta.dispatchEvent(new Event('input'));
+  }
+}
+
+/* ── кнопка наверх ── */
+const scrollBtn = document.querySelector('.scroll-top');
+window.addEventListener('scroll', () => {
+  scrollBtn.classList.toggle('visible', window.scrollY > 300);
+});
+scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
