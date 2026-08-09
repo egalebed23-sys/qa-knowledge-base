@@ -2068,7 +2068,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 const PYODIDE_VER = 'v0.27.7';
 
 const HARNESS = [
-  "import io, os, sys, json, tempfile, traceback",
+  "import ast, io, os, sys, json, tempfile, traceback",
   "",
   "_FN = '<решение>'",
   "_NL = chr(10)",
@@ -2081,6 +2081,46 @@ const HARNESS = [
   "        return 'строка ' + str(nums[-1]) + ': ' + head",
   "    return head",
   "",
+  "def _input_names(cases):",
+  "    'Имена, которые задаёт условие: всё публичное, что появилось после setup.'",
+  "    if not cases:",
+  "        return set()",
+  "    setup = cases[0].get('setup') or ''",
+  "    if not setup:",
+  "        return set()",
+  "    os.chdir(tempfile.mkdtemp())",
+  "    probe = {'__name__': '__main__'}",
+  "    try:",
+  "        exec(compile(setup, '<условие>', 'exec'), probe)",
+  "    except Exception:",
+  "        return set()",
+  "    return set(k for k in probe if not k.startswith('_'))",
+  "",
+  "_LITERAL = (ast.Constant, ast.List, ast.Tuple, ast.Dict, ast.Set, ast.UnaryOp, ast.JoinedStr)",
+  "",
+  "def _shadowed(code, names):",
+  "    'Присваивания литерала входному имени на верхнем уровне — прибитые данные.'",
+  "    if not names:",
+  "        return []",
+  "    try:",
+  "        tree = ast.parse(code)",
+  "    except SyntaxError:",
+  "        return []",
+  "    bad = []",
+  "    for node in tree.body:",
+  "        if isinstance(node, ast.Assign):",
+  "            targets, value = node.targets, node.value",
+  "        elif isinstance(node, ast.AnnAssign) and node.value is not None:",
+  "            targets, value = [node.target], node.value",
+  "        else:",
+  "            continue",
+  "        if not isinstance(value, _LITERAL):",
+  "            continue",
+  "        for t in targets:",
+  "            if isinstance(t, ast.Name) and t.id in names and t.id not in bad:",
+  "                bad.append(t.id)",
+  "    return bad",
+  "",
   "def run_task(code, cases_json):",
   "    cases = json.loads(cases_json)",
   "    try:",
@@ -2091,6 +2131,9 @@ const HARNESS = [
   "        if parts and parts[0].lstrip().startswith('File '):",
   "            parts = parts[1:]",
   "        return json.dumps({'syntax': 'строка ' + str(e.lineno or '?') + ':' + _NL + _NL.join(parts)})",
+  "    shadow = _shadowed(code, _input_names(cases))",
+  "    if shadow:",
+  "        return json.dumps({'shadow': shadow})",
   "    out_all = []",
   "    for case in cases:",
   "        os.chdir(tempfile.mkdtemp())",
@@ -2415,6 +2458,12 @@ allTasks.forEach((task) => {
     }
     if (payload.fatal) {
       results.innerHTML = `<div class="verdict bad">${esc(payload.fatal)}</div>`;
+      return;
+    }
+    if (payload.shadow) {
+      const list = payload.shadow.map((n) => `<code>${esc(n)}</code>`).join(', ');
+      const many = payload.shadow.length > 1;
+      results.innerHTML = `<div class="verdict warn">Решение само задаёт ${list} — ${many ? 'а эти значения подставляет' : 'а это значение подставляет'} проверка, своё на каждый прогон. Пока ${many ? 'эти строки остаются' : 'эта строка остаётся'} в коде, решение считает всегда одно и то же и на остальных наборах данных не сработает.<br><br>Убери ${many ? 'их' : 'её'} — либо нажми «Сбросить код», чтобы вернуть чистую заготовку.</div>`;
       return;
     }
     if (payload.syntax) {
