@@ -507,6 +507,20 @@
     caret-color: #e8eaf0;
     overflow-x: auto;
   }
+  .cmp-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    padding: 6px 14px;
+    border-top: 1px solid var(--border);
+    background: #101319;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .cmp-hint b { color: #a0c4ff; font-weight: 600; }
+  .cmp-hint i { font-style: normal; opacity: 0.65; }
+
   .editor::selection { background: rgba(0, 91, 255, 0.45); }
   .editor::-moz-selection { background: rgba(0, 91, 255, 0.45); }
 
@@ -724,7 +738,8 @@
       <div class="hl purple"><span class="hl-label">Проверка</span>Решение прогоняется на нескольких наборах входных данных — не только на том, что в условии. Проверяется и результат в переменных, и то, что напечатано в консоль. Код выполняется в отдельном потоке с лимитом 10 секунд, поэтому бесконечный цикл не повесит страницу — он просто вернёт ошибку.</div>
       <ul>
         <li><strong>Ctrl + Enter</strong> — запустить проверку, не отрывая рук от клавиатуры</li>
-        <li><strong>Tab / Shift + Tab</strong> — отступ и снятие отступа, Enter продолжает отступ автоматически</li>
+        <li><strong>Tab</strong> сразу после начатого слова — дополнить его; повторный Tab перебирает варианты. В остальных случаях Tab и <strong>Shift + Tab</strong> — отступ и снятие отступа, а Enter продолжает отступ сам</li>
+        <li>Дополнение знает только то, что разобрано <strong>к текущей главе</strong>, плюс имена, которые ты уже написал. В главе про <code>while</code> оно не подскажет <code>for</code></li>
         <li>Код и прогресс сохраняются в этом браузере — можно закрыть вкладку и вернуться</li>
       </ul>
     </div>
@@ -790,6 +805,7 @@ year = <span class="val">1</span>
   4 1215.51
   5 1276.28</div>
     <p><code>&gt;3d</code> — целое шириной в три знака с выравниванием по правому краю: единица встаёт в третью колонку, а слева остаются два пробела. <code>0.2f</code> — дробное ровно с двумя знаками после точки. В скобках допустимо любое выражение, не только имя переменной: <code>f'{base_year + year:&gt;4d}'</code>.</p>`,
+  vocab: { names: ['print', 'while', 'True', 'False', 'None', 'int', 'float', 'str', 'bool'], methods: [] },
   allowed: 'типы <code>int</code> / <code>float</code> / <code>str</code> / <code>bool</code>, переменные, арифметические выражения, цикл <code>while</code> с простым условием, <code>print()</code>, f-строки со спецификаторами вида <code>{x:&gt;3d}</code> и <code>{x:0.2f}</code>, сокращённое присваивание <code>+=</code>',
   tasks: [
     {
@@ -1000,6 +1016,7 @@ x = (a &amp; mask) &gt;&gt; <span class="val">4</span>    <span class="cm"># x =
     <p>Ложными считаются <code>False</code>, <code>None</code>, числовой нуль и любое пустое значение. Всё остальное — истина.</p>
     <div class="hl"><span class="hl-label">Нюанс</span><code>and</code> и <code>or</code> возвращают не булево значение, а <strong>один из операндов</strong>: <code>x or y</code> — это <code>x</code>, если <code>x</code> истинно, иначе <code>y</code>. Отсюда идиома <code>name = name or 'default'</code>.</div>
     <p>Обновление значения записывают сокращённо: <code>x += 1</code>, <code>y *= n</code>. Так работает любой из операторов. Инкремента <code>++</code> и декремента <code>--</code> в Python нет.</p>`,
+  vocab: { names: ['and', 'or', 'not', 'abs', 'divmod', 'pow', 'round'], methods: [] },
   allowed: 'всё из 1.3 плюс <code>//</code>, <code>%</code>, <code>**</code>, функции <code>abs()</code>, <code>divmod()</code>, <code>pow()</code>, <code>round()</code>, битовые операторы <code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code>, двоичные литералы <code>0b1100</code>, сравнения, <code>and</code> / <code>or</code> / <code>not</code>',
   tasks: [
     {
@@ -1185,6 +1202,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
     <h4>break и continue</h4>
     <p><code>break</code> прерывает цикл целиком и передаёт управление за него, <code>continue</code> пропускает остаток тела и возвращается к началу. Оба действуют только на самый внутренний цикл.</p>
     <div class="hl orange"><span class="hl-label">Ловушка</span>В связке <code>while</code> + <code>continue</code> счётчик надо увеличивать <strong>до</strong> проверки, из-за которой срабатывает <code>continue</code>. Иначе прыжок к началу цикла перескочит через увеличение, условие никогда не изменится и программа зависнет. У <code>for</code> такого не бывает — там счётчик двигает сам цикл.</div>`,
+  vocab: { names: ['if', 'elif', 'else', 'pass', 'break', 'continue'], methods: [] },
   allowed: 'всё из 1.3—1.4 плюс <code>if</code> / <code>elif</code> / <code>else</code>, <code>pass</code>, условное выражение <code>a if cond else b</code>, оператор <code>:=</code>, <code>break</code>, <code>continue</code>',
   tasks: [
     {
@@ -1477,6 +1495,7 @@ y = <span class="st">'42'</span>
 z = x + y              <span class="cm"># '3742' — склеились, а не сложились</span>
 z = <span class="fn">int</span>(x) + <span class="fn">int</span>(y)    <span class="cm"># 79</span></div>
     <p>Обратно в строку значение переводят <code>str()</code>, <code>repr()</code> или <code>format()</code>. <code>str()</code> даёт то, что показал бы <code>print()</code>, а <code>repr()</code> — запись, по которой значение можно опознать: с кавычками и видимыми спецсимволами. Поэтому в отладке и в сообщениях об ошибках полезнее <code>repr()</code>: он покажет разницу между <code>42</code> и <code>'42'</code>, а также лишние пробелы по краям.</p>`,
+  vocab: { names: ['len', 'repr', 'format'], methods: ['find', 'replace', 'strip', 'upper', 'lower', 'startswith', 'endswith'] },
   allowed: 'всё из 1.3—1.5 плюс строковые литералы, <code>len()</code>, индексы <code>s[i]</code> (в том числе отрицательные), срезы <code>s[i:j]</code>, конкатенация <code>+</code>, методы <code>find</code> / <code>replace</code> / <code>strip</code> / <code>upper</code> / <code>lower</code> / <code>startswith</code> / <code>endswith</code>, преобразования <code>int()</code>, <code>float()</code>, <code>str()</code>, <code>repr()</code>, <code>format()</code>',
   tasks: [
     {
@@ -1656,6 +1675,7 @@ assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а �
     <div class="code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="st">'data.txt'</span>, encoding=<span class="st">'latin-1'</span>) <span class="kw">as</span> file:
     data = file.<span class="fn">read</span>()</div>
     <p>Ввод с консоли даёт <code>input()</code> — она возвращает введённый текст без завершающего перевода строки.</p>`,
+  vocab: { names: ['open', 'with', 'as', 'for', 'in', 'input', 'encoding', 'file'], methods: ['read', 'write', 'close'] },
   allowed: 'всё из 1.3—1.6 плюс <code>open()</code>, команда <code>with</code>, перебор файла <code>for line in file</code>, <code>read()</code>, <code>write()</code>, <code>print(..., file=out)</code>, аргумент <code>encoding</code>',
   note: 'Файлы для задач уже созданы во временной файловой системе прямо в браузере — <code>open()</code> работает как обычно, никаких путей на диске.',
   tasks: [
@@ -1884,6 +1904,7 @@ names[<span class="val">0</span>:<span class="val">2</span>] = [<span class="st"
     values.<span class="fn">append</span>(<span class="fn">int</span>(row[<span class="val">1</span>]) * <span class="fn">float</span>(row[<span class="val">2</span>]))
 total = <span class="fn">sum</span>(values)</div>
     <p>Для простых вычислений предпочитают первую форму. Встроенная <code>sum()</code> складывает все элементы последовательности; на пустом списке она честно возвращает <code>0</code>.</p>`,
+  vocab: { names: ['list', 'sum'], methods: ['append', 'insert', 'split'] },
   allowed: 'всё из 1.3—1.7 плюс списки <code>[]</code>, индексы и срезы списка, <code>append()</code>, <code>insert()</code>, <code>for x in items</code>, конкатенация списков <code>+</code>, <code>list()</code>, вложенные списки, <code>split()</code>, списковое включение и <code>sum()</code>',
   tasks: [
     {
@@ -2323,8 +2344,15 @@ const root = document.getElementById('practice-root');
 const toc = document.getElementById('toc');
 let allTasks = [];
 
+// Словарь дополнения копится по главам: в 1.3 Tab не должен подсказывать for,
+// который появится только в 1.7 — это ровно то правило, на котором стоит раздел.
+const vocabSoFar = { names: [], methods: [] };
+
 CHAPTERS.forEach((ch) => {
-  ch.tasks.forEach((t) => { t._chapter = ch; allTasks.push(t); });
+  vocabSoFar.names = vocabSoFar.names.concat(ch.vocab.names);
+  vocabSoFar.methods = vocabSoFar.methods.concat(ch.vocab.methods);
+  const chapterVocab = { names: [...vocabSoFar.names], methods: [...vocabSoFar.methods] };
+  ch.tasks.forEach((t) => { t._chapter = ch; t._vocab = chapterVocab; allTasks.push(t); });
 
   const sec = document.createElement('section');
   sec.className = 'section';
@@ -2347,6 +2375,7 @@ CHAPTERS.forEach((ch) => {
             <pre class="editor-hl" aria-hidden="true"></pre>
             <textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
           </div>
+          <div class="cmp-hint" hidden></div>
         </div>
         <div class="task-actions">
           <button class="btn btn-run">▶ Запустить и проверить</button>
@@ -2395,6 +2424,7 @@ allTasks.forEach((task) => {
   const el = root.querySelector(`[data-task="${task.id}"]`);
   const editor = el.querySelector('.editor');
   const hl = el.querySelector('.editor-hl');
+  const cmpHint = el.querySelector('.cmp-hint');
   const results = el.querySelector('.results');
   const runBtn = el.querySelector('.btn-run');
   const resetBtn = el.querySelector('.btn-reset');
@@ -2410,7 +2440,8 @@ allTasks.forEach((task) => {
   sync();
 
   editor.addEventListener('input', () => { saveCode(task.id, editor.value); sync(); });
-  editor.addEventListener('keydown', (e) => handleEditorKeys(e, editor, () => run()));
+  editor.addEventListener('keydown', (e) => handleEditorKeys(e, editor, () => run(), task._vocab, cmpHint));
+  editor.addEventListener('blur', () => { cycle = null; cmpHint.hidden = true; });
   editor.addEventListener('scroll', () => {
     hl.scrollTop = editor.scrollTop;
     hl.scrollLeft = editor.scrollLeft;
@@ -2551,12 +2582,81 @@ document.getElementById('reset-progress').addEventListener('click', () => {
 /* ══════════════════════════════════════════════════════════════
    РЕДАКТОР: Tab, авто-отступ, Ctrl+Enter
    ══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   ДОПОЛНЕНИЕ ПО TAB
+   Tab остаётся отступом — это синтаксис Python. Дополняем только
+   когда каретка стоит вплотную к началу слова и есть чем продлить.
+   ══════════════════════════════════════════════════════════════ */
+function completionContext(value, pos) {
+  const left = value.slice(0, pos);
+  const m = left.match(/([A-Za-z_][A-Za-z_0-9]*)$/);
+  if (!m) return null;
+  const prefix = m[1];
+  const before = left.slice(0, left.length - prefix.length);
+  if (/[0-9]$/.test(before)) return null;            // хвост числа вроде 0b11, не имя
+  return { prefix, isMethod: /\.$/.test(before), start: pos - prefix.length };
+}
+
+function completionsFor(ctx, vocab, value) {
+  const pool = ctx.isMethod
+    ? vocab.methods
+    // имена из словаря главы + всё, что человек уже написал сам
+    : vocab.names.concat(value.match(/[A-Za-z_][A-Za-z_0-9]*/g) || []);
+  const seen = new Set();
+  return pool.filter((w) => {
+    if (!w.startsWith(ctx.prefix) || w === ctx.prefix || seen.has(w)) return false;
+    seen.add(w);
+    return true;
+  }).sort((a, b) => a.length - b.length || a.localeCompare(b));
+}
+
+// Повторный Tab на том же месте перебирает варианты по кругу
+let cycle = null;
+
+// 'skip' — не контекст дополнения, Tab отрабатывает как отступ
+// 'none' — слово есть, но продлить нечем: молча ничего не делаем,
+//          вставлять отступ в середину слова нельзя
+// 'done' — дополнили
+function tryComplete(ta, vocab, hint) {
+  if (ta.selectionStart !== ta.selectionEnd) return 'skip';
+  const pos = ta.selectionStart;
+  const ctx = completionContext(ta.value, pos);
+  if (!ctx) return 'skip';
+  // каретка внутри слова: дополнять нечего — иначе хвост слова останется висеть
+  if (/[A-Za-z_0-9]/.test(ta.value.charAt(pos))) return 'none';
+
+  const cycling = cycle && cycle.ta === ta && cycle.end === pos && cycle.start === ctx.start;
+  const base = cycling ? cycle.prefix : ctx.prefix;
+  const words = cycling ? cycle.words : completionsFor(ctx, vocab, ta.value);
+  if (!words.length) return 'none';
+
+  const index = cycling ? (cycle.index + 1) % words.length : 0;
+  const word = words[index];
+  ta.value = ta.value.slice(0, ctx.start) + word + ta.value.slice(pos);
+  const end = ctx.start + word.length;
+  ta.selectionStart = ta.selectionEnd = end;
+  cycle = { ta, start: ctx.start, end, prefix: base, words, index };
+
+  if (words.length > 1) {
+    hint.hidden = false;
+    hint.innerHTML = words
+      .map((w, i) => (i === index ? '<b>' + esc(w) + '</b>' : esc(w)))
+      .join(' · ') + '  <i>— Tab перебирает</i>';
+  } else {
+    hint.hidden = true;
+  }
+  ta.dispatchEvent(new Event('input'));
+  return 'done';
+}
+
 function autoSize(ta) {
   ta.style.height = 'auto';
   ta.style.height = Math.max(150, ta.scrollHeight + 4) + 'px';
 }
 
-function handleEditorKeys(e, ta, onRun) {
+function handleEditorKeys(e, ta, onRun, vocab, hint) {
+  if (e.key !== 'Tab') { cycle = null; hint.hidden = true; }
+
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
     onRun();
@@ -2565,6 +2665,9 @@ function handleEditorKeys(e, ta, onRun) {
 
   if (e.key === 'Tab') {
     e.preventDefault();
+    if (!e.shiftKey && tryComplete(ta, vocab, hint) !== 'skip') return;
+    cycle = null;
+    hint.hidden = true;
     const start = ta.selectionStart, end = ta.selectionEnd;
     const value = ta.value;
     if (!e.shiftKey && start === end) {
