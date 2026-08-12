@@ -519,7 +519,7 @@
     white-space: nowrap;
   }
   .cmp-hint b { color: #a0c4ff; font-weight: 600; }
-  .cmp-hint i { font-style: normal; opacity: 0.65; }
+  .cmp-hint i { font-style: normal; opacity: 0.55; white-space: pre; }
 
   .editor::selection { background: rgba(0, 91, 255, 0.45); }
   .editor::-moz-selection { background: rgba(0, 91, 255, 0.45); }
@@ -738,7 +738,7 @@
       <div class="hl purple"><span class="hl-label">Проверка</span>Решение прогоняется на нескольких наборах входных данных — не только на том, что в условии. Проверяется и результат в переменных, и то, что напечатано в консоль. Код выполняется в отдельном потоке с лимитом 10 секунд, поэтому бесконечный цикл не повесит страницу — он просто вернёт ошибку.</div>
       <ul>
         <li><strong>Ctrl + Enter</strong> — запустить проверку, не отрывая рук от клавиатуры</li>
-        <li><strong>Tab</strong> сразу после начатого слова — дополнить его; повторный Tab перебирает варианты. В остальных случаях Tab и <strong>Shift + Tab</strong> — отступ и снятие отступа, а Enter продолжает отступ сам</li>
+        <li>С двух набранных букв под редактором появляется список подходящих имён. <strong>Tab</strong> вставляет первое, повторный Tab идёт по списку дальше, <strong>Esc</strong> убирает. Когда подсказки нет, Tab и <strong>Shift + Tab</strong> работают как отступ и снятие отступа, а Enter продолжает отступ сам</li>
         <li>Дополнение знает только то, что разобрано <strong>к текущей главе</strong>, плюс имена, которые ты уже написал. В главе про <code>while</code> оно не подскажет <code>for</code></li>
         <li>Код и прогресс сохраняются в этом браузере — можно закрыть вкладку и вернуться</li>
       </ul>
@@ -2439,7 +2439,12 @@ allTasks.forEach((task) => {
   editor.value = loadCode(task.id) !== null ? loadCode(task.id) : task.starter;
   sync();
 
-  editor.addEventListener('input', () => { saveCode(task.id, editor.value); sync(); });
+  editor.addEventListener('input', () => {
+    saveCode(task.id, editor.value);
+    sync();
+    refreshHint(editor, task._vocab, cmpHint);
+  });
+  editor.addEventListener('click', () => refreshHint(editor, task._vocab, cmpHint));
   editor.addEventListener('keydown', (e) => handleEditorKeys(e, editor, () => run(), task._vocab, cmpHint));
   editor.addEventListener('blur', () => { cycle = null; cmpHint.hidden = true; });
   editor.addEventListener('scroll', () => {
@@ -2613,6 +2618,38 @@ function completionsFor(ctx, vocab, value) {
 // Повторный Tab на том же месте перебирает варианты по кругу
 let cycle = null;
 
+const HINT_MAX = 8;        // столько вариантов влезает в строку, не переполняя её
+const HINT_MIN_PREFIX = 2; // с одной буквы список был бы шумом
+
+function renderHint(hint, words, index, hasPicked) {
+  const shown = words.slice(0, HINT_MAX)
+    .map((w, i) => (i === index ? '<b>' + esc(w) + '</b>' : esc(w)))
+    .join(' · ');
+  const tail = words.length > HINT_MAX ? ' …' : '';
+  const note = words.length > 1
+    ? (hasPicked ? 'Tab — следующий' : 'Tab — вставить, ещё раз — следующий')
+    : 'Tab — вставить';
+  hint.hidden = false;
+  hint.innerHTML = shown + tail + '<i>    ' + note + '</i>';
+}
+
+// Что можно предложить прямо сейчас, без нажатия Tab
+function suggestNow(ta, vocab) {
+  if (ta.selectionStart !== ta.selectionEnd) return null;
+  const pos = ta.selectionStart;
+  const ctx = completionContext(ta.value, pos);
+  if (!ctx || ctx.prefix.length < HINT_MIN_PREFIX) return null;
+  if (/[A-Za-z_0-9]/.test(ta.value.charAt(pos))) return null;
+  const words = completionsFor(ctx, vocab, ta.value);
+  return words.length ? words : null;
+}
+
+function refreshHint(ta, vocab, hint) {
+  const words = suggestNow(ta, vocab);
+  if (words) renderHint(hint, words, -1, false);
+  else hint.hidden = true;
+}
+
 // 'skip' — не контекст дополнения, Tab отрабатывает как отступ
 // 'none' — слово есть, но продлить нечем: молча ничего не делаем,
 //          вставлять отступ в середину слова нельзя
@@ -2637,15 +2674,10 @@ function tryComplete(ta, vocab, hint) {
   ta.selectionStart = ta.selectionEnd = end;
   cycle = { ta, start: ctx.start, end, prefix: base, words, index };
 
-  if (words.length > 1) {
-    hint.hidden = false;
-    hint.innerHTML = words
-      .map((w, i) => (i === index ? '<b>' + esc(w) + '</b>' : esc(w)))
-      .join(' · ') + '  <i>— Tab перебирает</i>';
-  } else {
-    hint.hidden = true;
-  }
+  // input первым: его обработчик перерисует подсказку, и наша бы затёрлась
   ta.dispatchEvent(new Event('input'));
+  if (words.length > 1) renderHint(hint, words, index, true);
+  else hint.hidden = true;
   return 'done';
 }
 
@@ -2655,6 +2687,8 @@ function autoSize(ta) {
 }
 
 function handleEditorKeys(e, ta, onRun, vocab, hint) {
+  if (e.key === 'Escape') { cycle = null; hint.hidden = true; return; }
+  // сбрасываем перебор; для печатных клавиш подсказку тут же вернёт input
   if (e.key !== 'Tab') { cycle = null; hint.hidden = true; }
 
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
