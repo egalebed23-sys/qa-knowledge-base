@@ -270,6 +270,45 @@
   }
   .hl code { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08); }
 
+  /* ─── PRACTICE: РАЗДЕЛ ─── */
+  .part-head {
+    max-width: var(--content-max);
+    margin: 40px auto 20px;
+    padding: 18px 24px;
+    background: linear-gradient(180deg, rgba(0,201,167,0.09), rgba(0,201,167,0.02));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 12px 12px 0;
+    scroll-margin-top: 24px;
+  }
+  .part-head:first-child { margin-top: 0; }
+  .part-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .part-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+  .part-lead {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+    margin-top: 10px;
+    max-width: 90ch;
+  }
+  .toc-part {
+    margin-top: 14px;
+    color: var(--accent2) !important;
+    opacity: 0.85;
+  }
+  .toc-inner > .toc-part:first-of-type { margin-top: 0; }
+
   /* ─── PRACTICE: ТЕОРИЯ ─── */
   .theory {
     border: 1px solid var(--border);
@@ -702,9 +741,7 @@
     <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
     <a class="nav-item active" href="#"><span class="nav-num">14</span> Практика Python</a>
   </div>
-  <div class="toc-inner" id="toc">
-    <div class="nav-group-title">Главы книги</div>
-  </div>
+  <div class="toc-inner" id="toc"></div>
 </aside>
 
 <main class="main">
@@ -714,7 +751,7 @@
 
   <div class="header">
     <h1>Практика Python</h1>
-    <p>// мини-курс по книге «Python. Исчерпывающее руководство» · главы 1.3 — 1.8 · теория и задачи</p>
+    <p>// мини-курс по книге «Python. Исчерпывающее руководство» · теория и задачи по главам</p>
   </div>
 
   <div class="progress-bar">
@@ -757,6 +794,17 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════════
+   РАЗДЕЛЫ: крупные части книги. Главы ниже привязаны к ним полем part.
+   ══════════════════════════════════════════════════════════════ */
+const PARTS = {
+  basics: {
+    title: 'Основы Python',
+    sub: 'Глава 1 книги · базовые конструкции языка',
+    lead: 'Всё, из чего состоит любая программа на Python: типы и переменные, ветвления и циклы, строки, файлы, коллекции, функции и обработка ошибок. Этого набора хватает, чтобы писать рабочий код — дальше идёт углубление, а не замена.'
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
    ДАННЫЕ: главы и задачи
    Каждый case: { label, setup, check }
      setup — выполняется до кода решения, задаёт входные данные
@@ -769,6 +817,7 @@ const CHAPTERS = [
 {
   id: 'ch13',
   num: '1.3',
+  part: 'basics',
   title: 'Примитивы, переменные и выражения',
   theory: `
     <h4>Примитивы и переменные</h4>
@@ -987,6 +1036,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 {
   id: 'ch14',
   num: '1.4',
+  part: 'basics',
   title: 'Арифметические операторы',
   theory: `
     <h4>Деление и остаток</h4>
@@ -1175,6 +1225,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 {
   id: 'ch15',
   num: '1.5',
+  part: 'basics',
   title: 'Условные команды и управление логикой',
   theory: `
     <h4>if / elif / else</h4>
@@ -1452,6 +1503,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 {
   id: 'ch16',
   num: '1.6',
+  part: 'basics',
   title: 'Строки',
   theory: `
     <h4>Литералы и форматирование</h4>
@@ -1656,6 +1708,7 @@ assert _lines == _exp, 'Ожидались строки ' + repr(_exp) + ', а �
 {
   id: 'ch17',
   num: '1.7',
+  part: 'basics',
   title: 'Файловый ввод и вывод',
   theory: `
     <h4>Чтение</h4>
@@ -1872,6 +1925,7 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
 {
   id: 'ch18',
   num: '1.8',
+  part: 'basics',
   title: 'Списки',
   theory: `
     <h4>Список и операции над ним</h4>
@@ -2076,6 +2130,1252 @@ assert 'total' in globals(), 'Не создана переменная total'
 assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
 _e = f'Total cost: {_t:0.2f}'
 assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+}
+,
+
+/* ─────────────────────────── 1.9 ─────────────────────────── */
+{
+  id: 'ch19',
+  num: '1.9',
+  part: 'basics',
+  title: 'Кортежи',
+  theory: `
+    <h4>Кортеж — неизменяемая запись</h4>
+    <p>Кортеж (tuple) упаковывает несколько значений в один объект. Создаётся круглыми скобками:</p>
+    <div class="code-block">holding = (<span class="st">'GOOG'</span>, <span class="val">100</span>, <span class="val">490.10</span>)
+address = (<span class="st">'www.python.org'</span>, <span class="val">80</span>)</div>
+    <p>Пустой и одноэлементный кортежи записываются особо — и вторая форма ловит почти всех:</p>
+    <div class="code-block">a = ()          <span class="cm"># пустой кортеж</span>
+b = (item,)     <span class="cm"># ОДИН элемент — запятая обязательна</span>
+c = (item)      <span class="cm"># это не кортеж, а просто item в скобках</span></div>
+    <div class="hl orange"><span class="hl-label">Ловушка</span>Кортеж делают <strong>запятые</strong>, а не скобки. <code>(5)</code> — это число пять, <code>(5,)</code> — кортеж из одного элемента. Отсюда же <code>x = 5,</code> без скобок вообще создаёт кортеж — частая причина недоумения, когда функция вдруг вернула <code>(5,)</code> вместо <code>5</code>.</div>
+
+    <h4>Распаковка</h4>
+    <p>Индексы у кортежа работают, но чаще его сразу разбирают на переменные:</p>
+    <div class="code-block">name, shares, price = holding
+host, port = address</div>
+    <p>Количество имён слева должно точно совпадать с длиной кортежа, иначе — <code>ValueError</code>.</p>
+
+    <h4>Неизменяемость</h4>
+    <p>Кортеж поддерживает индексирование, срезы и конкатенацию, но менять его нельзя: ни заменить элемент, ни добавить, ни удалить. Это одна цельная запись, а не набор ячеек. «Изменение» — это сборка нового кортежа:</p>
+    <div class="code-block">row = (<span class="st">'AA'</span>, <span class="val">100</span>, <span class="val">32.20</span>)
+row[<span class="val">1</span>] = <span class="val">50</span>                       <span class="cm"># TypeError</span>
+row = row[:<span class="val">1</span>] + (<span class="val">50</span>,) + row[<span class="val">2</span>:]   <span class="cm"># а так можно</span></div>
+
+    <h4>Список кортежей — это таблица</h4>
+    <p>Список, где каждый элемент — кортеж, естественно представляет таблицу: список строк, в каждой строке фиксированный набор полей.</p>
+    <div class="code-block">portfolio = []
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'portfolio.csv'</span>) <span class="kw">as</span> file:
+    <span class="kw">for</span> line <span class="kw">in</span> file:
+        row = line.<span class="fn">split</span>(<span class="st">','</span>)
+        holding = (row[<span class="val">0</span>], <span class="fn">int</span>(row[<span class="val">1</span>]), <span class="fn">float</span>(row[<span class="val">2</span>]))
+        portfolio.<span class="fn">append</span>(holding)
+
+portfolio[<span class="val">0</span>]       <span class="cm"># ('AA', 100, 32.2)</span>
+portfolio[<span class="val">1</span>][<span class="val">1</span>]    <span class="cm"># 50</span></div>
+    <p>Перебирать такой список удобно с распаковкой прямо в заголовке цикла — сразу получаются осмысленные имена вместо <code>row[1]</code> и <code>row[2]</code>:</p>
+    <div class="code-block">total = <span class="val">0.0</span>
+<span class="kw">for</span> name, shares, price <span class="kw">in</span> portfolio:
+    total += shares * price</div>
+    <p>Ненужное поле принято называть <code>_</code> — это обычное имя, но по соглашению оно значит «значение мне не нужно»:</p>
+    <div class="code-block">total = <span class="fn">sum</span>([shares * price <span class="kw">for</span> _, shares, price <span class="kw">in</span> portfolio])</div>`,
+  vocab: { names: ['tuple'], methods: [] },
+  allowed: 'всё из 1.3—1.8 плюс кортежи <code>(a, b, c)</code>, одноэлементный <code>(x,)</code>, распаковка <code>a, b = t</code>, распаковка в заголовке <code>for</code>, индексы и срезы кортежа, конкатенация <code>+</code>, <code>tuple()</code>, имя <code>_</code> для ненужного поля',
+  tasks: [
+    {
+      id: 't19-1',
+      title: 'Распаковка записи',
+      statement: `<p>Дан кортеж <code>holding</code> из трёх полей: название бумаги, количество и цена.</p>
+        <p>Распакуй его <strong>одной командой</strong> в переменные <code>name</code>, <code>shares</code> и <code>price</code>, посчитай стоимость в <code>cost</code> и выведи одну строку.</p>`,
+      io: `holding = ('GOOG', 100, 490.10)
+→  GOOG: 49010.00`,
+      hint: 'Распаковка — это присваивание, где слева через запятую стоят три имени, а справа кортеж: <code>name, shares, price = holding</code>. Обращаться по индексам <code>holding[0]</code> тоже можно, но задача именно про распаковку.',
+      starter: `# holding уже задан
+
+`,
+      solution: `name, shares, price = holding
+cost = shares * price
+print(f'{name}: {cost:0.2f}')`,
+      cases: [
+        { label: "holding = ('GOOG', 100, 490.10)",
+          setup: `holding = ('GOOG', 100, 490.10)
+_h0 = holding`,
+          check: `_n, _s, _p = _h0
+for _k, _v in (('name', _n), ('shares', _s), ('price', _p)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v)
+assert 'cost' in globals(), 'Не создана переменная cost'
+assert abs(cost - _s * _p) < 1e-9, 'cost = ' + str(round(cost, 6)) + ', ожидалось ' + str(round(_s * _p, 6))
+_e = _n + ': ' + format(_s * _p, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "holding = ('IBM', 50, 91.10)",
+          setup: `holding = ('IBM', 50, 91.10)
+_h0 = holding`,
+          check: `_n, _s, _p = _h0
+for _k, _v in (('name', _n), ('shares', _s), ('price', _p)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v)
+assert abs(cost - _s * _p) < 1e-9, 'cost = ' + str(round(cost, 6)) + ', ожидалось ' + str(round(_s * _p, 6))
+_e = _n + ': ' + format(_s * _p, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "holding = ('CASH', 1, 0.99)",
+          setup: `holding = ('CASH', 1, 0.99)
+_h0 = holding`,
+          check: `_n, _s, _p = _h0
+for _k, _v in (('name', _n), ('shares', _s), ('price', _p)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v)
+assert abs(cost - _s * _p) < 1e-9, 'cost = ' + str(round(cost, 6)) + ', ожидалось ' + str(round(_s * _p, 6))
+_e = _n + ': ' + format(_s * _p, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't19-2',
+      title: 'Портфель как список кортежей',
+      statement: `<p>Файл <code>portfolio.csv</code> содержит строки <code>НАЗВАНИЕ,КОЛИЧЕСТВО,ЦЕНА</code>.</p>
+        <p>Собери <code>portfolio</code> — список кортежей, где название осталось строкой, количество стало <code>int</code>, а цена <code>float</code>. Затем посчитай <code>total</code> — сумму «количество × цена», перебирая список <strong>с распаковкой в заголовке цикла</strong>. Выведи одну строку.</p>
+        <p>В 1.8 такая же таблица собиралась как список списков строк. Разница принципиальная: здесь строка таблицы — цельная запись с уже приведёнными типами.</p>`,
+      io: `portfolio.csv:
+AA,100,32.20
+IBM,50,91.10
+→  portfolio = [('AA', 100, 32.2), ('IBM', 50, 91.1)]
+   Total cost: 7775.00`,
+      hint: 'Кортеж собирается прямо при чтении строки: <code>(row[0], int(row[1]), float(row[2]))</code>. Не забудь <code>strip()</code> — иначе перевод строки уедет в цену. В цикле по готовому списку пиши <code>for name, shares, price in portfolio</code>.',
+      starter: `# файл portfolio.csv уже существует
+
+`,
+      solution: `portfolio = []
+with open('portfolio.csv') as file:
+    for line in file:
+        row = line.strip().split(',')
+        holding = (row[0], int(row[1]), float(row[2]))
+        portfolio.append(holding)
+
+total = 0.0
+for name, shares, price in portfolio:
+    total += shares * price
+print(f'Total cost: {total:0.2f}')`,
+      cases: [
+        { label: 'две позиции',
+          setup: `_data = """AA,100,32.20
+IBM,50,91.10
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [(l.split(',')[0], int(l.split(',')[1]), float(l.split(',')[2])) for l in _data.splitlines() if l.strip()]
+_t = 0.0
+for _n, _s, _p in _exp:
+    _t += _s * _p
+assert 'portfolio' in globals(), 'Не создана переменная portfolio'
+assert portfolio == _exp, 'portfolio = ' + repr(portfolio) + ', ожидалось ' + repr(_exp)
+for _row in portfolio:
+    assert isinstance(_row, tuple), 'Строки должны быть кортежами, а получен ' + type(_row).__name__
+assert 'total' in globals(), 'Не создана переменная total'
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+_e = 'Total cost: ' + format(_t, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'четыре позиции',
+          setup: `_data = """ACME,50,92.34
+IBM,75,102.25
+PHP,40,74.50
+GE,95,40.37
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [(l.split(',')[0], int(l.split(',')[1]), float(l.split(',')[2])) for l in _data.splitlines() if l.strip()]
+_t = 0.0
+for _n, _s, _p in _exp:
+    _t += _s * _p
+assert 'portfolio' in globals(), 'Не создана переменная portfolio'
+assert portfolio == _exp, 'portfolio = ' + repr(portfolio) + ', ожидалось ' + repr(_exp)
+for _row in portfolio:
+    assert isinstance(_row, tuple), 'Строки должны быть кортежами, а получен ' + type(_row).__name__
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+_e = 'Total cost: ' + format(_t, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'одна позиция',
+          setup: `_data = """SYM,123,456.78
+"""
+with open('portfolio.csv', 'w') as _f:
+    _f.write(_data)`,
+          check: `_exp = [(l.split(',')[0], int(l.split(',')[1]), float(l.split(',')[2])) for l in _data.splitlines() if l.strip()]
+_t = 0.0
+for _n, _s, _p in _exp:
+    _t += _s * _p
+assert 'portfolio' in globals(), 'Не создана переменная portfolio'
+assert portfolio == _exp, 'portfolio = ' + repr(portfolio) + ', ожидалось ' + repr(_exp)
+for _row in portfolio:
+    assert isinstance(_row, tuple), 'Строки должны быть кортежами, а получен ' + type(_row).__name__
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+_e = 'Total cost: ' + format(_t, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't19-3',
+      title: 'Правка неизменяемой записи',
+      statement: `<p>Даны кортеж <code>row</code> из трёх полей и новое количество <code>new_shares</code>.</p>
+        <p>Собери <code>fixed</code> — такой же кортеж, но со вторым полем, заменённым на <code>new_shares</code>. Исходный <code>row</code> должен остаться нетронутым: менять кортеж на месте нельзя, можно только собрать новый.</p>
+        <p>Выведи одну строку.</p>`,
+      io: `row = ('AA', 100, 32.20)   new_shares = 75
+→  ('AA', 75, 32.2)`,
+      hint: 'Срез кортежа даёт кортеж, и склеить их можно обычным <code>+</code>. Средний кусок — кортеж из одного элемента, а значит, запятая обязательна: <code>(new_shares,)</code>. Без неё получится не кортеж, и <code>+</code> упадёт.',
+      starter: `# row и new_shares уже заданы
+
+`,
+      solution: `fixed = row[:1] + (new_shares,) + row[2:]
+print(fixed)`,
+      cases: [
+        { label: "row = ('AA', 100, 32.20), new_shares = 75",
+          setup: `row = ('AA', 100, 32.20)
+new_shares = 75
+_r0, _ns0 = row, new_shares`,
+          check: `_exp = (_r0[0], _ns0, _r0[2])
+assert 'fixed' in globals(), 'Не создана переменная fixed'
+assert isinstance(fixed, tuple), 'fixed должен быть кортежем, а это ' + type(fixed).__name__
+assert fixed == _exp, 'fixed = ' + repr(fixed) + ', ожидалось ' + repr(_exp)
+assert row == _r0, 'Исходный row изменился: ' + repr(row) + ', а должен был остаться ' + repr(_r0)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "row = ('IBM', 50, 91.10), new_shares = 0",
+          setup: `row = ('IBM', 50, 91.10)
+new_shares = 0
+_r0, _ns0 = row, new_shares`,
+          check: `_exp = (_r0[0], _ns0, _r0[2])
+assert 'fixed' in globals(), 'Не создана переменная fixed'
+assert isinstance(fixed, tuple), 'fixed должен быть кортежем, а это ' + type(fixed).__name__
+assert fixed == _exp, 'fixed = ' + repr(fixed) + ', ожидалось ' + repr(_exp)
+assert row == _r0, 'Исходный row изменился: ' + repr(row)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "row = ('CAT', 7, 83.44), new_shares = 1000",
+          setup: `row = ('CAT', 7, 83.44)
+new_shares = 1000
+_r0, _ns0 = row, new_shares`,
+          check: `_exp = (_r0[0], _ns0, _r0[2])
+assert 'fixed' in globals(), 'Не создана переменная fixed'
+assert isinstance(fixed, tuple), 'fixed должен быть кортежем, а это ' + type(fixed).__name__
+assert fixed == _exp, 'fixed = ' + repr(fixed) + ', ожидалось ' + repr(_exp)
+assert row == _r0, 'Исходный row изменился: ' + repr(row)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.10 ─────────────────────────── */
+{
+  id: 'ch110',
+  num: '1.10',
+  part: 'basics',
+  title: 'Множества',
+  theory: `
+    <h4>Множество — неупорядоченный набор уникальных значений</h4>
+    <p>Множество нужно там, где важны две вещи: <strong>уникальность</strong> и <strong>принадлежность</strong> («есть ли такое значение»). Создаётся фигурными скобками или вызовом <code>set()</code> от готовой коллекции:</p>
+    <div class="code-block">names1 = { <span class="st">'IBM'</span>, <span class="st">'MSFT'</span>, <span class="st">'AA'</span> }
+names2 = <span class="fn">set</span>([<span class="st">'IBM'</span>, <span class="st">'MSFT'</span>, <span class="st">'HPE'</span>, <span class="st">'IBM'</span>, <span class="st">'CAT'</span>])
+
+names2   <span class="cm"># {'CAT', 'IBM', 'MSFT', 'HPE'} — 'IBM' остался один</span></div>
+    <p>Элементы <strong>не упорядочены</strong> и не индексируются числами: <code>names[0]</code> для множества не работает. Порядок при выводе непредсказуем и может отличаться между запусками — на него нельзя опираться ни в коде, ни в тестах.</p>
+    <p>Элементами могут быть только неизменяемые объекты: числа, строки, кортежи. Множество списков создать нельзя.</p>
+    <div class="hl orange"><span class="hl-label">Ловушка</span><code>{}</code> — это пустой <em>словарь</em>, а не пустое множество. Пустое множество создаётся только вызовом <code>set()</code>.</div>
+
+    <h4>Операции</h4>
+    <table>
+      <thead><tr><th>Операция</th><th>Что даёт</th></tr></thead>
+      <tbody>
+        <tr><td><code>t | s</code></td><td>объединение — всё, что есть хотя бы в одном</td></tr>
+        <tr><td><code>t &amp; s</code></td><td>пересечение — то, что есть в обоих</td></tr>
+        <tr><td><code>t - s</code></td><td>разность — элементы <code>t</code>, которых нет в <code>s</code></td></tr>
+        <tr><td><code>t ^ s</code></td><td>симметричная разность — то, что есть ровно в одном из двух</td></tr>
+      </tbody>
+    </table>
+    <p>Это готовый инструмент для сверки двух наборов: что пропало, что появилось лишнего, что совпало — три операции вместо трёх циклов.</p>
+
+    <h4>Изменение</h4>
+    <div class="code-block">t.<span class="fn">add</span>(<span class="st">'DIS'</span>)                     <span class="cm"># добавить один элемент</span>
+s.<span class="fn">update</span>({<span class="st">'JJ'</span>, <span class="st">'GE'</span>})           <span class="cm"># добавить несколько</span>
+t.<span class="fn">remove</span>(<span class="st">'IBM'</span>)                  <span class="cm"># удалить; если нет — KeyError</span>
+s.<span class="fn">discard</span>(<span class="st">'SCOX'</span>)                <span class="cm"># удалить, если есть; молча пройдёт мимо</span></div>
+    <p>Разница <code>remove()</code> и <code>discard()</code> ровно в этом: первый требует, чтобы элемент был, второй — нет.</p>
+
+    <h4>Генератор множеств</h4>
+    <p>Так же, как списковое включение строит список, генератор множеств строит множество — и попутно убирает повторы:</p>
+    <div class="code-block">symbols = { row[<span class="val">0</span>] <span class="kw">for</span> row <span class="kw">in</span> portfolio }</div>`,
+  vocab: { names: ['set'], methods: ['add', 'update', 'remove', 'discard'] },
+  allowed: 'всё из 1.3—1.9 плюс множества <code>{a, b}</code>, <code>set()</code>, операции <code>|</code> <code>&amp;</code> <code>-</code> <code>^</code>, методы <code>add</code> / <code>update</code> / <code>remove</code> / <code>discard</code>, генератор множеств <code>{ x for x in ... }</code>, <code>len()</code>',
+  tasks: [
+    {
+      id: 't110-1',
+      title: 'Сколько уникальных',
+      statement: `<p>Дан список <code>names</code>, в котором значения повторяются.</p>
+        <p>Собери <code>unique</code> — множество неповторяющихся значений, положи их количество в <code>count</code> и выведи одну строку.</p>
+        <p>Печатать само множество не надо: его порядок непредсказуем, а значит, проверить такой вывод невозможно.</p>`,
+      io: `names = ['IBM', 'MSFT', 'HPE', 'IBM', 'CAT', 'MSFT']
+→  Уникальных: 4`,
+      hint: '<code>set()</code> от списка сразу выбрасывает повторы — отдельный цикл с проверками не нужен. Длину множества даёт та же <code>len()</code>, что и для списка.',
+      starter: `# names уже задан
+
+`,
+      solution: `unique = set(names)
+count = len(unique)
+print(f'Уникальных: {count}')`,
+      cases: [
+        { label: "6 значений, 4 уникальных",
+          setup: `names = ['IBM', 'MSFT', 'HPE', 'IBM', 'CAT', 'MSFT']
+_n0 = list(names)`,
+          check: `_exp = set(_n0)
+assert 'unique' in globals(), 'Не создана переменная unique'
+assert isinstance(unique, set), 'unique должно быть множеством, а это ' + type(unique).__name__
+assert unique == _exp, 'unique = ' + repr(unique) + ', ожидалось ' + repr(_exp)
+assert 'count' in globals(), 'Не создана переменная count'
+assert count == len(_exp), 'count = ' + str(count) + ', ожидалось ' + str(len(_exp))
+_e = 'Уникальных: ' + str(len(_exp))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "все значения разные",
+          setup: `names = ['a', 'b', 'c']
+_n0 = list(names)`,
+          check: `_exp = set(_n0)
+assert 'unique' in globals() and 'count' in globals(), 'Нужны переменные unique и count'
+assert isinstance(unique, set), 'unique должно быть множеством, а это ' + type(unique).__name__
+assert unique == _exp, 'unique = ' + repr(unique) + ', ожидалось ' + repr(_exp)
+assert count == len(_exp), 'count = ' + str(count) + ', ожидалось ' + str(len(_exp))
+_e = 'Уникальных: ' + str(len(_exp))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "все значения одинаковые",
+          setup: `names = ['IBM', 'IBM', 'IBM']
+_n0 = list(names)`,
+          check: `_exp = set(_n0)
+assert 'unique' in globals() and 'count' in globals(), 'Нужны переменные unique и count'
+assert unique == _exp, 'unique = ' + repr(unique) + ', ожидалось ' + repr(_exp)
+assert count == 1, 'count = ' + str(count) + ', ожидалось 1'
+assert _lines and _lines[-1] == 'Уникальных: 1', 'Ожидалась строка ' + repr('Уникальных: 1') + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "пустой список",
+          setup: `names = []
+_n0 = list(names)`,
+          check: `assert 'unique' in globals() and 'count' in globals(), 'Нужны переменные unique и count'
+assert unique == set(), 'unique = ' + repr(unique) + ', для пустого списка ожидалось пустое множество'
+assert count == 0, 'count = ' + str(count) + ', ожидалось 0'
+assert _lines and _lines[-1] == 'Уникальных: 0', 'Ожидалась строка ' + repr('Уникальных: 0') + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't110-2',
+      title: 'Сверка полей в ответе API',
+      statement: `<p>Даны два списка имён полей: <code>expected</code> — что мы ждём в ответе, и <code>actual</code> — что реально пришло.</p>
+        <p>Посчитай три множества:</p>
+        <ul>
+          <li><code>missing</code> — ждали, но не пришло;</li>
+          <li><code>extra</code> — пришло, но не ждали;</li>
+          <li><code>common</code> — есть и там, и там.</li>
+        </ul>
+        <p>Выведи одну строку с их размерами. Ровно эту сверку делает контрактный тест.</p>`,
+      io: `expected = ['id', 'name', 'price', 'currency']
+actual   = ['id', 'name', 'price', 'discount']
+→  не хватает: 1, лишних: 1, совпало: 3`,
+      hint: 'Сначала переведи оба списка в множества, иначе операции <code>-</code> и <code>&amp;</code> работать не будут. Дальше «ждали, но не пришло» — это разность в одну сторону, «пришло, но не ждали» — в другую.',
+      starter: `# expected и actual уже заданы
+
+`,
+      solution: `exp = set(expected)
+act = set(actual)
+missing = exp - act
+extra = act - exp
+common = exp & act
+print(f'не хватает: {len(missing)}, лишних: {len(extra)}, совпало: {len(common)}')`,
+      cases: [
+        { label: 'одно пропало, одно лишнее',
+          setup: `expected = ['id', 'name', 'price', 'currency']
+actual = ['id', 'name', 'price', 'discount']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_e, _a = set(_e0), set(_a0)
+_m, _x, _c = _e - _a, _a - _e, _e & _a
+for _k, _v in (('missing', _m), ('extra', _x), ('common', _c)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v)
+_line = 'не хватает: ' + str(len(_m)) + ', лишних: ' + str(len(_x)) + ', совпало: ' + str(len(_c))
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'ответ полностью совпал',
+          setup: `expected = ['id', 'name']
+actual = ['name', 'id']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_e, _a = set(_e0), set(_a0)
+_m, _x, _c = _e - _a, _a - _e, _e & _a
+for _k, _v in (('missing', _m), ('extra', _x), ('common', _c)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v) + ' (порядок в списках роли не играет)'
+_line = 'не хватает: 0, лишних: 0, совпало: 2'
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'пришёл пустой ответ',
+          setup: `expected = ['id', 'name', 'price']
+actual = []
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_e, _a = set(_e0), set(_a0)
+_m, _x, _c = _e - _a, _a - _e, _e & _a
+for _k, _v in (('missing', _m), ('extra', _x), ('common', _c)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v)
+_line = 'не хватает: 3, лишних: 0, совпало: 0'
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'в ответе есть повторы',
+          setup: `expected = ['id', 'name']
+actual = ['id', 'id', 'name', 'name', 'extra']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_e, _a = set(_e0), set(_a0)
+_m, _x, _c = _e - _a, _a - _e, _e & _a
+for _k, _v in (('missing', _m), ('extra', _x), ('common', _c)):
+    assert _k in globals(), 'Не создана переменная ' + _k
+    assert globals()[_k] == _v, _k + ' = ' + repr(globals()[_k]) + ', ожидалось ' + repr(_v) + ' (повторы множество убирает само)'
+_line = 'не хватает: 0, лишних: 1, совпало: 2'
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't110-3',
+      title: 'Генератор множеств',
+      statement: `<p>Дан <code>portfolio</code> — список кортежей вида <code>(название, количество, цена)</code>, названия в нём повторяются.</p>
+        <p>Собери <strong>генератором множеств</strong> переменную <code>symbols</code> — множество названий. Затем добавь в него <code>'CASH'</code> и убери <code>'PHP'</code> так, чтобы код не падал, даже если этой бумаги в портфеле не было. Выведи одну строку.</p>`,
+      io: `portfolio = [('ACME', 50, 92.34), ('IBM', 75, 102.25),
+             ('PHP', 40, 74.50), ('IBM', 50, 124.75)]
+→  Бумаг: 3`,
+      hint: 'Генератор множеств выглядит как списковое включение, но в фигурных скобках: <code>{ row[0] for row in portfolio }</code>. Для удаления «если есть» существует отдельный метод — тот, который не выбрасывает <code>KeyError</code>.',
+      starter: `# portfolio уже задан
+
+`,
+      solution: `symbols = { row[0] for row in portfolio }
+symbols.add('CASH')
+symbols.discard('PHP')
+print(f'Бумаг: {len(symbols)}')`,
+      cases: [
+        { label: 'PHP в портфеле есть',
+          setup: `portfolio = [('ACME', 50, 92.34), ('IBM', 75, 102.25), ('PHP', 40, 74.50), ('IBM', 50, 124.75)]
+_p0 = list(portfolio)`,
+          check: `_exp = set(_r[0] for _r in _p0)
+_exp.add('CASH')
+_exp.discard('PHP')
+assert 'symbols' in globals(), 'Не создана переменная symbols'
+assert isinstance(symbols, set), 'symbols должно быть множеством, а это ' + type(symbols).__name__
+assert symbols == _exp, 'symbols = ' + repr(symbols) + ', ожидалось ' + repr(_exp)
+_e = 'Бумаг: ' + str(len(_exp))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'PHP в портфеле нет — код не должен падать',
+          setup: `portfolio = [('AA', 100, 32.20), ('IBM', 50, 91.10)]
+_p0 = list(portfolio)`,
+          check: `_exp = set(_r[0] for _r in _p0)
+_exp.add('CASH')
+_exp.discard('PHP')
+assert 'symbols' in globals(), 'Не создана переменная symbols'
+assert symbols == _exp, 'symbols = ' + repr(symbols) + ', ожидалось ' + repr(_exp)
+_e = 'Бумаг: ' + str(len(_exp))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'в портфеле только PHP',
+          setup: `portfolio = [('PHP', 40, 74.50), ('PHP', 10, 75.00)]
+_p0 = list(portfolio)`,
+          check: `_exp = set(_r[0] for _r in _p0)
+_exp.add('CASH')
+_exp.discard('PHP')
+assert 'symbols' in globals(), 'Не создана переменная symbols'
+assert symbols == _exp, 'symbols = ' + repr(symbols) + ', ожидалось ' + repr(_exp)
+_e = 'Бумаг: ' + str(len(_exp))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.11 ─────────────────────────── */
+{
+  id: 'ch111',
+  num: '1.11',
+  part: 'basics',
+  title: 'Словари',
+  theory: `
+    <h4>Словарь — соответствие ключей значениям</h4>
+    <p>Словарь задаётся парами «ключ : значение» в фигурных скобках, а обращение идёт по ключу вместо номера:</p>
+    <div class="code-block">s = {
+    <span class="st">'name'</span>: <span class="st">'GOOG'</span>,
+    <span class="st">'shares'</span>: <span class="val">100</span>,
+    <span class="st">'price'</span>: <span class="val">490.10</span>
+}
+
+name = s[<span class="st">'name'</span>]
+cost = s[<span class="st">'shares'</span>] * s[<span class="st">'price'</span>]
+s[<span class="st">'shares'</span>] = <span class="val">75</span>          <span class="cm"># изменение</span>
+s[<span class="st">'date'</span>] = <span class="st">'2007-06-07'</span>  <span class="cm"># вставка нового ключа</span>
+<span class="kw">del</span> s[<span class="st">'date'</span>]              <span class="cm"># удаление</span></div>
+    <p>У словаря две разные роли, и полезно их различать: он бывает <strong>записью</strong> с именованными полями (как выше) и <strong>отображением</strong> для быстрого поиска — цена по названию, счётчик по ключу.</p>
+
+    <h4>Отсутствующий ключ</h4>
+    <p>Обращение по несуществующему ключу — это <code>KeyError</code>. Наличие проверяют оператором <code>in</code>:</p>
+    <div class="code-block"><span class="kw">if</span> <span class="st">'IBM'</span> <span class="kw">in</span> prices:
+    p = prices[<span class="st">'IBM'</span>]
+<span class="kw">else</span>:
+    p = <span class="val">0.0</span></div>
+    <p>Ровно то же самое короче — методом <code>get()</code> со значением по умолчанию:</p>
+    <div class="code-block">p = prices.<span class="fn">get</span>(<span class="st">'IBM'</span>, <span class="val">0.0</span>)</div>
+
+    <h4>Ключи</h4>
+    <p>Ключом может быть любой неизменяемый объект: строка, число, кортеж. Кортежи удобны для составных ключей. Списки, множества и словари ключами быть не могут.</p>
+    <div class="code-block">prices[(<span class="st">'IBM'</span>, <span class="st">'2015-02-03'</span>)] = <span class="val">91.23</span>
+prices[<span class="st">'IBM'</span>, <span class="st">'2015-02-04'</span>] = <span class="val">91.42</span>   <span class="cm"># те же скобки можно опустить</span></div>
+    <p>Ключи хранятся <strong>в порядке вставки</strong> — на это можно опираться при выводе и отладке (начиная с Python 3.7 это гарантия языка).</p>
+
+    <h4>Обход</h4>
+    <div class="code-block"><span class="fn">list</span>(prices)        <span class="cm"># список ключей</span>
+prices.<span class="fn">keys</span>()       <span class="cm"># ключи</span>
+prices.<span class="fn">values</span>()     <span class="cm"># значения</span>
+prices.<span class="fn">items</span>()      <span class="cm"># пары (ключ, значение)</span>
+
+<span class="kw">for</span> sym, price <span class="kw">in</span> prices.<span class="fn">items</span>():
+    <span class="fn">print</span>(f<span class="st">'{sym} = {price}'</span>)</div>
+    <p><code>keys()</code> возвращает не список, а «представление», живо связанное со словарём: добавили ключ — представление тут же его показывает.</p>
+
+    <h4>Словарное включение и подсчёт</h4>
+    <p>Классическая задача — свести таблицу к сводке по ключу. Сначала словарным включением строится заготовка с нулями, потом цикл её наполняет:</p>
+    <div class="code-block">portfolio = [
+    (<span class="st">'ACME'</span>, <span class="val">50</span>, <span class="val">92.34</span>),
+    (<span class="st">'IBM'</span>, <span class="val">75</span>, <span class="val">102.25</span>),
+    (<span class="st">'IBM'</span>, <span class="val">50</span>, <span class="val">124.75</span>)
+]
+
+total_shares = { s[<span class="val">0</span>]: <span class="val">0</span> <span class="kw">for</span> s <span class="kw">in</span> portfolio }
+<span class="kw">for</span> name, shares, _ <span class="kw">in</span> portfolio:
+    total_shares[name] += shares
+
+<span class="cm"># {'ACME': 50, 'IBM': 125}</span></div>
+    <p>Пустой словарь — это <code>{}</code> или <code>dict()</code>. Здесь же кроется путаница: <code>{}</code> даёт именно словарь, а не множество.</p>`,
+  vocab: { names: ['dict', 'del'], methods: ['get', 'keys', 'values', 'items'] },
+  allowed: 'всё из 1.3—1.10 плюс словари <code>{k: v}</code>, доступ <code>d[k]</code>, вставка и изменение, <code>del d[k]</code>, проверка <code>k in d</code>, <code>get()</code>, <code>keys()</code> / <code>values()</code> / <code>items()</code>, словарное включение, <code>dict()</code>, кортежи как ключи',
+  tasks: [
+    {
+      id: 't111-1',
+      title: 'Словарь как запись',
+      statement: `<p>Дан словарь <code>s</code> с ключами <code>'name'</code>, <code>'shares'</code> и <code>'price'</code>.</p>
+        <p>Посчитай стоимость позиции, положи её <strong>в тот же словарь</strong> под ключом <code>'cost'</code> и выведи одну строку.</p>`,
+      io: `s = {'name': 'GOOG', 'shares': 100, 'price': 490.10}
+→  GOOG: 49010.00`,
+      hint: 'Новый ключ добавляется тем же присваиванием по индексу, что и изменение существующего: <code>s[\'cost\'] = ...</code>. Отдельного метода для вставки не нужно.',
+      starter: `# s уже задан
+
+`,
+      solution: `s['cost'] = s['shares'] * s['price']
+print(f"{s['name']}: {s['cost']:0.2f}")`,
+      cases: [
+        { label: "GOOG, 100 x 490.10",
+          setup: `s = {'name': 'GOOG', 'shares': 100, 'price': 490.10}
+_s0 = dict(s)`,
+          check: `_c = _s0['shares'] * _s0['price']
+assert 'cost' in s, 'В словаре нет ключа cost'
+assert abs(s['cost'] - _c) < 1e-9, "s['cost'] = " + str(round(s['cost'], 6)) + ', ожидалось ' + str(round(_c, 6))
+for _k in ('name', 'shares', 'price'):
+    assert s[_k] == _s0[_k], 'Ключ ' + repr(_k) + ' не должен был меняться'
+_e = _s0['name'] + ': ' + format(_c, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "IBM, 50 x 91.10",
+          setup: `s = {'name': 'IBM', 'shares': 50, 'price': 91.10}
+_s0 = dict(s)`,
+          check: `_c = _s0['shares'] * _s0['price']
+assert 'cost' in s, 'В словаре нет ключа cost'
+assert abs(s['cost'] - _c) < 1e-9, "s['cost'] = " + str(round(s['cost'], 6)) + ', ожидалось ' + str(round(_c, 6))
+_e = _s0['name'] + ': ' + format(_c, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "нулевое количество",
+          setup: `s = {'name': 'CASH', 'shares': 0, 'price': 1.0}
+_s0 = dict(s)`,
+          check: `_c = _s0['shares'] * _s0['price']
+assert 'cost' in s, 'В словаре нет ключа cost'
+assert abs(s['cost'] - _c) < 1e-9, "s['cost'] = " + str(round(s['cost'], 6)) + ', ожидалось ' + str(round(_c, 6))
+_e = _s0['name'] + ': ' + format(_c, '0.2f')
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't111-2',
+      title: 'Цена по названию, с запасным значением',
+      statement: `<p>Даны словарь <code>prices</code> (название → цена) и список <code>symbols</code>, который надо запросить.</p>
+        <p>Для каждого названия из <code>symbols</code>, <strong>в порядке списка</strong>, выведи строку <code>IBM = 91.5</code>. Если такой бумаги в словаре нет, вместо цены выводи <code>0.0</code> — программа не должна падать на отсутствующем ключе.</p>`,
+      io: `prices  = {'GOOG': 490.1, 'IBM': 91.5}
+symbols = ['IBM', 'NOPE', 'GOOG']
+→  IBM = 91.5
+   NOPE = 0.0
+   GOOG = 490.1`,
+      hint: 'Обращение <code>prices[sym]</code> на отсутствующем ключе выбросит <code>KeyError</code>. Нужен метод, который вернёт запасное значение вторым аргументом. Значение печатай как есть, без спецификатора формата.',
+      starter: `# prices и symbols уже заданы
+
+`,
+      solution: `for sym in symbols:
+    price = prices.get(sym, 0.0)
+    print(f'{sym} = {price}')`,
+      cases: [
+        { label: 'один символ отсутствует',
+          setup: `prices = {'GOOG': 490.1, 'IBM': 91.5}
+symbols = ['IBM', 'NOPE', 'GOOG']
+_p0, _s0 = dict(prices), list(symbols)`,
+          check: `_exp = [_s + ' = ' + str(_p0.get(_s, 0.0)) for _s in _s0]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'все символы есть',
+          setup: `prices = {'AAPL': 123.5, 'MSFT': 52.13}
+symbols = ['MSFT', 'AAPL']
+_p0, _s0 = dict(prices), list(symbols)`,
+          check: `_exp = [_s + ' = ' + str(_p0.get(_s, 0.0)) for _s in _s0]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'словарь пуст',
+          setup: `prices = {}
+symbols = ['IBM', 'GOOG']
+_p0, _s0 = dict(prices), list(symbols)`,
+          check: `_exp = [_s + ' = 0.0' for _s in _s0]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'запрашивать нечего',
+          setup: `prices = {'IBM': 91.5}
+symbols = []
+_p0, _s0 = dict(prices), list(symbols)`,
+          check: `assert _lines == [], 'При пустом списке symbols выводить нечего, а получено ' + repr(_lines)` }
+      ]
+    },
+    {
+      id: 't111-3',
+      title: 'Сводка по бумагам',
+      statement: `<p>Дан <code>portfolio</code> — список кортежей <code>(название, количество, цена)</code>, где одна и та же бумага может встречаться несколько раз.</p>
+        <p>Построй <code>total_shares</code> — словарь «название → суммарное количество». Затем выведи по строке на бумагу в формате <code>IBM = 125</code>, <strong>в порядке первого появления</strong> в портфеле.</p>`,
+      io: `portfolio = [('ACME', 50, 92.34), ('IBM', 75, 102.25),
+             ('PHP', 40, 74.50), ('IBM', 50, 124.75)]
+→  ACME = 50
+   IBM = 125
+   PHP = 40`,
+      hint: 'Сначала словарным включением заведи все ключи с нулём: <code>{ s[0]: 0 for s in portfolio }</code> — порядок вставки сохранится сам. Потом цикл с распаковкой прибавляет количества. Для вывода пригодится метод, отдающий пары «ключ — значение».',
+      starter: `# portfolio уже задан
+
+`,
+      solution: `total_shares = { s[0]: 0 for s in portfolio }
+for name, shares, _ in portfolio:
+    total_shares[name] += shares
+
+for name, shares in total_shares.items():
+    print(f'{name} = {shares}')`,
+      cases: [
+        { label: 'IBM встречается дважды',
+          setup: `portfolio = [('ACME', 50, 92.34), ('IBM', 75, 102.25), ('PHP', 40, 74.50), ('IBM', 50, 124.75)]
+_p0 = list(portfolio)`,
+          check: `_exp = {}
+for _n, _s, _ in _p0:
+    _exp[_n] = _exp.get(_n, 0) + _s
+assert 'total_shares' in globals(), 'Не создана переменная total_shares'
+assert total_shares == _exp, 'total_shares = ' + repr(total_shares) + ', ожидалось ' + repr(_exp)
+_want = [_k + ' = ' + str(_v) for _k, _v in _exp.items()]
+assert _lines == _want, 'Ожидался вывод ' + repr(_want) + ', а получено ' + repr(_lines) + ' (порядок — по первому появлению)'` },
+        { label: 'все бумаги разные',
+          setup: `portfolio = [('AA', 100, 32.20), ('IBM', 50, 91.10), ('CAT', 150, 83.44)]
+_p0 = list(portfolio)`,
+          check: `_exp = {}
+for _n, _s, _ in _p0:
+    _exp[_n] = _exp.get(_n, 0) + _s
+assert total_shares == _exp, 'total_shares = ' + repr(total_shares) + ', ожидалось ' + repr(_exp)
+_want = [_k + ' = ' + str(_v) for _k, _v in _exp.items()]
+assert _lines == _want, 'Ожидался вывод ' + repr(_want) + ', а получено ' + repr(_lines)` },
+        { label: 'одна бумага во всех строках',
+          setup: `portfolio = [('IBM', 10, 1.0), ('IBM', 20, 2.0), ('IBM', 30, 3.0)]
+_p0 = list(portfolio)`,
+          check: `_exp = {}
+for _n, _s, _ in _p0:
+    _exp[_n] = _exp.get(_n, 0) + _s
+assert total_shares == _exp, 'total_shares = ' + repr(total_shares) + ', ожидалось ' + repr(_exp)
+_want = [_k + ' = ' + str(_v) for _k, _v in _exp.items()]
+assert _lines == _want, 'Ожидался вывод ' + repr(_want) + ', а получено ' + repr(_lines)` },
+        { label: 'пустой портфель',
+          setup: `portfolio = []
+_p0 = list(portfolio)`,
+          check: `assert 'total_shares' in globals(), 'Не создана переменная total_shares'
+assert total_shares == {}, 'total_shares = ' + repr(total_shares) + ', для пустого портфеля ожидался пустой словарь'
+assert _lines == [], 'Выводить нечего, а получено ' + repr(_lines)` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.12 ─────────────────────────── */
+{
+  id: 'ch112',
+  num: '1.12',
+  part: 'basics',
+  title: 'Перебор и циклы',
+  theory: `
+    <h4>for перебирает коллекцию, а не считает</h4>
+    <p>В отличие от <code>while</code>, который крутится по условию, <code>for</code> проходит по готовой последовательности — и счётчик двигает сам:</p>
+    <div class="code-block"><span class="kw">for</span> n <span class="kw">in</span> [<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>, <span class="val">4</span>, <span class="val">5</span>]:
+    <span class="fn">print</span>(f<span class="st">'2 to the {n} power is {2**n}'</span>)</div>
+
+    <h4>range</h4>
+    <p>Перебор диапазона целых чисел встречается так часто, что для него есть отдельная функция. <code>range(i, j)</code> даёт числа от <code>i</code> до <code>j</code>, <strong>не включая</strong> <code>j</code>:</p>
+    <div class="code-block">a = <span class="fn">range</span>(<span class="val">5</span>)          <span class="cm"># 0, 1, 2, 3, 4</span>
+b = <span class="fn">range</span>(<span class="val">1</span>, <span class="val">8</span>)       <span class="cm"># 1, 2, 3, 4, 5, 6, 7</span>
+c = <span class="fn">range</span>(<span class="val">0</span>, <span class="val">14</span>, <span class="val">3</span>)   <span class="cm"># 0, 3, 6, 9, 12   — третий аргумент это шаг</span>
+d = <span class="fn">range</span>(<span class="val">8</span>, <span class="val">1</span>, -<span class="val">1</span>)   <span class="cm"># 8, 7, 6, 5, 4, 3, 2   — шаг может быть отрицательным</span></div>
+    <p>Начальное значение по умолчанию — ноль. Сами числа <code>range()</code> вычисляет по запросу, а не хранит списком, поэтому <code>range(1000000)</code> ничего не стоит по памяти.</p>
+    <div class="hl orange"><span class="hl-label">Ловушка</span>Правая граница не входит в диапазон. Чтобы получить числа от 1 до 10 включительно, нужен <code>range(1, 11)</code>. На этом промахиваются постоянно — ошибка «на единицу» в тестах живёт именно здесь.</div>
+
+    <h4>Перебирать можно почти всё</h4>
+    <p>Один и тот же <code>for</code> ходит по строке (посимвольно), списку, кортежу, множеству, словарю и файлу (построчно):</p>
+    <div class="code-block"><span class="kw">for</span> c <span class="kw">in</span> <span class="st">'Hello'</span>:            <span class="cm"># символы</span>
+    <span class="fn">print</span>(c)
+
+<span class="kw">for</span> name <span class="kw">in</span> names:            <span class="cm"># элементы списка</span>
+    <span class="fn">print</span>(name)
+
+<span class="kw">for</span> key <span class="kw">in</span> prices:           <span class="cm"># ключи словаря</span>
+    <span class="fn">print</span>(key, <span class="st">'='</span>, prices[key])
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'foo.txt'</span>) <span class="kw">as</span> file:  <span class="cm"># строки файла</span>
+    <span class="kw">for</span> line <span class="kw">in</span> file:
+        <span class="fn">print</span>(line, end=<span class="st">''</span>)</div>
+    <p>Это одна из сильных сторон языка: код обхода не зависит от того, что именно обходится.</p>`,
+  vocab: { names: ['range'], methods: [] },
+  allowed: 'всё из 1.3—1.11 плюс <code>range(i, j, шаг)</code>, перебор строк, списков, кортежей, множеств, словарей и файлов одним <code>for</code>',
+  tasks: [
+    {
+      id: 't112-1',
+      title: 'Степени двойки',
+      statement: `<p>Дано <code>n</code>. Для каждого числа от <code>1</code> до <code>n</code> <strong>включительно</strong> выведи строку вида <code>2 to the 3 power is 8</code>.</p>
+        <p>Цикл — <code>for</code> с <code>range</code>.</p>`,
+      io: `n = 4
+→  2 to the 1 power is 2
+   2 to the 2 power is 4
+   2 to the 3 power is 8
+   2 to the 4 power is 16`,
+      hint: 'Правая граница в <code>range</code> не включается, так что «до n включительно» — это <code>range(1, n + 1)</code>. Степень считает оператор <code>**</code>, и его можно вписать прямо в f-строку.',
+      starter: `# n уже задан
+
+`,
+      solution: `for i in range(1, n + 1):
+    print(f'2 to the {i} power is {2**i}')`,
+      cases: [
+        { label: 'n = 4',
+          setup: `n = 4
+_n0 = n`,
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'n = 1 (одна строка)',
+          setup: `n = 1
+_n0 = n`,
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines) + ' (граница range не включается — нужен n + 1)'` },
+        { label: 'n = 10',
+          setup: `n = 10
+_n0 = n`,
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'n = 0 (выводить нечего)',
+          setup: `n = 0
+_n0 = n`,
+          check: `assert _lines == [], 'При n = 0 выводить нечего, а получено ' + repr(_lines)` }
+      ]
+    },
+    {
+      id: 't112-2',
+      title: 'Сколько цифр в строке',
+      statement: `<p>Дана строка <code>text</code>. Посчитай, сколько в ней цифровых символов, положи результат в <code>digits</code> и выведи одну строку.</p>
+        <p>Перебирай строку посимвольно циклом <code>for</code>.</p>`,
+      io: `text = 'QA-2024: 15 багов'
+→  Цифр: 6`,
+      hint: 'Цикл <code>for c in text</code> отдаёт по одному символу. Проверить, что символ — цифра, можно оператором <code>in</code>: <code>if c in \'0123456789\'</code>.',
+      starter: `# text уже задан
+
+`,
+      solution: `digits = 0
+for c in text:
+    if c in '0123456789':
+        digits += 1
+print(f'Цифр: {digits}')`,
+      cases: [
+        { label: "text = 'QA-2024: 15 багов'",
+          setup: `text = 'QA-2024: 15 багов'
+_t0 = text`,
+          check: `_exp = 0
+for _c in _t0:
+    if _c in '0123456789':
+        _exp += 1
+assert 'digits' in globals(), 'Не создана переменная digits'
+assert digits == _exp, 'digits = ' + str(digits) + ', ожидалось ' + str(_exp)
+_e = 'Цифр: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "цифр нет вообще",
+          setup: `text = 'release candidate'
+_t0 = text`,
+          check: `_exp = 0
+for _c in _t0:
+    if _c in '0123456789':
+        _exp += 1
+assert 'digits' in globals(), 'Не создана переменная digits'
+assert digits == _exp, 'digits = ' + str(digits) + ', ожидалось ' + str(_exp)
+assert _lines and _lines[-1] == 'Цифр: 0', 'Ожидалась строка ' + repr('Цифр: 0') + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "строка целиком из цифр",
+          setup: `text = '4242424242424242'
+_t0 = text`,
+          check: `_exp = len(_t0)
+assert digits == _exp, 'digits = ' + str(digits) + ', ожидалось ' + str(_exp)
+_e = 'Цифр: ' + str(_exp)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "пустая строка",
+          setup: `text = ''
+_t0 = text`,
+          check: `assert 'digits' in globals(), 'Не создана переменная digits — её надо завести до цикла'
+assert digits == 0, 'digits = ' + str(digits) + ', ожидалось 0'
+assert _lines and _lines[-1] == 'Цифр: 0', 'Ожидалась строка ' + repr('Цифр: 0') + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't112-3',
+      title: 'Каждый n-й элемент',
+      statement: `<p>Даны список <code>items</code> и целое <code>step</code>.</p>
+        <p>Собери <code>picked</code> — список элементов с индексами <code>0</code>, <code>step</code>, <code>2 * step</code> и так далее. Перебирай <strong>индексы</strong> через <code>range</code> с шагом, а не сам список. Выведи одну строку.</p>`,
+      io: `items = ['a', 'b', 'c', 'd', 'e', 'f', 'g']   step = 3
+→  ['a', 'd', 'g']`,
+      hint: 'Верхняя граница диапазона — <code>len(items)</code>, третий аргумент <code>range</code> — шаг. Внутри цикла бери <code>items[i]</code> и добавляй в список.',
+      starter: `# items и step уже заданы
+
+`,
+      solution: `picked = []
+for i in range(0, len(items), step):
+    picked.append(items[i])
+print(picked)`,
+      cases: [
+        { label: "7 элементов, шаг 3",
+          setup: `items = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+step = 3
+_i0, _s0 = list(items), step`,
+          check: `_exp = [_i0[_i] for _i in range(0, len(_i0), _s0)]
+assert 'picked' in globals(), 'Не создана переменная picked'
+assert picked == _exp, 'picked = ' + repr(picked) + ', ожидалось ' + repr(_exp)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "шаг 1 — берём всё",
+          setup: `items = [10, 20, 30]
+step = 1
+_i0, _s0 = list(items), step`,
+          check: `_exp = [_i0[_i] for _i in range(0, len(_i0), _s0)]
+assert picked == _exp, 'picked = ' + repr(picked) + ', ожидалось ' + repr(_exp)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "шаг больше длины списка",
+          setup: `items = ['x', 'y']
+step = 5
+_i0, _s0 = list(items), step`,
+          check: `_exp = [_i0[_i] for _i in range(0, len(_i0), _s0)]
+assert picked == _exp, 'picked = ' + repr(picked) + ', ожидалось ' + repr(_exp)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "пустой список",
+          setup: `items = []
+step = 2
+_i0, _s0 = list(items), step`,
+          check: `assert 'picked' in globals(), 'Не создана переменная picked'
+assert picked == [], 'picked = ' + repr(picked) + ', ожидался пустой список'
+assert _lines and _lines[-1] == '[]', 'Ожидалась строка ' + repr('[]') + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.13 ─────────────────────────── */
+{
+  id: 'ch113',
+  num: '1.13',
+  part: 'basics',
+  title: 'Функции',
+  theory: `
+    <h4>def и return</h4>
+    <p>Функция определяется командой <code>def</code>, а значение отдаёт через <code>return</code>:</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">remainder</span>(a, b):
+    q = a // b
+    r = a - q * b
+    <span class="kw">return</span> r
+
+result = <span class="fn">remainder</span>(<span class="val">37</span>, <span class="val">15</span>)   <span class="cm"># 7</span></div>
+    <p>Если <code>return</code> не выполнился, функция возвращает <code>None</code> — это отдельный частый источник недоумения: «функция ничего не вернула» обычно значит «у неё не сработала ни одна ветка с return».</p>
+
+    <h4>Строка документации и аннотации</h4>
+    <p>В начало функции принято класть строку документации — её показывает <code>help()</code> и подхватывают редакторы:</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">remainder</span>(a: <span class="kw">int</span>, b: <span class="kw">int</span>) -&gt; <span class="kw">int</span>:
+    <span class="st">'''
+    Вычисляет остаток от деления a на b
+    '''</span>
+    <span class="kw">return</span> a - (a // b) * b</div>
+    <p>Аннотации типов, как и в 1.3, ни на что не влияют во время выполнения: вызвать <code>remainder(37.5, 3.2)</code> никто не помешает.</p>
+
+    <h4>Несколько значений сразу</h4>
+    <p>Отдельного синтаксиса для этого не нужно — возвращается кортеж, который на месте вызова распаковывается:</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">divide</span>(a, b):
+    q = a // b
+    r = a - q * b
+    <span class="kw">return</span> (q, r)
+
+quotient, remainder = <span class="fn">divide</span>(<span class="val">1456</span>, <span class="val">33</span>)</div>
+
+    <h4>Значения по умолчанию и именованные аргументы</h4>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">connect</span>(hostname, port, timeout=<span class="val">300</span>):
+    ...
+
+<span class="fn">connect</span>(<span class="st">'www.python.org'</span>, <span class="val">80</span>)                <span class="cm"># timeout возьмётся по умолчанию</span>
+<span class="fn">connect</span>(<span class="st">'www.python.org'</span>, <span class="val">80</span>, <span class="val">500</span>)           <span class="cm"># позиционно</span>
+<span class="fn">connect</span>(<span class="st">'www.python.org'</span>, <span class="val">80</span>, timeout=<span class="val">500</span>)   <span class="cm"># по имени — читается лучше</span>
+<span class="fn">connect</span>(port=<span class="val">80</span>, hostname=<span class="st">'www.python.org'</span>)   <span class="cm"># порядок имён не важен</span></div>
+    <p>Когда необязательных аргументов много, вызов вида <code>connect(host, 80, 500, 1, 0)</code> становится нечитаемым — поэтому их принято передавать по имени.</p>
+
+    <h4>Область видимости</h4>
+    <p>Переменные, созданные внутри функции, живут только внутри неё и исчезают при возврате. Читать переменные, определённые снаружи, функция может:</p>
+    <div class="code-block">debug = <span class="kw">True</span>            <span class="cm"># глобальная</span>
+
+<span class="kw">def</span> <span class="fn">read_data</span>(filename):
+    <span class="kw">if</span> debug:            <span class="cm"># видна изнутри</span>
+        <span class="fn">print</span>(<span class="st">'Reading'</span>, filename)</div>`,
+  vocab: { names: ['def', 'return'], methods: [] },
+  allowed: 'всё из 1.3—1.12 плюс <code>def</code>, <code>return</code>, строка документации, аннотации типов, возврат кортежа, значения по умолчанию, именованные аргументы',
+  tasks: [
+    {
+      id: 't113-1',
+      title: 'Функция маскирования карты',
+      statement: `<p>Определи функцию <code>mask_pan(pan)</code>, которая принимает номер карты из 16 цифр и <strong>возвращает</strong> строку: первые 6 символов, шесть звёздочек, последние 4.</p>
+        <p>Функция должна именно возвращать значение, а не печатать его. Печатать в этой задаче не нужно вообще — проверка вызовет функцию сама, с разными номерами.</p>`,
+      io: `mask_pan('4242424242424242')  →  '424242******4242'
+mask_pan('5555555555554444')  →  '555555******4444'`,
+      hint: 'Тело — та же сборка срезов, что была в 1.6, только результат уходит в <code>return</code>, а не в <code>print</code>. Если в конце функции нет <code>return</code>, она вернёт <code>None</code>.',
+      starter: `def mask_pan(pan):
+
+`,
+      solution: `def mask_pan(pan):
+    return pan[:6] + '******' + pan[-4:]`,
+      cases: [
+        { label: "mask_pan('4242424242424242')",
+          setup: ``,
+          check: `assert 'mask_pan' in globals(), 'Не определена функция mask_pan'
+_got = mask_pan('4242424242424242')
+assert _got == '424242******4242', 'Функция вернула ' + repr(_got) + ', ожидалось ' + repr('424242******4242')` },
+        { label: "mask_pan('5555555555554444')",
+          setup: ``,
+          check: `assert 'mask_pan' in globals(), 'Не определена функция mask_pan'
+_got = mask_pan('5555555555554444')
+assert _got == '555555******4444', 'Функция вернула ' + repr(_got) + ', ожидалось ' + repr('555555******4444')` },
+        { label: "mask_pan('4000056655665556')",
+          setup: ``,
+          check: `assert 'mask_pan' in globals(), 'Не определена функция mask_pan'
+_got = mask_pan('4000056655665556')
+assert _got == '400005******5556', 'Функция вернула ' + repr(_got) + ', ожидалось ' + repr('400005******5556')` },
+        { label: 'функция вызывается дважды подряд и не портит состояние',
+          setup: ``,
+          check: `assert 'mask_pan' in globals(), 'Не определена функция mask_pan'
+_a = mask_pan('4242424242424242')
+_b = mask_pan('4242424242424242')
+assert _a == _b == '424242******4242', 'Два одинаковых вызова дали ' + repr(_a) + ' и ' + repr(_b)` }
+      ]
+    },
+    {
+      id: 't113-2',
+      title: 'Значение по умолчанию',
+      statement: `<p>Определи функцию <code>connect(hostname, port, timeout=300)</code>, которая <strong>возвращает</strong> строку вида <code>www.python.org:80 (timeout=300)</code>.</p>
+        <p>Третий аргумент необязательный: если его не передали, подставляется <code>300</code>. Печатать ничего не нужно.</p>`,
+      io: `connect('www.python.org', 80)               →  'www.python.org:80 (timeout=300)'
+connect('localhost', 8080, 500)            →  'localhost:8080 (timeout=500)'
+connect('api.ozon.ru', 443, timeout=15)    →  'api.ozon.ru:443 (timeout=15)'`,
+      hint: 'Значение по умолчанию записывается прямо в заголовке: <code>def connect(hostname, port, timeout=300):</code>. Собрать строку удобнее всего f-строкой.',
+      starter: `def connect(hostname, port, timeout=300):
+
+`,
+      solution: `def connect(hostname, port, timeout=300):
+    return f'{hostname}:{port} (timeout={timeout})'`,
+      cases: [
+        { label: 'два аргумента — timeout по умолчанию',
+          setup: ``,
+          check: `assert 'connect' in globals(), 'Не определена функция connect'
+_got = connect('www.python.org', 80)
+assert _got == 'www.python.org:80 (timeout=300)', 'Вернулось ' + repr(_got) + ', ожидалось ' + repr('www.python.org:80 (timeout=300)')` },
+        { label: 'три аргумента позиционно',
+          setup: ``,
+          check: `assert 'connect' in globals(), 'Не определена функция connect'
+_got = connect('localhost', 8080, 500)
+assert _got == 'localhost:8080 (timeout=500)', 'Вернулось ' + repr(_got) + ', ожидалось ' + repr('localhost:8080 (timeout=500)')` },
+        { label: 'timeout передан по имени',
+          setup: ``,
+          check: `assert 'connect' in globals(), 'Не определена функция connect'
+_got = connect('api.ozon.ru', 443, timeout=15)
+assert _got == 'api.ozon.ru:443 (timeout=15)', 'Вернулось ' + repr(_got) + ', ожидалось ' + repr('api.ozon.ru:443 (timeout=15)')` },
+        { label: 'все аргументы по имени, в другом порядке',
+          setup: ``,
+          check: `assert 'connect' in globals(), 'Не определена функция connect'
+_got = connect(port=80, hostname='example.com')
+assert _got == 'example.com:80 (timeout=300)', 'Вернулось ' + repr(_got) + ', ожидалось ' + repr('example.com:80 (timeout=300)') + ' — имена параметров должны совпадать с условием'` }
+      ]
+    },
+    {
+      id: 't113-3',
+      title: 'Два значения из функции',
+      statement: `<p>Определи функцию <code>divide(a, b)</code>, которая возвращает <strong>кортеж из двух чисел</strong>: целую часть от деления <code>a</code> на <code>b</code> и остаток.</p>
+        <p>Затем вызови её для заданных <code>a</code> и <code>b</code>, распакуй результат в <code>quotient</code> и <code>remainder</code> и выведи одну строку.</p>`,
+      io: `a = 1456   b = 33
+→  1456 / 33 = 44 остаток 4`,
+      hint: 'Возврат нескольких значений — это возврат кортежа: <code>return (q, r)</code>. На месте вызова он распаковывается в две переменные одной командой.',
+      starter: `# a и b уже заданы
+
+def divide(x, y):
+
+`,
+      solution: `def divide(x, y):
+    q = x // y
+    r = x - q * y
+    return (q, r)
+
+quotient, remainder = divide(a, b)
+print(f'{a} / {b} = {quotient} остаток {remainder}')`,
+      cases: [
+        { label: 'a = 1456, b = 33',
+          setup: `a = 1456
+b = 33
+_a0, _b0 = a, b`,
+          check: `assert 'divide' in globals(), 'Не определена функция divide'
+_r = divide(_a0, _b0)
+assert isinstance(_r, tuple) and len(_r) == 2, 'Функция должна вернуть кортеж из двух чисел, а вернула ' + repr(_r)
+assert _r == (_a0 // _b0, _a0 % _b0), 'divide вернула ' + repr(_r) + ', ожидалось ' + repr((_a0 // _b0, _a0 % _b0))
+assert 'quotient' in globals() and 'remainder' in globals(), 'Нужны переменные quotient и remainder'
+assert quotient == _a0 // _b0, 'quotient = ' + str(quotient) + ', ожидалось ' + str(_a0 // _b0)
+assert remainder == _a0 % _b0, 'remainder = ' + str(remainder) + ', ожидалось ' + str(_a0 % _b0)
+_e = str(_a0) + ' / ' + str(_b0) + ' = ' + str(_a0 // _b0) + ' остаток ' + str(_a0 % _b0)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'делится нацело',
+          setup: `a = 100
+b = 25
+_a0, _b0 = a, b`,
+          check: `assert 'divide' in globals(), 'Не определена функция divide'
+_r = divide(_a0, _b0)
+assert _r == (_a0 // _b0, _a0 % _b0), 'divide вернула ' + repr(_r) + ', ожидалось ' + repr((_a0 // _b0, _a0 % _b0))
+assert quotient == _a0 // _b0 and remainder == _a0 % _b0, 'quotient/remainder = ' + repr((quotient, remainder))
+_e = str(_a0) + ' / ' + str(_b0) + ' = ' + str(_a0 // _b0) + ' остаток ' + str(_a0 % _b0)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'делимое меньше делителя',
+          setup: `a = 7
+b = 15
+_a0, _b0 = a, b`,
+          check: `assert 'divide' in globals(), 'Не определена функция divide'
+_r = divide(_a0, _b0)
+assert _r == (_a0 // _b0, _a0 % _b0), 'divide вернула ' + repr(_r) + ', ожидалось ' + repr((_a0 // _b0, _a0 % _b0))
+assert quotient == _a0 // _b0 and remainder == _a0 % _b0, 'quotient/remainder = ' + repr((quotient, remainder))
+_e = str(_a0) + ' / ' + str(_b0) + ' = ' + str(_a0 // _b0) + ' остаток ' + str(_a0 % _b0)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 1.14 ─────────────────────────── */
+{
+  id: 'ch114',
+  num: '1.14',
+  part: 'basics',
+  title: 'Исключения',
+  theory: `
+    <h4>Что происходит при ошибке</h4>
+    <p>Ошибка во время выполнения — это <strong>исключение</strong>. Программа печатает трассировку и обычно завершается:</p>
+    <div class="code-block">Traceback (most recent call last):
+  File <span class="st">"readport.py"</span>, line 9, in &lt;module&gt;
+    shares = int(row[1])
+ValueError: invalid literal for int() with base 10: 'N/A'</div>
+    <p>Читать её нужно снизу вверх: последняя строка — <em>что</em> случилось (тип и текст), строки выше — <em>где</em>. Для QA это первое, что попадает в баг-репорт.</p>
+
+    <h4>try / except</h4>
+    <div class="code-block">portfolio = []
+<span class="kw">for</span> line <span class="kw">in</span> file:
+    row = line.<span class="fn">split</span>(<span class="st">','</span>)
+    <span class="kw">try</span>:
+        holding = (row[<span class="val">0</span>], <span class="fn">int</span>(row[<span class="val">1</span>]), <span class="fn">float</span>(row[<span class="val">2</span>]))
+        portfolio.<span class="fn">append</span>(holding)
+    <span class="kw">except</span> ValueError <span class="kw">as</span> err:
+        <span class="fn">print</span>(<span class="st">'Bad row:'</span>, row)
+        <span class="fn">print</span>(<span class="st">'Reason:'</span>, err)</div>
+    <p>Если внутри <code>try</code> возникло исключение указанного типа, управление уходит в <code>except</code>, а подробности оказываются в переменной после <code>as</code>. Исключение <em>другого</em> типа не перехватывается — программа упадёт, как и раньше.</p>
+    <div class="hl orange"><span class="hl-label">Важно</span>После обработки выполнение продолжается <strong>со строки за блоком</strong> <code>except</code>, а не с того места, где случилась ошибка. Оставшаяся часть <code>try</code> пропускается целиком — в примере выше при плохом количестве <code>append</code> уже не выполнится.</div>
+    <p>Часто встречающиеся типы: <code>ValueError</code> (значение не того вида — <code>int('N/A')</code>), <code>TypeError</code> (не тот тип), <code>KeyError</code> (нет ключа в словаре), <code>IndexError</code> (индекс за границей), <code>FileNotFoundError</code>.</p>
+
+    <h4>raise</h4>
+    <p>Своё исключение выдают командой <code>raise</code>:</p>
+    <div class="code-block"><span class="kw">raise</span> RuntimeError(<span class="st">'Computer says no'</span>)</div>
+
+    <h4>finally и with</h4>
+    <p>Блок <code>finally</code> выполняется <strong>в любом случае</strong> — и когда всё прошло гладко, и когда вылетело исключение. Туда кладут освобождение ресурсов:</p>
+    <div class="code-block">lock.<span class="fn">acquire</span>()
+<span class="kw">try</span>:
+    ...
+<span class="kw">finally</span>:
+    lock.<span class="fn">release</span>()   <span class="cm"># выполнится при любом раскладе</span></div>
+    <p>Именно эту схему прячет внутри себя знакомая по 1.7 команда <code>with</code>: она сама захватывает ресурс и сама отпускает его на выходе из блока, даже если внутри случилось исключение. Поэтому файл и советуют открывать через <code>with</code>.</p>`,
+  vocab: { names: ['try', 'except', 'finally', 'raise', 'Exception', 'ValueError', 'TypeError', 'KeyError', 'IndexError', 'RuntimeError', 'FileNotFoundError'], methods: [] },
+  allowed: 'всё из 1.3—1.13 плюс <code>try</code> / <code>except</code>, <code>except X as err</code>, <code>raise</code>, <code>try</code> / <code>finally</code>, встроенные типы исключений',
+  tasks: [
+    {
+      id: 't114-1',
+      title: 'Пропустить битые строки',
+      statement: `<p>Дан <code>rows</code> — список списков строк вида <code>['AA', '100', '32.20']</code>. В некоторых строках вместо числа стоит мусор.</p>
+        <p>Посчитай <code>total</code> — сумму «количество × цена» по <strong>годным</strong> строкам, и <code>bad</code> — сколько строк не удалось разобрать. Разбор оберни в <code>try</code> / <code>except ValueError</code>. Выведи одну строку.</p>`,
+      io: `rows = [['AA', '100', '32.20'],
+        ['IBM', 'N/A', '91.10'],
+        ['CAT', '50', '83.44']]
+→  Сумма: 7392.00, битых: 1`,
+      hint: 'Внутрь <code>try</code> положи и преобразование, и прибавление к сумме. Тогда при плохой строке до прибавления дело не дойдёт — управление уйдёт в <code>except</code>, где надо увеличить счётчик.',
+      starter: `# rows уже задан
+
+`,
+      solution: `total = 0.0
+bad = 0
+for row in rows:
+    try:
+        total += int(row[1]) * float(row[2])
+    except ValueError:
+        bad += 1
+print(f'Сумма: {total:0.2f}, битых: {bad}')`,
+      cases: [
+        { label: 'одна битая строка из трёх',
+          setup: `rows = [['AA', '100', '32.20'], ['IBM', 'N/A', '91.10'], ['CAT', '50', '83.44']]
+_r0 = [list(r) for r in rows]`,
+          check: `_t, _b = 0.0, 0
+for _r in _r0:
+    try:
+        _t += int(_r[1]) * float(_r[2])
+    except ValueError:
+        _b += 1
+assert 'total' in globals() and 'bad' in globals(), 'Нужны переменные total и bad'
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+assert bad == _b, 'bad = ' + str(bad) + ', ожидалось ' + str(_b)
+_e = 'Сумма: ' + format(_t, '0.2f') + ', битых: ' + str(_b)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'все строки годные',
+          setup: `rows = [['AA', '10', '2.50'], ['IBM', '4', '1.00']]
+_r0 = [list(r) for r in rows]`,
+          check: `_t, _b = 0.0, 0
+for _r in _r0:
+    try:
+        _t += int(_r[1]) * float(_r[2])
+    except ValueError:
+        _b += 1
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+assert bad == 0, 'bad = ' + str(bad) + ', ожидалось 0'
+_e = 'Сумма: ' + format(_t, '0.2f') + ', битых: 0'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'битые и в количестве, и в цене',
+          setup: `rows = [['AA', 'x', '1.0'], ['IBM', '5', 'нет'], ['CAT', '2', '3.0']]
+_r0 = [list(r) for r in rows]`,
+          check: `_t, _b = 0.0, 0
+for _r in _r0:
+    try:
+        _t += int(_r[1]) * float(_r[2])
+    except ValueError:
+        _b += 1
+assert abs(total - _t) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось ' + str(round(_t, 6))
+assert bad == _b, 'bad = ' + str(bad) + ', ожидалось ' + str(_b)
+_e = 'Сумма: ' + format(_t, '0.2f') + ', битых: ' + str(_b)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'все строки битые',
+          setup: `rows = [['AA', 'N/A', 'N/A'], ['IBM', '-', '-']]
+_r0 = [list(r) for r in rows]`,
+          check: `assert 'total' in globals() and 'bad' in globals(), 'Нужны переменные total и bad'
+assert abs(total - 0.0) < 1e-9, 'total = ' + str(round(total, 6)) + ', ожидалось 0'
+assert bad == 2, 'bad = ' + str(bad) + ', ожидалось 2'
+_e = 'Сумма: 0.00, битых: 2'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't114-2',
+      title: 'Причина ошибки в сообщении',
+      statement: `<p>Дана строка <code>value</code>. Попробуй превратить её в целое число.</p>
+        <ul>
+          <li>получилось — выведи <code>Число: 42</code>;</li>
+          <li>не получилось — перехвати <code>ValueError</code> и выведи <code>Ошибка: </code> и текст самого исключения.</li>
+        </ul>
+        <p>Текст надо взять из объекта исключения, а не выдумывать свой — для этого его связывают с именем через <code>as</code>.</p>`,
+      io: `value = '42'    →  Число: 42
+value = 'N/A'   →  Ошибка: invalid literal for int() with base 10: 'N/A'`,
+      hint: 'Пиши <code>except ValueError as err:</code> — тогда в <code>err</code> окажется объект исключения, а f-строка подставит его текст, как обычную величину: <code>f\'Ошибка: {err}\'</code>.',
+      starter: `# value уже задан
+
+`,
+      solution: `try:
+    number = int(value)
+    print(f'Число: {number}')
+except ValueError as err:
+    print(f'Ошибка: {err}')`,
+      cases: [
+        { label: "value = '42' — разбирается",
+          setup: `value = '42'
+_v0 = value`,
+          check: `try:
+    _e = 'Число: ' + str(int(_v0))
+except ValueError as _err:
+    _e = 'Ошибка: ' + str(_err)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "value = 'N/A' — не разбирается",
+          setup: `value = 'N/A'
+_v0 = value`,
+          check: `try:
+    _e = 'Число: ' + str(int(_v0))
+except ValueError as _err:
+    _e = 'Ошибка: ' + str(_err)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '') + ' — текст надо брать из объекта исключения'` },
+        { label: "value = '  7  ' — пробелы int() переживает",
+          setup: `value = '  7  '
+_v0 = value`,
+          check: `try:
+    _e = 'Число: ' + str(int(_v0))
+except ValueError as _err:
+    _e = 'Ошибка: ' + str(_err)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "value = '3.14' — для int() это тоже ошибка",
+          setup: `value = '3.14'
+_v0 = value`,
+          check: `try:
+    _e = 'Число: ' + str(int(_v0))
+except ValueError as _err:
+    _e = 'Ошибка: ' + str(_err)
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` }
+      ]
+    },
+    {
+      id: 't114-3',
+      title: 'finally выполняется всегда',
+      statement: `<p>Дана строка <code>value</code>. Напиши разбор так, чтобы вывелось ровно две строки:</p>
+        <ul>
+          <li>в <code>try</code> — преобразование в число и вывод <code>Число: 42</code>;</li>
+          <li>в <code>except ValueError</code> — вывод <code>Ошибка разбора</code>;</li>
+          <li>в <code>finally</code> — вывод <code>Готово</code>.</li>
+        </ul>
+        <p>Строка <code>Готово</code> должна появляться в обоих случаях — в этом весь смысл <code>finally</code>.</p>`,
+      io: `value = '42'    →  Число: 42
+                   Готово
+
+value = 'ой'    →  Ошибка разбора
+                   Готово`,
+      hint: 'Все три блока относятся к одной команде: <code>try:</code> … <code>except ValueError:</code> … <code>finally:</code> … Отдельного <code>print</code> после конструкции не нужно — иначе при ошибке строк станет три.',
+      starter: `# value уже задан
+
+`,
+      solution: `try:
+    number = int(value)
+    print(f'Число: {number}')
+except ValueError:
+    print('Ошибка разбора')
+finally:
+    print('Готово')`,
+      cases: [
+        { label: "value = '42' — успешный путь",
+          setup: `value = '42'
+_v0 = value`,
+          check: `assert _lines == ['Число: 42', 'Готово'], 'Ожидался вывод ' + repr(['Число: 42', 'Готово']) + ', а получено ' + repr(_lines)` },
+        { label: "value = 'ой' — путь с ошибкой",
+          setup: `value = 'ой'
+_v0 = value`,
+          check: `assert _lines == ['Ошибка разбора', 'Готово'], 'Ожидался вывод ' + repr(['Ошибка разбора', 'Готово']) + ', а получено ' + repr(_lines)` },
+        { label: "value = '0' — ноль это тоже число",
+          setup: `value = '0'
+_v0 = value`,
+          check: `assert _lines == ['Число: 0', 'Готово'], 'Ожидался вывод ' + repr(['Число: 0', 'Готово']) + ', а получено ' + repr(_lines)` },
+        { label: "value = '' — пустая строка не число",
+          setup: `value = ''
+_v0 = value`,
+          check: `assert _lines == ['Ошибка разбора', 'Готово'], 'Ожидался вывод ' + repr(['Ошибка разбора', 'Готово']) + ', а получено ' + repr(_lines)` }
       ]
     }
   ]
@@ -2348,7 +3648,29 @@ let allTasks = [];
 // который появится только в 1.7 — это ровно то правило, на котором стоит раздел.
 const vocabSoFar = { names: [], methods: [] };
 
+let lastPart = null;
+
 CHAPTERS.forEach((ch) => {
+  if (ch.part !== lastPart) {
+    lastPart = ch.part;
+    const part = PARTS[ch.part];
+    const n = CHAPTERS.filter((c) => c.part === ch.part).length;
+
+    const band = document.createElement('div');
+    band.className = 'part-head';
+    band.id = 'part-' + ch.part;
+    band.innerHTML = `
+      <div class="part-title">${part.title}</div>
+      <div class="part-sub">${part.sub} · ${n} ${n === 1 ? 'глава' : n < 5 ? 'главы' : 'глав'}</div>
+      <div class="part-lead">${part.lead}</div>`;
+    root.appendChild(band);
+
+    const tocTitle = document.createElement('div');
+    tocTitle.className = 'nav-group-title toc-part';
+    tocTitle.textContent = part.title;
+    toc.appendChild(tocTitle);
+  }
+
   vocabSoFar.names = vocabSoFar.names.concat(ch.vocab.names);
   vocabSoFar.methods = vocabSoFar.methods.concat(ch.vocab.methods);
   const chapterVocab = { names: [...vocabSoFar.names], methods: [...vocabSoFar.methods] };
