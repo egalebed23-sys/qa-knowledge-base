@@ -3386,6 +3386,295 @@ _v0 = value`,
     }
   ]
 }
+,
+
+/* ─────────────────────────── 1.16 ─────────────────────────── */
+{
+  id: 'ch116',
+  num: '1.16',
+  part: 'basics',
+  title: 'Объекты и классы',
+  theory: `
+    <h4>Всё вокруг — объекты</h4>
+    <p>Объект — это внутренние данные плюс методы, которые с ними работают. Ты этим пользуешься с главы 1.6: строка и список — тоже объекты, а <code>append</code> — их метод.</p>
+    <div class="code-block">items = [<span class="val">37</span>, <span class="val">42</span>]   <span class="cm"># создали объект-список</span>
+items.<span class="fn">append</span>(<span class="val">73</span>)   <span class="cm"># вызвали его метод</span>
+
+<span class="fn">dir</span>(items)          <span class="cm"># покажет все доступные методы объекта</span></div>
+    <p>Среди них попадаются имена в двойных подчёркиваниях — <strong>специальные методы</strong>. Они стоят за операторами: <code>__add__</code> обслуживает <code>+</code>, <code>__len__</code> — вызов <code>len()</code>, <code>__eq__</code> — сравнение <code>==</code>.</p>
+
+    <h4>class, __init__ и self</h4>
+    <div class="code-block"><span class="kw">class</span> Stack:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._items = []
+
+    <span class="kw">def</span> <span class="fn">push</span>(self, item):
+        self._items.<span class="fn">append</span>(item)
+
+    <span class="kw">def</span> <span class="fn">pop</span>(self):
+        <span class="kw">return</span> self._items.<span class="fn">pop</span>()
+
+s = Stack()        <span class="cm"># создание объекта — __init__ вызывается сам</span>
+s.<span class="fn">push</span>(<span class="st">'Dave'</span>)
+x = s.<span class="fn">pop</span>()      <span class="cm"># 'Dave'</span></div>
+    <p>Методы объявляются тем же <code>def</code>, но <strong>первый параметр всегда обозначает сам объект</strong> и по соглашению зовётся <code>self</code>. Обращение к любому своему полю идёт только через него: <code>self._items</code>, а не просто <code>_items</code>. Метод <code>__init__</code> вызывается при создании объекта и готовит его начальное состояние.</p>
+    <div class="hl orange"><span class="hl-label">Ловушка</span>Список надо создавать <strong>внутри</strong> <code>__init__</code>. Если написать его прямо в теле класса (<code>_items = []</code> рядом с методами), он станет общим для всех объектов сразу — две «разные» корзины будут делить одно содержимое. Классическая ошибка, которую ловят только тестом на два независимых экземпляра.</div>
+
+    <h4>Приватность — это соглашение</h4>
+    <p>Имя, начинающееся с одного подчёркивания (<code>_items</code>), означает «внутренняя кухня, снаружи не трогать». Никакой защиты за этим нет: обратиться к <code>s._items</code> можно всегда, язык не помешает. Помешают только коллеги на ревью.</p>
+
+    <h4>Специальные методы</h4>
+    <p>Их определяют, чтобы объект нормально жил в окружении языка:</p>
+    <div class="code-block"><span class="kw">class</span> Stack:
+    ...
+    <span class="kw">def</span> <span class="fn">__len__</span>(self):
+        <span class="kw">return</span> <span class="fn">len</span>(self._items)
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):
+        <span class="kw">return</span> f<span class="st">'&lt;Stack size={len(self)}&gt;'</span>
+
+<span class="fn">len</span>(s)   <span class="cm"># 2   — работает благодаря __len__</span>
+s        <span class="cm"># &lt;Stack size=2&gt;   — благодаря __repr__</span></div>
+    <p><code>__repr__</code> стоит писать всегда: именно он определяет, как объект выглядит в отладке и в сообщениях об ошибках.</p>
+    <div class="hl"><span class="hl-label">Важно для тестировщика</span>Пока не определён <code>__eq__</code>, два объекта сравниваются <strong>по идентичности</strong>, а не по содержимому: <code>Holding('AA', 100) == Holding('AA', 100)</code> даст <code>False</code>. Поэтому <code>assert result == ожидаемое</code> на собственном классе проваливается даже при совпадающих данных. У кортежей и списков сравнение по значению есть из коробки — это одна из причин, почему их так часто возвращают из функций.</div>
+
+    <h4>Наследование</h4>
+    <p>Наследник получает всё поведение родителя и может добавить своё либо переопределить существующее. Вызвать прежнюю версию метода позволяет <code>super()</code>:</p>
+    <div class="code-block"><span class="kw">class</span> NumericStack(Stack):
+    <span class="kw">def</span> <span class="fn">push</span>(self, item):
+        <span class="kw">if</span> <span class="kw">not</span> <span class="fn">isinstance</span>(item, (<span class="kw">int</span>, <span class="kw">float</span>)):
+            <span class="kw">raise</span> TypeError(<span class="st">'Expected an int or float'</span>)
+        <span class="fn">super</span>().<span class="fn">push</span>(item)   <span class="cm"># обычное добавление из Stack</span></div>
+    <p>Так проверка добавляется <em>поверх</em> готовой логики, а не копированием её тела.</p>
+
+    <h4>Композиция вместо наследования</h4>
+    <p>Наследование подходит не всегда. Калькулятор на стеке использует <code>push</code> и <code>pop</code>, но калькулятор — не разновидность стека, поэтому стек кладут <strong>внутрь</strong>:</p>
+    <div class="code-block"><span class="kw">class</span> Calculator:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._stack = Stack()      <span class="cm"># стек — часть реализации</span>
+
+    <span class="kw">def</span> <span class="fn">push</span>(self, item):
+        self._stack.<span class="fn">push</span>(item)   <span class="cm"># делегируем</span></div>
+    <p>Проверка простая: наследование уместно, когда честно звучит «это разновидность того». В телефоне стоит процессор, но телефон — не разновидность процессора.</p>`,
+  vocab: { names: ['class', 'self', 'super', 'isinstance', 'dir', '__init__', '__len__', '__repr__', '__eq__'], methods: ['pop'] },
+  allowed: 'всё из 1.3—1.14 плюс <code>class</code>, <code>__init__</code> и <code>self</code>, методы объекта, соглашение <code>_приватное</code>, специальные методы <code>__len__</code> / <code>__repr__</code>, наследование, <code>super()</code>, <code>isinstance()</code>, композиция',
+  tasks: [
+    {
+      id: 't116-1',
+      title: 'Класс со своим состоянием',
+      statement: `<p>Определи класс <code>Cart</code> — корзину покупок:</p>
+        <ul>
+          <li><code>__init__</code> заводит пустой внутренний список <code>_items</code>;</li>
+          <li><code>add(name, price)</code> добавляет в него кортеж <code>(name, price)</code>;</li>
+          <li><code>total()</code> возвращает сумму цен, а для пустой корзины — <code>0</code>.</li>
+        </ul>
+        <p>Печатать ничего не нужно: проверка создаст корзины и вызовет методы сама.</p>`,
+      io: `c = Cart()
+c.add('мышь', 990.0)
+c.add('коврик', 250.5)
+c.total()   →  1240.5`,
+      hint: 'Список создавай <strong>внутри</strong> <code>__init__</code> через <code>self._items = []</code>. Если объявить его в теле класса рядом с методами, он окажется общим для всех корзин сразу. Каждый метод первым параметром принимает <code>self</code>.',
+      starter: `class Cart:
+
+`,
+      solution: `class Cart:
+    def __init__(self):
+        self._items = []
+
+    def add(self, name, price):
+        self._items.append((name, price))
+
+    def total(self):
+        return sum([price for _, price in self._items])`,
+      cases: [
+        { label: 'пустая корзина',
+          setup: ``,
+          check: `assert 'Cart' in globals(), 'Не определён класс Cart'
+_c = Cart()
+assert _c.total() == 0, 'total() пустой корзины вернул ' + repr(_c.total()) + ', ожидался 0'` },
+        { label: 'два товара',
+          setup: ``,
+          check: `assert 'Cart' in globals(), 'Не определён класс Cart'
+_c = Cart()
+_c.add('мышь', 990.0)
+_c.add('коврик', 250.5)
+assert abs(_c.total() - 1240.5) < 1e-9, 'total() вернул ' + repr(_c.total()) + ', ожидалось 1240.5'` },
+        { label: 'товары хранятся кортежами (name, price)',
+          setup: ``,
+          check: `assert 'Cart' in globals(), 'Не определён класс Cart'
+_c = Cart()
+_c.add('мышь', 990.0)
+assert hasattr(_c, '_items'), 'У объекта нет внутреннего списка _items'
+assert _c._items == [('мышь', 990.0)], '_items = ' + repr(_c._items) + ", ожидалось [('мышь', 990.0)]"` },
+        { label: 'две корзины не делят содержимое',
+          setup: ``,
+          check: `assert 'Cart' in globals(), 'Не определён класс Cart'
+_a = Cart()
+_b = Cart()
+_a.add('мышь', 990.0)
+assert _b.total() == 0, 'Вторая корзина получила товар из первой: total() = ' + repr(_b.total()) + '. Список надо создавать внутри __init__, а не в теле класса'
+assert abs(_a.total() - 990.0) < 1e-9, 'total() первой корзины вернул ' + repr(_a.total())` }
+      ]
+    },
+    {
+      id: 't116-2',
+      title: 'Наследник с проверкой',
+      statement: `<p>Класс <code>Cart</code> из прошлой задачи <strong>уже определён</strong> — его писать не надо.</p>
+        <p>Определи <code>StrictCart</code> — наследника <code>Cart</code>, который переопределяет <code>add</code>: если цена отрицательная, выбрасывается <code>ValueError</code>, иначе товар добавляется <strong>обычным способом родителя</strong> через <code>super()</code>.</p>
+        <p>Тело <code>add</code> из <code>Cart</code> копировать не нужно — в этом весь смысл <code>super()</code>. Метод <code>total()</code> наследуется сам.</p>`,
+      io: `c = StrictCart()
+c.add('мышь', 990.0)     →  добавилось
+c.add('битый', -5.0)     →  ValueError
+c.total()                →  990.0`,
+      hint: 'Заголовок класса — <code>class StrictCart(Cart):</code>. Внутри <code>add</code> сначала проверка и <code>raise ValueError(...)</code>, а в конце — <code>super().add(name, price)</code>.',
+      starter: `# класс Cart уже определён
+
+class StrictCart(Cart):
+
+`,
+      solution: `class StrictCart(Cart):
+    def add(self, name, price):
+        if price < 0:
+            raise ValueError('Отрицательная цена')
+        super().add(name, price)`,
+      cases: [
+        { label: 'обычный товар добавляется',
+          setup: `class Cart:
+    def __init__(self):
+        self._items = []
+
+    def add(self, name, price):
+        self._items.append((name, price))
+
+    def total(self):
+        return sum([price for _, price in self._items])`,
+          check: `assert 'StrictCart' in globals(), 'Не определён класс StrictCart'
+assert issubclass(StrictCart, Cart), 'StrictCart должен наследоваться от Cart'
+_c = StrictCart()
+_c.add('мышь', 990.0)
+assert abs(_c.total() - 990.0) < 1e-9, 'total() вернул ' + repr(_c.total()) + ', ожидалось 990.0 — товар должен уходить в родительский add через super()'` },
+        { label: 'отрицательная цена даёт ValueError',
+          setup: `class Cart:
+    def __init__(self):
+        self._items = []
+
+    def add(self, name, price):
+        self._items.append((name, price))
+
+    def total(self):
+        return sum([price for _, price in self._items])`,
+          check: `assert 'StrictCart' in globals(), 'Не определён класс StrictCart'
+_c = StrictCart()
+_raised = False
+try:
+    _c.add('битый', -5.0)
+except ValueError:
+    _raised = True
+assert _raised, 'На отрицательной цене ожидался ValueError, но его не было'
+assert _c.total() == 0, 'После отказа корзина должна остаться пустой, а total() = ' + repr(_c.total())` },
+        { label: 'нулевая цена допустима',
+          setup: `class Cart:
+    def __init__(self):
+        self._items = []
+
+    def add(self, name, price):
+        self._items.append((name, price))
+
+    def total(self):
+        return sum([price for _, price in self._items])`,
+          check: `assert 'StrictCart' in globals(), 'Не определён класс StrictCart'
+_c = StrictCart()
+_c.add('подарок', 0)
+assert _c.total() == 0, 'total() вернул ' + repr(_c.total()) + ', ожидалось 0'
+assert len(_c._items) == 1, 'Товар с нулевой ценой должен добавляться: _items = ' + repr(_c._items)` },
+        { label: 'total() унаследован, а не переписан',
+          setup: `class Cart:
+    def __init__(self):
+        self._items = []
+
+    def add(self, name, price):
+        self._items.append((name, price))
+
+    def total(self):
+        return sum([price for _, price in self._items])`,
+          check: `assert 'StrictCart' in globals(), 'Не определён класс StrictCart'
+assert 'total' not in StrictCart.__dict__, 'total() переопределять не нужно — он наследуется от Cart'
+_c = StrictCart()
+_c.add('a', 10.0)
+_c.add('b', 2.5)
+assert abs(_c.total() - 12.5) < 1e-9, 'total() вернул ' + repr(_c.total()) + ', ожидалось 12.5'` }
+      ]
+    },
+    {
+      id: 't116-3',
+      title: 'len() и repr() для своего класса',
+      statement: `<p>Определи класс <code>TestRun</code> — прогон автотестов:</p>
+        <ul>
+          <li><code>__init__</code> заводит пустой внутренний список <code>_results</code>;</li>
+          <li><code>add(name, passed)</code> добавляет кортеж <code>(name, passed)</code>, где <code>passed</code> — это <code>True</code> или <code>False</code>;</li>
+          <li><code>__len__</code> возвращает количество тестов, чтобы работал <code>len(run)</code>;</li>
+          <li><code>__repr__</code> возвращает строку <code>&lt;TestRun tests=2, failed=1&gt;</code>.</li>
+        </ul>
+        <p>Именно <code>__repr__</code> определяет, как объект покажется в отладке и в сообщении упавшего теста — поэтому его и стоит писать всегда.</p>`,
+      io: `run = TestRun()
+run.add('login', True)
+run.add('pay', False)
+len(run)    →  2
+repr(run)   →  '<TestRun tests=2, failed=1>'`,
+      hint: 'Внутри <code>__repr__</code> можно звать <code>len(self)</code> — <code>__len__</code> к этому моменту уже определён. Упавшие удобно посчитать списковым включением по <code>self._results</code>, отбирая записи с <code>passed</code> равным <code>False</code>.',
+      starter: `class TestRun:
+
+`,
+      solution: `class TestRun:
+    def __init__(self):
+        self._results = []
+
+    def add(self, name, passed):
+        self._results.append((name, passed))
+
+    def __len__(self):
+        return len(self._results)
+
+    def __repr__(self):
+        failed = len([1 for _, passed in self._results if not passed])
+        return f'<TestRun tests={len(self)}, failed={failed}>'`,
+      cases: [
+        { label: 'пустой прогон',
+          setup: ``,
+          check: `assert 'TestRun' in globals(), 'Не определён класс TestRun'
+_r = TestRun()
+assert len(_r) == 0, 'len() вернул ' + repr(len(_r)) + ', ожидался 0'
+assert repr(_r) == '<TestRun tests=0, failed=0>', 'repr() вернул ' + repr(repr(_r)) + ', ожидалось ' + repr('<TestRun tests=0, failed=0>')` },
+        { label: 'два теста, один упал',
+          setup: ``,
+          check: `assert 'TestRun' in globals(), 'Не определён класс TestRun'
+_r = TestRun()
+_r.add('login', True)
+_r.add('pay', False)
+assert len(_r) == 2, 'len() вернул ' + repr(len(_r)) + ', ожидалось 2'
+assert repr(_r) == '<TestRun tests=2, failed=1>', 'repr() вернул ' + repr(repr(_r)) + ', ожидалось ' + repr('<TestRun tests=2, failed=1>')` },
+        { label: 'все тесты зелёные',
+          setup: ``,
+          check: `assert 'TestRun' in globals(), 'Не определён класс TestRun'
+_r = TestRun()
+_r.add('a', True)
+_r.add('b', True)
+_r.add('c', True)
+assert len(_r) == 3, 'len() вернул ' + repr(len(_r)) + ', ожидалось 3'
+assert repr(_r) == '<TestRun tests=3, failed=0>', 'repr() вернул ' + repr(repr(_r)) + ', ожидалось ' + repr('<TestRun tests=3, failed=0>')` },
+        { label: 'записи хранятся кортежами, прогоны независимы',
+          setup: ``,
+          check: `assert 'TestRun' in globals(), 'Не определён класс TestRun'
+_a = TestRun()
+_b = TestRun()
+_a.add('login', True)
+assert hasattr(_a, '_results'), 'У объекта нет внутреннего списка _results'
+assert _a._results == [('login', True)], '_results = ' + repr(_a._results) + ", ожидалось [('login', True)]"
+assert len(_b) == 0, 'Второй прогон получил записи первого — список надо создавать внутри __init__'` }
+      ]
+    }
+  ]
+}
 
 ];
 
