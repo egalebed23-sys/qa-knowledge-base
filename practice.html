@@ -3673,6 +3673,227 @@ assert _a._results == [('login', True)], '_results = ' + repr(_a._results) + ", 
 assert len(_b) == 0, 'Второй прогон получил записи первого — список надо создавать внутри __init__'` }
       ]
     }
+,
+    {
+      id: 't116-4',
+      title: 'Сравнение по значению',
+      statement: `<p>Определи класс <code>Holding</code> — позицию портфеля:</p>
+        <ul>
+          <li><code>__init__(self, name, shares, price)</code> сохраняет три поля под теми же именами;</li>
+          <li><code>__eq__</code> считает две позиции равными, когда совпадают все три поля.</li>
+        </ul>
+        <p>Сравнение с объектом другого типа должно давать <code>False</code>, а <strong>не падать с ошибкой</strong>.</p>
+        <p>Пока <code>__eq__</code> не определён, Python сравнивает объекты по идентичности — и <code>assert result == ожидаемое</code> проваливается даже на полностью совпадающих данных. Ради этого метод и пишут.</p>`,
+      io: `a = Holding('AA', 100, 32.2)
+b = Holding('AA', 100, 32.2)
+
+a == b                          →  True
+a == Holding('IBM', 100, 32.2)  →  False
+a == 42                         →  False   (не ошибка)`,
+      hint: 'Первым делом в <code>__eq__</code> отсеки чужие типы через <code>isinstance(other, Holding)</code> — иначе обращение к <code>other.name</code> у числа выбросит <code>AttributeError</code>. Дальше сравни три поля и верни результат сравнения.',
+      starter: `class Holding:
+
+`,
+      solution: `class Holding:
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+
+    def __eq__(self, other):
+        if not isinstance(other, Holding):
+            return False
+        return (self.name == other.name
+                and self.shares == other.shares
+                and self.price == other.price)`,
+      cases: [
+        { label: 'поля сохраняются под своими именами',
+          setup: ``,
+          check: `assert 'Holding' in globals(), 'Не определён класс Holding'
+_a = Holding('AA', 100, 32.2)
+for _k, _v in (('name', 'AA'), ('shares', 100)):
+    assert hasattr(_a, _k), 'У объекта нет поля ' + _k
+    assert getattr(_a, _k) == _v, _k + ' = ' + repr(getattr(_a, _k)) + ', ожидалось ' + repr(_v)
+assert hasattr(_a, 'price'), 'У объекта нет поля price'
+assert abs(_a.price - 32.2) < 1e-9, 'price = ' + repr(_a.price) + ', ожидалось 32.2'` },
+        { label: 'одинаковые данные — равны',
+          setup: ``,
+          check: `assert 'Holding' in globals(), 'Не определён класс Holding'
+_a = Holding('AA', 100, 32.2)
+_b = Holding('AA', 100, 32.2)
+assert _a == _b, 'Две позиции с одинаковыми данными оказались не равны — без __eq__ Python сравнивает по идентичности'` },
+        { label: 'разное название — не равны',
+          setup: ``,
+          check: `assert 'Holding' in globals(), 'Не определён класс Holding'
+_a = Holding('AA', 100, 32.2)
+_c = Holding('IBM', 100, 32.2)
+assert not (_a == _c), 'Позиции с разными названиями не должны быть равны'` },
+        { label: 'разное количество или цена — не равны',
+          setup: ``,
+          check: `assert 'Holding' in globals(), 'Не определён класс Holding'
+_a = Holding('AA', 100, 32.2)
+assert not (_a == Holding('AA', 50, 32.2)), 'Позиции с разным количеством не должны быть равны'
+assert not (_a == Holding('AA', 100, 91.1)), 'Позиции с разной ценой не должны быть равны'` },
+        { label: 'сравнение с чужим типом не падает',
+          setup: ``,
+          check: `assert 'Holding' in globals(), 'Не определён класс Holding'
+_a = Holding('AA', 100, 32.2)
+for _other in (42, 'AA', ('AA', 100, 32.2), None):
+    try:
+        _res = (_a == _other)
+    except Exception as _err:
+        raise AssertionError('Сравнение с ' + repr(_other) + ' упало: ' + type(_err).__name__ + ': ' + str(_err) + '. Отсеки чужие типы через isinstance')
+    assert not _res, 'Сравнение с ' + repr(_other) + ' дало ' + repr(_res) + ', ожидалось False'` }
+      ]
+    },
+    {
+      id: 't116-5',
+      title: 'Композиция вместо наследования',
+      statement: `<p>Класс <code>Stack</code> <strong>уже определён</strong>: у него есть <code>push(item)</code>, <code>pop()</code> и работающий <code>len()</code>.</p>
+        <p>Определи <code>Calculator</code>, который <strong>держит стек внутри себя</strong>:</p>
+        <ul>
+          <li><code>__init__</code> создаёт <code>self._stack = Stack()</code>;</li>
+          <li><code>push(item)</code> и <code>pop()</code> передают вызов внутреннему стеку;</li>
+          <li><code>add()</code> снимает два числа и кладёт обратно их сумму;</li>
+          <li><code>mul()</code> — то же с произведением;</li>
+          <li><code>sub()</code> — то же с разностью, где вычитается <strong>снятое первым</strong>.</li>
+        </ul>
+        <p>Наследоваться от <code>Stack</code> здесь нельзя. Калькулятор пользуется стеком, но не является его разновидностью — и проверка это контролирует.</p>`,
+      io: `calc = Calculator()   # считаем 2 + 3 * 4
+calc.push(2)
+calc.push(3)
+calc.push(4)
+calc.mul()            # 3 * 4 = 12
+calc.add()            # 2 + 12 = 14
+calc.pop()   →  14`,
+      hint: 'Делегирование — это просто вызов метода внутреннего объекта: <code>self._stack.push(item)</code>. В <code>sub()</code> порядок важен: <code>pop()</code> отдаёт положенное последним, поэтому первое снятое число — это правый операнд, и его надо запомнить в переменную.',
+      starter: `# класс Stack уже определён
+
+class Calculator:
+
+`,
+      solution: `class Calculator:
+    def __init__(self):
+        self._stack = Stack()
+
+    def push(self, item):
+        self._stack.push(item)
+
+    def pop(self):
+        return self._stack.pop()
+
+    def add(self):
+        self.push(self.pop() + self.pop())
+
+    def mul(self):
+        self.push(self.pop() * self.pop())
+
+    def sub(self):
+        right = self.pop()
+        self.push(self.pop() - right)`,
+      cases: [
+        { label: 'стек лежит внутри, а не наследуется',
+          setup: `class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+
+    def pop(self):
+        return self._items.pop()
+
+    def __len__(self):
+        return len(self._items)`,
+          check: `assert 'Calculator' in globals(), 'Не определён класс Calculator'
+assert not issubclass(Calculator, Stack), 'Calculator не должен наследоваться от Stack — стек надо положить внутрь объекта'
+_c = Calculator()
+assert hasattr(_c, '_stack'), 'Внутри Calculator нет стека — ожидалось поле _stack'
+assert isinstance(_c._stack, Stack), '_stack должен быть объектом Stack, а это ' + type(_c._stack).__name__` },
+        { label: 'push и pop передают вызов внутрь',
+          setup: `class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+
+    def pop(self):
+        return self._items.pop()
+
+    def __len__(self):
+        return len(self._items)`,
+          check: `assert 'Calculator' in globals(), 'Не определён класс Calculator'
+_c = Calculator()
+_c.push(7)
+assert len(_c._stack) == 1, 'После push() внутренний стек пуст — вызов до него не дошёл'
+_got = _c.pop()
+assert _got == 7, 'pop() вернул ' + repr(_got) + ', ожидалось 7'
+assert len(_c._stack) == 0, 'pop() должен снимать значение с внутреннего стека'` },
+        { label: '2 + 3 * 4 = 14',
+          setup: `class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+
+    def pop(self):
+        return self._items.pop()
+
+    def __len__(self):
+        return len(self._items)`,
+          check: `assert 'Calculator' in globals(), 'Не определён класс Calculator'
+_c = Calculator()
+_c.push(2)
+_c.push(3)
+_c.push(4)
+_c.mul()
+_c.add()
+_got = _c.pop()
+assert _got == 14, 'Получилось ' + repr(_got) + ', ожидалось 14'` },
+        { label: 'sub() вычитает снятое первым',
+          setup: `class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+
+    def pop(self):
+        return self._items.pop()
+
+    def __len__(self):
+        return len(self._items)`,
+          check: `assert 'Calculator' in globals(), 'Не определён класс Calculator'
+_c = Calculator()
+_c.push(10)
+_c.push(3)
+_c.sub()
+_got = _c.pop()
+assert _got == 7, 'Получилось ' + repr(_got) + ', ожидалось 7 (10 - 3). Порядок снятия в sub() важен: вычитается то, что снято первым'` },
+        { label: 'mul() на отрицательных числах',
+          setup: `class Stack:
+    def __init__(self):
+        self._items = []
+
+    def push(self, item):
+        self._items.append(item)
+
+    def pop(self):
+        return self._items.pop()
+
+    def __len__(self):
+        return len(self._items)`,
+          check: `assert 'Calculator' in globals(), 'Не определён класс Calculator'
+_c = Calculator()
+_c.push(-6)
+_c.push(7)
+_c.mul()
+_got = _c.pop()
+assert _got == -42, 'Получилось ' + repr(_got) + ', ожидалось -42'` }
+      ]
+    }
   ]
 }
 
