@@ -1047,9 +1047,15 @@ assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e
         <tr><td><code>x / y</code></td><td>деление — <strong>всегда</strong> даёт float, даже для целых</td><td><code>7 / 4</code> → <code>1.75</code></td></tr>
         <tr><td><code>x // y</code></td><td>целочисленное деление, отбрасывает дробную часть</td><td><code>7 // 4</code> → <code>1</code></td></tr>
         <tr><td><code>x % y</code></td><td>остаток от деления</td><td><code>7 % 4</code> → <code>3</code></td></tr>
-        <tr><td><code>x ** y</code></td><td>возведение в степень</td><td><code>2 ** 10</code> → <code>1024</code></td></tr>
+        <tr><td><code>x**y</code></td><td>возведение в степень</td><td><code>2**10</code> → <code>1024</code></td></tr>
       </tbody>
     </table>
+    <div class="hl"><span class="hl-label">Про пробелы вокруг **</span>На смысл они не влияют: <code>2**10</code> и <code>2 ** 10</code> — одно и то же. Но PEP 8 не требует окружать <code>**</code> пробелами и прямо разрешает их опускать у операторов с высоким приоритетом, чтобы показать группировку. Форматтер <strong>black</strong>, на который равняется большинство проектов, делает из этого правило: <code>**</code> пишется <em>слитно</em>, когда оба операнда простые, и <em>с пробелами</em>, когда операнд сложный. Остальные арифметические операторы всегда идут с пробелами — <code>**</code> тут исключение.</div>
+    <div class="code-block"><span class="val">2</span>**<span class="val">10</span>          <span class="cm"># оба операнда простые — слитно</span>
+x**<span class="val">2</span>
+x**-<span class="val">1</span>
+<span class="fn">int</span>(x) ** <span class="val">2</span>   <span class="cm"># слева вызов — с пробелами</span>
+(a + b) ** <span class="val">2</span></div>
     <p>Пара <code>//</code> и <code>%</code> — рабочая лошадка для «разложить число на части»: секунды на часы и минуты, копейки на рубли и копейки, номер страницы на смещение.</p>
     <p>Из встроенных функций пригодятся <code>abs(x)</code> — модуль, <code>divmod(x, y)</code> — сразу частное и остаток одной операцией, <code>pow(x, y)</code> — степень, <code>round(x, n)</code> — округление до n знаков.</p>
     <div class="hl orange"><span class="hl-label">Ловушка</span><code>round()</code> использует <strong>банковское округление</strong>: значение ровно посередине уходит к ближайшему <em>чётному</em>. <code>round(0.5)</code> даёт <code>0</code>, а <code>round(1.5)</code> — <code>2</code>. Классический источник расхождения на копейку между расчётом в коде и ожиданием в тест-кейсе.</div>
@@ -2853,17 +2859,17 @@ d = <span class="fn">range</span>(<span class="val">8</span>, <span class="val">
         { label: 'n = 4',
           setup: `n = 4
 _n0 = n`,
-          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2**_i) for _i in range(1, _n0 + 1)]
 assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
         { label: 'n = 1 (одна строка)',
           setup: `n = 1
 _n0 = n`,
-          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2**_i) for _i in range(1, _n0 + 1)]
 assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines) + ' (граница range не включается — нужен n + 1)'` },
         { label: 'n = 10',
           setup: `n = 10
 _n0 = n`,
-          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2 ** _i) for _i in range(1, _n0 + 1)]
+          check: `_exp = ['2 to the ' + str(_i) + ' power is ' + str(2**_i) for _i in range(1, _n0 + 1)]
 assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
         { label: 'n = 0 (выводить нечего)',
           setup: `n = 0
