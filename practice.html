@@ -797,6 +797,11 @@
    РАЗДЕЛЫ: крупные части книги. Главы ниже привязаны к ним полем part.
    ══════════════════════════════════════════════════════════════ */
 const PARTS = {
+  flow: {
+    title: 'Структура программы и управление выполнением',
+    sub: 'Глава 3 книги · порядок выполнения, ошибки, ресурсы',
+    lead: 'Четыре раздела из семи: перебор с <code>enumerate</code> и <code>zip</code>, иерархия исключений и свои типы ошибок, менеджеры контекста и <code>assert</code>. Структура программы и условное выполнение сюда не вошли — они закрыты в главе 1.'
+  },
   operators: {
     title: 'Операторы, выражения и обработка данных',
     sub: 'Глава 2 книги · как Python на самом деле считает',
@@ -5214,6 +5219,1029 @@ assert _lines == [], 'Выводить нечего, а получено ' + rep
     }
   ]
 }
+,
+
+/* ─────────────────────────── 3.3 ─────────────────────────── */
+{
+  id: 'ch33',
+  num: '3.3',
+  part: 'flow',
+  title: 'Циклы и перебор',
+  theory: `
+    <h4>Итеративная переменная живёт дольше цикла</h4>
+    <p>В <code>for i in s</code> переменная <code>i</code> <strong>не приватна для цикла</strong>. Если снаружи было имя <code>i</code>, оно будет затёрто, а после цикла в переменной останется последнее значение:</p>
+    <div class="code-block">i = <span class="st">'важное'</span>
+<span class="kw">for</span> i <span class="kw">in</span> [<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>]:
+    <span class="kw">pass</span>
+i                  <span class="cm"># 3 — старое значение потеряно</span></div>
+    <p>Здесь <code>for</code> ведёт себя иначе, чем списковое включение из 2.14: там переменная наружу не протекает.</p>
+
+    <h4>Распаковка в заголовке</h4>
+    <p>Если элементы одинакового размера, их сразу разбирают на переменные. Если разного — выручает звёздочка:</p>
+    <div class="code-block">s = [(<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>), (<span class="val">4</span>, <span class="val">5</span>, <span class="val">6</span>)]
+<span class="kw">for</span> x, y, z <span class="kw">in</span> s: ...
+<span class="kw">for</span> x, _, z <span class="kw">in</span> s: ...          <span class="cm"># средний не нужен</span>
+
+s = [(<span class="val">1</span>, <span class="val">2</span>), (<span class="val">3</span>, <span class="val">4</span>, <span class="val">5</span>), (<span class="val">6</span>, <span class="val">7</span>, <span class="val">8</span>, <span class="val">9</span>)]
+<span class="kw">for</span> x, y, *extra <span class="kw">in</span> s: ...     <span class="cm"># extra = [], [5], [8, 9]</span></div>
+
+    <h4>enumerate — номер вместе со значением</h4>
+    <p>Считать индекс вручную не нужно:</p>
+    <div class="code-block"><span class="kw">for</span> i, x <span class="kw">in</span> <span class="fn">enumerate</span>(s):
+    ...                          <span class="cm"># (0, s[0]), (1, s[1]), ...</span>
+
+<span class="kw">for</span> i, x <span class="kw">in</span> <span class="fn">enumerate</span>(s, start=<span class="val">1</span>):
+    ...                          <span class="cm"># нумерация с единицы</span></div>
+
+    <h4>zip — параллельный перебор</h4>
+    <div class="code-block"><span class="kw">for</span> x, y <span class="kw">in</span> <span class="fn">zip</span>(s, t):
+    ...                          <span class="cm"># (s[0], t[0]), (s[1], t[1]), ...</span></div>
+    <div class="hl orange"><span class="hl-label">Ловушка</span><code>zip</code> останавливается на <strong>более коротком</strong> наборе — молча, без ошибки. Если сравнивать ожидаемое с фактическим через <code>zip</code>, а фактическое оказалось короче, лишние ожидаемые элементы просто не проверятся, и тест пройдёт. Длину надо сверять отдельно.</div>
+    <p>Результат <code>zip()</code> — итератор, а не список. Чтобы посмотреть его целиком, оберни в <code>list()</code>.</p>
+
+    <h4>else у цикла</h4>
+    <p>К <code>for</code> и <code>while</code> можно приписать <code>else</code>. Он выполняется, только если цикл <strong>дошёл до конца сам</strong>, и пропускается при выходе через <code>break</code>:</p>
+    <div class="code-block"><span class="kw">for</span> line <span class="kw">in</span> file:
+    <span class="kw">if</span> <span class="kw">not</span> line.<span class="fn">strip</span>():
+        <span class="kw">break</span>                 <span class="cm"># нашли разделитель</span>
+<span class="kw">else</span>:
+    <span class="kw">raise</span> RuntimeError(<span class="st">'Разделитель не найден'</span>)</div>
+    <p>Это замена флаговой переменной вида <code>found = False</code> с проверкой после цикла. Читается непривычно, но встречается — и на собеседовании про <code>for/else</code> спрашивают именно потому, что мало кто помнит правило «else срабатывает, когда break не сработал».</p>
+    <p><code>break</code> и <code>continue</code> действуют только на самый внутренний цикл. Чтобы выпрыгнуть сразу из нескольких, используют исключение — <code>goto</code> в Python нет.</p>`,
+  vocab: { names: ['enumerate', 'zip'], methods: [] },
+  allowed: 'всё из глав 1—2 плюс <code>enumerate()</code> с аргументом <code>start</code>, <code>zip()</code>, распаковка со звёздочкой в заголовке <code>for</code>, секция <code>else</code> у цикла',
+  tasks: [
+    {
+      id: 't33-1',
+      title: 'Нумерованный список упавших',
+      statement: `<p>Дан <code>results</code> — список кортежей <code>(имя_теста, прошёл)</code>.</p>
+        <p>Выведи упавшие тесты нумерованным списком, <strong>начиная с единицы</strong>, по одному в строке. Порядок сохрани исходный. Если упавших нет, не выводи ничего.</p>`,
+      io: `results = [('login', True), ('pay', False), ('cart', False)]
+→  1. pay
+   2. cart`,
+      hint: 'Сначала отбери имена упавших включением, потом пройди по ним <code>enumerate</code>. Нумерация с единицы задаётся аргументом: <code>enumerate(failed, start=1)</code> — иначе первым номером будет ноль.',
+      starter: `# results уже задан
+
+`,
+      solution: `failed = [name for name, passed in results if not passed]
+for i, name in enumerate(failed, start=1):
+    print(f'{i}. {name}')`,
+      cases: [
+        { label: 'два теста из трёх упали',
+          setup: `results = [('login', True), ('pay', False), ('cart', False)]
+_r0 = list(results)`,
+          check: `_failed = [_n for _n, _p in _r0 if not _p]
+_exp = [str(_i) + '. ' + _n for _i, _n in enumerate(_failed, start=1)]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines)` },
+        { label: 'все зелёные — выводить нечего',
+          setup: `results = [('a', True), ('b', True)]
+_r0 = list(results)`,
+          check: `assert _lines == [], 'Упавших нет, выводить нечего, а получено ' + repr(_lines)` },
+        { label: 'упал только первый',
+          setup: `results = [('smoke', False), ('api', True), ('ui', True)]
+_r0 = list(results)`,
+          check: `_failed = [_n for _n, _p in _r0 if not _p]
+_exp = [str(_i) + '. ' + _n for _i, _n in enumerate(_failed, start=1)]
+assert _lines == _exp, 'Ожидался вывод ' + repr(_exp) + ', а получено ' + repr(_lines) + ' (нумерация начинается с 1)'` },
+        { label: 'пустой прогон',
+          setup: `results = []
+_r0 = list(results)`,
+          check: `assert _lines == [], 'Выводить нечего, а получено ' + repr(_lines)` }
+      ]
+    },
+    {
+      id: 't33-2',
+      title: 'Сверка ожидаемого и фактического',
+      statement: `<p>Даны два списка: <code>expected</code> — что мы ждём, и <code>actual</code> — что пришло.</p>
+        <p>Сравни их поэлементно через <code>zip</code> и собери:</p>
+        <ul>
+          <li><code>compared</code> — сколько пар удалось сравнить;</li>
+          <li><code>mismatches</code> — список кортежей <code>(индекс, ожидалось, получено)</code> для расходящихся пар.</li>
+        </ul>
+        <p>Выведи одну строку. Обрати внимание на второй набор данных: <code>zip</code> обрежет перебор по короткому списку, и часть ожидаемых значений вообще не будет проверена.</p>`,
+      io: `expected = ['id', 'name', 'price']   actual = ['id', 'NAME', 'price']
+→  сравнено 3, расхождений 1
+
+expected = ['id', 'name', 'price']   actual = ['id']
+→  сравнено 1, расхождений 0   ← остальные просто не проверились`,
+      hint: 'Индекс и пару сразу даёт связка двух функций: <code>for i, (exp, act) in enumerate(zip(expected, actual)):</code>. Внутренние скобки обязательны — иначе Python попытается разложить пару на два имени вместо одного.',
+      starter: `# expected и actual уже заданы
+
+`,
+      solution: `compared = 0
+mismatches = []
+for i, (exp, act) in enumerate(zip(expected, actual)):
+    compared += 1
+    if exp != act:
+        mismatches.append((i, exp, act))
+print(f'сравнено {compared}, расхождений {len(mismatches)}')`,
+      cases: [
+        { label: 'одинаковая длина, одно расхождение',
+          setup: `expected = ['id', 'name', 'price']
+actual = ['id', 'NAME', 'price']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_c, _m = 0, []
+for _i, (_x, _y) in enumerate(zip(_e0, _a0)):
+    _c += 1
+    if _x != _y:
+        _m.append((_i, _x, _y))
+assert 'compared' in globals() and 'mismatches' in globals(), 'Нужны переменные compared и mismatches'
+assert compared == _c, 'compared = ' + repr(compared) + ', ожидалось ' + str(_c)
+assert mismatches == _m, 'mismatches = ' + repr(mismatches) + ', ожидалось ' + repr(_m)
+_e = 'сравнено ' + str(_c) + ', расхождений ' + str(len(_m))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'фактический короче — zip обрезает',
+          setup: `expected = ['id', 'name', 'price']
+actual = ['id']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_c, _m = 0, []
+for _i, (_x, _y) in enumerate(zip(_e0, _a0)):
+    _c += 1
+    if _x != _y:
+        _m.append((_i, _x, _y))
+assert compared == 1, 'compared = ' + repr(compared) + ', ожидалось 1: zip останавливается на более коротком списке'
+assert mismatches == _m, 'mismatches = ' + repr(mismatches) + ', ожидалось ' + repr(_m)
+_e = 'сравнено 1, расхождений 0'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'всё совпало',
+          setup: `expected = [1, 2, 3]
+actual = [1, 2, 3]
+_e0, _a0 = list(expected), list(actual)`,
+          check: `assert compared == 3, 'compared = ' + repr(compared) + ', ожидалось 3'
+assert mismatches == [], 'mismatches = ' + repr(mismatches) + ', ожидался пустой список'
+_e = 'сравнено 3, расхождений 0'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'фактический длиннее',
+          setup: `expected = ['a']
+actual = ['b', 'c', 'd']
+_e0, _a0 = list(expected), list(actual)`,
+          check: `_c, _m = 0, []
+for _i, (_x, _y) in enumerate(zip(_e0, _a0)):
+    _c += 1
+    if _x != _y:
+        _m.append((_i, _x, _y))
+assert compared == 1, 'compared = ' + repr(compared) + ', ожидалось 1'
+assert mismatches == _m, 'mismatches = ' + repr(mismatches) + ', ожидалось ' + repr(_m)
+_e = 'сравнено 1, расхождений 1'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'оба пустые',
+          setup: `expected = []
+actual = []
+_e0, _a0 = list(expected), list(actual)`,
+          check: `assert compared == 0, 'compared = ' + repr(compared) + ', ожидалось 0'
+assert mismatches == [], 'mismatches = ' + repr(mismatches) + ', ожидался пустой список'
+_e = 'сравнено 0, расхождений 0'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
+      ]
+    },
+    {
+      id: 't33-3',
+      title: 'else у цикла',
+      statement: `<p>Дан <code>lines</code> — список строк. Разделителем считается первая строка, которая после <code>strip()</code> оказалась пустой.</p>
+        <p>Найди её и выведи <code>Разделитель на строке 2</code> с её индексом. Если разделителя в списке нет, выведи <code>Разделитель не найден</code>.</p>
+        <p><strong>Ограничение:</strong> переменной-флагом пользоваться нельзя — задача про секцию <code>else</code> у цикла, которая срабатывает, когда <code>break</code> не сработал.</p>`,
+      io: `lines = ['a = 1', 'b = 2', '   ', 'c = 3']
+→  Разделитель на строке 2
+
+lines = ['a = 1', 'b = 2']
+→  Разделитель не найден`,
+      require: [['else:', 'Решить надо через секцию else у цикла, а не через переменную-флаг с проверкой после цикла.']],
+      hint: '<code>else</code> приписывается к самому <code>for</code>, на одном уровне отступа с ним, а не к <code>if</code> внутри. Выполнится он только если цикл дошёл до конца без <code>break</code>.',
+      starter: `# lines уже задан
+
+`,
+      solution: `for i, line in enumerate(lines):
+    if not line.strip():
+        print(f'Разделитель на строке {i}')
+        break
+else:
+    print('Разделитель не найден')`,
+      cases: [
+        { label: 'разделитель в середине',
+          setup: `lines = ['a = 1', 'b = 2', '   ', 'c = 3']
+_l0 = list(lines)`,
+          check: `_exp = None
+for _i, _l in enumerate(_l0):
+    if not _l.strip():
+        _exp = _i
+        break
+_want = 'Разделитель на строке ' + str(_exp) if _exp is not None else 'Разделитель не найден'
+assert _lines == [_want], 'Ожидался вывод ' + repr([_want]) + ', а получено ' + repr(_lines)` },
+        { label: 'разделителя нет',
+          setup: `lines = ['a = 1', 'b = 2']
+_l0 = list(lines)`,
+          check: `assert _lines == ['Разделитель не найден'], 'Ожидался вывод ' + repr(['Разделитель не найден']) + ', а получено ' + repr(_lines)` },
+        { label: 'разделитель первой строкой',
+          setup: `lines = ['', 'a = 1']
+_l0 = list(lines)`,
+          check: `assert _lines == ['Разделитель на строке 0'], 'Ожидался вывод ' + repr(['Разделитель на строке 0']) + ', а получено ' + repr(_lines)` },
+        { label: 'пустой список строк',
+          setup: `lines = []
+_l0 = list(lines)`,
+          check: `assert _lines == ['Разделитель не найден'], 'Ожидался вывод ' + repr(['Разделитель не найден']) + ', а получено ' + repr(_lines) + ' — цикл не выполнился ни разу, значит else срабатывает'` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 3.4 ─────────────────────────── */
+{
+  id: 'ch34',
+  num: '3.4',
+  part: 'flow',
+  title: 'Исключения: иерархия и свои типы',
+  theory: `
+    <h4>Исключения выстроены в иерархию</h4>
+    <p>Встроенных исключений больше шестидесяти, и запоминать их поимённо бессмысленно. Полезнее знать, что они наследуются друг от друга, и ловить <strong>категорию</strong>:</p>
+    <div class="code-block"><span class="kw">try</span>:
+    item = items[index]
+<span class="kw">except</span> IndexError:    <span class="cm"># если items — последовательность</span>
+    ...
+<span class="kw">except</span> KeyError:      <span class="cm"># если items — словарь</span>
+    ...
+
+<span class="cm"># то же самое одной секцией:</span>
+<span class="kw">try</span>:
+    item = items[index]
+<span class="kw">except</span> LookupError:   <span class="cm"># общий родитель обоих</span>
+    ...</div>
+    <table>
+      <thead><tr><th>Категория</th><th>Что объединяет</th></tr></thead>
+      <tbody>
+        <tr><td><code>BaseException</code></td><td>вообще всё, включая выход из программы</td></tr>
+        <tr><td><code>Exception</code></td><td>обычные ошибки программы — <strong>это и надо ловить</strong></td></tr>
+        <tr><td><code>ArithmeticError</code></td><td><code>ZeroDivisionError</code>, <code>OverflowError</code></td></tr>
+        <tr><td><code>LookupError</code></td><td><code>IndexError</code>, <code>KeyError</code></td></tr>
+        <tr><td><code>OSError</code></td><td>файлы, сеть, права, таймауты</td></tr>
+        <tr><td><code>ValueError</code></td><td>значение не того вида</td></tr>
+      </tbody>
+    </table>
+    <div class="hl orange"><span class="hl-label">Почему Exception, а не BaseException</span>От <code>BaseException</code> напрямую наследуются <code>SystemExit</code>, <code>KeyboardInterrupt</code> и <code>StopIteration</code> — они управляют выполнением, а не сообщают об ошибке. Поймав <code>BaseException</code>, ты проглотишь Ctrl+C и попытку программы завершиться. Именно поэтому «поймать всё» — это <code>except Exception</code>.</div>
+
+    <h4>Несколько секций и общий обработчик</h4>
+    <div class="code-block"><span class="kw">except</span> (TypeError, ValueError) <span class="kw">as</span> e:   <span class="cm"># оба типа одной секцией</span>
+    ...
+
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    <span class="fn">print</span>(f<span class="st">'An error occurred: {e!r}'</span>)      <span class="cm"># всегда показывай значение</span></div>
+    <p>Переменная после <code>as</code> живёт <strong>только внутри своей секции</strong> — после выхода из блока она удаляется, и обращение к ней даёт <code>NameError</code>.</p>
+    <p>Голый <code>raise</code> внутри обработчика выбрасывает текущее исключение заново — удобно, когда надо залогировать и передать выше.</p>
+
+    <h4>else и finally</h4>
+    <div class="code-block"><span class="kw">try</span>:
+    file = <span class="fn">open</span>(<span class="st">'foo.txt'</span>)
+<span class="kw">except</span> FileNotFoundError:
+    data = <span class="st">''</span>
+<span class="kw">else</span>:
+    data = file.<span class="fn">read</span>()      <span class="cm"># только если исключения НЕ было</span>
+<span class="kw">finally</span>:
+    ...                        <span class="cm"># всегда</span></div>
+    <p>Секция <code>else</code> нужна, чтобы в <code>try</code> оставалась только та строка, ошибку которой мы ловим. Иначе <code>except</code> случайно поймает ошибку из следующей строки и спрячет настоящую причину.</p>
+
+    <h4>Свои исключения</h4>
+    <div class="code-block"><span class="kw">class</span> ApplicationError(Exception):
+    <span class="kw">pass</span>
+
+<span class="kw">class</span> UnauthorizedUserError(ApplicationError):
+    <span class="kw">pass</span>
+
+<span class="kw">raise</span> UnauthorizedUserError(<span class="st">'Go away'</span>)</div>
+    <p>Секция <code>except ApplicationError</code> поймает любого наследника, а точный тип при необходимости покажет <code>type(e)</code>. Смысл затеи — отличать <strong>намеренно выданные</strong> ошибки приложения от настоящих багов: если вылетел <code>TypeError</code>, это скорее всего сломанный код, а не предусмотренная ситуация.</p>
+    <p>Если нужно выдать своё исключение в ответ на чужое, их связывают: <code>raise ApplicationError('It failed') from e</code>. В трассировке будут видны оба.</p>
+
+    <h4>Что ловить, а что нет</h4>
+    <p>Главное правило: <strong>не перехватывай то, с чем не можешь ничего сделать здесь</strong>. Если файл не открылся, а функция умеет только читать данные — восстанавливаться нечем, пусть ошибка идёт выше, к тому коду, который спрашивал имя файла. Молчаливый <code>except: pass</code> превращает падение в трудноуловимый сбой.</p>`,
+  vocab: { names: ['LookupError', 'ArithmeticError', 'ZeroDivisionError', 'OverflowError', 'OSError', 'AttributeError', 'NotImplementedError', 'StopIteration', 'BaseException', 'KeyboardInterrupt', 'SystemExit', 'type', 'issubclass'], methods: ['args'] },
+  allowed: 'всё из глав 1—2 и 3.3 плюс иерархия исключений, несколько секций <code>except</code>, кортеж типов в одной секции, <code>else</code> у <code>try</code>, повторный <code>raise</code>, свои классы исключений, <code>raise ... from e</code>',
+  tasks: [
+    {
+      id: 't34-1',
+      title: 'Одна секция вместо двух',
+      statement: `<p>Даны <code>container</code> (список либо словарь) и <code>key</code> — индекс или ключ.</p>
+        <p>Попробуй достать <code>container[key]</code>. Если получилось — положи значение в <code>value</code>, а в <code>error</code> запиши <code>None</code>. Если нет — <code>value</code> должен стать <code>None</code>, а в <code>error</code> попасть <strong>имя класса</strong> случившегося исключения.</p>
+        <p><strong>Ограничение:</strong> секция <code>except</code> должна быть <strong>одна</strong>. Список даёт <code>IndexError</code>, словарь — <code>KeyError</code>, но у них есть общий родитель.</p>`,
+      io: `container = [1, 2, 3]        key = 10      →  value=None error=IndexError
+container = {'a': 1}         key = 'b'     →  value=None error=KeyError
+container = {'a': 1}         key = 'a'     →  value=1 error=None`,
+      hint: 'Общий родитель <code>IndexError</code> и <code>KeyError</code> — <code>LookupError</code>. Имя класса пойманного исключения даёт <code>type(e).__name__</code>.',
+      forbid: [['except KeyError', 'Секция except должна быть одна — поймай общую категорию, а не каждый тип отдельно.'], ['except IndexError', 'Секция except должна быть одна — поймай общую категорию, а не каждый тип отдельно.']],
+      starter: `# container и key уже заданы
+
+`,
+      solution: `try:
+    value = container[key]
+    error = None
+except LookupError as e:
+    value = None
+    error = type(e).__name__
+print(f'value={value} error={error}')`,
+      cases: [
+        { label: 'список, индекс за границей → IndexError',
+          setup: `container = [1, 2, 3]
+key = 10
+_c0, _k0 = container, key`,
+          check: `try:
+    _v, _e = _c0[_k0], None
+except LookupError as _err:
+    _v, _e = None, type(_err).__name__
+assert 'value' in globals() and 'error' in globals(), 'Нужны переменные value и error'
+assert value == _v, 'value = ' + repr(value) + ', ожидалось ' + repr(_v)
+assert error == _e, 'error = ' + repr(error) + ', ожидалось ' + repr(_e)
+_line = 'value=' + str(_v) + ' error=' + str(_e)
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'словарь, нет ключа → KeyError',
+          setup: `container = {'a': 1}
+key = 'b'
+_c0, _k0 = container, key`,
+          check: `try:
+    _v, _e = _c0[_k0], None
+except LookupError as _err:
+    _v, _e = None, type(_err).__name__
+assert value == _v, 'value = ' + repr(value) + ', ожидалось ' + repr(_v)
+assert error == _e, 'error = ' + repr(error) + ', ожидалось ' + repr(_e) + ' — одна секция LookupError ловит и KeyError тоже'
+_line = 'value=' + str(_v) + ' error=' + str(_e)
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line)` },
+        { label: 'словарь, ключ есть — ошибки нет',
+          setup: `container = {'a': 1}
+key = 'a'
+_c0, _k0 = container, key`,
+          check: `assert value == 1, 'value = ' + repr(value) + ', ожидалось 1'
+assert error is None, 'error = ' + repr(error) + ', ожидалось None'
+assert _lines and _lines[-1] == 'value=1 error=None', 'Ожидалась строка ' + repr('value=1 error=None')` },
+        { label: 'список, индекс в границах',
+          setup: `container = ['x', 'y']
+key = 1
+_c0, _k0 = container, key`,
+          check: `assert value == 'y', 'value = ' + repr(value) + ', ожидалось ' + repr('y')
+assert error is None, 'error = ' + repr(error) + ', ожидалось None'
+assert _lines and _lines[-1] == 'value=y error=None', 'Ожидалась строка ' + repr('value=y error=None')` },
+        { label: 'отрицательный индекс за границей',
+          setup: `container = [1]
+key = -5
+_c0, _k0 = container, key`,
+          check: `try:
+    _v, _e = _c0[_k0], None
+except LookupError as _err:
+    _v, _e = None, type(_err).__name__
+assert value == _v and error == _e, 'value/error = ' + repr((value, error)) + ', ожидалось ' + repr((_v, _e))
+_line = 'value=' + str(_v) + ' error=' + str(_e)
+assert _lines and _lines[-1] == _line, 'Ожидалась строка ' + repr(_line)` }
+      ]
+    },
+    {
+      id: 't34-2',
+      title: 'Своя иерархия исключений',
+      statement: `<p>Определи два класса исключений и одну функцию:</p>
+        <ul>
+          <li><code>ApplicationError</code> — наследник <code>Exception</code>, общий предок ошибок приложения;</li>
+          <li><code>UnauthorizedUserError</code> — наследник <code>ApplicationError</code>;</li>
+          <li><code>check_access(role)</code> — возвращает <code>True</code> для роли <code>'admin'</code>, а для любой другой выбрасывает <code>UnauthorizedUserError</code> с текстом <code>'Доступ запрещён'</code>.</li>
+        </ul>
+        <p>Печатать ничего не нужно. Смысл конструкции: ловля <code>ApplicationError</code> перехватывает и наследника, так что вызывающий код может не знать про частные типы.</p>`,
+      io: `check_access('admin')   →  True
+check_access('guest')   →  UnauthorizedUserError: Доступ запрещён
+
+except ApplicationError  тоже её поймает`,
+      hint: 'Тело класса-исключения обычно состоит из одного <code>pass</code> — всё нужное уже есть в <code>Exception</code>. Текст сообщения передаётся при выбросе: <code>raise UnauthorizedUserError(\'Доступ запрещён\')</code>.',
+      starter: `class ApplicationError(Exception):
+    pass
+
+`,
+      solution: `class ApplicationError(Exception):
+    pass
+
+
+class UnauthorizedUserError(ApplicationError):
+    pass
+
+
+def check_access(role):
+    if role != 'admin':
+        raise UnauthorizedUserError('Доступ запрещён')
+    return True`,
+      cases: [
+        { label: 'классы выстроены в иерархию',
+          setup: ``,
+          check: `for _n in ('ApplicationError', 'UnauthorizedUserError'):
+    assert _n in globals(), 'Не определён класс ' + _n
+assert issubclass(ApplicationError, Exception), 'ApplicationError должен наследоваться от Exception'
+assert issubclass(UnauthorizedUserError, ApplicationError), 'UnauthorizedUserError должен наследоваться от ApplicationError'
+assert UnauthorizedUserError is not ApplicationError, 'Это должны быть два разных класса'` },
+        { label: "роль admin проходит",
+          setup: ``,
+          check: `assert 'check_access' in globals(), 'Не определена функция check_access'
+_r = check_access('admin')
+assert _r is True, 'check_access(\\'admin\\') вернула ' + repr(_r) + ', ожидалось True'` },
+        { label: 'чужая роль выбрасывает UnauthorizedUserError',
+          setup: ``,
+          check: `assert 'check_access' in globals(), 'Не определена функция check_access'
+_caught = None
+try:
+    check_access('guest')
+except UnauthorizedUserError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался UnauthorizedUserError, но исключения не было'
+assert str(_caught) == 'Доступ запрещён', 'Текст исключения ' + repr(str(_caught)) + ', ожидалось ' + repr('Доступ запрещён')` },
+        { label: 'ловится и как ApplicationError',
+          setup: ``,
+          check: `assert 'check_access' in globals(), 'Не определена функция check_access'
+_caught = None
+try:
+    check_access('anonymous')
+except ApplicationError as _e:
+    _caught = _e
+assert _caught is not None, 'except ApplicationError должен ловить наследника, но исключение прошло мимо'
+assert type(_caught) is UnauthorizedUserError, 'Пойман ' + type(_caught).__name__ + ', ожидался UnauthorizedUserError'` }
+      ]
+    },
+    {
+      id: 't34-3',
+      title: 'try, except, else, finally по порядку',
+      statement: `<p>Дана строка <code>value</code>.</p>
+        <p>Собери список <code>log</code>, записывая в него отметки о том, какие секции сработали, — в порядке выполнения:</p>
+        <ul>
+          <li><code>'try'</code> — первой строкой внутри <code>try</code>, до преобразования <code>int(value)</code>;</li>
+          <li><code>'except'</code> — в секции перехвата <code>ValueError</code>;</li>
+          <li><code>'else'</code> — в секции, которая работает только без ошибки;</li>
+          <li><code>'finally'</code> — в секции, которая работает всегда.</li>
+        </ul>
+        <p>Выведи отметки одной строкой через <code>' -&gt; '</code>.</p>`,
+      io: `value = '42'    →  try -> else -> finally
+value = 'N/A'   →  try -> except -> finally`,
+      require: [['else:', 'Отметка else должна стоять в отдельной секции else у try, а не в конце блока try — иначе задача теряет смысл.']],
+      hint: 'Все четыре секции относятся к одной команде и идут строго в порядке <code>try</code> / <code>except</code> / <code>else</code> / <code>finally</code>. Преобразование <code>int(value)</code> должно остаться внутри <code>try</code>, а вот <code>else</code> сработает, только если оно прошло без ошибки.',
+      starter: `# value уже задан
+log = []
+
+`,
+      solution: `log = []
+try:
+    log.append('try')
+    number = int(value)
+except ValueError:
+    log.append('except')
+else:
+    log.append('else')
+finally:
+    log.append('finally')
+
+print(' -> '.join(log))`,
+      cases: [
+        { label: "value = '42' — путь без ошибки",
+          setup: `value = '42'
+_v0 = value`,
+          check: `assert 'log' in globals(), 'Не создана переменная log'
+assert log == ['try', 'else', 'finally'], 'log = ' + repr(log) + ", ожидалось ['try', 'else', 'finally']"
+assert _lines and _lines[-1] == 'try -> else -> finally', 'Ожидалась строка ' + repr('try -> else -> finally') + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "value = 'N/A' — путь с ошибкой",
+          setup: `value = 'N/A'
+_v0 = value`,
+          check: `assert 'log' in globals(), 'Не создана переменная log'
+assert log == ['try', 'except', 'finally'], 'log = ' + repr(log) + ", ожидалось ['try', 'except', 'finally'] — секция else при ошибке пропускается"
+assert _lines and _lines[-1] == 'try -> except -> finally', 'Ожидалась строка ' + repr('try -> except -> finally') + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: "value = '0' — ноль разбирается нормально",
+          setup: `value = '0'
+_v0 = value`,
+          check: `assert log == ['try', 'else', 'finally'], 'log = ' + repr(log) + ", ожидалось ['try', 'else', 'finally']"
+assert _lines and _lines[-1] == 'try -> else -> finally', 'Ожидалась строка ' + repr('try -> else -> finally')` },
+        { label: "value = '' — пустая строка не число",
+          setup: `value = ''
+_v0 = value`,
+          check: `assert log == ['try', 'except', 'finally'], 'log = ' + repr(log) + ", ожидалось ['try', 'except', 'finally']"
+assert _lines and _lines[-1] == 'try -> except -> finally', 'Ожидалась строка ' + repr('try -> except -> finally')` }
+      ]
+    }
+  ]
+}
+,
+
+/* ─────────────────────────── 3.5 ─────────────────────────── */
+{
+  id: 'ch35',
+  num: '3.5',
+  part: 'flow',
+  title: 'Менеджеры контекста и with',
+  theory: `
+    <h4>Зачем это нужно</h4>
+    <p>Освобождение ресурса — файла, блокировки, подключения — легко пропустить: выброшенное исключение уносит управление мимо закрывающей строки. Команда <code>with</code> снимает вопрос: вход и выход из блока обслуживает сам объект.</p>
+    <div class="code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="st">'debuglog'</span>, <span class="st">'wt'</span>) <span class="kw">as</span> file:
+    file.<span class="fn">write</span>(<span class="st">'Debugging'</span>)
+    ...                       <span class="cm"># файл закроется при любом исходе</span></div>
+
+    <h4>Протокол: __enter__ и __exit__</h4>
+    <p>Менеджер контекста — обычный объект с двумя методами. При входе в блок вызывается <code>__enter__()</code>, при выходе — <code>__exit__(type, value, traceback)</code>:</p>
+    <div class="code-block"><span class="kw">class</span> Manager:
+    <span class="kw">def</span> <span class="fn">__enter__</span>(self):
+        <span class="kw">return</span> self          <span class="cm"># это значение попадёт в as</span>
+
+    <span class="kw">def</span> <span class="fn">__exit__</span>(self, ty, val, tb):
+        <span class="kw">pass</span>                 <span class="cm"># уборка</span>
+
+<span class="kw">with</span> Manager() <span class="kw">as</span> m:
+    ...</div>
+    <p>Если блок завершился без ошибки, все три аргумента <code>__exit__</code> равны <code>None</code>. Если вылетело исключение — в них лежат его тип, значение и трассировка. Проверка <code>if ty is None</code> внутри <code>__exit__</code> и отличает «всё прошло» от «что-то упало».</p>
+
+    <h4>__exit__ может проглотить исключение</h4>
+    <div class="hl orange"><span class="hl-label">Важно</span>Если <code>__exit__</code> вернул <code>True</code>, исключение считается обработанным и <strong>дальше не распространяется</strong>. Вернул <code>None</code> или <code>False</code> — полетит дальше как обычно. Забытый <code>return True</code> в конце <code>__exit__</code> — это молча проглоченные ошибки во всём блоке.</div>
+
+    <h4>Транзакция: применить или откатить</h4>
+    <p>Менеджер контекста хорош не только для файлов. Здесь изменения списка закрепляются, только если блок отработал без исключения:</p>
+    <div class="code-block"><span class="kw">class</span> ListTransaction:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, thelist):
+        self.thelist = thelist
+
+    <span class="kw">def</span> <span class="fn">__enter__</span>(self):
+        self.working = <span class="fn">list</span>(self.thelist)   <span class="cm"># работаем с копией</span>
+        <span class="kw">return</span> self.working
+
+    <span class="kw">def</span> <span class="fn">__exit__</span>(self, ty, val, tb):
+        <span class="kw">if</span> ty <span class="kw">is</span> <span class="kw">None</span>:
+            self.thelist[:] = self.working    <span class="cm"># закрепляем</span>
+        <span class="kw">return</span> <span class="kw">False</span>                          <span class="cm"># ошибку не глушим</span></div>
+    <div class="code-block">items = [<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>]
+
+<span class="kw">with</span> ListTransaction(items) <span class="kw">as</span> working:
+    working.<span class="fn">append</span>(<span class="val">4</span>)
+items                     <span class="cm"># [1, 2, 3, 4] — закрепилось</span>
+
+<span class="kw">try</span>:
+    <span class="kw">with</span> ListTransaction(items) <span class="kw">as</span> working:
+        working.<span class="fn">append</span>(<span class="val">5</span>)
+        <span class="kw">raise</span> RuntimeError(<span class="st">'сбой'</span>)
+<span class="kw">except</span> RuntimeError:
+    <span class="kw">pass</span>
+items                     <span class="cm"># [1, 2, 3, 4] — откатилось</span></div>
+    <p>Обрати внимание на <code>self.thelist[:] = self.working</code>: присваивание срезу меняет <strong>исходный</strong> список на месте, а не подменяет ссылку — иначе снаружи ничего бы не изменилось.</p>
+    <p>Для более сложных случаев есть модуль <code>contextlib</code> из стандартной библиотеки.</p>`,
+  vocab: { names: ['__enter__', '__exit__'], methods: [] },
+  allowed: 'всё из глав 1—2 и 3.3—3.4 плюс протокол менеджера контекста: <code>__enter__</code>, <code>__exit__</code>, значение в <code>as</code>, подавление исключения возвратом <code>True</code>',
+  tasks: [
+    {
+      id: 't35-1',
+      title: 'Свой менеджер контекста',
+      statement: `<p>Определи класс <code>Section</code> — метку этапа в логе прогона:</p>
+        <ul>
+          <li><code>__init__(name)</code> сохраняет имя;</li>
+          <li><code>__enter__</code> печатает <code>&gt;&gt;&gt; имя</code> и возвращает сам объект;</li>
+          <li><code>__exit__</code> печатает <code>&lt;&lt;&lt; имя</code>.</li>
+        </ul>
+        <p>Закрывающая строка должна печататься <strong>в любом случае</strong> — и когда блок отработал спокойно, и когда внутри вылетело исключение.</p>
+        <p>Печатать что-либо вне класса не нужно: проверка сама создаст объект и войдёт в блок.</p>`,
+      io: `with Section('setup'):
+    print('внутри')
+
+→  >>> setup
+   внутри
+   <<< setup`,
+      hint: '<code>__enter__</code> должен заканчиваться <code>return self</code> — иначе в <code>as</code> попадёт <code>None</code>. У <code>__exit__</code> три обязательных параметра после <code>self</code>: тип, значение и трассировка.',
+      starter: `class Section:
+
+`,
+      solution: `class Section:
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        print(f'>>> {self.name}')
+        return self
+
+    def __exit__(self, ty, val, tb):
+        print(f'<<< {self.name}')`,
+      cases: [
+        { label: 'обычный блок',
+          setup: ``,
+          check: `assert 'Section' in globals(), 'Не определён класс Section'
+import io as _io, sys as _sys
+_buf = _io.StringIO()
+_old = _sys.stdout
+_sys.stdout = _buf
+try:
+    with Section('setup'):
+        print('внутри')
+finally:
+    _sys.stdout = _old
+_got = _buf.getvalue().rstrip(chr(10)).split(chr(10))
+assert _got == ['>>> setup', 'внутри', '<<< setup'], 'Получилось ' + repr(_got) + ", ожидалось ['>>> setup', 'внутри', '<<< setup']"` },
+        { label: 'значение из __enter__ попадает в as',
+          setup: ``,
+          check: `assert 'Section' in globals(), 'Не определён класс Section'
+import io as _io, sys as _sys
+_buf = _io.StringIO()
+_old = _sys.stdout
+_sys.stdout = _buf
+try:
+    with Section('api') as _s:
+        _inside = _s
+finally:
+    _sys.stdout = _old
+assert _inside is not None, 'В as попал None — __enter__ должен возвращать self'
+assert isinstance(_inside, Section), 'В as попал ' + type(_inside).__name__ + ', ожидался объект Section'` },
+        { label: 'исключение внутри блока — закрытие всё равно печатается',
+          setup: ``,
+          check: `assert 'Section' in globals(), 'Не определён класс Section'
+import io as _io, sys as _sys
+_buf = _io.StringIO()
+_old = _sys.stdout
+_sys.stdout = _buf
+_reraised = False
+try:
+    with Section('pay'):
+        raise RuntimeError('сбой')
+except RuntimeError:
+    _reraised = True
+finally:
+    _sys.stdout = _old
+_got = _buf.getvalue().rstrip(chr(10)).split(chr(10))
+assert _got == ['>>> pay', '<<< pay'], 'Получилось ' + repr(_got) + ", ожидалось ['>>> pay', '<<< pay']"
+assert _reraised, 'Исключение не вышло наружу — __exit__ не должен возвращать True'` },
+        { label: 'два вложенных блока',
+          setup: ``,
+          check: `assert 'Section' in globals(), 'Не определён класс Section'
+import io as _io, sys as _sys
+_buf = _io.StringIO()
+_old = _sys.stdout
+_sys.stdout = _buf
+try:
+    with Section('outer'):
+        with Section('inner'):
+            pass
+finally:
+    _sys.stdout = _old
+_got = _buf.getvalue().rstrip(chr(10)).split(chr(10))
+_exp = ['>>> outer', '>>> inner', '<<< inner', '<<< outer']
+assert _got == _exp, 'Получилось ' + repr(_got) + ', ожидалось ' + repr(_exp)` }
+      ]
+    },
+    {
+      id: 't35-2',
+      title: 'Подавить одно исключение',
+      statement: `<p>Определи класс <code>Suppress</code>, который гасит исключения <strong>заданного типа</strong> и только их:</p>
+        <ul>
+          <li><code>__init__(exc_type)</code> запоминает тип, который надо гасить;</li>
+          <li><code>__enter__</code> возвращает сам объект;</li>
+          <li><code>__exit__</code> возвращает <code>True</code>, если вылетело исключение этого типа (или его наследник), и <code>False</code> во всех остальных случаях.</li>
+        </ul>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `with Suppress(ValueError):
+    int('N/A')            # погашено, программа идёт дальше
+
+with Suppress(ValueError):
+    1 / 0                 # ZeroDivisionError вылетит наружу`,
+      hint: 'Когда блок отработал без ошибки, первый параметр <code>__exit__</code> равен <code>None</code> — гасить нечего, надо вернуть <code>False</code>. Проверить родство типов помогает <code>issubclass(ty, self.exc_type)</code>.',
+      starter: `class Suppress:
+
+`,
+      solution: `class Suppress:
+    def __init__(self, exc_type):
+        self.exc_type = exc_type
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, ty, val, tb):
+        if ty is None:
+            return False
+        return issubclass(ty, self.exc_type)`,
+      cases: [
+        { label: 'нужный тип гасится',
+          setup: ``,
+          check: `assert 'Suppress' in globals(), 'Не определён класс Suppress'
+_ok = True
+try:
+    with Suppress(ValueError):
+        int('N/A')
+except ValueError:
+    _ok = False
+assert _ok, 'ValueError вышел наружу, хотя должен был погаситься'` },
+        { label: 'чужой тип проходит наружу',
+          setup: ``,
+          check: `assert 'Suppress' in globals(), 'Не определён класс Suppress'
+_caught = False
+try:
+    with Suppress(ValueError):
+        1 / 0
+except ZeroDivisionError:
+    _caught = True
+assert _caught, 'ZeroDivisionError не вышел наружу — гасить надо только заданный тип, а не всё подряд'` },
+        { label: 'без исключения блок отрабатывает нормально',
+          setup: ``,
+          check: `assert 'Suppress' in globals(), 'Не определён класс Suppress'
+_marker = []
+with Suppress(ValueError):
+    _marker.append('прошло')
+assert _marker == ['прошло'], 'Блок без ошибки должен выполняться целиком, а получено ' + repr(_marker)` },
+        { label: 'наследник заданного типа тоже гасится',
+          setup: ``,
+          check: `assert 'Suppress' in globals(), 'Не определён класс Suppress'
+_ok = True
+try:
+    with Suppress(LookupError):
+        {}['нет']
+except LookupError:
+    _ok = False
+assert _ok, 'KeyError — наследник LookupError, он тоже должен гаситься. Используй issubclass, а не сравнение типов через =='` }
+      ]
+    },
+    {
+      id: 't35-3',
+      title: 'Транзакция с откатом',
+      statement: `<p>Определи класс <code>ListTransaction</code>, который позволяет менять список «начерно»:</p>
+        <ul>
+          <li><code>__init__(thelist)</code> запоминает исходный список;</li>
+          <li><code>__enter__</code> делает его <strong>копию</strong> и возвращает её — правки идут в копию;</li>
+          <li><code>__exit__</code> переносит правки в исходный список <strong>только если исключения не было</strong>, и не гасит ошибку.</li>
+        </ul>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `items = [1, 2, 3]
+
+with ListTransaction(items) as working:
+    working.append(4)
+items          →  [1, 2, 3, 4]      закрепилось
+
+try:
+    with ListTransaction(items) as working:
+        working.append(5)
+        raise RuntimeError('сбой')
+except RuntimeError:
+    pass
+items          →  [1, 2, 3, 4]      откатилось`,
+      hint: 'Перенести правки в исходный список надо <strong>на месте</strong>: <code>self.thelist[:] = self.working</code>. Обычное присваивание <code>self.thelist = self.working</code> лишь переставит внутреннюю ссылку, и снаружи список останется прежним — это как раз ловушка из 2.4.',
+      starter: `class ListTransaction:
+
+`,
+      solution: `class ListTransaction:
+    def __init__(self, thelist):
+        self.thelist = thelist
+
+    def __enter__(self):
+        self.working = list(self.thelist)
+        return self.working
+
+    def __exit__(self, ty, val, tb):
+        if ty is None:
+            self.thelist[:] = self.working
+        return False`,
+      cases: [
+        { label: 'успешный блок закрепляет правки',
+          setup: ``,
+          check: `assert 'ListTransaction' in globals(), 'Не определён класс ListTransaction'
+_items = [1, 2, 3]
+with ListTransaction(_items) as _w:
+    _w.append(4)
+    _w.append(5)
+assert _items == [1, 2, 3, 4, 5], '_items = ' + repr(_items) + ', ожидалось [1, 2, 3, 4, 5]. Переносить правки надо на месте: thelist[:] = working'` },
+        { label: 'исключение откатывает правки',
+          setup: ``,
+          check: `assert 'ListTransaction' in globals(), 'Не определён класс ListTransaction'
+_items = [1, 2, 3]
+_reraised = False
+try:
+    with ListTransaction(_items) as _w:
+        _w.append(99)
+        raise RuntimeError('сбой')
+except RuntimeError:
+    _reraised = True
+assert _items == [1, 2, 3], '_items = ' + repr(_items) + ', ожидалось [1, 2, 3] — при исключении правки применяться не должны'
+assert _reraised, 'Исключение не вышло наружу — __exit__ должен возвращать False, а не True'` },
+        { label: 'правки идут в копию, а не в исходный список',
+          setup: ``,
+          check: `assert 'ListTransaction' in globals(), 'Не определён класс ListTransaction'
+_items = [1, 2]
+with ListTransaction(_items) as _w:
+    assert _w is not _items, '__enter__ вернул сам исходный список — нужна его копия'
+    _w.append(3)
+    assert _items == [1, 2], 'Исходный список поменялся до выхода из блока: ' + repr(_items)
+assert _items == [1, 2, 3], 'После выхода _items = ' + repr(_items) + ', ожидалось [1, 2, 3]'` },
+        { label: 'пустой блок ничего не портит',
+          setup: ``,
+          check: `assert 'ListTransaction' in globals(), 'Не определён класс ListTransaction'
+_items = ['a']
+with ListTransaction(_items) as _w:
+    pass
+assert _items == ['a'], '_items = ' + repr(_items) + ", ожидалось ['a']"` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 3.6 ─────────────────────────── */
+{
+  id: 'ch36',
+  num: '3.6',
+  part: 'flow',
+  title: 'assert и __debug__',
+  theory: `
+    <h4>Как устроен assert</h4>
+    <div class="code-block"><span class="kw">assert</span> условие, сообщение     <span class="cm"># сообщение необязательно</span></div>
+    <p>Если условие ложно, выбрасывается <code>AssertionError</code> с этим сообщением. Если истинно — не происходит ничего.</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">factorial</span>(n):
+    <span class="kw">assert</span> n &gt; <span class="val">0</span>, <span class="st">'must supply a positive value'</span>
+    ...</div>
+
+    <h4>Где assert уместен, а где нет</h4>
+    <div class="hl orange"><span class="hl-label">Главное</span>В оптимизированном режиме (запуск <code>python -O</code>) <strong>все команды assert выбрасываются из программы</strong> — вместе с их условиями. Поэтому assert нельзя использовать там, где проверка нужна для правильной работы: для валидации пользовательского ввода, проверки прав, контроля успеха важной операции. Всё это пишется обычным <code>if</code> с <code>raise</code>.</div>
+    <p>Место assert — <strong>инварианты</strong>: утверждения, которые обязаны быть истинными, если программа не сломана. Нарушение инварианта означает баг в коде, а не ошибку пользователя.</p>
+    <table>
+      <thead><tr><th>Ситуация</th><th>Чем проверять</th></tr></thead>
+      <tbody>
+        <tr><td>пользователь ввёл не то</td><td><code>if</code> + <code>raise ValueError</code></td></tr>
+        <tr><td>внешний сервис вернул ошибку</td><td><code>if</code> + <code>raise</code></td></tr>
+        <tr><td>«здесь список не может быть пустым»</td><td><code>assert</code></td></tr>
+        <tr><td>проверка в тесте</td><td><code>assert</code></td></tr>
+      </tbody>
+    </table>
+    <p>Переменная <code>__debug__</code> равна <code>True</code> при обычном запуске и <code>False</code> под <code>-O</code> — по ней можно узнать, включены ли проверки.</p>
+
+    <h4>Assert как быстрый тест</h4>
+    <div class="code-block"><span class="kw">assert</span> <span class="fn">factorial</span>(<span class="val">5</span>) == <span class="val">120</span></div>
+    <p>Проверка неполная, но если функция явно сломана — программа упадёт сразу. На этом же построены и настоящие тесты: <code>pytest</code> использует обычный <code>assert</code>, просто дорисовывая к нему подробный разбор несовпадения.</p>
+
+    <h4>Ловушка лишних скобок</h4>
+    <div class="hl orange"><span class="hl-label">Классика</span><code>assert (value == expected, 'не совпало')</code> <strong>не падает никогда</strong>. В скобках оказался кортеж из двух элементов, а непустой кортеж всегда истинен — проверяется он, а не равенство. Условие и сообщение разделяются запятой <em>без</em> скобок вокруг них. В современных версиях Python на такую запись приходит предупреждение, но молча проходящий тест успевает пожить в проекте годами.</p></div>`,
+  vocab: { names: ['assert', 'AssertionError', '__debug__'], methods: [] },
+  allowed: 'всё из глав 1—2 и 3.3—3.5 плюс <code>assert</code> с сообщением, <code>AssertionError</code>, <code>__debug__</code>',
+  tasks: [
+    {
+      id: 't36-1',
+      title: 'assert для инварианта',
+      statement: `<p>Определи функцию <code>set_progress(percent)</code>, которая возвращает переданное значение, но перед этим проверяет инвариант: процент обязан лежать в диапазоне от <code>0</code> до <code>100</code> включительно.</p>
+        <p>Проверку делай командой <code>assert</code> с сообщением <code>'процент вне диапазона'</code>.</p>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `set_progress(50)    →  50
+set_progress(0)     →  0
+set_progress(101)   →  AssertionError: процент вне диапазона`,
+      hint: 'Двойное сравнение записывается напрямую: <code>0 &lt;= percent &lt;= 100</code>. Сообщение идёт после условия через запятую и <strong>без скобок вокруг всего</strong> — иначе получится кортеж, который истинен всегда.',
+      starter: `def set_progress(percent):
+
+`,
+      solution: `def set_progress(percent):
+    assert 0 <= percent <= 100, 'процент вне диапазона'
+    return percent`,
+      cases: [
+        { label: 'значение в середине диапазона',
+          setup: ``,
+          check: `assert 'set_progress' in globals(), 'Не определена функция set_progress'
+_r = set_progress(50)
+assert _r == 50, 'Вернулось ' + repr(_r) + ', ожидалось 50'` },
+        { label: 'границы 0 и 100 допустимы',
+          setup: ``,
+          check: `assert 'set_progress' in globals(), 'Не определена функция set_progress'
+for _v in (0, 100):
+    _raised = False
+    try:
+        _got = set_progress(_v)
+    except AssertionError:
+        _raised = True
+    assert not _raised, 'На значении ' + str(_v) + ' сработал assert, хотя граница включена в диапазон'
+    assert _got == _v, 'Для ' + str(_v) + ' вернулось ' + repr(_got)` },
+        { label: 'больше 100 — AssertionError с сообщением',
+          setup: ``,
+          check: `assert 'set_progress' in globals(), 'Не определена функция set_progress'
+_caught = None
+try:
+    set_progress(101)
+except AssertionError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался AssertionError, но исключения не было. Возможно, условие и сообщение обёрнуты в скобки — тогда это кортеж, и он всегда истинен'
+assert str(_caught) == 'процент вне диапазона', 'Сообщение ' + repr(str(_caught)) + ', ожидалось ' + repr('процент вне диапазона')` },
+        { label: 'отрицательное значение тоже отсекается',
+          setup: ``,
+          check: `assert 'set_progress' in globals(), 'Не определена функция set_progress'
+_caught = None
+try:
+    set_progress(-1)
+except AssertionError as _e:
+    _caught = _e
+assert _caught is not None, 'На -1 ожидался AssertionError, но его не было'
+assert str(_caught) == 'процент вне диапазона', 'Сообщение ' + repr(str(_caught)) + ', ожидалось ' + repr('процент вне диапазона')` }
+      ]
+    },
+    {
+      id: 't36-2',
+      title: 'Ввод пользователя — не для assert',
+      statement: `<p>Функция принимает данные <strong>снаружи</strong>, поэтому проверять их через <code>assert</code> нельзя: под <code>python -O</code> проверка исчезнет вместе с условием, и в систему пройдёт что угодно.</p>
+        <p>Определи <code>parse_age(raw)</code>, которая получает строку и возвращает целое число:</p>
+        <ul>
+          <li>строка не разбирается в число — <code>raise ValueError('возраст должен быть числом')</code>;</li>
+          <li>число отрицательное — <code>raise ValueError('возраст не может быть отрицательным')</code>;</li>
+          <li>иначе возвращается число.</li>
+        </ul>
+        <p><strong>Ограничение:</strong> <code>assert</code> в этой задаче использовать нельзя.</p>`,
+      io: `parse_age('42')    →  42
+parse_age('abc')   →  ValueError: возраст должен быть числом
+parse_age('-1')    →  ValueError: возраст не может быть отрицательным`,
+      hint: 'Нечисловую строку ловит <code>try</code> / <code>except ValueError</code> вокруг <code>int(raw)</code> — а внутри обработчика выбрасывается свой <code>ValueError</code> с понятным текстом. Отрицательное число проверяется обычным <code>if</code> уже после разбора.',
+      forbid: [['assert', 'В этой задаче assert запрещён: он выключается под -O, а проверять данные снаружи надо всегда.']],
+      starter: `def parse_age(raw):
+
+`,
+      solution: `def parse_age(raw):
+    try:
+        age = int(raw)
+    except ValueError:
+        raise ValueError('возраст должен быть числом')
+    if age < 0:
+        raise ValueError('возраст не может быть отрицательным')
+    return age`,
+      cases: [
+        { label: 'обычное число',
+          setup: ``,
+          check: `assert 'parse_age' in globals(), 'Не определена функция parse_age'
+_r = parse_age('42')
+assert _r == 42, 'Вернулось ' + repr(_r) + ', ожидалось 42'
+assert isinstance(_r, int), 'Вернулся ' + type(_r).__name__ + ', ожидалось целое число'` },
+        { label: 'ноль допустим',
+          setup: ``,
+          check: `assert 'parse_age' in globals(), 'Не определена функция parse_age'
+_r = parse_age('0')
+assert _r == 0, 'Вернулось ' + repr(_r) + ', ожидалось 0'` },
+        { label: 'не число — ValueError со своим текстом',
+          setup: ``,
+          check: `assert 'parse_age' in globals(), 'Не определена функция parse_age'
+_caught = None
+try:
+    parse_age('abc')
+except ValueError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался ValueError, но исключения не было'
+assert str(_caught) == 'возраст должен быть числом', 'Текст ' + repr(str(_caught)) + ', ожидалось ' + repr('возраст должен быть числом')` },
+        { label: 'отрицательное — свой текст ошибки',
+          setup: ``,
+          check: `assert 'parse_age' in globals(), 'Не определена функция parse_age'
+_caught = None
+try:
+    parse_age('-1')
+except ValueError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался ValueError, но исключения не было'
+assert str(_caught) == 'возраст не может быть отрицательным', 'Текст ' + repr(str(_caught)) + ', ожидалось ' + repr('возраст не может быть отрицательным')` },
+        { label: 'пустая строка — не число',
+          setup: ``,
+          check: `assert 'parse_age' in globals(), 'Не определена функция parse_age'
+_caught = None
+try:
+    parse_age('')
+except ValueError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался ValueError, но исключения не было'
+assert str(_caught) == 'возраст должен быть числом', 'Текст ' + repr(str(_caught)) + ', ожидалось ' + repr('возраст должен быть числом')` }
+      ]
+    },
+    {
+      id: 't36-3',
+      title: 'Ловушка лишних скобок',
+      statement: `<p>Две части.</p>
+        <p><strong>Первая.</strong> Определи <code>check_equal(actual, expected)</code> — она сравнивает значения командой <code>assert</code> с сообщением вида <code>ожидалось 5, получено 3</code>, а при совпадении возвращает <code>True</code>.</p>
+        <p><strong>Вторая.</strong> Запиши в <code>tuple_is_truthy</code> значение выражения <code>bool((False, 'сообщение'))</code>. Именно в это превращается ошибочная запись <code>assert (a == b, 'сообщение')</code> — и именно поэтому она не падает никогда.</p>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `check_equal(5, 5)   →  True
+check_equal(3, 5)   →  AssertionError: ожидалось 5, получено 3
+
+tuple_is_truthy     →  True   ← непустой кортеж всегда истинен`,
+      hint: 'В <code>check_equal</code> пиши <code>assert actual == expected, f\'...\'</code> — запятая разделяет условие и сообщение, скобок вокруг них быть не должно. Во второй части ничего вычислять руками не надо: просто примени <code>bool()</code> к кортежу.',
+      starter: `def check_equal(actual, expected):
+
+`,
+      solution: `def check_equal(actual, expected):
+    assert actual == expected, f'ожидалось {expected}, получено {actual}'
+    return True
+
+
+tuple_is_truthy = bool((False, 'сообщение'))`,
+      cases: [
+        { label: 'совпадение проходит',
+          setup: ``,
+          check: `assert 'check_equal' in globals(), 'Не определена функция check_equal'
+_r = check_equal(5, 5)
+assert _r is True, 'Вернулось ' + repr(_r) + ', ожидалось True'` },
+        { label: 'расхождение даёт AssertionError с разбором',
+          setup: ``,
+          check: `assert 'check_equal' in globals(), 'Не определена функция check_equal'
+_caught = None
+try:
+    check_equal(3, 5)
+except AssertionError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался AssertionError, но его не было — проверь, что условие и сообщение не обёрнуты в скобки'
+assert str(_caught) == 'ожидалось 5, получено 3', 'Сообщение ' + repr(str(_caught)) + ', ожидалось ' + repr('ожидалось 5, получено 3')` },
+        { label: 'сообщение подставляет реальные значения',
+          setup: ``,
+          check: `assert 'check_equal' in globals(), 'Не определена функция check_equal'
+_caught = None
+try:
+    check_equal('a', 'b')
+except AssertionError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался AssertionError, но его не было'
+assert str(_caught) == 'ожидалось b, получено a', 'Сообщение ' + repr(str(_caught)) + ', ожидалось ' + repr('ожидалось b, получено a')` },
+        { label: 'непустой кортеж истинен',
+          setup: ``,
+          check: `assert 'tuple_is_truthy' in globals(), 'Не создана переменная tuple_is_truthy'
+assert tuple_is_truthy is True, 'tuple_is_truthy = ' + repr(tuple_is_truthy) + ', ожидалось True: кортеж из двух элементов непуст, а значит истинен — поэтому assert с лишними скобками не падает никогда'` }
+      ]
+    }
+  ]
+}
 
 ];
 
@@ -5630,6 +6658,16 @@ allTasks.forEach((task) => {
       const hit = task.forbid.find(([needle]) => code.includes(needle));
       if (hit) {
         results.innerHTML = `<div class="verdict warn">Ограничение задачи: ${esc(hit[1])}</div>`;
+        return;
+      }
+    }
+
+    // require — для задач, где важна конструкция, а не только результат:
+    // обходной путь даёт тот же вывод, и проверками его не отличить
+    if (task.require) {
+      const miss = task.require.find(([needle]) => !code.includes(needle));
+      if (miss) {
+        results.innerHTML = `<div class="verdict warn">Ограничение задачи: ${esc(miss[1])}</div>`;
         return;
       }
     }
