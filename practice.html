@@ -797,6 +797,11 @@
    РАЗДЕЛЫ: крупные части книги. Главы ниже привязаны к ним полем part.
    ══════════════════════════════════════════════════════════════ */
 const PARTS = {
+  objects: {
+    title: 'Объекты, типы и протоколы',
+    sub: 'Глава 4 книги · как объекты устроены изнутри',
+    lead: 'Четыре раздела из восемнадцати: ссылки и копии, функции как данные, протокол сравнения и протокол итераций. Остальное — либо справочник по редко нужным протоколам, либо то, что уже закрыто раньше: менеджер контекста разобран в 3.5, <code>__repr__</code> в 1.16, <code>None</code> в 2.7.'
+  },
   flow: {
     title: 'Структура программы и управление выполнением',
     sub: 'Глава 3 книги · порядок выполнения, ошибки, ресурсы',
@@ -6238,6 +6243,921 @@ assert str(_caught) == 'ожидалось b, получено a', 'Сообще
           setup: ``,
           check: `assert 'tuple_is_truthy' in globals(), 'Не создана переменная tuple_is_truthy'
 assert tuple_is_truthy is True, 'tuple_is_truthy = ' + repr(tuple_is_truthy) + ', ожидалось True: кортеж из двух элементов непуст, а значит истинен — поэтому assert с лишними скобками не падает никогда'` }
+      ]
+    }
+  ]
+}
+,
+
+/* ─────────────────────────── 4.4 ─────────────────────────── */
+{
+  id: 'ch44',
+  num: '4.4',
+  part: 'objects',
+  title: 'Ссылки и копии',
+  theory: `
+    <h4>Счётчик ссылок</h4>
+    <p>Python сам следит за памятью через <strong>подсчёт ссылок</strong>. Счётчик растёт, когда объект связывают с новым именем или кладут в контейнер, и падает при <code>del</code>, при выходе имени из области видимости или при переприсваивании:</p>
+    <div class="code-block">a = <span class="val">37</span>        <span class="cm"># создан объект 37</span>
+b = a         <span class="cm"># +1 ссылка</span>
+c = []
+c.<span class="fn">append</span>(b)  <span class="cm"># +1 ссылка</span>
+
+<span class="kw">del</span> a         <span class="cm"># -1</span>
+b = <span class="val">42</span>       <span class="cm"># -1</span></div>
+    <p>Когда счётчик доходит до нуля, объект уничтожается. Кольцевые ссылки (<code>a</code> держит <code>b</code>, <code>b</code> держит <code>a</code>) до нуля не падают никогда — их подбирает отдельный <strong>детектор циклов</strong>, работающий по мере роста расхода памяти. Именно поэтому на вопрос «как в Python устроена сборка мусора» правильный ответ состоит из двух частей: подсчёт ссылок плюс сборщик циклов.</p>
+
+    <h4>Присваивание не копирует</h4>
+    <p>Это уже разбиралось в 2.4: <code>b = a</code> заводит второе имя для того же объекта.</p>
+    <div class="code-block">a = [<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>, <span class="val">4</span>]
+b = a
+b[<span class="val">2</span>] = -<span class="val">100</span>
+a              <span class="cm"># [1, 2, -100, 4] — изменилось и здесь</span></div>
+
+    <h4>Поверхностная копия</h4>
+    <p>Копия бывает двух видов. <strong>Поверхностная</strong> создаёт новый контейнер, но кладёт в него <em>ссылки</em> на те же самые элементы:</p>
+    <div class="code-block">a = [<span class="val">1</span>, <span class="val">2</span>, [<span class="val">3</span>, <span class="val">4</span>]]
+b = <span class="fn">list</span>(a)          <span class="cm"># то же самое: a[:] или a.copy()</span>
+
+b <span class="kw">is</span> a              <span class="cm"># False — контейнеры разные</span>
+b.<span class="fn">append</span>(<span class="val">100</span>)
+a                   <span class="cm"># [1, 2, [3, 4]] — не изменился</span>
+
+b[<span class="val">2</span>][<span class="val">0</span>] = -<span class="val">100</span>     <span class="cm"># меняем ВЛОЖЕННЫЙ список</span>
+a                   <span class="cm"># [1, 2, [-100, 4]] — изменился!</span></div>
+    <div class="hl orange"><span class="hl-label">Ровно эта ловушка</span>Внешний уровень независим, вложенные объекты — общие. Поэтому <code>list(config)</code> для словаря с вложенными списками даёт <strong>обманчивое</strong> чувство безопасности: имена ключей менять можно, а вот <code>copy['retries'].append(...)</code> испортит оригинал. В фикстурах это выглядит как «тест ломается только при запуске вторым».</div>
+
+    <h4>Глубокая копия</h4>
+    <p>Встроенного оператора нет — нужна функция из стандартной библиотеки. Она рекурсивно копирует всё содержимое:</p>
+    <div class="code-block"><span class="kw">import</span> copy
+
+a = [<span class="val">1</span>, <span class="val">2</span>, [<span class="val">3</span>, <span class="val">4</span>]]
+b = copy.<span class="fn">deepcopy</span>(a)
+b[<span class="val">2</span>][<span class="val">0</span>] = -<span class="val">100</span>
+a                   <span class="cm"># [1, 2, [3, 4]] — не тронут</span></div>
+    <p>Пользоваться <code>deepcopy()</code> по умолчанию не стоит: копирование медленное и чаще всего лишнее. Берут его там, где данные <em>будут меняться</em>, а оригинал должен уцелеть. И учти: <code>deepcopy()</code> не работает с объектами, завязанными на состояние среды — открытыми файлами, сетевыми подключениями, потоками и генераторами.</p>`,
+  vocab: { names: ['copy', 'deepcopy'], methods: [] },
+  allowed: 'всё из глав 1—3 плюс <code>import copy</code> и <code>copy.deepcopy()</code>, поверхностное копирование через <code>[:]</code> / <code>list()</code> / <code>dict()</code> / <code>.copy()</code>, <code>del</code>',
+  tasks: [
+    {
+      id: 't44-1',
+      title: 'Что делится при поверхностной копии',
+      statement: `<p>Дан <code>original</code> — список, внутри которого есть вложенный список.</p>
+        <p>Сделай <code>shallow</code> — <strong>поверхностную</strong> копию. Затем добавь в неё элемент <code>'new'</code> и измени первый элемент вложенного списка на <code>999</code>.</p>
+        <p>После этого запиши, что из изменений просочилось в оригинал:</p>
+        <ul>
+          <li><code>outer_shared</code> — совпадает ли теперь длина <code>original</code> и <code>shallow</code>;</li>
+          <li><code>inner_shared</code> — стал ли первый элемент вложенного списка в <code>original</code> равен <code>999</code>.</li>
+        </ul>
+        <p>Выведи одну строку. Ответы будут разными — в этом суть.</p>`,
+      io: `original = [1, 2, [3, 4]]
+→  внешний общий: False, вложенный общий: True`,
+      hint: 'Поверхностную копию даёт <code>list(original)</code>, <code>original[:]</code> или <code>original.copy()</code> — любой вариант. Вложенный список внутри копии — <strong>тот же самый объект</strong>, что и в оригинале, поэтому правка в нём видна с обеих сторон.',
+      starter: `# original уже задан
+
+`,
+      solution: `shallow = list(original)
+shallow.append('new')
+shallow[2][0] = 999
+
+outer_shared = len(original) == len(shallow)
+inner_shared = original[2][0] == 999
+print(f'внешний общий: {outer_shared}, вложенный общий: {inner_shared}')`,
+      cases: [
+        { label: 'original = [1, 2, [3, 4]]',
+          setup: `original = [1, 2, [3, 4]]
+import copy as _copy
+_o0 = _copy.deepcopy(original)`,
+          check: `assert 'shallow' in globals(), 'Не создана переменная shallow'
+assert shallow is not original, 'shallow и original — один объект: нужна копия'
+assert 'outer_shared' in globals() and 'inner_shared' in globals(), 'Нужны переменные outer_shared и inner_shared'
+assert outer_shared is False, 'outer_shared = ' + repr(outer_shared) + ', ожидалось False: добавление в копию не меняет длину оригинала'
+assert inner_shared is True, 'inner_shared = ' + repr(inner_shared) + ', ожидалось True: вложенный список у копии и оригинала общий'
+assert original[2][0] == 999, 'original[2][0] = ' + repr(original[2][0]) + ', ожидалось 999 — правка вложенного должна была просочиться'
+assert len(original) == len(_o0), 'Длина original изменилась: ' + repr(original)
+_e = 'внешний общий: False, вложенный общий: True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'вложенный список длиннее',
+          setup: `original = ['a', 'b', [10, 20, 30]]
+import copy as _copy
+_o0 = _copy.deepcopy(original)`,
+          check: `assert 'shallow' in globals(), 'Не создана переменная shallow'
+assert shallow is not original, 'shallow и original — один объект: нужна копия'
+assert outer_shared is False, 'outer_shared = ' + repr(outer_shared) + ', ожидалось False'
+assert inner_shared is True, 'inner_shared = ' + repr(inner_shared) + ', ожидалось True'
+assert original[2][0] == 999, 'original[2][0] = ' + repr(original[2][0]) + ', ожидалось 999'
+assert original[2][1] == 20, 'Остальные элементы вложенного списка меняться не должны: ' + repr(original[2])
+_e = 'внешний общий: False, вложенный общий: True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'вложенный список в конце короткого списка',
+          setup: `original = [0, 0, [7]]
+import copy as _copy
+_o0 = _copy.deepcopy(original)`,
+          check: `assert shallow is not original, 'shallow и original — один объект: нужна копия'
+assert outer_shared is False, 'outer_shared = ' + repr(outer_shared) + ', ожидалось False'
+assert inner_shared is True, 'inner_shared = ' + repr(inner_shared) + ', ожидалось True'
+assert original[2] == [999], 'original[2] = ' + repr(original[2]) + ', ожидалось [999]'
+_e = 'внешний общий: False, вложенный общий: True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
+      ]
+    },
+    {
+      id: 't44-2',
+      title: 'Независимая копия конфига',
+      statement: `<p>Дан <code>base_config</code> — словарь, в котором есть вложенный список.</p>
+        <p>Сделай <code>test_config</code> — <strong>полностью независимую</strong> копию, затем поменяй в ней значение по ключу <code>'env'</code> на <code>'staging'</code> и добавь <code>500</code> в список по ключу <code>'retries'</code>.</p>
+        <p><code>base_config</code> при этом обязан остаться нетронутым — целиком, включая вложенный список. Выведи одну строку.</p>`,
+      io: `base_config = {'env': 'prod', 'retries': [1, 2]}
+→  test: staging [1, 2, 500] | base: prod [1, 2]`,
+      hint: 'Ни <code>dict(base_config)</code>, ни <code>.copy()</code> тут не годятся — они копируют только верхний уровень, и список <code>retries</code> останется общим. Нужен <code>import copy</code> и <code>copy.deepcopy()</code>.',
+      starter: `# base_config уже задан
+
+`,
+      solution: `import copy
+
+test_config = copy.deepcopy(base_config)
+test_config['env'] = 'staging'
+test_config['retries'].append(500)
+
+print(f"test: {test_config['env']} {test_config['retries']} | base: {base_config['env']} {base_config['retries']}")`,
+      cases: [
+        { label: "base_config = {'env': 'prod', 'retries': [1, 2]}",
+          setup: `base_config = {'env': 'prod', 'retries': [1, 2]}
+import copy as _copy
+_b0 = _copy.deepcopy(base_config)`,
+          check: `assert 'test_config' in globals(), 'Не создана переменная test_config'
+assert test_config['env'] == 'staging', "test_config['env'] = " + repr(test_config['env']) + ", ожидалось 'staging'"
+assert test_config['retries'] == _b0['retries'] + [500], "test_config['retries'] = " + repr(test_config['retries']) + ', ожидалось ' + repr(_b0['retries'] + [500])
+assert base_config == _b0, 'base_config изменился: ' + repr(base_config) + ', а должен был остаться ' + repr(_b0) + '. Поверхностная копия оставляет вложенный список общим — нужен deepcopy'
+assert test_config['retries'] is not base_config['retries'], 'Списки retries остались одним объектом — копия поверхностная'
+_e = 'test: staging ' + str(_b0['retries'] + [500]) + ' | base: ' + _b0['env'] + ' ' + str(_b0['retries'])
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'пустой список повторов',
+          setup: `base_config = {'env': 'dev', 'retries': []}
+import copy as _copy
+_b0 = _copy.deepcopy(base_config)`,
+          check: `assert test_config['env'] == 'staging', "test_config['env'] = " + repr(test_config['env'])
+assert test_config['retries'] == [500], "test_config['retries'] = " + repr(test_config['retries']) + ', ожидалось [500]'
+assert base_config == _b0, 'base_config изменился: ' + repr(base_config) + ', а должен был остаться ' + repr(_b0)
+_e = 'test: staging [500] | base: dev []'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'длинный список повторов',
+          setup: `base_config = {'env': 'prod', 'retries': [1, 2, 3, 4]}
+import copy as _copy
+_b0 = _copy.deepcopy(base_config)`,
+          check: `assert test_config['retries'] == _b0['retries'] + [500], "test_config['retries'] = " + repr(test_config['retries'])
+assert base_config == _b0, 'base_config изменился: ' + repr(base_config)
+assert base_config['retries'] == [1, 2, 3, 4], "base_config['retries'] = " + repr(base_config['retries']) + ', ожидалось [1, 2, 3, 4]'
+_e = 'test: staging ' + str(_b0['retries'] + [500]) + ' | base: prod ' + str(_b0['retries'])
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
+      ]
+    },
+    {
+      id: 't44-3',
+      title: 'Что именно копирует срез',
+      statement: `<p>Дан <code>a</code> — список, внутри которого есть вложенный список.</p>
+        <p>Сделай <code>b = a[:]</code> и заполни две переменные проверками оператором <code>is</code>:</p>
+        <ul>
+          <li><code>same_object</code> — один ли объект <code>b</code> и <code>a</code>;</li>
+          <li><code>same_inner</code> — один ли объект вложенный список внутри <code>b</code> и внутри <code>a</code>.</li>
+        </ul>
+        <p>Выведи одну строку. Ответы противоположны — это и есть определение поверхностной копии в одну строчку.</p>`,
+      io: `a = [1, [2, 3]]
+→  same_object=False same_inner=True`,
+      hint: 'Ничего вычислять не надо: выражения <code>b is a</code> и <code>b[1] is a[1]</code> сами дают <code>True</code> или <code>False</code>. Срез создаёт новый внешний список, но кладёт в него ссылки на прежние элементы.',
+      starter: `# a уже задан
+
+`,
+      solution: `b = a[:]
+same_object = b is a
+same_inner = b[1] is a[1]
+print(f'same_object={same_object} same_inner={same_inner}')`,
+      cases: [
+        { label: 'a = [1, [2, 3]]',
+          setup: `a = [1, [2, 3]]`,
+          check: `assert 'b' in globals(), 'Не создана переменная b'
+assert 'same_object' in globals() and 'same_inner' in globals(), 'Нужны переменные same_object и same_inner'
+assert same_object is False, 'same_object = ' + repr(same_object) + ', ожидалось False: срез создаёт новый список'
+assert same_inner is True, 'same_inner = ' + repr(same_inner) + ', ожидалось True: вложенный объект не копируется, копируется ссылка на него'
+_e = 'same_object=False same_inner=True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'вложенный список пуст',
+          setup: `a = ['x', []]`,
+          check: `assert same_object is False, 'same_object = ' + repr(same_object) + ', ожидалось False'
+assert same_inner is True, 'same_inner = ' + repr(same_inner) + ', ожидалось True (два пустых списка были бы равны, но здесь это буквально один объект)'
+_e = 'same_object=False same_inner=True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'вложенный словарь вместо списка',
+          setup: `a = [0, {'k': 'v'}]`,
+          check: `assert same_object is False, 'same_object = ' + repr(same_object) + ', ожидалось False'
+assert same_inner is True, 'same_inner = ' + repr(same_inner) + ', ожидалось True: правило одинаково для любых вложенных объектов'
+_e = 'same_object=False same_inner=True'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 4.6 ─────────────────────────── */
+{
+  id: 'ch46',
+  num: '4.6',
+  part: 'objects',
+  title: 'Первоклассные объекты',
+  theory: `
+    <h4>Данными может быть что угодно</h4>
+    <p>В Python <strong>все объекты первоклассные</strong>: всё, что можно связать с именем, можно и положить в переменную, передать аргументом, вернуть из функции, положить в список или словарь. Функции, модули, классы и типы исключений — не исключение:</p>
+    <div class="code-block">items = {}
+items[<span class="st">'func'</span>] = <span class="fn">abs</span>            <span class="cm"># функция</span>
+<span class="kw">import</span> math
+items[<span class="st">'mod'</span>] = math             <span class="cm"># модуль</span>
+items[<span class="st">'error'</span>] = ValueError      <span class="cm"># тип исключения</span>
+
+nums = [<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>]
+items[<span class="st">'append'</span>] = nums.<span class="fn">append</span>   <span class="cm"># метод другого объекта</span></div>
+    <p>И дальше всё это работает как обычно, просто вызывается через словарь:</p>
+    <div class="code-block">items[<span class="st">'func'</span>](-<span class="val">45</span>)        <span class="cm"># 45 — то же, что abs(-45)</span>
+items[<span class="st">'mod'</span>].<span class="fn">sqrt</span>(<span class="val">4</span>)      <span class="cm"># 2.0</span>
+
+<span class="kw">try</span>:
+    x = <span class="fn">int</span>(<span class="st">'a lot'</span>)
+<span class="kw">except</span> items[<span class="st">'error'</span>]:     <span class="cm"># то же, что except ValueError</span>
+    ...</div>
+    <p>Обрати внимание: скобок при сохранении нет. <code>abs</code> — это сама функция, <code>abs(-45)</code> — уже результат её вызова. Перепутать эти две вещи — самая частая ошибка на первых порах.</p>
+
+    <h4>Типы тоже объекты</h4>
+    <p><code>str</code>, <code>int</code>, <code>float</code> — обычные объекты, которые можно сложить в список и применять по очереди. Отсюда компактный разбор строки с приведением типов по колонкам:</p>
+    <div class="code-block">line = <span class="st">'ACME,100,490.10'</span>
+column_types = [<span class="kw">str</span>, <span class="kw">int</span>, <span class="kw">float</span>]
+
+parts = line.<span class="fn">split</span>(<span class="st">','</span>)
+row = [ty(val) <span class="kw">for</span> ty, val <span class="kw">in</span> <span class="fn">zip</span>(column_types, parts)]
+row                          <span class="cm"># ['ACME', 100, 490.1]</span></div>
+
+    <h4>Словарь вместо лестницы if-elif</h4>
+    <p>Стандартный приём: вместо длинной цепочки ветвлений держат словарь «имя → функция или класс».</p>
+    <div class="code-block"><span class="cm"># было</span>
+<span class="kw">if</span> fmt == <span class="st">'text'</span>:
+    formatter = TextFormatter()
+<span class="kw">elif</span> fmt == <span class="st">'csv'</span>:
+    formatter = CSVFormatter()
+<span class="kw">elif</span> fmt == <span class="st">'html'</span>:
+    formatter = HTMLFormatter()
+<span class="kw">else</span>:
+    <span class="kw">raise</span> RuntimeError(<span class="st">'Bad format'</span>)
+
+<span class="cm"># стало</span>
+_formats = {
+    <span class="st">'text'</span>: TextFormatter,
+    <span class="st">'csv'</span>: CSVFormatter,
+    <span class="st">'html'</span>: HTMLFormatter,
+}
+<span class="kw">if</span> fmt <span class="kw">in</span> _formats:
+    formatter = _formats[fmt]()
+<span class="kw">else</span>:
+    <span class="kw">raise</span> RuntimeError(<span class="st">'Bad format'</span>)</div>
+    <p>Новый вариант добавляется вставкой строки в словарь, а не правкой большого блока. На этом же приёме держатся реестры плагинов, диспетчеризация по типу события и параметризация тестов.</p>`,
+  vocab: { names: [], methods: [] },
+  allowed: 'всё из глав 1—3 и 4.4 плюс хранение функций, типов и классов в переменных и коллекциях, вызов через переменную, словарь диспетчеризации',
+  tasks: [
+    {
+      id: 't46-1',
+      title: 'Разбор строки по списку типов',
+      statement: `<p>Даны строка <code>line</code> со значениями через запятую и <code>column_types</code> — список типов, по одному на колонку.</p>
+        <p>Разбери строку и собери <code>row</code> — список значений, где каждое приведено к своему типу. Выведи его.</p>
+        <p><strong>Ограничение:</strong> никаких <code>if</code> по номеру колонки — типы применяются как обычные объекты из списка.</p>`,
+      io: `line = 'ACME,100,490.10'   column_types = [str, int, float]
+→  ['ACME', 100, 490.1]`,
+      hint: 'Тип — такой же объект, как функция: если <code>ty = int</code>, то <code>ty(\'100\')</code> даёт <code>100</code>. Свести две последовательности в пары умеет <code>zip</code>, а собрать результат — списковое включение.',
+      forbid: [['if ', 'В этой задаче ветвления не нужны: типы применяются как объекты из списка.']],
+      starter: `# line и column_types уже заданы
+
+`,
+      solution: `parts = line.split(',')
+row = [ty(val) for ty, val in zip(column_types, parts)]
+print(row)`,
+      cases: [
+        { label: "'ACME,100,490.10' с [str, int, float]",
+          setup: `line = 'ACME,100,490.10'
+column_types = [str, int, float]
+_l0, _c0 = line, list(column_types)`,
+          check: `_exp = [_t(_v) for _t, _v in zip(_c0, _l0.split(','))]
+assert 'row' in globals(), 'Не создана переменная row'
+assert row == _exp, 'row = ' + repr(row) + ', ожидалось ' + repr(_exp)
+assert [type(_x).__name__ for _x in row] == [type(_x).__name__ for _x in _exp], 'Типы значений: ' + repr([type(_x).__name__ for _x in row]) + ', ожидалось ' + repr([type(_x).__name__ for _x in _exp])
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp)) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'другой порядок типов',
+          setup: `line = '42,IBM,7'
+column_types = [int, str, int]
+_l0, _c0 = line, list(column_types)`,
+          check: `_exp = [_t(_v) for _t, _v in zip(_c0, _l0.split(','))]
+assert row == _exp, 'row = ' + repr(row) + ', ожидалось ' + repr(_exp)
+assert [type(_x).__name__ for _x in row] == ['int', 'str', 'int'], 'Типы значений: ' + repr([type(_x).__name__ for _x in row]) + ", ожидалось ['int', 'str', 'int']"
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp))` },
+        { label: 'одна колонка',
+          setup: `line = '3.5'
+column_types = [float]
+_l0, _c0 = line, list(column_types)`,
+          check: `_exp = [_t(_v) for _t, _v in zip(_c0, _l0.split(','))]
+assert row == _exp, 'row = ' + repr(row) + ', ожидалось ' + repr(_exp)
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp))` },
+        { label: 'типов меньше, чем колонок — zip обрежет',
+          setup: `line = 'a,1,2,3'
+column_types = [str, int]
+_l0, _c0 = line, list(column_types)`,
+          check: `_exp = [_t(_v) for _t, _v in zip(_c0, _l0.split(','))]
+assert row == _exp, 'row = ' + repr(row) + ', ожидалось ' + repr(_exp) + ' — zip останавливается на более коротком'
+assert _lines and _lines[-1] == str(_exp), 'Ожидалась строка ' + repr(str(_exp))` }
+      ]
+    },
+    {
+      id: 't46-2',
+      title: 'Словарь вместо лестницы if-elif',
+      statement: `<p>Определи три функции преобразования строки и собери из них диспетчер:</p>
+        <ul>
+          <li><code>to_upper(text)</code> — в верхний регистр;</li>
+          <li><code>to_lower(text)</code> — в нижний;</li>
+          <li><code>to_strip(text)</code> — убрать пробелы по краям;</li>
+          <li><code>actions</code> — словарь <code>'upper'</code> / <code>'lower'</code> / <code>'strip'</code> → <strong>сама функция</strong>, без скобок;</li>
+          <li><code>apply(name, text)</code> — находит функцию по имени и вызывает её. Для неизвестного имени выбрасывает <code>ValueError('неизвестное действие')</code>.</li>
+        </ul>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `apply('upper', 'qa')      →  'QA'
+apply('strip', '  qa  ')  →  'qa'
+apply('нет', 'qa')        →  ValueError: неизвестное действие`,
+      hint: 'В словарь кладётся <code>to_upper</code>, а не <code>to_upper()</code> — во втором случае функция сразу вызовется, и в словарь попадёт результат. Достав функцию из словаря, её вызывают обычными скобками: <code>actions[name](text)</code>.',
+      starter: `def to_upper(text):
+    return text.upper()
+
+`,
+      solution: `def to_upper(text):
+    return text.upper()
+
+
+def to_lower(text):
+    return text.lower()
+
+
+def to_strip(text):
+    return text.strip()
+
+
+actions = {
+    'upper': to_upper,
+    'lower': to_lower,
+    'strip': to_strip,
+}
+
+
+def apply(name, text):
+    if name not in actions:
+        raise ValueError('неизвестное действие')
+    return actions[name](text)`,
+      cases: [
+        { label: 'все три действия работают',
+          setup: ``,
+          check: `assert 'apply' in globals(), 'Не определена функция apply'
+assert apply('upper', 'qa') == 'QA', "apply('upper', 'qa') вернула " + repr(apply('upper', 'qa')) + ", ожидалось 'QA'"
+assert apply('lower', 'QA') == 'qa', "apply('lower', 'QA') вернула " + repr(apply('lower', 'QA')) + ", ожидалось 'qa'"
+assert apply('strip', '  qa  ') == 'qa', "apply('strip', '  qa  ') вернула " + repr(apply('strip', '  qa  ')) + ", ожидалось 'qa'"` },
+        { label: 'в словаре лежат функции, а не их результаты',
+          setup: ``,
+          check: `assert 'actions' in globals(), 'Не создан словарь actions'
+assert set(actions) == {'upper', 'lower', 'strip'}, 'Ключи actions: ' + repr(sorted(actions)) + ", ожидались ['lower', 'strip', 'upper']"
+for _k, _v in actions.items():
+    assert callable(_v), 'По ключу ' + repr(_k) + ' лежит ' + repr(_v) + ' — в словарь надо класть саму функцию, без скобок'
+assert actions['upper']('qa') == 'QA', 'Функция по ключу upper отработала неверно'` },
+        { label: 'неизвестное имя даёт ValueError',
+          setup: ``,
+          check: `assert 'apply' in globals(), 'Не определена функция apply'
+_caught = None
+try:
+    apply('нет такого', 'qa')
+except ValueError as _e:
+    _caught = _e
+assert _caught is not None, 'Ожидался ValueError, но исключения не было'
+assert str(_caught) == 'неизвестное действие', 'Текст ' + repr(str(_caught)) + ', ожидалось ' + repr('неизвестное действие')` },
+        { label: 'функции работают и напрямую',
+          setup: ``,
+          check: `for _n in ('to_upper', 'to_lower', 'to_strip'):
+    assert _n in globals(), 'Не определена функция ' + _n
+assert to_upper('ab') == 'AB', "to_upper('ab') вернула " + repr(to_upper('ab'))
+assert to_lower('AB') == 'ab', "to_lower('AB') вернула " + repr(to_lower('AB'))
+assert to_strip(' ab ') == 'ab', "to_strip(' ab ') вернула " + repr(to_strip(' ab '))` }
+      ]
+    },
+    {
+      id: 't46-3',
+      title: 'Функция как аргумент',
+      statement: `<p>Определи <code>apply_all(func, items)</code> — она принимает <strong>функцию</strong> и список, применяет функцию к каждому элементу и возвращает список результатов.</p>
+        <p>Функция внутри не выбирается по имени и не хардкодится: применяется ровно та, что пришла аргументом. Печатать ничего не нужно.</p>`,
+      io: `apply_all(abs, [-1, 2, -3])   →  [1, 2, 3]
+apply_all(str, [1, 2])        →  ['1', '2']
+apply_all(len, ['ab', ''])    →  [2, 0]`,
+      hint: 'Тело — одно списковое включение: <code>[func(x) for x in items]</code>. Параметр <code>func</code> ведёт себя как любая другая функция, его просто вызывают скобками.',
+      starter: `def apply_all(func, items):
+
+`,
+      solution: `def apply_all(func, items):
+    return [func(x) for x in items]`,
+      cases: [
+        { label: 'со встроенной abs',
+          setup: ``,
+          check: `assert 'apply_all' in globals(), 'Не определена функция apply_all'
+_r = apply_all(abs, [-1, 2, -3])
+assert _r == [1, 2, 3], 'Вернулось ' + repr(_r) + ', ожидалось [1, 2, 3]'` },
+        { label: 'с типом str',
+          setup: ``,
+          check: `assert 'apply_all' in globals(), 'Не определена функция apply_all'
+_r = apply_all(str, [1, 2])
+assert _r == ['1', '2'], 'Вернулось ' + repr(_r) + ", ожидалось ['1', '2']"` },
+        { label: 'со встроенной len',
+          setup: ``,
+          check: `assert 'apply_all' in globals(), 'Не определена функция apply_all'
+_r = apply_all(len, ['ab', '', 'xyz'])
+assert _r == [2, 0, 3], 'Вернулось ' + repr(_r) + ', ожидалось [2, 0, 3]'` },
+        { label: 'со своей функцией и пустым списком',
+          setup: ``,
+          check: `assert 'apply_all' in globals(), 'Не определена функция apply_all'
+def _double(x):
+    return x * 2
+_r = apply_all(_double, [1, 5])
+assert _r == [2, 10], 'Вернулось ' + repr(_r) + ', ожидалось [2, 10]'
+_r2 = apply_all(abs, [])
+assert _r2 == [], 'Для пустого списка вернулось ' + repr(_r2) + ', ожидался []'` }
+      ]
+    }
+  ]
+}
+,
+
+/* ─────────────────────────── 4.11 ─────────────────────────── */
+{
+  id: 'ch411',
+  num: '4.11',
+  part: 'objects',
+  title: 'Протокол сравнения',
+  theory: `
+    <h4>is переопределить нельзя</h4>
+    <p><code>a is b</code> — встроенная проверка тождественности, её поведение изменить невозможно. Всё остальное сравнение объектов задаётся специальными методами:</p>
+    <table>
+      <thead><tr><th>Метод</th><th>За что отвечает</th></tr></thead>
+      <tbody>
+        <tr><td><code>__bool__(self)</code></td><td>истинность объекта в условии</td></tr>
+        <tr><td><code>__eq__(self, other)</code></td><td><code>==</code> и <code>!=</code></td></tr>
+        <tr><td><code>__lt__</code> · <code>__le__</code> · <code>__gt__</code> · <code>__ge__</code></td><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td></tr>
+        <tr><td><code>__hash__(self)</code></td><td>хеш-код для множеств и ключей словаря</td></tr>
+      </tbody>
+    </table>
+    <p>Реализация <code>__eq__</code> по умолчанию сравнивает <strong>по тождественности</strong> — про это была задача в 1.16.</p>
+
+    <h4>Для сортировки достаточно __lt__</h4>
+    <p>Определять все шесть операторов не нужно. Чтобы работали <code>sorted()</code>, <code>min()</code> и <code>max()</code>, хватает одного <code>__lt__</code>:</p>
+    <div class="code-block"><span class="kw">class</span> Version:
+    <span class="kw">def</span> <span class="fn">__lt__</span>(self, other):
+        <span class="kw">return</span> (self.major, self.minor) &lt; (other.major, other.minor)
+
+<span class="fn">sorted</span>([v3, v1, v2])   <span class="cm"># работает</span></div>
+    <p>Обрати внимание на приём: поля упаковываются в кортежи, и дальше работает поэлементное сравнение из 2.5 — писать сравнение по разрядам вручную не нужно.</p>
+    <p>Если нужны все операторы, их не пишут руками: декоратор <code>@total_ordering</code> из модуля <code>functools</code> достроит остальные, когда есть <code>__eq__</code> и одно из сравнений.</p>
+    <p>Когда сравнение бессмысленно, метод возвращает встроенный объект <code>NotImplemented</code> — <strong>не путать</strong> с исключением <code>NotImplementedError</code>. Тогда Python пробует обратную операцию у второго операнда:</p>
+    <div class="code-block">(<span class="val">42</span>).<span class="fn">__lt__</span>(<span class="val">52.3</span>)     <span class="cm"># NotImplemented</span>
+(<span class="val">52.3</span>).<span class="fn">__gt__</span>(<span class="val">42</span>)     <span class="cm"># True  — сработала она</span></div>
+
+    <h4>__eq__ и __hash__ ходят парой</h4>
+    <div class="hl orange"><span class="hl-label">Ключевое</span>Как только класс определяет <code>__eq__</code>, Python <strong>сам ставит его <code>__hash__</code> в <code>None</code></strong>, и объект становится нехешируемым: его нельзя положить в множество или сделать ключом словаря. Логика простая — раз равенство переопределили, прежний хеш (по адресу) ему больше не соответствует. Значит, <code>__hash__</code> надо определить рядом.</div>
+    <div class="code-block"><span class="kw">class</span> Point:
+    <span class="kw">def</span> <span class="fn">__eq__</span>(self, other):
+        <span class="kw">return</span> (self.x, self.y) == (other.x, other.y)
+
+{Point(<span class="val">1</span>, <span class="val">2</span>)}    <span class="cm"># TypeError: unhashable type: 'Point'</span></div>
+    <p>Правило связи: <strong>равные объекты обязаны иметь равный хеш</strong>. Обратное неверно — у разных объектов хеши могут совпасть, и тогда словарь разрешит коллизию вызовом <code>__eq__</code>. Проще всего собрать хеш из тех же полей, что участвуют в равенстве: <code>hash((self.x, self.y))</code>.</p>
+
+    <h4>Истинность</h4>
+    <p>Проверка <code>if obj:</code> вызывает <code>__bool__()</code>. Если его нет, берётся <code>__len__()</code> — нулевая длина считается ложью. Если нет ни того ни другого, объект всегда истинен:</p>
+    <div class="code-block"><span class="kw">class</span> Basket:
+    <span class="kw">def</span> <span class="fn">__len__</span>(self):
+        <span class="kw">return</span> <span class="fn">len</span>(self._items)
+
+<span class="kw">if</span> basket:      <span class="cm"># пустая корзина ложна благодаря __len__</span>
+    ...</div>`,
+  vocab: { names: ['__lt__', '__hash__', '__bool__', 'hash', 'NotImplemented', 'total_ordering', 'functools'], methods: [] },
+  allowed: 'всё из глав 1—3 и 4.4—4.6 плюс <code>__lt__</code>, <code>__hash__</code>, <code>__bool__</code>, встроенная <code>hash()</code>, сравнение кортежей полей',
+  tasks: [
+    {
+      id: 't411-1',
+      title: 'Сортировка своих объектов',
+      statement: `<p>Определи класс <code>Version</code>:</p>
+        <ul>
+          <li><code>__init__(major, minor, patch)</code> сохраняет три поля под теми же именами;</li>
+          <li><code>__lt__</code> сравнивает версии по разрядам: сначала <code>major</code>, при равенстве — <code>minor</code>, потом <code>patch</code>;</li>
+          <li><code>__repr__</code> возвращает строку вида <code>1.10.0</code>.</li>
+        </ul>
+        <p>Ничего печатать не нужно: проверка сама отсортирует список версий.</p>`,
+      io: `versions = [Version(1, 2, 3), Version(1, 10, 0), Version(1, 2, 10)]
+sorted(versions)   →  [1.2.3, 1.2.10, 1.10.0]`,
+      hint: 'Писать сравнение по разрядам вручную не надо: упакуй поля в кортежи и сравни их — <code>(self.major, self.minor, self.patch) &lt; (other.major, ...)</code>. Кортежи сравниваются поэлементно, ровно как нужно. Для <code>sorted()</code> достаточно одного <code>__lt__</code>.',
+      starter: `class Version:
+
+`,
+      solution: `class Version:
+    def __init__(self, major, minor, patch):
+        self.major = major
+        self.minor = minor
+        self.patch = patch
+
+    def __lt__(self, other):
+        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+
+    def __repr__(self):
+        return f'{self.major}.{self.minor}.{self.patch}'`,
+      cases: [
+        { label: 'поля и repr',
+          setup: ``,
+          check: `assert 'Version' in globals(), 'Не определён класс Version'
+_v = Version(1, 10, 0)
+for _k, _e in (('major', 1), ('minor', 10), ('patch', 0)):
+    assert hasattr(_v, _k), 'У объекта нет поля ' + _k
+    assert getattr(_v, _k) == _e, _k + ' = ' + repr(getattr(_v, _k)) + ', ожидалось ' + repr(_e)
+assert repr(_v) == '1.10.0', 'repr() вернул ' + repr(repr(_v)) + ", ожидалось '1.10.0'"` },
+        { label: 'сортировка по второму разряду',
+          setup: ``,
+          check: `assert 'Version' in globals(), 'Не определён класс Version'
+_vs = [Version(1, 2, 3), Version(1, 10, 0), Version(1, 2, 10)]
+_got = [repr(_x) for _x in sorted(_vs)]
+assert _got == ['1.2.3', '1.2.10', '1.10.0'], 'sorted дал ' + repr(_got) + ", ожидалось ['1.2.3', '1.2.10', '1.10.0'] — 10 больше 2, хотя как строки сравнились бы наоборот"` },
+        { label: 'решает старший разряд',
+          setup: ``,
+          check: `assert 'Version' in globals(), 'Не определён класс Version'
+_vs = [Version(2, 0, 0), Version(1, 99, 99)]
+_got = [repr(_x) for _x in sorted(_vs)]
+assert _got == ['1.99.99', '2.0.0'], 'sorted дал ' + repr(_got) + ", ожидалось ['1.99.99', '2.0.0']"` },
+        { label: 'min и max тоже работают',
+          setup: ``,
+          check: `assert 'Version' in globals(), 'Не определён класс Version'
+_vs = [Version(1, 2, 3), Version(3, 0, 0), Version(0, 9, 9)]
+assert repr(min(_vs)) == '0.9.9', 'min дал ' + repr(repr(min(_vs))) + ", ожидалось '0.9.9'"
+assert repr(max(_vs)) == '3.0.0', 'max дал ' + repr(repr(max(_vs))) + ", ожидалось '3.0.0' — обеим функциям хватает одного __lt__"` }
+      ]
+    },
+    {
+      id: 't411-2',
+      title: '__eq__ без __hash__ ломает множества',
+      statement: `<p>Определи класс <code>Point</code>:</p>
+        <ul>
+          <li><code>__init__(x, y)</code> сохраняет два поля;</li>
+          <li><code>__eq__</code> считает точки равными при совпадении обоих полей, а при сравнении с чужим типом возвращает <code>False</code>;</li>
+          <li><code>__hash__</code> возвращает хеш от тех же полей.</li>
+        </ul>
+        <p>Без <code>__hash__</code> объект станет <strong>нехешируемым</strong>: Python сам обнуляет хеш у класса, который переопределил равенство. Точку тогда не положить ни в множество, ни в ключ словаря.</p>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `Point(1, 2) == Point(1, 2)        →  True
+len({Point(1, 2), Point(1, 2)})   →  1   одинаковые схлопнулись
+{Point(0, 0): 'старт'}            →  работает как ключ`,
+      hint: 'Проще всего собрать хеш из кортежа тех же полей: <code>hash((self.x, self.y))</code>. Главное правило — равные объекты обязаны давать равный хеш, поэтому поля в <code>__eq__</code> и <code>__hash__</code> должны быть одни и те же.',
+      starter: `class Point:
+
+`,
+      solution: `class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return False
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))`,
+      cases: [
+        { label: 'равенство по значению',
+          setup: ``,
+          check: `assert 'Point' in globals(), 'Не определён класс Point'
+assert Point(1, 2) == Point(1, 2), 'Точки с одинаковыми координатами должны быть равны'
+assert not (Point(1, 2) == Point(9, 2)), 'Точки с разными координатами не должны быть равны'
+assert not (Point(1, 2) == 'что-то'), 'Сравнение с чужим типом должно давать False'` },
+        { label: 'объект хешируем',
+          setup: ``,
+          check: `assert 'Point' in globals(), 'Не определён класс Point'
+assert Point.__hash__ is not None, 'У класса __hash__ равен None — Python обнуляет его при определении __eq__, значит __hash__ надо задать явно'
+try:
+    hash(Point(1, 2))
+except TypeError as _e:
+    raise AssertionError('Точка нехешируема: ' + str(_e))` },
+        { label: 'одинаковые точки схлопываются в множестве',
+          setup: ``,
+          check: `assert 'Point' in globals(), 'Не определён класс Point'
+_s = {Point(1, 2), Point(1, 2), Point(3, 4)}
+assert len(_s) == 2, 'В множестве ' + str(len(_s)) + ' элементов, ожидалось 2 — равные точки должны давать равный хеш'` },
+        { label: 'точка работает как ключ словаря',
+          setup: ``,
+          check: `assert 'Point' in globals(), 'Не определён класс Point'
+_d = {Point(0, 0): 'старт'}
+_d[Point(0, 0)] = 'финиш'
+assert len(_d) == 1, 'В словаре ' + str(len(_d)) + ' ключей, ожидался 1'
+assert _d[Point(0, 0)] == 'финиш', 'По ключу лежит ' + repr(_d[Point(0, 0)]) + ", ожидалось 'финиш'"` }
+      ]
+    },
+    {
+      id: 't411-3',
+      title: 'Истинность своего объекта',
+      statement: `<p>Определи класс <code>Basket</code>:</p>
+        <ul>
+          <li><code>__init__</code> заводит пустой внутренний список <code>_items</code>;</li>
+          <li><code>add(item)</code> добавляет элемент;</li>
+          <li><code>__len__</code> возвращает количество элементов.</li>
+        </ul>
+        <p>Отдельный <code>__bool__</code> писать <strong>не нужно</strong>: когда его нет, Python берёт <code>__len__</code>, и пустая корзина сама становится ложной. Это и надо проверить.</p>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `basket = Basket()
+bool(basket)        →  False   пустая
+basket.add('мышь')
+bool(basket)        →  True
+len(basket)         →  1`,
+      hint: 'Если бы не было ни <code>__bool__</code>, ни <code>__len__</code>, объект считался бы истинным всегда — даже пустой. Поэтому одного <code>__len__</code> достаточно, чтобы заработала запись <code>if basket:</code>.',
+      forbid: [['__bool__', 'В этой задаче __bool__ определять не надо — смысл в том, что Python берёт __len__ как запасной вариант.']],
+      starter: `class Basket:
+
+`,
+      solution: `class Basket:
+    def __init__(self):
+        self._items = []
+
+    def add(self, item):
+        self._items.append(item)
+
+    def __len__(self):
+        return len(self._items)`,
+      cases: [
+        { label: 'пустая корзина ложна',
+          setup: ``,
+          check: `assert 'Basket' in globals(), 'Не определён класс Basket'
+_b = Basket()
+assert len(_b) == 0, 'len() пустой корзины вернул ' + repr(len(_b)) + ', ожидался 0'
+assert bool(_b) is False, 'bool() пустой корзины вернул ' + repr(bool(_b)) + ', ожидалось False'
+assert not _b, 'Пустая корзина должна быть ложной в условии'` },
+        { label: 'непустая корзина истинна',
+          setup: ``,
+          check: `assert 'Basket' in globals(), 'Не определён класс Basket'
+_b = Basket()
+_b.add('мышь')
+assert len(_b) == 1, 'len() вернул ' + repr(len(_b)) + ', ожидался 1'
+assert bool(_b) is True, 'bool() вернул ' + repr(bool(_b)) + ', ожидалось True'` },
+        { label: 'несколько элементов',
+          setup: ``,
+          check: `assert 'Basket' in globals(), 'Не определён класс Basket'
+_b = Basket()
+for _i in ['a', 'b', 'c']:
+    _b.add(_i)
+assert len(_b) == 3, 'len() вернул ' + repr(len(_b)) + ', ожидалось 3'
+assert _b._items == ['a', 'b', 'c'], '_items = ' + repr(_b._items) + ", ожидалось ['a', 'b', 'c']"` },
+        { label: 'две корзины независимы',
+          setup: ``,
+          check: `assert 'Basket' in globals(), 'Не определён класс Basket'
+_a = Basket()
+_b = Basket()
+_a.add('x')
+assert len(_b) == 0, 'Вторая корзина получила элемент первой — список надо создавать внутри __init__'
+assert len(_a) == 1, 'len() первой корзины вернул ' + repr(len(_a))` }
+      ]
+    }
+  ]
+},
+
+/* ─────────────────────────── 4.14 ─────────────────────────── */
+{
+  id: 'ch414',
+  num: '4.14',
+  part: 'objects',
+  title: 'Протокол итераций',
+  theory: `
+    <h4>Как на самом деле работает for</h4>
+    <p>Объект пригоден для перебора, если у него есть метод <code>__iter__()</code>, возвращающий <strong>итератор</strong>. У итератора есть единственный метод <code>__next__()</code>: он отдаёт следующее значение или выбрасывает <code>StopIteration</code>, когда значения кончились.</p>
+    <p>Цикл <code>for x in s</code> разворачивается ровно в это:</p>
+    <div class="code-block">_iter = s.<span class="fn">__iter__</span>()
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="kw">try</span>:
+        x = _iter.<span class="fn">__next__</span>()
+    <span class="kw">except</span> StopIteration:
+        <span class="kw">break</span>
+    <span class="cm"># тело цикла</span></div>
+    <p>Снаружи те же методы доступны как встроенные <code>iter(s)</code> и <code>next(it)</code>. Отсюда понятно и то, почему <code>StopIteration</code> наследуется от <code>BaseException</code> в стороне от обычных ошибок: это не сбой, а штатный сигнал конца перебора.</p>
+
+    <h4>Итератор вручную</h4>
+    <div class="code-block"><span class="kw">class</span> Countdown:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n):
+        self.n = n
+
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+        <span class="kw">return</span> self          <span class="cm"># объект сам себе итератор</span>
+
+    <span class="kw">def</span> <span class="fn">__next__</span>(self):
+        <span class="kw">if</span> self.n &lt;= <span class="val">0</span>:
+            <span class="kw">raise</span> StopIteration
+        self.n -= <span class="val">1</span>
+        <span class="kw">return</span> self.n + <span class="val">1</span></div>
+    <div class="hl orange"><span class="hl-label">Следствие</span>Когда <code>__iter__</code> возвращает <code>self</code>, объект <strong>одноразовый</strong>: состояние перебора хранится в нём самом, и после первого прохода оно исчерпано. Второй <code>for</code> по тому же объекту молча даст пустоту — та же ловушка, что у генераторов из 2.15.</div>
+
+    <h4>Через yield — проще и многоразово</h4>
+    <p>Функции-генераторы сами соответствуют протоколу итераций, поэтому <code>__iter__</code> достаточно сделать генератором. Тогда <code>__next__</code> писать не нужно вовсе:</p>
+    <div class="code-block"><span class="kw">class</span> FRange:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, start, stop, step):
+        self.start = start
+        self.stop = stop
+        self.step = step
+
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+        x = self.start
+        <span class="kw">while</span> x &lt; self.stop:
+            <span class="kw">yield</span> x
+            x += self.step
+
+nums = FRange(<span class="val">0.0</span>, <span class="val">1.0</span>, <span class="val">0.25</span>)
+<span class="fn">list</span>(nums)     <span class="cm"># [0.0, 0.25, 0.5, 0.75]</span>
+<span class="fn">list</span>(nums)     <span class="cm"># то же самое — можно перебирать снова</span></div>
+    <p>Команда <code>yield</code> отдаёт значение и <strong>замораживает</strong> функцию до следующего запроса. Разница с прошлым вариантом принципиальная: каждый вызов <code>__iter__</code> запускает генератор заново, поэтому объект перебирается сколько угодно раз.</p>
+    <p>Если объект умеет и обратный обход, он реализует <code>__reversed__()</code> — им пользуется встроенная <code>reversed()</code>.</p>`,
+  vocab: { names: ['iter', 'yield', 'reversed', '__iter__', '__next__', '__reversed__'], methods: [] },
+  allowed: 'всё из глав 1—3 и 4.4—4.11 плюс <code>__iter__</code>, <code>__next__</code>, <code>StopIteration</code>, встроенные <code>iter()</code> и <code>next()</code>, генераторы через <code>yield</code>',
+  tasks: [
+    {
+      id: 't414-1',
+      title: 'Свой диапазон через yield',
+      statement: `<p>Определи класс <code>FRange</code> — диапазон с дробным шагом, которого нет у встроенного <code>range</code>:</p>
+        <ul>
+          <li><code>__init__(start, stop, step)</code> сохраняет три поля;</li>
+          <li><code>__iter__</code> отдаёт значения от <code>start</code>, пока они <strong>меньше</strong> <code>stop</code>, увеличивая на <code>step</code>.</li>
+        </ul>
+        <p>Метод <code>__next__</code> писать не надо: сделай <code>__iter__</code> генератором через <code>yield</code>. Тогда объект можно будет перебирать <strong>повторно</strong>.</p>
+        <p>Печатать ничего не нужно.</p>`,
+      io: `nums = FRange(0.0, 1.0, 0.25)
+list(nums)   →  [0.0, 0.25, 0.5, 0.75]
+list(nums)   →  [0.0, 0.25, 0.5, 0.75]   снова, а не пусто`,
+      hint: 'Внутри <code>__iter__</code> заведи локальную переменную от <code>self.start</code> и крути <code>while</code>, отдавая её через <code>yield</code>. Именно потому, что счётчик локальный, каждый новый перебор начинается сначала.',
+      forbid: [['__next__', 'В этой задаче __next__ не нужен — сделай __iter__ генератором через yield.']],
+      starter: `class FRange:
+
+`,
+      solution: `class FRange:
+    def __init__(self, start, stop, step):
+        self.start = start
+        self.stop = stop
+        self.step = step
+
+    def __iter__(self):
+        x = self.start
+        while x < self.stop:
+            yield x
+            x += self.step`,
+      cases: [
+        { label: 'дробный шаг',
+          setup: ``,
+          check: `assert 'FRange' in globals(), 'Не определён класс FRange'
+_got = list(FRange(0.0, 1.0, 0.25))
+assert _got == [0.0, 0.25, 0.5, 0.75], 'Получилось ' + repr(_got) + ', ожидалось [0.0, 0.25, 0.5, 0.75]'` },
+        { label: 'перебирается повторно',
+          setup: ``,
+          check: `assert 'FRange' in globals(), 'Не определён класс FRange'
+_r = FRange(0.0, 1.0, 0.5)
+_first = list(_r)
+_second = list(_r)
+assert _first == [0.0, 0.5], 'Первый проход дал ' + repr(_first) + ', ожидалось [0.0, 0.5]'
+assert _second == _first, 'Второй проход дал ' + repr(_second) + ', ожидалось то же самое. Счётчик должен быть локальным внутри __iter__, а не полем объекта'` },
+        { label: 'целый шаг, работает и цикл for',
+          setup: ``,
+          check: `assert 'FRange' in globals(), 'Не определён класс FRange'
+_acc = []
+for _x in FRange(0, 5, 1):
+    _acc.append(_x)
+assert _acc == [0, 1, 2, 3, 4], 'Цикл собрал ' + repr(_acc) + ', ожидалось [0, 1, 2, 3, 4] — верхняя граница не включается'` },
+        { label: 'пустой диапазон',
+          setup: ``,
+          check: `assert 'FRange' in globals(), 'Не определён класс FRange'
+assert list(FRange(5, 5, 1)) == [], 'FRange(5, 5, 1) дал ' + repr(list(FRange(5, 5, 1))) + ', ожидался пустой список'
+assert list(FRange(10, 1, 1)) == [], 'FRange(10, 1, 1) дал ' + repr(list(FRange(10, 1, 1))) + ', ожидался пустой список'` }
+      ]
+    },
+    {
+      id: 't414-2',
+      title: 'Итератор вручную',
+      statement: `<p>Определи класс <code>Countdown</code> — обратный отсчёт, написанный <strong>без</strong> <code>yield</code>:</p>
+        <ul>
+          <li><code>__init__(n)</code> сохраняет число в поле <code>n</code>;</li>
+          <li><code>__iter__</code> возвращает <code>self</code>;</li>
+          <li><code>__next__</code> отдаёт <code>n</code>, <code>n-1</code>, … <code>1</code>, а потом выбрасывает <code>StopIteration</code>.</li>
+        </ul>
+        <p>Из-за того что <code>__iter__</code> возвращает сам объект, состояние перебора живёт внутри него — и второй проход по тому же объекту даст пустоту. Это ожидаемо, проверка на это и рассчитывает.</p>`,
+      io: `c = Countdown(3)
+list(c)   →  [3, 2, 1]
+list(c)   →  []          объект исчерпан`,
+      hint: 'В <code>__next__</code> сначала проверь, не кончились ли значения, и если да — <code>raise StopIteration</code>. Иначе уменьши поле и верни значение. Возвращать надо то, что было <em>до</em> уменьшения, иначе отсчёт начнётся не с той цифры.',
+      forbid: [['yield', 'В этой задаче нужен ручной __next__, а не генератор — про yield будет соседняя задача.']],
+      starter: `class Countdown:
+
+`,
+      solution: `class Countdown:
+    def __init__(self, n):
+        self.n = n
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.n <= 0:
+            raise StopIteration
+        self.n -= 1
+        return self.n + 1`,
+      cases: [
+        { label: 'обратный отсчёт от 3',
+          setup: ``,
+          check: `assert 'Countdown' in globals(), 'Не определён класс Countdown'
+_got = list(Countdown(3))
+assert _got == [3, 2, 1], 'Получилось ' + repr(_got) + ', ожидалось [3, 2, 1]'` },
+        { label: 'объект одноразовый',
+          setup: ``,
+          check: `assert 'Countdown' in globals(), 'Не определён класс Countdown'
+_c = Countdown(2)
+_first = list(_c)
+_second = list(_c)
+assert _first == [2, 1], 'Первый проход дал ' + repr(_first) + ', ожидалось [2, 1]'
+assert _second == [], 'Второй проход дал ' + repr(_second) + ', ожидался пустой список: состояние перебора хранится в самом объекте'` },
+        { label: 'ноль — сразу StopIteration',
+          setup: ``,
+          check: `assert 'Countdown' in globals(), 'Не определён класс Countdown'
+assert list(Countdown(0)) == [], 'Countdown(0) дал ' + repr(list(Countdown(0))) + ', ожидался пустой список'
+_c = Countdown(0)
+_raised = False
+try:
+    next(iter(_c))
+except StopIteration:
+    _raised = True
+assert _raised, 'Ожидался StopIteration на первом же next()'` },
+        { label: 'next() работает напрямую',
+          setup: ``,
+          check: `assert 'Countdown' in globals(), 'Не определён класс Countdown'
+_c = Countdown(2)
+_it = iter(_c)
+assert _it is _c, '__iter__ должен возвращать сам объект'
+assert next(_it) == 2, 'Первый next() вернул не 2'
+assert next(_it) == 1, 'Второй next() вернул не 1'
+_raised = False
+try:
+    next(_it)
+except StopIteration:
+    _raised = True
+assert _raised, 'Третий next() должен был выбросить StopIteration'` }
+      ]
+    },
+    {
+      id: 't414-3',
+      title: 'Разобрать for на части',
+      statement: `<p>Дан <code>items</code> — какая-нибудь перебираемая коллекция.</p>
+        <p>Собери <code>collected</code> — список всех её элементов, <strong>не пользуясь циклом <code>for</code> и включениями</strong>. Только то, во что <code>for</code> разворачивается: получить итератор через <code>iter()</code>, крутить <code>while</code>, брать значения через <code>next()</code> и выйти по <code>StopIteration</code>.</p>
+        <p>Выведи одну строку.</p>`,
+      io: `items = [10, 20, 30]
+→  Собрано: 3`,
+      hint: 'Схема такая: <code>it = iter(items)</code>, затем <code>while True:</code> с <code>try</code> внутри — в <code>try</code> берём <code>next(it)</code> и добавляем в список, а в <code>except StopIteration:</code> делаем <code>break</code>.',
+      forbid: [['for ', 'В этой задаче цикл for запрещён — задача про то, во что он разворачивается.']],
+      starter: `# items уже задан
+
+`,
+      solution: `collected = []
+it = iter(items)
+while True:
+    try:
+        value = next(it)
+    except StopIteration:
+        break
+    collected.append(value)
+
+print(f'Собрано: {len(collected)}')`,
+      cases: [
+        { label: 'список чисел',
+          setup: `items = [10, 20, 30]
+_i0 = list(items)`,
+          check: `assert 'collected' in globals(), 'Не создана переменная collected'
+assert collected == _i0, 'collected = ' + repr(collected) + ', ожидалось ' + repr(_i0)
+_e = 'Собрано: ' + str(len(_i0))
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e) + ', а получено ' + repr(_lines[-1] if _lines else '')` },
+        { label: 'строка перебирается посимвольно',
+          setup: `items = 'abc'
+_i0 = list(items)`,
+          check: `assert collected == _i0, 'collected = ' + repr(collected) + ', ожидалось ' + repr(_i0)
+_e = 'Собрано: 3'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'кортеж',
+          setup: `items = (1, 2)
+_i0 = list(items)`,
+          check: `assert collected == _i0, 'collected = ' + repr(collected) + ', ожидалось ' + repr(_i0)
+_e = 'Собрано: 2'
+assert _lines and _lines[-1] == _e, 'Ожидалась строка ' + repr(_e)` },
+        { label: 'пустая коллекция',
+          setup: `items = []
+_i0 = list(items)`,
+          check: `assert 'collected' in globals(), 'Не создана переменная collected'
+assert collected == [], 'collected = ' + repr(collected) + ', ожидался пустой список'
+assert _lines and _lines[-1] == 'Собрано: 0', 'Ожидалась строка ' + repr('Собрано: 0')` }
       ]
     }
   ]
