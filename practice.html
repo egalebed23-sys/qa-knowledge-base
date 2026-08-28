@@ -812,6 +812,11 @@ const PARTS = {
     sub: 'Глава 2 книги · как Python на самом деле считает',
     lead: 'Не вся глава, а шесть разделов, которые реально встречаются на собеседовании и в автотестах: изменяемость и ссылки, <code>==</code> против <code>is</code>, истинность объектов, распаковка, включения и генераторы. Справочные таблицы и то, что уже закрыто в главе 1, сюда не вошли.'
   },
+  interview: {
+    title: 'Задачи для собеседований',
+    sub: 'Не из книги · типовое живое кодирование на QA',
+    lead: 'Десять задач уровня easy и medium, которые спрашивают чаще всего: строки, коллекции, словари и немного логики. Решаются всем, что разобрано в предыдущих разделах. В каждой есть граничный случай, про который на собеседовании ждут уточняющего вопроса.'
+  },
   basics: {
     title: 'Основы Python',
     sub: 'Глава 1 книги · базовые конструкции языка',
@@ -7158,6 +7163,600 @@ _i0 = list(items)`,
           check: `assert 'collected' in globals(), 'Не создана переменная collected'
 assert collected == [], 'collected = ' + repr(collected) + ', ожидался пустой список'
 assert _lines and _lines[-1] == 'Собрано: 0', 'Ожидалась строка ' + repr('Собрано: 0')` }
+      ]
+    }
+  ]
+}
+,
+
+/* ─────────────────────── ЖИВОЕ КОДИРОВАНИЕ ─────────────────────── */
+{
+  id: 'chlc',
+  num: '★',
+  part: 'interview',
+  title: 'Задачи для собеседований',
+  theory: `
+    <h4>Что на самом деле оценивают</h4>
+    <p>На живом кодировании для QA почти никогда не ждут оптимального алгоритма. Смотрят на другое: понял ли ты задачу, задал ли уточняющие вопросы, работает ли решение на границах, и можешь ли объяснить, что написал. Человек, который вслух проговорил «а что если список пустой?», выглядит сильнее того, кто молча выдал красивую однострочную конструкцию.</p>
+
+    <h4>Порядок, который почти всегда выигрывает</h4>
+    <ul>
+      <li><strong>Уточни вход.</strong> Регистр важен? Дубликаты возможны? Что вернуть на пустом входе? Может ли прийти <code>None</code>? Эти вопросы — половина оценки, и почти в каждой задаче ниже есть подвох ровно здесь.</li>
+      <li><strong>Проговори пример.</strong> Возьми вход из условия и вслух скажи, что должно получиться. Так ловятся расхождения в понимании до написания кода.</li>
+      <li><strong>Сначала просто, потом быстро.</strong> Рабочее решение за <code>O(n²)</code> лучше сломанного за <code>O(n)</code>. Написал — скажи сам: «здесь два вложенных цикла, можно ускорить словарём». Это ровно то, что хотят услышать.</li>
+      <li><strong>Проверь границы.</strong> Пустой вход, один элемент, все элементы одинаковые, отрицательные числа. Как тестировщик ты обязан это делать не по подсказке.</li>
+      <li><strong>Назови сложность.</strong> Хотя бы «проход по списку — линейно, поиск в словаре — константа».</li>
+    </ul>
+    <div class="hl orange"><span class="hl-label">Частая ошибка</span>Молчаливое кодирование. Интервьюер не видит хода мыслей и вынужден оценивать только итог. Даже если застрял — говори, где именно застрял и что пробуешь: это почти всегда спасает.</div>
+
+    <h4>Два инструмента, которых не было в главах книги</h4>
+    <p>В живом кодировании их ждут, поэтому вводим здесь.</p>
+    <div class="code-block"><span class="cm"># 1. lambda — безымянная функция в одно выражение</span>
+<span class="fn">sorted</span>(rows, key=<span class="kw">lambda</span> row: row[<span class="st">'price'</span>])
+
+<span class="cm"># то же самое обычной функцией — так тоже правильно</span>
+<span class="kw">def</span> <span class="fn">by_price</span>(row):
+    <span class="kw">return</span> row[<span class="st">'price'</span>]
+<span class="fn">sorted</span>(rows, key=by_price)</div>
+    <div class="code-block"><span class="cm"># 2. Counter — готовый счётчик частот</span>
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+
+c = Counter([<span class="st">'b'</span>, <span class="st">'a'</span>, <span class="st">'a'</span>])
+c[<span class="st">'a'</span>]                <span class="cm"># 2</span>
+c.<span class="fn">most_common</span>(<span class="val">1</span>)      <span class="cm"># [('a', 2)]</span></div>
+    <p>При равенстве частот <code>most_common()</code> отдаёт тот элемент, который встретился <strong>раньше</strong>. Пользоваться <code>Counter</code> можно везде, но уметь написать подсчёт руками через словарь тоже нужно — иногда просят именно так.</p>
+
+    <h4>Про сортировку</h4>
+    <p>Сортировка в Python <strong>устойчивая</strong>: элементы с одинаковым ключом сохраняют исходный взаимный порядок. На это можно опираться, и об этом хорошо знать вслух.</p>
+    <div class="code-block"><span class="fn">sorted</span>(items)              <span class="cm"># новый список, исходный цел</span>
+items.<span class="fn">sort</span>()               <span class="cm"># меняет список на месте, возвращает None</span></div>
+
+    <h4>Что в этой главе</h4>
+    <p>Десять задач, которые спрашивают чаще всего. Строки — палиндром и анаграммы. Коллекции — частоты, дубликаты, сортировка и группировка. Логика — FizzBuzz, поиск пары, разворачивание вложенности и скобки. Уровень easy и medium: ничего олимпиадного, всё встречается в работе.</p>`,
+  vocab: {
+    names: ['lambda', 'Counter', 'collections', 'defaultdict', 'key', 'reverse', 'isinstance', 'abs'],
+    methods: ['most_common', 'sort', 'join', 'isalnum', 'setdefault', 'count', 'index', 'lower', 'upper']
+  },
+  allowed: 'всё из глав 1—4 плюс <code>lambda</code>, <code>collections.Counter</code>, <code>sorted(key=...)</code>, метод <code>.sort()</code>, <code>str.join()</code>, <code>str.isalnum()</code>',
+  tasks: [
+    {
+      id: 'tlc-1',
+      title: 'FizzBuzz',
+      statement: `<p>Определи <code>fizzbuzz(n)</code>, которая возвращает <strong>список строк</strong> для чисел от <code>1</code> до <code>n</code> включительно:</p>
+        <ul>
+          <li>кратно 3 — <code>'Fizz'</code>;</li>
+          <li>кратно 5 — <code>'Buzz'</code>;</li>
+          <li>кратно и 3, и 5 — <code>'FizzBuzz'</code>;</li>
+          <li>иначе — само число строкой.</li>
+        </ul>
+        <p>Самая частая задача на разогрев. Подвох ровно один — в порядке проверок.</p>`,
+      io: `fizzbuzz(15)
+→  ['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8',
+    'Fizz', 'Buzz', '11', 'Fizz', '13', '14', 'FizzBuzz']`,
+      hint: 'Проверку на «и 3, и 5» надо делать <strong>первой</strong> — иначе число 15 попадёт в ветку <code>Fizz</code> и до <code>FizzBuzz</code> дело не дойдёт. Число превращается в строку через <code>str(i)</code>.',
+      starter: `def fizzbuzz(n):
+
+`,
+      solution: `def fizzbuzz(n):
+    result = []
+    for i in range(1, n + 1):
+        if i % 15 == 0:
+            result.append('FizzBuzz')
+        elif i % 3 == 0:
+            result.append('Fizz')
+        elif i % 5 == 0:
+            result.append('Buzz')
+        else:
+            result.append(str(i))
+    return result`,
+      cases: [
+        { label: 'n = 15 — доходит до FizzBuzz',
+          setup: ``,
+          check: `assert 'fizzbuzz' in globals(), 'Не определена функция fizzbuzz'
+_exp = []
+for _i in range(1, 16):
+    if _i % 15 == 0:
+        _exp.append('FizzBuzz')
+    elif _i % 3 == 0:
+        _exp.append('Fizz')
+    elif _i % 5 == 0:
+        _exp.append('Buzz')
+    else:
+        _exp.append(str(_i))
+_got = fizzbuzz(15)
+assert _got == _exp, 'Вернулось ' + repr(_got) + ', ожидалось ' + repr(_exp)` },
+        { label: 'n = 5 — Fizz и Buzz по отдельности',
+          setup: ``,
+          check: `assert 'fizzbuzz' in globals(), 'Не определена функция fizzbuzz'
+_got = fizzbuzz(5)
+assert _got == ['1', '2', 'Fizz', '4', 'Buzz'], 'Вернулось ' + repr(_got) + ", ожидалось ['1', '2', 'Fizz', '4', 'Buzz']"` },
+        { label: 'n = 1 — одна строка',
+          setup: ``,
+          check: `assert 'fizzbuzz' in globals(), 'Не определена функция fizzbuzz'
+_got = fizzbuzz(1)
+assert _got == ['1'], 'Вернулось ' + repr(_got) + ", ожидалось ['1'] — число должно быть строкой"` },
+        { label: 'n = 0 — пустой список',
+          setup: ``,
+          check: `assert 'fizzbuzz' in globals(), 'Не определена функция fizzbuzz'
+_got = fizzbuzz(0)
+assert _got == [], 'Вернулось ' + repr(_got) + ', ожидался пустой список'` },
+        { label: 'n = 30 — второй FizzBuzz на месте',
+          setup: ``,
+          check: `assert 'fizzbuzz' in globals(), 'Не определена функция fizzbuzz'
+_got = fizzbuzz(30)
+assert len(_got) == 30, 'Длина ' + str(len(_got)) + ', ожидалось 30'
+assert _got[14] == 'FizzBuzz', 'На 15-м месте ' + repr(_got[14]) + ", ожидалось 'FizzBuzz'"
+assert _got[29] == 'FizzBuzz', 'На 30-м месте ' + repr(_got[29]) + ", ожидалось 'FizzBuzz' — проверка на кратность 15 должна идти первой"` }
+      ]
+    },
+    {
+      id: 'tlc-2',
+      title: 'Палиндром',
+      statement: `<p>Определи <code>is_palindrome(text)</code> — читается ли строка одинаково в обе стороны.</p>
+        <p><strong>Регистр, пробелы и знаки препинания игнорируются.</strong> Пустая строка считается палиндромом.</p>
+        <p>Именно здесь на собеседовании ждут уточняющего вопроса: «а пробелы и запятые учитываем?» Условие специально сформулировано так, чтобы его пришлось задать.</p>`,
+      io: `is_palindrome('А роза упала на лапу Азора')  →  True
+is_palindrome('Was it a car or a cat I saw?')  →  True
+is_palindrome('привет')                        →  False
+is_palindrome('')                              →  True`,
+      hint: 'Сначала приведи строку к одному регистру и оставь только буквы и цифры — символ проверяется методом <code>.isalnum()</code>. Собрать очищенную строку удобно включением плюс <code>\'\'.join(...)</code>, а сравнить с разворотом — срезом <code>[::-1]</code>.',
+      starter: `def is_palindrome(text):
+
+`,
+      solution: `def is_palindrome(text):
+    cleaned = ''.join([c.lower() for c in text if c.isalnum()])
+    return cleaned == cleaned[::-1]`,
+      cases: [
+        { label: 'палиндром с пробелами и регистром',
+          setup: ``,
+          check: `assert 'is_palindrome' in globals(), 'Не определена функция is_palindrome'
+_got = is_palindrome('А роза упала на лапу Азора')
+assert _got is True or _got == True, 'Вернулось ' + repr(_got) + ', ожидалось True — пробелы и регистр надо игнорировать'` },
+        { label: 'палиндром со знаками препинания',
+          setup: ``,
+          check: `assert 'is_palindrome' in globals(), 'Не определена функция is_palindrome'
+_got = is_palindrome('Was it a car or a cat I saw?')
+assert _got == True, 'Вернулось ' + repr(_got) + ', ожидалось True — знаки препинания надо отбрасывать'` },
+        { label: 'не палиндром',
+          setup: ``,
+          check: `assert 'is_palindrome' in globals(), 'Не определена функция is_palindrome'
+assert is_palindrome('привет') == False, "is_palindrome('привет') вернула " + repr(is_palindrome('привет')) + ', ожидалось False'
+assert is_palindrome('abcd') == False, "is_palindrome('abcd') вернула " + repr(is_palindrome('abcd')) + ', ожидалось False'` },
+        { label: 'пустая строка и один символ',
+          setup: ``,
+          check: `assert 'is_palindrome' in globals(), 'Не определена функция is_palindrome'
+assert is_palindrome('') == True, "is_palindrome('') вернула " + repr(is_palindrome('')) + ', ожидалось True'
+assert is_palindrome('я') == True, "is_palindrome('я') вернула " + repr(is_palindrome('я')) + ', ожидалось True'
+assert is_palindrome('   ') == True, "is_palindrome('   ') вернула " + repr(is_palindrome('   ')) + ', ожидалось True — после очистки строка пуста'` },
+        { label: 'цифры тоже считаются',
+          setup: ``,
+          check: `assert 'is_palindrome' in globals(), 'Не определена функция is_palindrome'
+assert is_palindrome('12321') == True, "is_palindrome('12321') вернула " + repr(is_palindrome('12321')) + ', ожидалось True'
+assert is_palindrome('12345') == False, "is_palindrome('12345') вернула " + repr(is_palindrome('12345')) + ', ожидалось False'` }
+      ]
+    },
+    {
+      id: 'tlc-3',
+      title: 'Анаграммы',
+      statement: `<p>Определи <code>is_anagram(first, second)</code> — состоят ли две строки из одних и тех же букв.</p>
+        <p>Регистр и пробелы не учитываются. Строки из одинаковых букв в одинаковом количестве — анаграммы.</p>`,
+      io: `is_anagram('listen', 'silent')       →  True
+is_anagram('Тверь', 'втерь')         →  True
+is_anagram('вкус', 'куст')           →  False
+is_anagram('a', 'aa')                →  False`,
+      hint: 'Самое короткое решение: очистить обе строки, отсортировать символы через <code>sorted()</code> и сравнить получившиеся списки. Альтернатива — сравнить два <code>Counter</code>. Оба ответа принимаются на собеседовании, второй работает быстрее.',
+      starter: `def is_anagram(first, second):
+
+`,
+      solution: `def is_anagram(first, second):
+    a = sorted([c for c in first.lower() if c != ' '])
+    b = sorted([c for c in second.lower() if c != ' '])
+    return a == b`,
+      cases: [
+        { label: 'классическая пара',
+          setup: ``,
+          check: `assert 'is_anagram' in globals(), 'Не определена функция is_anagram'
+assert is_anagram('listen', 'silent') == True, "is_anagram('listen', 'silent') вернула " + repr(is_anagram('listen', 'silent')) + ', ожидалось True'` },
+        { label: 'регистр не важен',
+          setup: ``,
+          check: `assert 'is_anagram' in globals(), 'Не определена функция is_anagram'
+assert is_anagram('Тверь', 'втерь') == True, "is_anagram('Тверь', 'втерь') вернула " + repr(is_anagram('Тверь', 'втерь')) + ', ожидалось True'
+assert is_anagram('Listen', 'SILENT') == True, 'Регистр должен игнорироваться'` },
+        { label: 'не анаграммы',
+          setup: ``,
+          check: `assert 'is_anagram' in globals(), 'Не определена функция is_anagram'
+assert is_anagram('вкус', 'куст') == False, "is_anagram('вкус', 'куст') вернула " + repr(is_anagram('вкус', 'куст')) + ', ожидалось False'` },
+        { label: 'разная длина',
+          setup: ``,
+          check: `assert 'is_anagram' in globals(), 'Не определена функция is_anagram'
+assert is_anagram('a', 'aa') == False, "is_anagram('a', 'aa') вернула " + repr(is_anagram('a', 'aa')) + ', ожидалось False — количество букв тоже должно совпадать'
+assert is_anagram('aab', 'abb') == False, "is_anagram('aab', 'abb') вернула " + repr(is_anagram('aab', 'abb')) + ', ожидалось False'` },
+        { label: 'пробелы игнорируются, пустые строки равны',
+          setup: ``,
+          check: `assert 'is_anagram' in globals(), 'Не определена функция is_anagram'
+assert is_anagram('на бок', 'банко') == True, "is_anagram('на бок', 'банко') вернула " + repr(is_anagram('на бок', 'банко')) + ', ожидалось True'
+assert is_anagram('', '') == True, 'Две пустые строки — анаграммы'` }
+      ]
+    },
+    {
+      id: 'tlc-4',
+      title: 'Самый частый элемент',
+      statement: `<p>Определи <code>most_common(items)</code> — элемент, который встречается чаще всех.</p>
+        <ul>
+          <li>если таких несколько — вернуть тот, что встретился <strong>раньше</strong> остальных;</li>
+          <li>для пустого списка вернуть <code>None</code>.</li>
+        </ul>
+        <p>Правило разрешения ничьей — это то, что интервьюер обычно не говорит сам, а ждёт вопроса.</p>`,
+      io: `most_common(['a', 'b', 'a', 'c', 'a'])  →  'a'
+most_common(['b', 'b', 'a', 'a'])       →  'b'   ничья, 'b' был раньше
+most_common([])                         →  None`,
+      hint: 'Собери частоты словарём за один проход: <code>counts[x] = counts.get(x, 0) + 1</code>. Затем пройди по <strong>исходному списку</strong> (а не по словарю) и найди первый элемент с максимальной частотой — так правило ничьей соблюдётся само. Готовый вариант: <code>Counter(items).most_common(1)</code>.',
+      starter: `def most_common(items):
+
+`,
+      solution: `def most_common(items):
+    if not items:
+        return None
+
+    counts = {}
+    for x in items:
+        counts[x] = counts.get(x, 0) + 1
+
+    best = items[0]
+    for x in items:
+        if counts[x] > counts[best]:
+            best = x
+    return best`,
+      cases: [
+        { label: 'явный победитель',
+          setup: ``,
+          check: `assert 'most_common' in globals(), 'Не определена функция most_common'
+_got = most_common(['a', 'b', 'a', 'c', 'a'])
+assert _got == 'a', 'Вернулось ' + repr(_got) + ", ожидалось 'a'"` },
+        { label: 'ничья — побеждает встреченный раньше',
+          setup: ``,
+          check: `assert 'most_common' in globals(), 'Не определена функция most_common'
+_got = most_common(['b', 'b', 'a', 'a'])
+assert _got == 'b', 'Вернулось ' + repr(_got) + ", ожидалось 'b': при равной частоте побеждает тот, кто встретился раньше"
+_got2 = most_common(['a', 'a', 'b', 'b'])
+assert _got2 == 'a', 'Вернулось ' + repr(_got2) + ", ожидалось 'a'"` },
+        { label: 'пустой список',
+          setup: ``,
+          check: `assert 'most_common' in globals(), 'Не определена функция most_common'
+_got = most_common([])
+assert _got is None, 'Вернулось ' + repr(_got) + ', ожидалось None'` },
+        { label: 'один элемент и числа',
+          setup: ``,
+          check: `assert 'most_common' in globals(), 'Не определена функция most_common'
+assert most_common(['x']) == 'x', "most_common(['x']) вернула " + repr(most_common(['x']))
+assert most_common([1, 2, 2, 3]) == 2, 'most_common([1, 2, 2, 3]) вернула ' + repr(most_common([1, 2, 2, 3])) + ', ожидалось 2'` },
+        { label: 'все элементы разные',
+          setup: ``,
+          check: `assert 'most_common' in globals(), 'Не определена функция most_common'
+_got = most_common(['c', 'b', 'a'])
+assert _got == 'c', 'Вернулось ' + repr(_got) + ", ожидалось 'c': все встречаются по разу, значит побеждает первый"` }
+      ]
+    },
+    {
+      id: 'tlc-5',
+      title: 'Убрать дубликаты, сохранив порядок',
+      statement: `<p>Определи <code>dedupe(items)</code> — новый список без повторов, в котором элементы идут <strong>в порядке первого появления</strong>.</p>
+        <p>Исходный список менять нельзя.</p>
+        <p>Ловушка на поверхности: <code>list(set(items))</code> действительно убирает дубликаты, но порядок при этом теряется — множество его не хранит.</p>`,
+      io: `dedupe(['b', 'a', 'b', 'c', 'a'])  →  ['b', 'a', 'c']
+dedupe([])                         →  []`,
+      hint: 'Идёшь по списку и складываешь в результат только то, чего ещё не видел. Уже виденное держи в <strong>множестве</strong> — проверка <code>x in seen</code> там за константу, а в списке она линейная, и на большом входе получится <code>O(n²)</code>.',
+      starter: `def dedupe(items):
+
+`,
+      solution: `def dedupe(items):
+    seen = set()
+    result = []
+    for x in items:
+        if x not in seen:
+            seen.add(x)
+            result.append(x)
+    return result`,
+      cases: [
+        { label: 'порядок первого появления',
+          setup: ``,
+          check: `assert 'dedupe' in globals(), 'Не определена функция dedupe'
+_src = ['b', 'a', 'b', 'c', 'a']
+_got = dedupe(_src)
+assert _got == ['b', 'a', 'c'], 'Вернулось ' + repr(_got) + ", ожидалось ['b', 'a', 'c'] — list(set(...)) порядок не сохраняет"
+assert _src == ['b', 'a', 'b', 'c', 'a'], 'Исходный список изменился: ' + repr(_src)` },
+        { label: 'дубликатов нет',
+          setup: ``,
+          check: `assert 'dedupe' in globals(), 'Не определена функция dedupe'
+_got = dedupe([1, 2, 3])
+assert _got == [1, 2, 3], 'Вернулось ' + repr(_got) + ', ожидалось [1, 2, 3]'` },
+        { label: 'все элементы одинаковые',
+          setup: ``,
+          check: `assert 'dedupe' in globals(), 'Не определена функция dedupe'
+_got = dedupe(['x', 'x', 'x'])
+assert _got == ['x'], 'Вернулось ' + repr(_got) + ", ожидалось ['x']"` },
+        { label: 'пустой список',
+          setup: ``,
+          check: `assert 'dedupe' in globals(), 'Не определена функция dedupe'
+_got = dedupe([])
+assert _got == [], 'Вернулось ' + repr(_got) + ', ожидался пустой список'` },
+        { label: 'длинный список с повторами по всей длине',
+          setup: ``,
+          check: `assert 'dedupe' in globals(), 'Не определена функция dedupe'
+_src = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]
+_got = dedupe(_src)
+assert _got == [3, 1, 4, 5, 9, 2, 6], 'Вернулось ' + repr(_got) + ', ожидалось [3, 1, 4, 5, 9, 2, 6]'` }
+      ]
+    },
+    {
+      id: 'tlc-6',
+      title: 'Два числа с заданной суммой',
+      statement: `<p>Определи <code>two_sum(nums, target)</code> — вернуть <strong>кортеж индексов</strong> <code>(i, j)</code> двух чисел, дающих в сумме <code>target</code>. Индексы разные, <code>i &lt; j</code>. Если пары нет — вернуть <code>None</code>.</p>
+        <p>Если подходящих пар несколько, вернуть ту, у которой <strong>второй индекс меньше</strong> — то есть первую, которая находится при проходе слева направо.</p>
+        <p>Решение в лоб — два вложенных цикла, <code>O(n²)</code>. Оно принимается, но дальше почти всегда просят ускорить.</p>`,
+      io: `two_sum([2, 7, 11, 15], 9)   →  (0, 1)
+two_sum([3, 2, 4], 6)         →  (1, 2)
+two_sum([1, 2], 100)          →  None`,
+      hint: 'За один проход: держи словарь «уже встреченное число → его индекс». Для текущего числа <code>x</code> нужное дополнение — это <code>target - x</code>. Если оно уже в словаре, пара найдена. Так получается <code>O(n)</code> вместо <code>O(n²)</code>.',
+      starter: `def two_sum(nums, target):
+
+`,
+      solution: `def two_sum(nums, target):
+    seen = {}
+    for i, x in enumerate(nums):
+        need = target - x
+        if need in seen:
+            return (seen[need], i)
+        if x not in seen:
+            seen[x] = i
+    return None`,
+      cases: [
+        { label: 'пара в начале',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+_got = two_sum([2, 7, 11, 15], 9)
+assert _got == (0, 1), 'Вернулось ' + repr(_got) + ', ожидалось (0, 1)'` },
+        { label: 'пара не с начала списка',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+_got = two_sum([3, 2, 4], 6)
+assert _got == (1, 2), 'Вернулось ' + repr(_got) + ', ожидалось (1, 2)'` },
+        { label: 'пары нет',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+assert two_sum([1, 2], 100) is None, 'Вернулось ' + repr(two_sum([1, 2], 100)) + ', ожидалось None'
+assert two_sum([], 0) is None, 'Для пустого списка ожидалось None'
+assert two_sum([5], 5) is None, 'Одно число не может составить пару само с собой'` },
+        { label: 'отрицательные числа и ноль',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+_got = two_sum([-3, 4, 3, 90], 0)
+assert _got == (0, 2), 'Вернулось ' + repr(_got) + ', ожидалось (0, 2)'` },
+        { label: 'одинаковые числа образуют пару',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+_got = two_sum([3, 3], 6)
+assert _got == (0, 1), 'Вернулось ' + repr(_got) + ', ожидалось (0, 1) — одно и то же значение на разных индексах подходит'` },
+        { label: 'несколько подходящих пар — берём с меньшим вторым индексом',
+          setup: ``,
+          check: `assert 'two_sum' in globals(), 'Не определена функция two_sum'
+_got = two_sum([3, 3, 3], 6)
+assert _got == (0, 1), 'Вернулось ' + repr(_got) + ', ожидалось (0, 1): подходят и (0, 2), и (1, 2), но нужна пара с наименьшим вторым индексом'
+_got2 = two_sum([1, 2, 3, 4], 5)
+assert _got2 == (1, 2), 'Вернулось ' + repr(_got2) + ', ожидалось (1, 2): пара 2+3 находится раньше, чем 1+4'` }
+      ]
+    },
+    {
+      id: 'tlc-7',
+      title: 'Развернуть вложенный список',
+      statement: `<p>Определи <code>flatten(items)</code> — превратить список произвольной вложенности в плоский, сохранив порядок элементов.</p>
+        <p>Вложенность может быть любой глубины. Элементы, не являющиеся списками, попадают в результат как есть.</p>`,
+      io: `flatten([1, [2, 3], [4, [5, [6]]]])  →  [1, 2, 3, 4, 5, 6]
+flatten([])                          →  []
+flatten([[], [[]]])                  →  []`,
+      hint: 'Проще всего рекурсией: идёшь по элементам, и если очередной сам список (<code>isinstance(x, list)</code>) — вызываешь <code>flatten</code> от него и добавляешь результат целиком через <code>extend</code>, иначе добавляешь сам элемент.',
+      starter: `def flatten(items):
+
+`,
+      solution: `def flatten(items):
+    result = []
+    for x in items:
+        if isinstance(x, list):
+            result.extend(flatten(x))
+        else:
+            result.append(x)
+    return result`,
+      cases: [
+        { label: 'разная глубина вложенности',
+          setup: ``,
+          check: `assert 'flatten' in globals(), 'Не определена функция flatten'
+_got = flatten([1, [2, 3], [4, [5, [6]]]])
+assert _got == [1, 2, 3, 4, 5, 6], 'Вернулось ' + repr(_got) + ', ожидалось [1, 2, 3, 4, 5, 6]'` },
+        { label: 'уже плоский список',
+          setup: ``,
+          check: `assert 'flatten' in globals(), 'Не определена функция flatten'
+_got = flatten([1, 2, 3])
+assert _got == [1, 2, 3], 'Вернулось ' + repr(_got) + ', ожидалось [1, 2, 3]'` },
+        { label: 'пустые списки внутри',
+          setup: ``,
+          check: `assert 'flatten' in globals(), 'Не определена функция flatten'
+assert flatten([]) == [], 'flatten([]) вернула ' + repr(flatten([])) + ', ожидался пустой список'
+assert flatten([[], [[]]]) == [], 'flatten([[], [[]]]) вернула ' + repr(flatten([[], [[]]])) + ', ожидался пустой список'` },
+        { label: 'строки не разбираются на символы',
+          setup: ``,
+          check: `assert 'flatten' in globals(), 'Не определена функция flatten'
+_got = flatten(['ab', ['cd', ['e']]])
+assert _got == ['ab', 'cd', 'e'], 'Вернулось ' + repr(_got) + ", ожидалось ['ab', 'cd', 'e'] — строка тоже перебираемая, но разворачивать надо только списки"` },
+        { label: 'глубокая вложенность',
+          setup: ``,
+          check: `assert 'flatten' in globals(), 'Не определена функция flatten'
+_got = flatten([[[[[1]]]], 2])
+assert _got == [1, 2], 'Вернулось ' + repr(_got) + ', ожидалось [1, 2]'` }
+      ]
+    },
+    {
+      id: 'tlc-8',
+      title: 'Сортировка списка словарей по полю',
+      statement: `<p>Определи <code>sort_by(rows, field)</code> — вернуть <strong>новый</strong> список словарей, отсортированный по значению указанного поля по возрастанию.</p>
+        <p>Исходный список менять нельзя. Записи с одинаковым значением поля должны сохранить исходный взаимный порядок.</p>
+        <p>Ежедневная задача при разборе выгрузок и ответов API.</p>`,
+      io: `rows = [{'name': 'b', 'price': 30},
+        {'name': 'a', 'price': 10},
+        {'name': 'c', 'price': 20}]
+
+sort_by(rows, 'price')  →  a(10), c(20), b(30)`,
+      hint: 'Встроенная <code>sorted()</code> уже возвращает новый список и уже устойчива — про сохранение порядка при равных значениях думать не надо, это её штатное поведение. Осталось передать ключ: <code>key=lambda row: row[field]</code> или именованной функцией.',
+      starter: `def sort_by(rows, field):
+
+`,
+      solution: `def sort_by(rows, field):
+    return sorted(rows, key=lambda row: row[field])`,
+      cases: [
+        { label: 'сортировка по числовому полю',
+          setup: ``,
+          check: `assert 'sort_by' in globals(), 'Не определена функция sort_by'
+_rows = [{'name': 'b', 'price': 30}, {'name': 'a', 'price': 10}, {'name': 'c', 'price': 20}]
+_got = sort_by(_rows, 'price')
+assert [_r['name'] for _r in _got] == ['a', 'c', 'b'], 'Порядок ' + repr([_r['name'] for _r in _got]) + ", ожидалось ['a', 'c', 'b']"` },
+        { label: 'исходный список не тронут',
+          setup: ``,
+          check: `assert 'sort_by' in globals(), 'Не определена функция sort_by'
+_rows = [{'n': 3}, {'n': 1}, {'n': 2}]
+_got = sort_by(_rows, 'n')
+assert [_r['n'] for _r in _rows] == [3, 1, 2], 'Исходный список изменился: ' + repr([_r['n'] for _r in _rows]) + ' — нужен sorted(), а не .sort()'
+assert _got is not _rows, 'Вернулся тот же объект, ожидался новый список'
+assert [_r['n'] for _r in _got] == [1, 2, 3], 'Порядок ' + repr([_r['n'] for _r in _got])` },
+        { label: 'сортировка по строковому полю',
+          setup: ``,
+          check: `assert 'sort_by' in globals(), 'Не определена функция sort_by'
+_rows = [{'name': 'смоук'}, {'name': 'api'}, {'name': 'регресс'}]
+_got = sort_by(_rows, 'name')
+assert [_r['name'] for _r in _got] == ['api', 'регресс', 'смоук'], 'Порядок ' + repr([_r['name'] for _r in _got])` },
+        { label: 'равные значения сохраняют порядок',
+          setup: ``,
+          check: `assert 'sort_by' in globals(), 'Не определена функция sort_by'
+_rows = [{'id': 1, 'p': 5}, {'id': 2, 'p': 1}, {'id': 3, 'p': 5}, {'id': 4, 'p': 1}]
+_got = sort_by(_rows, 'p')
+assert [_r['id'] for _r in _got] == [2, 4, 1, 3], 'Порядок id ' + repr([_r['id'] for _r in _got]) + ', ожидалось [2, 4, 1, 3] — сортировка устойчива'` },
+        { label: 'пустой список и один элемент',
+          setup: ``,
+          check: `assert 'sort_by' in globals(), 'Не определена функция sort_by'
+assert sort_by([], 'x') == [], 'Для пустого списка ожидался пустой список'
+assert sort_by([{'x': 1}], 'x') == [{'x': 1}], 'Для одного элемента вернулось ' + repr(sort_by([{'x': 1}], 'x'))` }
+      ]
+    },
+    {
+      id: 'tlc-9',
+      title: 'Сбалансированные скобки',
+      statement: `<p>Определи <code>is_balanced(text)</code> — правильно ли расставлены скобки трёх видов: <code>()</code>, <code>[]</code> и <code>{}</code>.</p>
+        <p>Каждая открывающая должна закрываться <strong>парной</strong> скобкой и в <strong>правильном порядке</strong>. Прочие символы игнорируются. Пустая строка сбалансирована.</p>`,
+      io: `is_balanced('({[]})')    →  True
+is_balanced('a(b[c]d)e')  →  True
+is_balanced('(]')         →  False
+is_balanced('([)]')       →  False   пересечение
+is_balanced('(()')        →  False`,
+      hint: 'Классический стек: открывающую скобку кладёшь в список, закрывающую — сверяешь с последней положенной и снимаешь через <code>pop()</code>. Два условия для <code>False</code>: пришла закрывающая, а стек пуст или на вершине не та скобка; и в конце — стек не опустел.',
+      starter: `def is_balanced(text):
+
+`,
+      solution: `def is_balanced(text):
+    pairs = {')': '(', ']': '[', '}': '{'}
+    stack = []
+    for c in text:
+        if c in '([{':
+            stack.append(c)
+        elif c in pairs:
+            if not stack or stack[-1] != pairs[c]:
+                return False
+            stack.pop()
+    return not stack`,
+      cases: [
+        { label: 'вложенные скобки всех видов',
+          setup: ``,
+          check: `assert 'is_balanced' in globals(), 'Не определена функция is_balanced'
+assert is_balanced('({[]})') == True, "is_balanced('({[]})') вернула " + repr(is_balanced('({[]})')) + ', ожидалось True'
+assert is_balanced('()[]{}') == True, "is_balanced('()[]{}') вернула " + repr(is_balanced('()[]{}')) + ', ожидалось True'` },
+        { label: 'посторонние символы игнорируются',
+          setup: ``,
+          check: `assert 'is_balanced' in globals(), 'Не определена функция is_balanced'
+assert is_balanced('a(b[c]d)e') == True, "is_balanced('a(b[c]d)e') вернула " + repr(is_balanced('a(b[c]d)e')) + ', ожидалось True'
+assert is_balanced('без скобок вообще') == True, 'Строка без скобок сбалансирована'` },
+        { label: 'непарная и пересекающаяся',
+          setup: ``,
+          check: `assert 'is_balanced' in globals(), 'Не определена функция is_balanced'
+assert is_balanced('(]') == False, "is_balanced('(]') вернула " + repr(is_balanced('(]')) + ', ожидалось False'
+assert is_balanced('([)]') == False, "is_balanced('([)]') вернула " + repr(is_balanced('([)]')) + ', ожидалось False — скобки пересекаются'` },
+        { label: 'незакрытая и лишняя закрывающая',
+          setup: ``,
+          check: `assert 'is_balanced' in globals(), 'Не определена функция is_balanced'
+assert is_balanced('(()') == False, "is_balanced('(()') вернула " + repr(is_balanced('(()')) + ', ожидалось False — стек не опустел'
+assert is_balanced('())') == False, "is_balanced('())') вернула " + repr(is_balanced('())')) + ', ожидалось False'
+assert is_balanced(')') == False, "is_balanced(')') вернула " + repr(is_balanced(')')) + ', ожидалось False — закрывающая при пустом стеке'` },
+        { label: 'пустая строка',
+          setup: ``,
+          check: `assert 'is_balanced' in globals(), 'Не определена функция is_balanced'
+assert is_balanced('') == True, "is_balanced('') вернула " + repr(is_balanced('')) + ', ожидалось True'` }
+      ]
+    },
+    {
+      id: 'tlc-10',
+      title: 'Группировка записей по полю',
+      statement: `<p>Определи <code>group_by(rows, field)</code> — сгруппировать список словарей по значению поля.</p>
+        <p>Возвращается словарь: <strong>значение поля → список записей</strong> с этим значением. Порядок записей внутри группы и порядок появления самих групп сохраняются.</p>
+        <p>Самый частый способ свести выгрузку к сводке: логи по уровню, тесты по статусу, заказы по клиенту.</p>`,
+      io: `rows = [{'name': 'login', 'status': 'passed'},
+        {'name': 'pay',   'status': 'failed'},
+        {'name': 'cart',  'status': 'passed'}]
+
+group_by(rows, 'status')
+→  {'passed': [login, cart], 'failed': [pay]}`,
+      hint: 'Идёшь по записям и для каждой достаёшь значение поля — это ключ. Если ключа в словаре ещё нет, заводишь под ним пустой список, потом добавляешь запись. Удобно записать так: <code>result.setdefault(key, []).append(row)</code>. Порядок ключей сохранится сам — словарь помнит порядок вставки.',
+      starter: `def group_by(rows, field):
+
+`,
+      solution: `def group_by(rows, field):
+    result = {}
+    for row in rows:
+        key = row[field]
+        if key not in result:
+            result[key] = []
+        result[key].append(row)
+    return result`,
+      cases: [
+        { label: 'две группы',
+          setup: ``,
+          check: `assert 'group_by' in globals(), 'Не определена функция group_by'
+_rows = [{'name': 'login', 'status': 'passed'}, {'name': 'pay', 'status': 'failed'}, {'name': 'cart', 'status': 'passed'}]
+_got = group_by(_rows, 'status')
+assert isinstance(_got, dict), 'Вернулся ' + type(_got).__name__ + ', ожидался словарь'
+assert set(_got) == {'passed', 'failed'}, 'Ключи ' + repr(sorted(_got)) + ", ожидались ['failed', 'passed']"
+assert [_r['name'] for _r in _got['passed']] == ['login', 'cart'], "В группе passed " + repr([_r['name'] for _r in _got['passed']]) + ", ожидалось ['login', 'cart']"
+assert [_r['name'] for _r in _got['failed']] == ['pay'], "В группе failed " + repr([_r['name'] for _r in _got['failed']])` },
+        { label: 'порядок групп — по первому появлению',
+          setup: ``,
+          check: `assert 'group_by' in globals(), 'Не определена функция group_by'
+_rows = [{'lvl': 'ERROR'}, {'lvl': 'INFO'}, {'lvl': 'ERROR'}, {'lvl': 'WARN'}]
+_got = group_by(_rows, 'lvl')
+assert list(_got) == ['ERROR', 'INFO', 'WARN'], 'Порядок ключей ' + repr(list(_got)) + ", ожидалось ['ERROR', 'INFO', 'WARN']"` },
+        { label: 'одна группа на всё',
+          setup: ``,
+          check: `assert 'group_by' in globals(), 'Не определена функция group_by'
+_rows = [{'k': 'x', 'i': 1}, {'k': 'x', 'i': 2}]
+_got = group_by(_rows, 'k')
+assert list(_got) == ['x'], 'Ключи ' + repr(list(_got)) + ", ожидалось ['x']"
+assert [_r['i'] for _r in _got['x']] == [1, 2], 'Порядок внутри группы ' + repr([_r['i'] for _r in _got['x']]) + ', ожидалось [1, 2]'` },
+        { label: 'пустой список',
+          setup: ``,
+          check: `assert 'group_by' in globals(), 'Не определена функция group_by'
+_got = group_by([], 'any')
+assert _got == {}, 'Вернулось ' + repr(_got) + ', ожидался пустой словарь'` },
+        { label: 'группировка по числовому полю',
+          setup: ``,
+          check: `assert 'group_by' in globals(), 'Не определена функция group_by'
+_rows = [{'n': 'a', 'c': 1}, {'n': 'b', 'c': 2}, {'n': 'd', 'c': 1}]
+_got = group_by(_rows, 'c')
+assert set(_got) == {1, 2}, 'Ключи ' + repr(sorted(_got)) + ', ожидались [1, 2]'
+assert [_r['n'] for _r in _got[1]] == ['a', 'd'], 'В группе 1 ' + repr([_r['n'] for _r in _got[1]]) + ", ожидалось ['a', 'd']"` }
       ]
     }
   ]
