@@ -842,6 +842,7 @@
           <code>Accept</code> — что мы готовы принять в ответ<br>
           <code>User-Agent</code> — кто клиент (браузер, бот)<br>
           <code>Cookie</code> — куки от сервера<br>
+          <code>Origin</code> — с какого сайта идёт запрос (запускает CORS)<br>
           <code>Referer</code> — откуда пришли
         </div>
         <div class="card">
@@ -894,13 +895,15 @@
         <li><code>X-API-Version</code> — версия API (альтернатива версионированию через URL)</li>
       </ul>
 
-      <p><strong>CORS-заголовки</strong> — без понимания не пройти ни одного собеса по фронтенду или Backend, даже как QA:</p>
+      <p><strong>CORS-заголовки</strong> — без понимания не пройти ни одного собеса по фронтенду или Backend, даже как QA. Механика — это диалог из двух частей: <strong>браузер шлёт <code>Origin</code> в запросе, сервер отвечает <code>Access-Control-Allow-Origin</code></strong>.</p>
       <ul>
-        <li><code>Access-Control-Allow-Origin: https://shop.com</code> — какие домены могут обращаться</li>
+        <li><code>Origin: https://shop.com</code> — <strong>заголовок запроса</strong>. Браузер подставляет его сам на все cross-origin запросы (и на любой POST), сказать «не шли» из JS нельзя. Содержит только <em>схему + хост + порт</em>, без пути — в отличие от <code>Referer</code>, где лежит полный URL</li>
+        <li><code>Access-Control-Allow-Origin: https://shop.com</code> — <strong>ответ сервера</strong>: с каких доменов можно. Сервер сверяет пришедший <code>Origin</code> со своим списком и возвращает его же (или <code>*</code>). Не совпало — браузер блокирует ответ</li>
         <li><code>Access-Control-Allow-Methods: GET, POST, PUT</code> — какие методы разрешены</li>
         <li><code>Access-Control-Allow-Credentials: true</code> — можно ли слать куки</li>
         <li><strong>Preflight</strong> — браузер автоматически шлёт OPTIONS перед «нестандартными» запросами (не-GET, нестандартный Content-Type) и смотрит на CORS-ответ</li>
       </ul>
+      <div class="hl"><span class="hl-label">Origin — что важно для QA</span><strong>CORS ограничивает браузер, а не сервер.</strong> Из Postman или <code>requests</code> запрос пройдёт при любом <code>Origin</code> — там нет браузерной политики. Поэтому «в Postman работает, в браузере CORS-ошибка» — не баг фронта, а незаданный <code>Access-Control-Allow-Origin</code> на бэке. Что проверять: 1) подставить чужой <code>Origin</code> — сервер не должен слепо отражать его обратно (иначе пускает кого угодно); 2) связка <code>Allow-Origin: *</code> + <code>Allow-Credentials: true</code> — <strong>невалидна</strong>, браузер такой ответ отклонит, с куками нужен конкретный домен; 3) <code>Origin: null</code> — приходит из sandbox-iframe и <code>file://</code>, разрешать его опасно. И отдельно: <code>Origin</code> нельзя подделать из браузерного JS — поэтому сервер может опираться на него в защите от CSRF.</div>
 
       <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатор регулярно сталкивается с заголовками в трёх контекстах: 1) <strong>аутентификация</strong> через <code>Authorization</code> или кастомный <code>X-API-Key</code>, 2) <strong>трейсинг</strong> через <code>X-Request-ID</code> — без него невозможно найти запрос в логах в микросервисной архитектуре, 3) <strong>rate limiting</strong> — твои тесты должны уметь читать <code>X-Rate-Limit-*</code> и тормозить себя, а не падать с 429.</div>
 
