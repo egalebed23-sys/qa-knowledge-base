@@ -860,13 +860,38 @@ docker run -d \                       <span class="cm"># -d = в фоне</span>
         <div class="code-block">docker compose up -d     <span class="cm"># поднять всё из docker-compose.yml</span>
 docker compose down      <span class="cm"># остановить и удалить ресурсы</span>
 docker compose logs -f   <span class="cm"># логи всех сервисов</span></div>
-        <p><strong>Dockerfile</strong> — рецепт сборки образа:</p>
+        <p><strong>Dockerfile</strong> — рецепт сборки образа. Собирается командой <code>docker build -t myimage:1.0 .</code> (точка — контекст сборки):</p>
         <div class="code-block"><span class="kw">FROM</span> python:3.12
 <span class="kw">WORKDIR</span> /app
-<span class="kw">COPY</span> requirements.txt .
+<span class="kw">COPY</span> requirements.txt .        <span class="cm"># сначала ТОЛЬКО зависимости</span>
 <span class="kw">RUN</span> pip install -r requirements.txt
-<span class="kw">COPY</span> . .
+<span class="kw">COPY</span> . .                     <span class="cm"># код — последним</span>
 <span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
+
+        <p><strong>Слои и кэш сборки</strong> — самый частый вопрос по Dockerfile. Каждая инструкция создаёт <em>слой</em>, слои кэшируются. При пересборке Docker переиспользует кэш, пока не встретит изменившийся слой — <strong>дальше пересобирает всё</strong>.</p>
+        <div class="hl green"><span class="hl-label">Почему requirements копируют отдельно</span>Если написать <code>COPY . .</code> до <code>pip install</code>, то <em>любая</em> правка кода инвалидирует слой и зависимости будут ставиться заново — каждая сборка по несколько минут. Копируя сначала только <code>requirements.txt</code>, ты добиваешься, что слой с <code>pip install</code> пересобирается лишь при изменении списка зависимостей. Правило: <strong>от редко меняющегося к часто меняющемуся</strong>.</div>
+
+        <p><strong>Инструкции, которые путают:</strong></p>
+        <table>
+          <thead><tr><th>Пара</th><th>Разница</th></tr></thead>
+          <tbody>
+            <tr><td><code>CMD</code> vs <code>ENTRYPOINT</code></td><td><code>CMD</code> — команда <em>по умолчанию</em>, её легко переопределить: <code>docker run img bash</code>. <code>ENTRYPOINT</code> — то, что выполнится <em>всегда</em>, а аргументы из <code>run</code> к нему дописываются. Частый приём: <code>ENTRYPOINT ["pytest"]</code> + <code>CMD ["tests/"]</code> — путь можно поменять, сам pytest — нет</td></tr>
+            <tr><td><code>COPY</code> vs <code>ADD</code></td><td><code>COPY</code> просто копирует. <code>ADD</code> умеет ещё качать по URL и авто-распаковывать архивы — из-за этой «магии» рекомендуют всегда <code>COPY</code>, кроме случая, когда распаковка нужна осознанно</td></tr>
+            <tr><td><code>RUN</code> vs <code>CMD</code></td><td><code>RUN</code> выполняется <em>при сборке</em> образа, <code>CMD</code> — <em>при запуске</em> контейнера</td></tr>
+          </tbody>
+        </table>
+        <p><strong><code>.dockerignore</code></strong> — что не класть в контекст сборки (<code>.git</code>, <code>venv</code>, <code>__pycache__</code>, локальные артефакты). Без него контекст раздувается, сборка тормозит, а в образ могут утечь лишние файлы и секреты.</p>
+
+        <p><strong>Volumes — где живут данные.</strong> Контейнер эфемерен: удалил — данные внутри исчезли. Чтобы сохранить, монтируют том:</p>
+        <div class="code-block">docker run -v mydata:/var/lib/postgresql/data postgres:16   <span class="cm"># named volume — управляет Docker</span>
+docker run -v $(pwd)/tests:/app/tests myimage                <span class="cm"># bind mount — папка с хоста</span></div>
+        <ul>
+          <li><strong>Named volume</strong> — Docker хранит сам, переживает пересоздание контейнера. Для данных БД</li>
+          <li><strong>Bind mount</strong> — конкретная папка хоста внутрь контейнера. Удобно подсунуть тесты или конфиг без пересборки образа</li>
+        </ul>
+
+        <p><strong>Сети — почему из контейнера не видно <code>localhost</code>.</strong> Классическая ловушка: внутри контейнера <code>localhost</code> — это <em>сам контейнер</em>, а не твоя машина и не соседний контейнер.</p>
+        <div class="hl orange"><span class="hl-label">Как обращаться правильно</span>· <strong>Контейнер → контейнер в одном compose:</strong> по <em>имени сервиса</em> — <code>postgres:5432</code>, а не <code>localhost:5432</code>. Compose поднимает общую сеть и заводит DNS по именам сервисов.<br>· <strong>Контейнер → хост-машина:</strong> <code>host.docker.internal</code> (Docker Desktop на Windows/macOS).<br>· <strong>Хост → контейнер:</strong> только через проброшенный порт <code>-p 5432:5432</code>. Без <code>-p</code> порт снаружи недоступен, даже если сервис внутри слушает.<br>· Сервис внутри должен слушать <code>0.0.0.0</code>, а не <code>127.0.0.1</code> — иначе он принимает только соединения изнутри контейнера.</div>
       </div>
 
       <hr class="lvl-divider">
@@ -879,6 +904,34 @@ docker logs -f --tail 100 cont   <span class="cm"># смотреть логи в
 docker inspect container         <span class="cm"># детали: сеть, env, volumes</span></div>
         <p>Зайдя внутрь через <code>exec</code>, проверяешь изнутри: переменные окружения (<code>env</code>), доступность других сервисов (<code>curl</code>, <code>nc</code>), файлы конфигов.</p>
         <p><strong>Testcontainers</strong> — библиотека, поднимает реальные зависимости (Postgres, Kafka) в Docker прямо из автотеста и останавливает после теста. Тест работает с настоящей БД, а не моком. Это связка раздела с CI/CD (раздел 06).</p>
+
+        <p style="margin-top:14px;"><strong>Multi-stage build</strong> — собрать в одном образе, а в финальный положить только результат. Так из образа исчезают компиляторы, dev-зависимости и исходники: меньше размер и меньше поверхность атаки.</p>
+        <div class="code-block"><span class="kw">FROM</span> python:3.12 <span class="kw">AS</span> builder      <span class="cm"># стадия сборки</span>
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install --user -r requirements.txt
+
+<span class="kw">FROM</span> python:3.12-slim           <span class="cm"># финальный образ — только нужное</span>
+<span class="kw">COPY</span> --from=builder /root/.local /root/.local
+<span class="kw">COPY</span> . .
+<span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
+
+        <p><strong><code>depends_on</code> не ждёт готовности</strong> — типичная причина flaky в CI. Он гарантирует только <em>порядок запуска</em>: Postgres «стартовал» ≠ Postgres «принимает подключения». Тесты бегут раньше, чем БД поднялась, и падают через раз. Лечится healthcheck-ом:</p>
+        <div class="code-block">services:
+  db:
+    image: postgres:16
+    healthcheck:
+      test: [<span class="st">"CMD-SHELL"</span>, <span class="st">"pg_isready -U postgres"</span>]
+      interval: 5s
+      retries: 10
+  tests:
+    depends_on:
+      db:
+        condition: service_healthy   <span class="cm"># ждать ЗДОРОВЬЯ, а не старта</span></div>
+        <p>Альтернатива без compose — <code>wait-for-it.sh</code> / retry в самом тесте. Testcontainers делает это за тебя из коробки.</p>
+
+        <p><strong>Registry и теги.</strong> Образы хранятся в реестре (Docker Hub, GitHub Container Registry, приватный Nexus/Harbor): <code>docker pull</code> / <code>docker push</code>. Про теги важно понимать: <code>latest</code> — <strong>не «последняя версия»</strong>, а просто тег по умолчанию, который можно перезаписать. Поэтому «у меня и в CI разное поведение на одном <code>latest</code>» — обычная история. Для воспроизводимости фиксируют версию (<code>postgres:16.2</code>) или digest (<code>postgres@sha256:...</code>).</p>
+
+        <p><strong>Жизненный цикл и restart policy.</strong> Контейнер живёт, пока жив его главный процесс (PID 1). <code>docker ps -a</code> показывает <strong>exit code</strong>: <code>0</code> — штатно завершился, <code>1</code> — ошибка приложения, <code>137</code> — убит по OOM (не хватило памяти), <code>143</code> — получил SIGTERM. Политика перезапуска задаётся флагом <code>--restart</code> (<code>no</code>, <code>on-failure</code>, <code>always</code>, <code>unless-stopped</code>) — при <code>always</code> упавший контейнер бесконечно перезапускается, и в логах это выглядит как «моргающий» сервис.</p>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Контейнер сразу падает после запуска. Как дебажить?» — 1) <code>docker logs container</code> — чаще всего причина видна в логах (упал процесс, не найден файл, нет env), 2) <code>docker ps -a</code> — посмотреть exit code, 3) запустить с переопределением команды на <code>bash</code> и зайти внутрь контейнера и проверить состояние, 4) проверить <code>docker inspect</code> — правильные ли env и volumes. Контейнер живёт, пока жив его главный процесс — если процесс упал, контейнер останавливается.</div>
       </div>
 
@@ -910,7 +963,21 @@ docker inspect container         <span class="cm"># детали: сеть, env,
           <li><strong>Deployment</strong> — управляет репликами подов: «держи 3 копии сервиса всегда живыми»</li>
           <li><strong>Service</strong> — стабильная точка доступа к подам (поды меняются, адрес остаётся)</li>
           <li><strong>Namespace</strong> — логическое разделение (dev / staging / prod в одном кластере)</li>
+          <li><strong>Ingress</strong> — маршрутизация внешнего HTTP-трафика внутрь кластера (какой домен/путь → какой Service)</li>
+          <li><strong>ConfigMap</strong> — конфиг (env-переменные, файлы настроек) отдельно от образа</li>
+          <li><strong>Secret</strong> — то же для чувствительного (пароли, токены). Хранится в base64, то есть <em>кодирование, а не шифрование</em> — без включённого шифрования etcd это не защита</li>
         </ul>
+
+        <p><strong>Probes — как кластер понимает, жив ли под.</strong> Спрашивают почти всегда, и путают чаще всего:</p>
+        <table>
+          <thead><tr><th>Probe</th><th>Вопрос</th><th>Что будет при провале</th></tr></thead>
+          <tbody>
+            <tr><td><strong>liveness</strong></td><td>приложение ещё живо?</td><td>под <strong>перезапускается</strong></td></tr>
+            <tr><td><strong>readiness</strong></td><td>готово принимать трафик?</td><td>под <strong>убирается из Service</strong>, но не перезапускается</td></tr>
+            <tr><td><strong>startup</strong></td><td>долгий старт закончился?</td><td>откладывает две другие проверки, пока приложение поднимается</td></tr>
+          </tbody>
+        </table>
+        <div class="hl orange"><span class="hl-label">Чем это оборачивается для QA</span>· <strong>Слишком строгая liveness</strong> — под перезапускается под нагрузкой, потому что не успел ответить на проверку. Снаружи выглядит как «сервис случайно рвёт соединения».<br>· <strong>Нет readiness</strong> — трафик идёт в под, который ещё не прогрелся: после каждого деплоя короткая пачка 502/503. Классический баг, который ловится smoke-тестом сразу после выката.<br>· <strong>Readiness ходит в БД</strong> — упала БД, все поды разом стали not ready, сервис пропал из балансировщика целиком.</div>
         <p><strong>kubectl</strong> — команда для общения с кластером, основное для QA:</p>
         <div class="code-block">kubectl get pods                  <span class="cm"># список подов</span>
 kubectl logs pod-name             <span class="cm"># логи пода</span>
@@ -927,6 +994,21 @@ kubectl describe pod pod-name     <span class="cm"># детали, событи�
 kubectl get pods -w               <span class="cm"># следить за статусами подов</span>
 kubectl port-forward pod 8080:80  <span class="cm"># пробросить порт пода к себе</span></div>
         <p><code>port-forward</code> особенно полезен — пробрасываешь порт сервиса из кластера на свою машину и тестируешь его локально через curl/Postman.</p>
+
+        <p style="margin-top:14px;"><strong>Requests и limits — почему под «сам умирает».</strong> <code>requests</code> — сколько ресурсов поду гарантированно выделить (по ним планировщик выбирает ноду), <code>limits</code> — потолок. Превысил лимит по <strong>памяти</strong> → контейнер убивают, статус <code>OOMKilled</code> (exit code 137). Превысил по <strong>CPU</strong> → не убивают, а <em>тормозят</em> (throttling) — и это выглядит как необъяснимо медленные ответы под нагрузкой. Для QA: «тест стабильно падает по таймауту только в кластере» — первым делом смотреть лимиты.</p>
+
+        <p><strong>Типовые статусы пода</strong> — по ним сразу видно класс проблемы:</p>
+        <table>
+          <thead><tr><th>Статус</th><th>Что означает</th></tr></thead>
+          <tbody>
+            <tr><td><code>CrashLoopBackOff</code></td><td>контейнер стартует и падает по кругу — ошибка приложения, конфига или проваленная liveness</td></tr>
+            <tr><td><code>ImagePullBackOff</code></td><td>не может скачать образ — опечатка в теге, нет доступа к приватному реестру</td></tr>
+            <tr><td><code>Pending</code></td><td>некуда поставить — не хватает ресурсов на нодах или не привязался volume</td></tr>
+            <tr><td><code>OOMKilled</code></td><td>вышел за limit по памяти, убит ядром</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Выкатка и откат:</strong> <code>kubectl rollout status deploy/name</code> — дождаться завершения выката, <code>kubectl rollout undo deploy/name</code> — откатиться на предыдущую версию. Полезно знать, что Deployment по умолчанию катит <em>rolling update</em>: старые поды заменяются новыми постепенно, поэтому какое-то время в проде работают <strong>обе версии сразу</strong> — отсюда требование обратной совместимости API и схемы БД (см. раздел CI/CD).</p>
         <div class="hl modern"><span class="hl-label">В реальном мире</span>Kubernetes — зона DevOps/SRE, QA редко настраивает его сам. От QA-автоматизатора ждут понимания «что это и зачем» + умения <code>kubectl logs</code>, <code>kubectl describe</code> (посмотреть, почему под не поднялся), <code>kubectl exec</code> (зайти внутрь), <code>port-forward</code> (протестировать сервис локально). Писать YAML-манифесты и настраивать кластер — не задача QA.</div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Под в статусе CrashLoopBackOff. Что это и что делать?» — Под постоянно падает и перезапускается по кругу. Действия: <code>kubectl logs &lt;pod&gt; --previous</code> (логи <em>упавшего</em> контейнера — текущий мог уже перезапуститься, поэтому важен --previous), <code>kubectl describe pod</code> (события: нехватка ресурсов, не прошёл health-check, не скачался образ), <code>kubectl get events</code> (события неймспейса — проблемы scheduling/probe/image pull). Частые причины: ошибка в коде при старте, неверный конфиг/env, failed liveness probe.</div>
       </div>
