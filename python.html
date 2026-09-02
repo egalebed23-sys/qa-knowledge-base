@@ -515,12 +515,13 @@
     <a href="#oop">04 · ООП в Python</a>
     <a href="#str-regex">05 · Строки и регулярные выражения</a>
     <a href="#diffs">06 · Частые вопросы «в чём разница»</a>
-    <a href="#qa-python">07 · Python для QA-фреймворка</a>
-    <a href="#complexity">08 · Сложность (Big O)</a>
-    <a href="#strings">09 · Задачи: строки</a>
-    <a href="#collections">10 · Задачи: коллекции</a>
-    <a href="#quality">11 · Качество кода и тестирование</a>
-    <a href="#real-tasks">12 · Реальные задачи с собеса</a>
+    <a href="#concurrency">07 · GIL, потоки и async</a>
+    <a href="#qa-python">08 · Python для QA-фреймворка</a>
+    <a href="#complexity">09 · Сложность (Big O)</a>
+    <a href="#strings">10 · Задачи: строки</a>
+    <a href="#collections">11 · Задачи: коллекции</a>
+    <a href="#quality">12 · Качество кода и тестирование</a>
+    <a href="#real-tasks">13 · Реальные задачи с собеса</a>
   </div>
 </aside>
 
@@ -536,7 +537,7 @@
 
   <div class="header">
     <h1>Python</h1>
-    <p>// 12 подтем · синтаксис, QA-практика, regex, задачи</p>
+    <p>// 13 подтем · синтаксис, QA-практика, regex, задачи</p>
   </div>
 
   <!-- ─────── 01. СТРУКТУРЫ ДАННЫХ ─────── -->
@@ -655,8 +656,78 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
         <span class="kw">for</span> line <span class="kw">in</span> f:
             <span class="kw">yield</span> line.strip()   <span class="cm"># по строке, не весь файл в память</span></div>
 
-        <p><strong>Декораторы</strong> — функция, оборачивающая другую функцию (добавляет поведение, не меняя код). Ты их уже используешь: <code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code> — это декораторы.</p>
-        <p><strong>Контекстные менеджеры (<code>with</code>)</strong> — гарантируют очистку (закрыть файл, соединение) даже при исключении. Под капотом — методы <code>__enter__</code> / <code>__exit__</code>.</p>
+        <p><strong>Итератор vs генератор</strong> — спрашивают в паре. <strong>Итератор</strong> — любой объект с <code>__iter__()</code> и <code>__next__()</code>, который отдаёт элементы по одному и бросает <code>StopIteration</code>, когда кончились. <strong>Генератор</strong> — это <em>частный случай</em> итератора, который Python строит за тебя из функции с <code>yield</code> (или из выражения в круглых скобках). То есть каждый генератор — итератор, но не наоборот. И то и другое одноразовое: прошёл до конца — заново не перечитаешь, нужен новый.</p>
+        <div class="code-block"><span class="cm"># то же самое «руками» — так выглядит итератор изнутри</span>
+<span class="kw">class</span> <span class="fn">Countdown</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n): self.n = n
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self): <span class="kw">return</span> self
+    <span class="kw">def</span> <span class="fn">__next__</span>(self):
+        <span class="kw">if</span> self.n &lt;= <span class="val">0</span>: <span class="kw">raise</span> StopIteration
+        self.n -= <span class="val">1</span>
+        <span class="kw">return</span> self.n + <span class="val">1</span></div>
+
+        <p><strong>Замыкание (closure)</strong> — вложенная функция запоминает переменные внешней даже после того, как внешняя завершилась. На этом стоят декораторы и фабрики функций:</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">make_multiplier</span>(k):
+    <span class="kw">def</span> <span class="fn">inner</span>(x):
+        <span class="kw">return</span> x * k       <span class="cm"># k «замкнута» — жива после выхода из make_multiplier</span>
+    <span class="kw">return</span> inner
+
+double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
+<span class="fn">double</span>(<span class="val">5</span>)                  <span class="cm"># 10</span>
+
+<span class="cm"># ⚠ чтобы менять внешнюю переменную, нужен nonlocal</span>
+<span class="kw">def</span> <span class="fn">counter</span>():
+    n = <span class="val">0</span>
+    <span class="kw">def</span> <span class="fn">inc</span>():
+        <span class="kw">nonlocal</span> n     <span class="cm"># без nonlocal — UnboundLocalError</span>
+        n += <span class="val">1</span>
+        <span class="kw">return</span> n
+    <span class="kw">return</span> inc</div>
+
+        <p><strong>Декораторы</strong> — функция, оборачивающая другую функцию: добавляет поведение, не меняя её код. Ты их уже используешь (<code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code>), но на собесе часто просят <em>написать свой</em> — обычно retry или замер времени:</p>
+        <div class="code-block"><span class="kw">import</span> functools, time
+
+<span class="kw">def</span> <span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">1</span>):        <span class="cm"># декоратор С АРГУМЕНТАМИ = 3 уровня вложенности</span>
+    <span class="kw">def</span> <span class="fn">decorator</span>(func):
+        @functools.wraps(func)          <span class="cm"># сохраняет __name__ и docstring оригинала</span>
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+            <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(times):
+                <span class="kw">try</span>:
+                    <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
+                <span class="kw">except</span> Exception:
+                    <span class="kw">if</span> attempt == times - <span class="val">1</span>: <span class="kw">raise</span>
+                    time.<span class="fn">sleep</span>(delay)
+            <span class="kw">return</span> <span class="kw">None</span>
+        <span class="kw">return</span> wrapper
+    <span class="kw">return</span> decorator
+
+@<span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">2</span>)
+<span class="kw">def</span> <span class="fn">flaky_api_call</span>(): ...</div>
+        <div class="hl orange"><span class="hl-label">Про <code>functools.wraps</code></span>Без него обёрнутая функция «теряет лицо»: <code>func.__name__</code> станет <code>wrapper</code>, docstring пропадёт. Для pytest это критично — он опирается на имена функций, и без <code>wraps</code> ломается отображение тестов и часть плагинов. Если на собесе пишешь декоратор и добавляешь <code>@functools.wraps</code> — это сразу читается как опыт.</div>
+
+        <p><strong>Контекстные менеджеры (<code>with</code>)</strong> — гарантируют очистку (закрыть файл, соединение, откатить транзакцию) даже если внутри выброшено исключение. Свой можно написать двумя способами:</p>
+        <div class="code-block"><span class="cm"># 1) класс с __enter__ / __exit__</span>
+<span class="kw">class</span> <span class="fn">Timer</span>:
+    <span class="kw">def</span> <span class="fn">__enter__</span>(self):
+        self.start = time.<span class="fn">time</span>()
+        <span class="kw">return</span> self                <span class="cm"># то, что попадёт в «as ...»</span>
+    <span class="kw">def</span> <span class="fn">__exit__</span>(self, exc_type, exc, tb):
+        <span class="fn">print</span>(time.<span class="fn">time</span>() - self.start)
+        <span class="cm"># return True — ПОДАВИТЬ исключение; None/False — пробросить дальше</span>
+
+<span class="cm"># 2) короче — через contextlib</span>
+<span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager
+
+@contextmanager
+<span class="kw">def</span> <span class="fn">temp_user</span>(api):
+    user = api.<span class="fn">create_user</span>()
+    <span class="kw">try</span>:
+        <span class="kw">yield</span> user             <span class="cm"># всё до yield = setup, после = teardown</span>
+    <span class="kw">finally</span>:
+        api.<span class="fn">delete_user</span>(user.id)   <span class="cm"># finally — чтобы чистилось и при падении</span></div>
+        <p>Ровно на этой механике устроены фикстуры pytest с <code>yield</code>: до <code>yield</code> — подготовка, после — уборка.</p>
+
+        <p><strong><code>lambda</code>, <code>map</code>, <code>filter</code></strong> — функциональный минимум. <code>lambda x: x*2</code> — безымянная функция в одно выражение. <code>map(f, seq)</code> применяет функцию к каждому элементу, <code>filter(f, seq)</code> отбирает по условию; оба возвращают <em>ленивый итератор</em>, поэтому обычно оборачивают в <code>list()</code>. В Python принято предпочитать comprehension: <code>[x*2 for x in nums]</code> читается лучше, чем <code>list(map(lambda x: x*2, nums))</code>. Где <code>lambda</code> реально уместна — как <code>key</code> в сортировке: <code>sorted(users, key=lambda u: u.age)</code>.</p>
 
         <div class="hl orange"><span class="hl-label">copy vs deepcopy</span>Присваивание <code>b = a</code> для списка — это <em>та же ссылка</em>, не копия: меняешь <code>b</code> — меняется <code>a</code>. <code>copy.copy()</code> — поверхностная копия (вложенные объекты общие). <code>copy.deepcopy()</code> — полная копия всего дерева. Частый источник багов с мутабельными структурами.</div>
 
@@ -774,7 +845,24 @@ i = <span class="val">0</span>
 <span class="kw">while</span> i &lt; <span class="val">5</span>:
     <span class="kw">if</span> i == <span class="val">2</span>: <span class="kw">continue</span>     <span class="cm"># ⚠ i не растёт → зависли навсегда</span>
     i += <span class="val">1</span></div>
+
       <div class="hl green"><span class="hl-label">Запомнить</span>Три ловушки: 1) <code>break</code>/<code>continue</code> действуют только на <strong>ближайший</strong> цикл — из вложенного одним <code>break</code> не выпрыгнуть (нужен флаг или вынести во функцию с <code>return</code>); 2) <code>for/else</code> — <code>else</code> выполняется, <em>если <code>break</code> НЕ случился</em> (читается как «no break», а не «иначе»); 3) <code>continue</code> в <code>while</code> перепрыгивает инкремент — классический бесконечный цикл.</div>
+
+      <!-- item: мутабельный аргумент по умолчанию -->
+      <p style="margin-top:16px;"><strong>Мутабельный аргумент по умолчанию.</strong> Значение по умолчанию вычисляется <em>один раз</em> — в момент определения функции, а не при каждом вызове. Поэтому один и тот же список живёт между вызовами и накапливает данные.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">add</span>(item, target=[]):     <span class="cm"># ⚠ список создан ОДИН раз</span>
+    target.<span class="fn">append</span>(item)
+    <span class="kw">return</span> target
+
+<span class="fn">add</span>(<span class="val">1</span>)      <span class="cm"># [1]</span>
+<span class="fn">add</span>(<span class="val">2</span>)      <span class="cm"># [1, 2]  ← не [2], список тот же самый!</span>
+
+<span class="kw">def</span> <span class="fn">add</span>(item, target=<span class="kw">None</span>):   <span class="cm"># ✓ правильно</span>
+    <span class="kw">if</span> target <span class="kw">is</span> <span class="kw">None</span>:
+        target = []                <span class="cm"># новый список на каждый вызов</span>
+    target.<span class="fn">append</span>(item)
+    <span class="kw">return</span> target</div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Дефолт вычисляется при <em>определении</em> функции, а не при вызове. Поэтому мутабельные дефолты (<code>[]</code>, <code>{}</code>, <code>set()</code>) — всегда баг: пиши <code>None</code> и создавай внутри. Немутабельные (<code>0</code>, <code>""</code>, <code>None</code>, кортеж) безопасны. Та же причина у <code>def f(x=datetime.now())</code> — время «замёрзнет» на момент импорта модуля.</div>
 
     </div>
   </section>
@@ -815,6 +903,20 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
         <span class="fn">super</span>().setup()           <span class="cm"># вызвать родительский</span>
         <span class="cm"># + своя логика</span></div>
 
+        <p><strong>Четыре принципа ООП</strong> — просят назвать почти всегда, и лучше сразу с питоновской спецификой:</p>
+        <table>
+          <thead><tr><th>Принцип</th><th>Суть</th><th>Как в Python</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Инкапсуляция</strong></td><td>спрятать внутреннее устройство за интерфейсом</td><td>соглашение <code>_protected</code> / <code>__private</code> — жёсткого запрета нет</td></tr>
+            <tr><td><strong>Наследование</strong></td><td>переиспользовать поведение родителя</td><td><code>class Child(Parent)</code>, <code>super()</code>. Множественное наследование разрешено</td></tr>
+            <tr><td><strong>Полиморфизм</strong></td><td>один интерфейс — разные реализации</td><td>duck typing: важен не тип, а наличие нужных методов</td></tr>
+            <tr><td><strong>Абстракция</strong></td><td>выделить общий контракт, скрыв детали</td><td><code>abc.ABC</code> + <code>@abstractmethod</code></td></tr>
+          </tbody>
+        </table>
+        <div class="hl orange"><span class="hl-label">Инкапсуляции в Python нет «по-настоящему»</span>Ключевых слов <code>private</code> / <code>public</code> не существует. Одно подчёркивание <code>_x</code> — <em>договорённость</em> «не трогай снаружи», ничего не запрещает. Два подчёркивания <code>__x</code> включают <strong>name mangling</strong>: атрибут переименовывается в <code>_ClassName__x</code>, поэтому «снаружи не видно» — но достать всё равно можно. Это делалось не ради защиты, а чтобы имена не сталкивались при наследовании. Правильная формулировка на собесе: «в Python инкапсуляция — соглашение, а не ограничение языка».</div>
+
+        <p><strong>Duck typing и полиморфизм.</strong> «Если крякает как утка — значит утка»: Python не проверяет тип, он проверяет, есть ли нужный метод. Поэтому полиморфизм работает без общего базового класса — любой объект с методом <code>.get()</code> подойдёт там, где ожидают клиента. Для тестов это удобно: подсунуть фейковый клиент вместо настоящего можно вообще без наследования.</p>
+
         <p><strong>Три типа методов:</strong></p>
         <ul>
           <li><code>@staticmethod</code> — не зависит от объекта (утилита внутри класса)</li>
@@ -836,6 +938,32 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
           <li><strong>__eq__</strong> — чтобы сравнивать объекты в ассертах по значению, а не по ссылке</li>
           <li><strong>Контекстные менеджеры</strong> — свой <code>with</code> для setup/teardown ресурса</li>
         </ul>
+
+        <p style="margin-top:14px;"><strong>Абстрактные классы</strong> — задают контракт, который обязаны реализовать наследники. Полезно для базового клиента или базовой страницы во фреймворке: забыл реализовать метод — упадёт при создании объекта, а не в середине теста.</p>
+        <div class="code-block"><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="kw">class</span> <span class="fn">BaseClient</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> <span class="fn">auth</span>(self): ...        <span class="cm"># наследник ОБЯЗАН реализовать</span>
+
+<span class="kw">class</span> <span class="fn">ApiClient</span>(BaseClient):
+    <span class="kw">def</span> <span class="fn">auth</span>(self): ...        <span class="cm"># без этого — TypeError при ApiClient()</span></div>
+
+        <p><strong>Композиция vs наследование</strong> — любимый архитектурный вопрос. Наследование = «является» (<code>AdminUser</code> является <code>User</code>), композиция = «имеет» (<code>OrderTest</code> <em>имеет</em> <code>ApiClient</code>). Проблема наследования — жёсткая связь: меняешь базовый класс, ломаются все наследники, а глубокие иерархии тест-классов быстро превращаются в клубок. Современный совет — <strong>предпочитать композицию</strong>: во фреймворке лучше передать клиент в тест фикстурой, чем наследовать тест от <code>BaseTestWithClient</code>.</p>
+
+        <p><strong>MRO (Method Resolution Order)</strong> — порядок, в котором Python ищет метод при множественном наследовании. Считается по алгоритму C3, посмотреть можно через <code>ClassName.__mro__</code>. Практический смысл: <code>super()</code> идёт <em>не к родителю</em>, а к следующему классу в MRO — поэтому в ромбовидном наследовании общий предок вызывается один раз, а не дважды. Для QA достаточно знать, что порядок детерминирован и проверяется через <code>__mro__</code>.</p>
+
+        <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
+        <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+@dataclass
+<span class="kw">class</span> <span class="fn">User</span>:
+    id: <span class="fn">int</span>
+    name: <span class="fn">str</span>
+    role: <span class="fn">str</span> = <span class="st">"user"</span>
+
+<span class="fn">User</span>(<span class="val">1</span>, <span class="st">"Ann"</span>) == <span class="fn">User</span>(<span class="val">1</span>, <span class="st">"Ann"</span>)   <span class="cm"># True — __eq__ уже есть</span></div>
+        <p><strong><code>__slots__</code></strong> — фиксирует список допустимых атрибутов, убирая у объекта <code>__dict__</code>: экономит память и ловит опечатку в имени атрибута ошибкой вместо молчаливого создания нового поля. Нужен редко (много объектов), но знать термин стоит.</p>
         <div class="hl modern"><span class="hl-label">В реальном мире</span>Глубокое ООП (метаклассы, дескрипторы, MRO при сложном множественном наследовании) QA-автоматизатору почти не нужно — это для разработчиков библиотек. Достаточно: классы, наследование, <code>super()</code>, основные dunder-методы, <code>@property</code>/<code>@staticmethod</code>/<code>@classmethod</code>. Этого хватает, чтобы писать и читать тест-фреймворк.</div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>__str__</code> отличается от <code>__repr__</code>?» — <code>__str__</code> — «человеческое» представление для пользователя (<code>print(obj)</code>). <code>__repr__</code> — однозначное техническое для отладки, в идеале такое, чтобы по нему можно было воссоздать объект (<code>repr(obj)</code>, вывод в консоли/логах). Если определён только один — определяй <code>__repr__</code>, он используется как fallback.</div>
       </div>
@@ -979,10 +1107,94 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
     </div>
   </section>
 
+  <!-- ─────── 07. GIL, ПОТОКИ И ASYNC ─────── -->
+  <section class="section" id="concurrency">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">GIL, потоки и async</span>
+      <span class="section-badge">concurrency</span>
+    </div>
+    <div class="section-body">
+
+      <div class="lvl lvl-1">
+        <span class="lvl-tag">L1 · Основы</span>
+        <p><strong>GIL</strong> (Global Interpreter Lock) — глобальная блокировка интерпретатора CPython: <strong>в один момент времени байткод Python исполняет только один поток</strong>. Даже на 8 ядрах два потока не будут считать параллельно — они будут по очереди захватывать GIL.</p>
+        <div class="hl green"><span class="hl-label">Аналогия</span>GIL — это один микрофон на всю комнату. Людей (потоков) много, говорить одновременно нельзя: микрофон передают по кругу. Если задача — «говорить» (считать в CPU), очередь из потоков ничего не ускорит. Но если задача — «ждать ответа» (сеть, диск), говорящий всё равно молчит и отдаёт микрофон другим — вот тут потоки и выигрывают.</div>
+        <p><strong>Главное следствие:</strong> потоки в Python ускоряют <em>I/O-bound</em> задачи (запросы по сети, чтение файлов, ожидание БД) и <strong>не ускоряют CPU-bound</strong> (вычисления, парсинг, обработка данных). Пока поток ждёт ответа от сети, он отпускает GIL — остальные работают.</p>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-2">
+        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Три способа выполнять несколько задач</strong> — и когда какой:</p>
+        <table>
+          <thead><tr><th>Подход</th><th>Обходит GIL?</th><th>Для чего</th><th>Цена</th></tr></thead>
+          <tbody>
+            <tr><td><strong>threading</strong> (потоки)</td><td>нет</td><td>I/O-bound: HTTP-запросы, файлы, БД</td><td>дёшево, но общая память → гонки</td></tr>
+            <tr><td><strong>multiprocessing</strong> (процессы)</td><td><strong>да</strong> — у каждого процесса свой GIL</td><td>CPU-bound: вычисления, обработка данных</td><td>дорого: своя память, накладные на запуск и передачу данных</td></tr>
+            <tr><td><strong>asyncio</strong> (корутины)</td><td>не нужно — всё в одном потоке</td><td>много одновременных сетевых операций</td><td>нужен async-совместимый код целиком</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Правило выбора</span><strong>CPU-bound → процессы. I/O-bound → потоки или asyncio.</strong> Это ответ на вопрос «как ускорить скрипт», и он же объясняет, почему <code>pytest-xdist</code> раскидывает тесты по <strong>процессам</strong> (<code>-n 4</code>), а не по потокам: процессы дают и настоящий параллелизм, и изоляцию — упавший тест не уронит соседей.</div>
+
+        <p><strong>asyncio — синхронно vs асинхронно.</strong> Корутина на <code>await</code> добровольно отдаёт управление циклу событий, и тот запускает следующую задачу. Один поток, но пока одни запросы «в полёте», выполняются другие:</p>
+        <div class="code-block"><span class="cm"># синхронно: 100 запросов по 1 сек = ~100 сек</span>
+<span class="kw">for</span> url <span class="kw">in</span> urls:
+    requests.<span class="fn">get</span>(url)
+
+<span class="cm"># асинхронно: те же 100 запросов ≈ 1–2 сек</span>
+<span class="kw">import</span> asyncio, httpx
+
+<span class="kw">async def</span> <span class="fn">fetch</span>(client, url):
+    r = <span class="kw">await</span> client.<span class="fn">get</span>(url)      <span class="cm"># await = «жду, работайте пока без меня»</span>
+    <span class="kw">return</span> r.status_code
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async with</span> httpx.<span class="fn">AsyncClient</span>() <span class="kw">as</span> client:
+        <span class="kw">return</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*[<span class="fn">fetch</span>(client, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
+        <ul>
+          <li><code>async def</code> — объявляет корутину; вызов <em>не</em> запускает её, а возвращает объект корутины</li>
+          <li><code>await</code> — ждать результат, отдав управление на это время</li>
+          <li><code>asyncio.gather()</code> — запустить пачку задач одновременно и дождаться всех</li>
+          <li><code>asyncio.run()</code> — точка входа, запускает цикл событий</li>
+        </ul>
+        <div class="hl orange"><span class="hl-label">Главная ошибка в async</span>Одна <strong>блокирующая</strong> строка внутри корутины останавливает весь цикл событий, и вся асинхронность пропадает. Классика: <code>time.sleep(1)</code> вместо <code>await asyncio.sleep(1)</code> или <code>requests.get()</code> вместо <code>httpx.AsyncClient</code>. Правило: внутри <code>async def</code> все операции ввода-вывода должны быть <code>await</code>-совместимыми.</div>
+      </div>
+
+      <hr class="lvl-divider">
+
+      <div class="lvl lvl-3">
+        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Где это реально встречается у QA:</strong></p>
+        <ul>
+          <li><strong>Параллельный прогон тестов</strong> — <code>pytest -n 4</code> (<code>pytest-xdist</code>): процессы, поэтому тесты обязаны быть изолированы (свои данные, никакого общего состояния)</li>
+          <li><strong>Пачка API-запросов</strong> — подготовить 500 сущностей для теста: <code>ThreadPoolExecutor</code> или <code>asyncio</code> вместо цикла на 10 минут</li>
+          <li><strong>Нагрузочные и WebSocket-тесты</strong> — держать сотни соединений одним процессом умеет только async</li>
+          <li><strong>Гонки в собственных тестах</strong> — общая фикстура, один тестовый юзер на всех, счётчик без блокировки: типичная причина flaky при параллельном запуске</li>
+        </ul>
+        <div class="code-block"><span class="cm"># простой параллелизм без asyncio — для I/O достаточно</span>
+<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor
+
+<span class="kw">with</span> <span class="fn">ThreadPoolExecutor</span>(max_workers=<span class="val">10</span>) <span class="kw">as</span> pool:
+    results = <span class="fn">list</span>(pool.<span class="fn">map</span>(create_user, payloads))</div>
+
+        <div class="hl modern"><span class="hl-label">Про «GIL убрали»</span>В Python 3.13 появился экспериментальный <em>free-threaded</em> режим (сборка без GIL, PEP 703), в 3.14 он продолжает стабилизироваться. Но это отдельная сборка, а не поведение по умолчанию, и экосистема C-расширений к ней ещё адаптируется. Корректный ответ на собесе: «в обычном CPython GIL на месте, есть экспериментальная сборка без него — но в проде на неё пока не опираются».</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У тебя скрипт делает 1000 HTTP-запросов и работает 20 минут. Как ускорить?» — Сначала уточнить, что задача <strong>I/O-bound</strong> (ждём сеть, не считаем) — значит GIL не мешает и процессы не нужны. Варианты по возрастанию: 1) <code>requests.Session()</code> — переиспользовать соединение, убрать повторные TLS-handshake; 2) <code>ThreadPoolExecutor</code> на 10–20 воркеров — самый дешёвый по изменениям путь; 3) <code>asyncio</code> + <code>httpx</code> — если запросов тысячи и нужен максимум; 4) проверить, не упрёмся ли в <strong>rate limit</strong> сервера — иначе ускорение превратится в 429.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему добавили потоков, а скрипт не ускорился?» — Почти наверняка задача CPU-bound: потоки делят один GIL и просто передают его по очереди, суммарная скорость та же плюс накладные на переключение. Лечится процессами (<code>multiprocessing</code>, <code>ProcessPoolExecutor</code>) либо выносом тяжёлой части в библиотеку, которая отпускает GIL (numpy, C-расширения).</div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ─────── PYTHON ДЛЯ QA-ФРЕЙМВОРКА ─────── -->
   <section class="section" id="qa-python">
     <div class="section-header">
-      <span class="section-num">07</span>
+      <span class="section-num">08</span>
       <span class="section-title">Python для QA-фреймворка</span>
       <span class="section-badge">практика</span>
     </div>
@@ -1073,7 +1285,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── СЛОЖНОСТЬ ─────── -->
   <section class="section" id="complexity">
     <div class="section-header">
-      <span class="section-num">08</span>
+      <span class="section-num">09</span>
       <span class="section-title">Сложность (Big O)</span>
       <span class="section-badge">complexity</span>
     </div>
@@ -1130,7 +1342,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 03. ЗАДАЧИ: СТРОКИ ─────── -->
   <section class="section" id="strings">
     <div class="section-header">
-      <span class="section-num">09</span>
+      <span class="section-num">10</span>
       <span class="section-title">Задачи: строки</span>
       <span class="section-badge">practice</span>
     </div>
@@ -1192,7 +1404,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 04. ЗАДАЧИ: КОЛЛЕКЦИИ ─────── -->
   <section class="section" id="collections">
     <div class="section-header">
-      <span class="section-num">10</span>
+      <span class="section-num">11</span>
       <span class="section-title">Задачи: коллекции</span>
       <span class="section-badge">practice</span>
     </div>
@@ -1265,7 +1477,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── 05. КАЧЕСТВО КОДА ─────── -->
   <section class="section" id="quality">
     <div class="section-header">
-      <span class="section-num">11</span>
+      <span class="section-num">12</span>
       <span class="section-title">Качество кода и тестирование</span>
       <span class="section-badge">code quality</span>
     </div>
@@ -1335,7 +1547,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
   <!-- ─────── РЕАЛЬНЫЕ ЗАДАЧИ ─────── -->
   <section class="section" id="real-tasks">
     <div class="section-header">
-      <span class="section-num">12</span>
+      <span class="section-num">13</span>
       <span class="section-title">Реальные задачи с собеса</span>
       <span class="section-badge">формат «почини класс»</span>
     </div>
