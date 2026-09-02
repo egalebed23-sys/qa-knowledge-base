@@ -528,7 +528,8 @@
     <a href="#groupby">04 · GROUP BY и HAVING</a>
     <a href="#tasks">05 · SQL-задачи с собеса</a>
     <a href="#qa-db">06 · БД в работе QA</a>
-    <a href="#rare">07 · Реже: транзакции, NoSQL, теория</a>
+    <a href="#transactions">07 · Транзакции, ACID, изоляция</a>
+    <a href="#rare">08 · Реже: индексы, NoSQL, теория</a>
   </div>
 </aside>
 
@@ -546,7 +547,7 @@
 
   <div class="header">
     <h1>Базы данных</h1>
-    <p>// 7 подтем · SQL, JOIN, БД в работе QA</p>
+    <p>// 8 подтем · SQL, JOIN, транзакции, БД в работе QA</p>
   </div>
 
 
@@ -976,18 +977,14 @@ row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>
   </section>
 
   <!-- ─────── 07. РЕЖЕ НА СОБЕСЕ ─────── -->
-  <section class="section" id="rare">
+  <!-- ─────── 07. ТРАНЗАКЦИИ И ACID ─────── -->
+  <section class="section" id="transactions">
     <div class="section-header">
       <span class="section-num">07</span>
-      <span class="section-title">Реже на собесе: транзакции, NoSQL, теория</span>
-      <span class="section-badge">rare</span>
+      <span class="section-title">Транзакции, ACID, изоляция</span>
+      <span class="section-badge">transactions</span>
     </div>
     <div class="section-body">
-
-      <div class="hl modern" style="margin-top:0;"><span class="hl-label">Зачем это здесь</span>Темы, которые на собесах QA всплывают редко: транзакции, устройство индексов, нормализация, NoSQL/Redis и академическая терминология. Держим коротко, чтобы было что ответить, если спросят.</div>
-
-      <!-- Индексы -->
-      <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">① Транзакции и ACID</strong></p>
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
@@ -1007,34 +1004,112 @@ row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>
         <span class="lvl-tag">L2 · Детали</span>
         <p><strong>ACID</strong> — четыре свойства, которые гарантирует транзакция:</p>
         <table>
-          <thead><tr><th>Свойство</th><th>Что значит</th></tr></thead>
+          <thead><tr><th>Свойство</th><th>Что значит</th><th>Что ломается без него</th></tr></thead>
           <tbody>
-            <tr><td><strong>A</strong>tomicity (атомарность)</td><td>всё или ничего — частичного выполнения не бывает</td></tr>
-            <tr><td><strong>C</strong>onsistency (согласованность)</td><td>данные валидны до и после (соблюдены все правила и ограничения)</td></tr>
-            <tr><td><strong>I</strong>solation (изоляция)</td><td>параллельные транзакции не мешают друг другу</td></tr>
-            <tr><td><strong>D</strong>urability (долговечность)</td><td>после COMMIT данные сохранены даже при сбое питания</td></tr>
+            <tr><td><strong>A</strong>tomicity (атомарность)</td><td>всё или ничего — частичного выполнения не бывает</td><td>деньги списались, но не зачислились</td></tr>
+            <tr><td><strong>C</strong>onsistency (согласованность)</td><td>данные валидны до и после: соблюдены constraints, FK, триггеры</td><td>отрицательный баланс, заказ на несуществующего юзера</td></tr>
+            <tr><td><strong>I</strong>solation (изоляция)</td><td>параллельные транзакции не мешают друг другу</td><td>два списания с одного счёта, «продали последний товар дважды»</td></tr>
+            <tr><td><strong>D</strong>urability (долговечность)</td><td>после <code>COMMIT</code> данные переживут падение сервера</td><td>подтвердили платёж, после перезапуска его нет</td></tr>
           </tbody>
         </table>
         <p><code>COMMIT</code> — применить изменения. <code>ROLLBACK</code> — откатить всё с начала транзакции.</p>
+        <div class="hl orange"><span class="hl-label">Про «C» стоит быть точным</span>Consistency в ACID — это <em>не</em> «согласованность реплик» и не та «C» из CAP-теоремы. Здесь речь про соблюдение правил самой БД: ограничения, типы, внешние ключи. Часто путают, и уточнение звучит сильно.</div>
+
+        <p style="margin-top:14px;"><strong>Три аномалии</strong> — то, от чего защищает изоляция. Спрашивают именно в связке «какой уровень какую аномалию отсекает»:</p>
+        <table>
+          <thead><tr><th>Аномалия</th><th>Что происходит</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Dirty read</strong> (грязное чтение)</td><td>прочитал чужие <em>незакоммиченные</em> изменения, а та транзакция потом откатилась</td></tr>
+            <tr><td><strong>Non-repeatable read</strong> (неповторяющееся чтение)</td><td>прочитал строку дважды в одной транзакции и получил <em>разные значения</em> — между чтениями кто-то её обновил и закоммитил</td></tr>
+            <tr><td><strong>Phantom read</strong> (фантомное чтение)</td><td>повторил тот же <code>SELECT ... WHERE</code> и получил <em>новые строки</em> — кто-то вставил подходящие под условие</td></tr>
+          </tbody>
+        </table>
+        <p>Разница между вторым и третьим: non-repeatable — <em>изменилась существующая строка</em>, phantom — <em>появились новые строки</em> в выборке.</p>
+
+        <p style="margin-top:14px;"><strong>Уровни изоляции</strong> — компромисс между корректностью и скоростью:</p>
+        <table>
+          <thead><tr><th>Уровень</th><th>Dirty</th><th>Non-repeatable</th><th>Phantom</th></tr></thead>
+          <tbody>
+            <tr><td>Read Uncommitted</td><td>возможно</td><td>возможно</td><td>возможно</td></tr>
+            <tr><td>Read Committed <em>(дефолт в PostgreSQL)</em></td><td>нет</td><td>возможно</td><td>возможно</td></tr>
+            <tr><td>Repeatable Read <em>(дефолт в MySQL/InnoDB)</em></td><td>нет</td><td>нет</td><td>возможно по стандарту</td></tr>
+            <tr><td>Serializable</td><td>нет</td><td>нет</td><td>нет</td></tr>
+          </tbody>
+        </table>
+        <div class="hl"><span class="hl-label">Нюанс про реальные СУБД</span>Таблица выше — <em>стандарт SQL</em>, а движки ведут себя строже. В PostgreSQL <strong>Read Uncommitted фактически работает как Read Committed</strong> — грязного чтения там не бывает вообще. А Repeatable Read в Postgres отсекает и фантомы. Хороший ответ на собесе: назвать стандарт и добавить, что конкретное поведение зависит от СУБД.</div>
       </div>
 
       <hr class="lvl-divider">
 
       <div class="lvl lvl-3">
         <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Уровни изоляции</strong> — компромисс между корректностью и скоростью. Чем строже, тем безопаснее, но медленнее:</p>
+        <p><strong>MVCC</strong> (Multi-Version Concurrency Control) — то, как Postgres и MySQL дают изоляцию, не заставляя читателей ждать. Вместо блокировки строки СУБД хранит <em>несколько версий</em>: транзакция видит снимок данных на момент своего старта, а параллельная запись создаёт новую версию. Главное следствие, которое стоит произнести: <strong>читатели не блокируют писателей, писатели не блокируют читателей</strong>. Побочный эффект — старые версии копятся, и их подчищает <code>VACUUM</code>.</p>
+
+        <p><strong>Пессимистичная vs оптимистичная блокировка</strong> — два способа не потерять обновление, когда двое правят одну строку:</p>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">Пессимистичная</div>
+            «Сначала захвачу, потом изменю»: <code>SELECT ... FOR UPDATE</code> блокирует строку до конца транзакции, второй ждёт.<br><br>
+            Надёжно при высокой конкуренции за одну строку (остаток на складе, баланс). Минус — ожидание и риск deadlock.
+          </div>
+          <div class="card">
+            <div class="card-title">Оптимистичная</div>
+            «Изменю и проверю, что никто не опередил»: в строке есть <code>version</code>, апдейт идёт с <code>WHERE version = 5</code>. Обновилось 0 строк — значит кто-то успел раньше, повторяем.<br><br>
+            Дешевле, когда конфликты редки. Минус — приложение обязано уметь retry.
+          </div>
+        </div>
+        <div class="code-block"><span class="cm">-- пессимистичная: строка заблокирована до COMMIT</span>
+<span class="kw">BEGIN</span>;
+  <span class="kw">SELECT</span> qty <span class="kw">FROM</span> stock <span class="kw">WHERE</span> id = <span class="val">1</span> <span class="kw">FOR UPDATE</span>;
+  <span class="kw">UPDATE</span> stock <span class="kw">SET</span> qty = qty - <span class="val">1</span> <span class="kw">WHERE</span> id = <span class="val">1</span>;
+<span class="kw">COMMIT</span>;
+
+<span class="cm">-- оптимистичная: конфликт виден по числу обновлённых строк</span>
+<span class="kw">UPDATE</span> stock <span class="kw">SET</span> qty = qty - <span class="val">1</span>, version = version + <span class="val">1</span>
+<span class="kw">WHERE</span> id = <span class="val">1</span> <span class="kw">AND</span> version = <span class="val">5</span>;   <span class="cm">-- 0 строк = кто-то опередил</span></div>
+
+        <p><strong>Deadlock</strong> — взаимная блокировка: транзакция A держит ресурс 1 и ждёт ресурс 2, а B держит ресурс 2 и ждёт ресурс 1. СУБД обнаруживает это и откатывает одну из транзакций с ошибкой. Лечится не «увеличить таймаут», а <em>одинаковым порядком захвата ресурсов</em> во всём коде и короткими транзакциями.</p>
+
+        <p style="margin-top:14px;"><strong>ACID vs BASE</strong> — реляционные БД против распределённых:</p>
+        <table>
+          <thead><tr><th></th><th>ACID</th><th>BASE</th></tr></thead>
+          <tbody>
+            <tr><td>Гарантия</td><td>согласованность сразу после commit</td><td><em>Basically Available, Soft state, Eventual consistency</em> — согласуется со временем</td></tr>
+            <tr><td>Где</td><td>PostgreSQL, MySQL, Oracle</td><td>Cassandra, DynamoDB, многие NoSQL</td></tr>
+            <tr><td>Цена</td><td>сложнее масштабировать горизонтально</td><td>приложение должно жить с временным рассогласованием</td></tr>
+          </tbody>
+        </table>
+        <p>Связь с <strong>CAP</strong>: при сетевом разделении система выбирает между согласованностью и доступностью. ACID-системы обычно жертвуют доступностью, BASE — согласованностью «прямо сейчас».</p>
+
+        <p style="margin-top:14px;"><strong>Транзакции в микросервисах.</strong> Обычная транзакция работает в пределах одной БД. Как только участвуют два сервиса или БД плюс брокер — ACID не работает, и это отдельный класс вопросов:</p>
         <ul>
-          <li><strong>Read Uncommitted</strong> — видны даже незакоммиченные чужие изменения (грязное чтение)</li>
-          <li><strong>Read Committed</strong> — видны только закоммиченные (дефолт в PostgreSQL)</li>
-          <li><strong>Repeatable Read</strong> — в рамках транзакции данные не меняются при повторном чтении</li>
-          <li><strong>Serializable</strong> — самый строгий, транзакции как будто выполняются по очереди</li>
+          <li><strong>Saga</strong> — вместо одной транзакции цепочка локальных, у каждой есть <em>компенсирующая</em> операция. Не «откатили платёж», а «сделали возврат». Для QA: проверять, что компенсации отрабатывают на каждом шаге обрыва</li>
+          <li><strong>Outbox</strong> — решает «записали в БД, но не отправили в Kafka» (или наоборот). Событие пишется <em>в ту же транзакцию</em> в таблицу <code>outbox</code>, а отдельный процесс дочитывает её и публикует. Атомарность возвращается за счёт того, что запись и событие — одна транзакция в одной БД</li>
+          <li><strong>2PC</strong> (двухфазный коммит) — координатор спрашивает всех «готовы?», потом «коммитим». Даёт настоящую атомарность, но блокирует участников и падает вместе с координатором — в микросервисах почти не используют, знать как термин</li>
         </ul>
-        <p><strong>Deadlock</strong> — взаимная блокировка: транзакция A держит ресурс 1 и ждёт ресурс 2, а B держит ресурс 2 и ждёт ресурс 1. СУБД обнаруживает это и откатывает одну из транзакций.</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA редко настраивает уровни изоляции, но понимать их нужно для тестирования <strong>конкурентности</strong>: два одновременных списания с одного счёта, два refund'а, повторный webhook. Именно изоляция и транзакции защищают от «charged twice» и гонок. На собесе в финтехе про это спрашивают часто.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Два пользователя одновременно покупают последний товар на складе. Что должно произойти?» — Только один должен успешно купить. Это решается транзакцией + блокировкой строки (<code>SELECT ... FOR UPDATE</code>) или проверкой остатка внутри транзакции. Задача QA — проверить, что не возникает «продали 2 товара при остатке 1».</div>
+        <div class="hl green"><span class="hl-label">Мост к разделу Backend и API</span>Outbox — прямой ответ на вопрос «как гарантировать, что событие в Kafka и запись в БД не разъедутся». А идемпотентный консьюмер на той стороне — то, что делает повторную доставку безопасной. См. раздел про брокеры сообщений.</div>
+
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA редко настраивает уровни изоляции, но понимать их нужно для тестирования <strong>конкурентности</strong>: два одновременных списания с одного счёта, два refund'а, повторный webhook, двойной клик по «Оплатить». Именно изоляция и транзакции защищают от «charged twice». Практический приём для теста: запустить две операции параллельно (потоки или два клиента) и проверить итоговое состояние в БД, а не только коды ответов.</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Два пользователя одновременно покупают последний товар на складе. Что должно произойти?» — Только один должен купить успешно. Решается транзакцией с блокировкой строки (<code>SELECT ... FOR UPDATE</code>) либо оптимистично — <code>UPDATE ... WHERE qty > 0</code> с проверкой числа обновлённых строк. Слабый вариант — «сначала <code>SELECT</code>, потом <code>UPDATE</code>» без блокировки: между ними влезет второй, и остаток уйдёт в минус. Задача QA — воспроизвести гонку и убедиться, что не «продали 2 при остатке 1».</div>
+
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Транзакция откатилась — что стало с автоинкрементным id?» — Он <strong>не возвращается</strong>. Последовательности живут вне транзакции, иначе они бы блокировали друг друга. Поэтому в id появляются дыры, и это нормально. Тест, который ожидает строго последовательные id, — плохой тест.</div>
       </div>
 
-      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">② Индексы</strong></p>
+    </div>
+  </section>
+
+  <section class="section" id="rare">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Реже на собесе: индексы, NoSQL, теория</span>
+      <span class="section-badge">rare</span>
+    </div>
+    <div class="section-body">
+
+      <div class="hl modern" style="margin-top:0;"><span class="hl-label">Зачем это здесь</span>Темы, которые на собесах QA всплывают реже: устройство индексов, нормализация, NoSQL/Redis и академическая терминология. Держим коротко, чтобы было что ответить, если спросят. Транзакции переехали в отдельный раздел 07 — их спрашивают часто, особенно там, где есть деньги.</div>
+
+      <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">① Индексы</strong></p>
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
@@ -1066,7 +1141,7 @@ row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>
       </div>
 
       <!-- Нормализация -->
-      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">③ Нормализация</strong></p>
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">② Нормализация</strong></p>
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
@@ -1094,7 +1169,7 @@ row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>
       </div>
 
       <!-- NoSQL и Redis -->
-      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">④ NoSQL и Redis</strong></p>
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">③ NoSQL и Redis</strong></p>
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
@@ -1144,7 +1219,7 @@ row = db.query(<span class="st">"SELECT status FROM orders WHERE id = %s"</span>
       </div>
 
       <!-- Терминология -->
-      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">⑤ Академическая терминология</strong></p>
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">④ Академическая терминология</strong></p>
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
