@@ -1344,12 +1344,46 @@ HTTP/1.1 101 Switching Protocols
 
       <p style="margin-top:14px;"><strong>Retention — сколько сообщения живут.</strong> Kafka удаляет не «после прочтения», а по политике: <strong>delete</strong> — по времени (<code>retention.ms</code>, часто 7 дней) или размеру; <strong>compact</strong> (log compaction) — хранит <em>последнее</em> значение для каждого ключа, старые версии того же ключа чистятся. Compaction нужен, когда топик — это «текущее состояние» (профиль пользователя по <code>user_id</code>), а не история событий. Для QA практический вывод: <em>тест, который рассчитывает перечитать сообщение через неделю, может его не найти</em>.</p>
 
-      <p><strong>Гарантии доставки</strong> — важно для тестировщика:</p>
+      <p><strong>Гарантии доставки</strong> — три режима, общие для всех брокеров:</p>
       <ul>
-        <li><strong>At most once</strong> — максимум один раз (может потеряться). Быстро, но ненадёжно</li>
-        <li><strong>At least once</strong> — минимум один раз (могут быть дубли). Самый частый режим</li>
-        <li><strong>Exactly once</strong> — ровно один раз. Идеал, но сложно и дорого. В Kafka собирается из двух вещей: <em>идемпотентный producer</em> (<code>enable.idempotence=true</code> — брокер отбрасывает дубли при ретраях) и <em>транзакции</em> (запись в топик и коммит оффсета одной атомарной операцией). Работает только внутри Kafka: как только консьюмер пишет во внешнюю БД, гарантия снова становится at-least-once, и спасает только идемпотентность на своей стороне</li>
+        <li><strong>At most once</strong> — максимум один раз, сообщение может потеряться. Быстро, но ненадёжно</li>
+        <li><strong>At least once</strong> — минимум один раз, возможны дубли. Самый частый режим в реальных системах</li>
+        <li><strong>Exactly once</strong> — ровно один раз. Идеал, дорогой и с оговорками</li>
       </ul>
+
+      <p style="margin-top:14px;"><strong>Чем гарантия задаётся именно в Kafka.</strong> Это <em>не одна настройка</em>, а свойство всей цепочки: гарантия собирается из <strong>настроек producer'а</strong> и <strong>стратегии коммита оффсетов у консьюмера</strong>. Слабое звено определяет итог — можно поставить <code>acks=all</code> и всё равно терять сообщения из-за коммита не в том месте.</p>
+
+      <p><strong>Сторона producer'а — отвечает за «дошло ли до брокера»:</strong></p>
+      <table>
+        <thead><tr><th>Настройка</th><th>Что даёт</th></tr></thead>
+        <tbody>
+          <tr><td><code>acks=0</code></td><td><strong>at-most-once</strong>: отправили и забыли, подтверждения не ждём. Брокер не принял — никто не узнал</td></tr>
+          <tr><td><code>acks=1</code></td><td>ждём только leader. Leader упал до репликации на follower'ов — сообщение потеряно</td></tr>
+          <tr><td><code>acks=all</code> + <code>min.insync.replicas ≥ 2</code></td><td>ждём все синхронные реплики (ISR) — <strong>потери на стороне брокера нет</strong></td></tr>
+          <tr><td><code>retries</code> без идемпотентности</td><td>источник <strong>дублей в самом топике</strong>: брокер записал, но ответ потерялся по сети → producer повторил → сообщение записано дважды</td></tr>
+          <tr><td><code>enable.idempotence=true</code></td><td>producer получает PID и порядковый номер на партицию, брокер <strong>отбрасывает повторы</strong>. Устраняет дубли от ретраев. С Kafka 3.0 включено по умолчанию вместе с <code>acks=all</code></td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:14px;"><strong>Сторона консьюмера — отвечает за «обработано ли». Решает <em>порядок</em>: коммитить оффсет до или после обработки:</strong></p>
+      <table>
+        <thead><tr><th>Когда коммитим</th><th>Гарантия</th><th>Что происходит при падении</th></tr></thead>
+        <tbody>
+          <tr><td><strong>до</strong> обработки</td><td><strong>at-most-once</strong></td><td>оффсет уже сдвинут, а обработка не завершилась → сообщение <em>потеряно</em>, повторно его никто не прочитает</td></tr>
+          <tr><td><strong>после</strong> обработки</td><td><strong>at-least-once</strong></td><td>обработали, но не успели закоммитить → после перезапуска прочитаем снова → <em>дубль</em></td></tr>
+          <tr><td>auto-commit по таймеру</td><td>как повезёт</td><td><code>enable.auto.commit=true</code> коммитит раз в 5 секунд <em>независимо</em> от обработки — можно получить и потерю, и дубль. Поэтому там, где важны деньги, auto-commit выключают</td></tr>
+        </tbody>
+      </table>
+      <div class="hl green"><span class="hl-label">Короткая формула для собеса</span><strong>At-most-once</strong> = <code>acks=0</code> и/или коммит оффсета до обработки. <strong>At-least-once</strong> = <code>acks=all</code> + коммит после обработки — <em>дефолт здорового человека</em>, дубли лечатся идемпотентным консьюмером. <strong>Exactly-once</strong> = идемпотентный producer + транзакции.</div>
+
+      <p style="margin-top:14px;"><strong>Exactly-once в Kafka (EOS)</strong> — работает, но у́же, чем кажется. Собирается из трёх частей:</p>
+      <ul>
+        <li><strong>Идемпотентный producer</strong> — убирает дубли от ретраев внутри одной сессии и партиции</li>
+        <li><strong>Транзакции</strong> (<code>transactional.id</code>) — запись в выходной топик <em>и</em> коммит оффсетов входного идут <strong>одной атомарной операцией</strong>. Или всё, или ничего</li>
+        <li><strong><code>isolation.level=read_committed</code></strong> у консьюмера — иначе он увидит сообщения незавершённых и отменённых транзакций, и вся конструкция теряет смысл. Про эту настройку забывают чаще всего</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Главное ограничение EOS</span>Exactly-once работает только для схемы <strong>Kafka → обработка → Kafka</strong> (read-process-write), потому что транзакция охватывает только то, что внутри Kafka. Как только побочный эффект уходит наружу — запись в БД, HTTP-вызов, отправка письма — транзакция это не покрывает, и гарантия <strong>снова становится at-least-once</strong>. Спасает только идемпотентность на своей стороне: уникальный ключ в БД, <code>UPSERT</code>, проверка «уже обработали такой <code>event_id</code>». Либо <em>outbox</em>-паттерн, если нужна атомарность БД и события (см. раздел «Базы данных»).</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У вас exactly-once?» — Сильный ответ: «Внутри Kafka — да, транзакциями, если стоит <code>read_committed</code>. Но наш консьюмер пишет в Postgres, а это вне транзакции Kafka, поэтому на практике у нас <strong>at-least-once + идемпотентная обработка</strong> по <code>event_id</code>. Exactly-once end-to-end в системе с внешними побочными эффектами — миф, честнее строить дедупликацию».</div>
 
       <p><strong>Что тестировать в системах с брокерами:</strong></p>
       <ul>
