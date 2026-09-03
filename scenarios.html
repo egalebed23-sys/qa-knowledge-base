@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<title>QA Senior · Сценарные кейсы</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface-2: #12151d;
+    --border: #252830;
+    --accent: #005BFF;
+    --accent2: #00C9A7;
+    --accent3: #FF6B35;
+    --accent-purple: #a07af5;
+    --text: #e8eaf0;
+    --muted: #7a7f92;
+    --muted-2: #5a5f72;
+    --tag-bg: #1e2230;
+    --sidebar-w: 260px;
+    --content-max: 1280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 40px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .sidebar-brand .logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-group { padding: 0 12px; margin-bottom: 18px; }
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    letter-spacing: 1px;
+    padding: 0 12px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--tag-bg); color: var(--text); }
+  .nav-item.active { background: rgba(0, 91, 255, 0.12); color: #fff; }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav-item.disabled:hover { background: transparent; color: var(--muted); }
+
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    min-width: 18px;
+  }
+  .nav-soon {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Внутреннее оглавление текущего раздела */
+  .toc-inner {
+    padding: 0 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toc-inner a {
+    display: block;
+    padding: 5px 12px 5px 28px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    margin-left: 8px;
+  }
+  .toc-inner a:hover { color: var(--text); border-left-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 40px 80px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+
+  .topbar {
+    max-width: var(--content-max);
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .crumbs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .crumbs span { color: var(--text); }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: var(--content-max);
+    margin: 0 auto 36px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: #fff;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: var(--content-max);
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a2a4a;
+    color: #6aa3f5;
+  }
+
+  .section-body { padding: 22px 26px; }
+
+  /* ─── ATOMS ─── */
+  ul { list-style: none; padding: 0; }
+  ul li {
+    padding: 4px 0 4px 16px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  ul li strong { color: #fff; font-weight: 700; }
+
+  p { font-size: 14px; margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1e2230;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #a0c4ff;
+  }
+
+  /* ─── HIGHLIGHTS ─── */
+  .hl {
+    background: #0d1f35;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 10px 0;
+    color: #b0c8f0;
+  }
+  .hl.green { background: #0d2a1f; border-color: var(--accent2); color: #90d8c0; }
+  .hl.orange { background: #2a1a0d; border-color: var(--accent3); color: #f0b090; }
+  .hl.red { background: #2a0d0d; border-color: #f05a5a; color: #f0a0a0; }
+  .hl.purple { background: #1a0d2a; border-color: var(--accent-purple); color: #c8a8f0; }
+  .hl.modern { background: #14202e; border-color: #5d8ab5; color: #a8c5e8; }
+  .hl.llm { background: #1f0d2e; border-color: #d97aff; color: #e8b8ff; }
+
+  .hl-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+
+  /* ─── TABLES ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  td code { font-size: 11.5px; }
+
+  /* ─── PYRAMID VIS ─── */
+  .pyramid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 12px 0;
+  }
+  .pyr-row {
+    display: grid;
+    grid-template-columns: 400px 200px;
+    align-items: center;
+    gap: 18px;
+  }
+  .pyr-bar {
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    justify-self: center;
+  }
+  .pyr-bar.e2e { width: 100px; background: linear-gradient(90deg, #f05a5a, #ff8c5a); }
+  .pyr-bar.int { width: 240px; background: linear-gradient(90deg, #e0c05a, #f5c842); color: #1a1a0d; }
+  .pyr-bar.unit { width: 400px; background: linear-gradient(90deg, #5de0b0, #6aa3f5); color: #0d2a1f; }
+  .pyr-info { color: var(--muted); font-size: 12px; }
+
+  /* ─── BUG FLOW ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+  }
+  .flow-arr { color: var(--muted); font-size: 14px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    body { flex-direction: column; }
+    .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .pyr-row { grid-template-columns: 260px 1fr; gap: 12px; }
+    .pyr-bar.unit { width: 260px; }
+    .pyr-bar.int { width: 180px; }
+    .pyr-bar.e2e { width: 80px; }
+    .pyr-info { font-size: 11px; }
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">QA Senior · Python</div>
+    <div class="sub">// interview prep base</div>
+  </div>
+
+    <div class="nav-group">
+    <div class="nav-group-title">Разделы</div>
+    <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
+    <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
+    <a class="nav-item" href="api.html"><span class="nav-num">02</span> Backend и API</a>
+    <a class="nav-item" href="db.html"><span class="nav-num">03</span> Базы данных</a>
+    <a class="nav-item" href="python.html"><span class="nav-num">04</span> Python</a>
+    <a class="nav-item" href="pytest.html"><span class="nav-num">05</span> Pytest</a>
+    <a class="nav-item" href="ui.html"><span class="nav-num">06</span> UI и E2E</a>
+    <a class="nav-item" href="cicd.html"><span class="nav-num">07</span> CI/CD</a>
+    <a class="nav-item" href="git.html"><span class="nav-num">08</span> Git</a>
+    <a class="nav-item" href="bash.html"><span class="nav-num">09</span> Bash · Docker · K8s</a>
+    <a class="nav-item" href="load.html"><span class="nav-num">10</span> Нагрузка</a>
+    <a class="nav-item" href="softskills.html"><span class="nav-num">11</span> Soft skills</a>
+    <a class="nav-item" href="architecture.html"><span class="nav-num">12</span> Архитектура</a>
+    <a class="nav-item" href="security.html"><span class="nav-num">13</span> Безопасность</a>
+    <a class="nav-item" href="practice.html"><span class="nav-num">14</span> Практика Python</a>
+    <a class="nav-item active" href="#"><span class="nav-num">15</span> Сценарные кейсы</a>
+  </div>
+  <div class="toc-inner">
+    <div class="nav-group-title">На этой странице</div>
+    <a href="#framework">01 · Каркас разбора сценария</a>
+    <a href="#localize">02 · Локализация: Web → API → SQL/логи</a>
+    <a href="#forensics">03 · SQL и логи: что спросить у данных</a>
+    <a href="#timeout">04 · Кейс: payment timeout</a>
+    <a href="#webhook">05 · Кейс: дубль webhook</a>
+    <a href="#release">06 · Кейс: решение о релизе</a>
+    <a href="#strategy">07 · Практика: risk-based стратегия</a>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="topbar">
+    <div class="crumbs">QA Senior / <span>Сценарные кейсы</span></div>
+  </div>
+
+  <div class="header">
+    <h1>Сценарные кейсы</h1>
+    <p>// 7 подтем · разбор инцидентов по слоям и risk-based стратегия</p>
+  </div>
+
+  <div class="hl modern" style="max-width:var(--content-max);margin:0 auto 28px;"><span class="hl-label">Зачем этот раздел</span>Остальные разделы устроены <em>по темам</em>: API, БД, теория. Этот — <em>по сценариям</em>, потому что на техническом интервью дают не тему, а ситуацию: «платёж завис», «webhook пришёл дважды», «релиз завтра». Проверяют не знание терминов, а умение <strong>пройти по слоям и обосновать решение</strong>. Механику (идемпотентность, retry, timeout, reconciliation) не дублируем — она в разделах <em>Backend и API</em> и <em>Архитектура</em>; здесь — как это собрать в ответ.</div>
+
+  <!-- ─────── 01. КАРКАС ─────── -->
+  <section class="section" id="framework">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Каркас разбора сценария</span>
+      <span class="section-badge">framework</span>
+    </div>
+    <div class="section-body">
+
+      <p>Любой сценарный вопрос («пользователь жалуется, что…», «в проде видим…») разбирается одной и той же схемой. Она же спасает, когда домен незнаком — структура важнее эрудиции.</p>
+      <div class="flow">
+        <span class="flow-step">Уточнить</span><span class="flow-arr">→</span>
+        <span class="flow-step">Локализовать по слоям</span><span class="flow-arr">→</span>
+        <span class="flow-step">Гипотезы</span><span class="flow-arr">→</span>
+        <span class="flow-step">Проверить данными</span><span class="flow-arr">→</span>
+        <span class="flow-step">Оценить масштаб</span><span class="flow-arr">→</span>
+        <span class="flow-step">Что чиним и что предотвращает</span>
+      </div>
+
+      <table>
+        <thead><tr><th>Шаг</th><th>Что говоришь вслух</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1. Уточнить</strong></td><td>Воспроизводится всегда или иногда? У одного юзера или у всех? С какого момента? Что менялось — релиз, миграция, конфиг? Какое окружение и версия клиента?</td></tr>
+          <tr><td><strong>2. Локализовать</strong></td><td>Слой за слоем сверху вниз: браузер → сеть → API → сервис → БД/очередь → внешний провайдер. Цель — не починить, а <em>сузить</em> зону</td></tr>
+          <tr><td><strong>3. Гипотезы</strong></td><td>Две-три конкурирующие версии, а не одна. И для каждой — чем её опровергнуть</td></tr>
+          <tr><td><strong>4. Проверить</strong></td><td>Данными, не рассуждением: запрос в БД, поиск по логам с request-id, ответ API в DevTools</td></tr>
+          <tr><td><strong>5. Масштаб</strong></td><td>Сколько юзеров затронуто, есть ли потеря денег/данных, есть ли workaround. Это переводит баг в приоритет</td></tr>
+          <tr><td><strong>6. Фикс и профилактика</strong></td><td>Что чиним сейчас и какой тест/алерт не даст повториться. Senior всегда добавляет вторую часть</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl green"><span class="hl-label">Главный приём</span>Начинай с <strong>уточняющих вопросов</strong>, даже если кажется, что ответ очевиден. Интервьюер почти всегда недоговаривает намеренно — проверяет, бросишься ли ты чинить не разобравшись. Три-четыре точных вопроса в начале дают больше, чем правильная догадка.</div>
+      <div class="hl orange"><span class="hl-label">Антипаттерн</span>Сразу назвать причину («это точно кэш») и дальше её защищать. Сильный ответ звучит как <em>«у меня две версии, вот чем я их различу»</em> — и потом сужение по данным. Готовность отбросить свою гипотезу читается как опыт.</div>
+    </div>
+  </section>
+
+  <!-- ─────── 02. ЛОКАЛИЗАЦИЯ ─────── -->
+  <section class="section" id="localize">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Локализация: Web → API → SQL/логи</span>
+      <span class="section-badge">debugging</span>
+    </div>
+    <div class="section-body">
+
+      <p>Формат «Web + API + SQL/логи» проверяет одно умение: по симптому в интерфейсе дойти до данных. Ключевая мысль — <strong>UI почти никогда не источник правды</strong>, он лишь отображает то, что отдал бэкенд.</p>
+
+      <table>
+        <thead><tr><th>Слой</th><th>Чем смотрю</th><th>Что отсекаю</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Браузер</strong></td><td>DevTools → Console (JS-ошибки), Network (что реально ушло и пришло)</td><td>верстка и фронт-логика vs данные с сервера</td></tr>
+          <tr><td><strong>Запрос</strong></td><td>Network: URL, метод, заголовки, тело, статус, время ответа</td><td>клиент отправил неверные данные vs сервер ответил неверно</td></tr>
+          <tr><td><strong>API</strong></td><td>тот же запрос через <code>curl</code>/Postman в обход UI</td><td>если через curl всё верно — проблема во фронте</td></tr>
+          <tr><td><strong>Сервис</strong></td><td>логи по <code>X-Request-ID</code> из ответа, трейс</td><td>на каком сервисе цепочки сломалось</td></tr>
+          <tr><td><strong>Данные</strong></td><td>SQL в БД: что реально лежит в строке</td><td>«не показали» vs «не сохранили»</td></tr>
+          <tr><td><strong>Внешние</strong></td><td>логи вызовов провайдера, его статус-страница</td><td>наша ошибка vs чужая недоступность</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl"><span class="hl-label">Вопрос-разделитель, который стоит задать первым</span><strong>«Данные неверные или неверно показаны?»</strong> Один <code>SELECT</code> по строке делит задачу пополам: если в БД правильно — баг выше (API-сериализация, фронт, кэш); если в БД уже неправильно — баг ниже (валидация, бизнес-логика, гонка, миграция). Этот вопрос сам по себе читается как опыт.</div>
+
+      <p style="margin-top:14px;"><strong>Сквозной идентификатор — то, что связывает слои.</strong> Без него разбор превращается в чтение логов «примерно за то же время». Как это работает: клиент или входной шлюз генерирует <code>X-Request-ID</code>, он идёт в каждый внутренний вызов и попадает в каждую строку лога. Дальше:</p>
+      <ul>
+        <li>взял <code>X-Request-ID</code> из заголовков <em>ответа</em> (DevTools → Network → Headers)</li>
+        <li>нашёл по нему все логи цепочки в Kibana / OpenSearch / Grafana Loki</li>
+        <li>увидел, на каком сервисе появилась ошибка и с каким сообщением</li>
+        <li>если есть трейсинг — тот же id в Jaeger покажет тайминги по шагам</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Частая находка на собесе</span>Если в проекте нет сквозного request-id — это само по себе <strong>дефект наблюдаемости</strong>, и его стоит назвать. «Первое, что я бы починил — проброс request-id через все сервисы, иначе каждый инцидент разбирается вслепую» — сильная реплика.</div>
+
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Пользователь говорит: заказ оформил, а в списке заказов его нет». — Не гадать, а делить: 1) уточняю — один юзер или все, с какого времени; 2) DevTools: запрос на создание вернул 2xx? какой <code>order_id</code> в ответе? 3) <code>SELECT * FROM orders WHERE id = ...</code> — заказ в БД <em>есть</em>? 4) если есть — смотрю запрос списка: фильтр по статусу, по <code>user_id</code>, пагинация, кэш; 5) если нет — смотрю логи создания по request-id: упала транзакция, откатилась, не прошла валидация. Две ветки — «не сохранили» и «не показали» — и они чинятся в разных местах.</div>
+    </div>
+  </section>
+
+  <!-- ─────── 03. SQL И ЛОГИ ─────── -->
+  <section class="section" id="forensics">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">SQL и логи: что спросить у данных</span>
+      <span class="section-badge">sql forensics</span>
+    </div>
+    <div class="section-body">
+
+      <p>На интервью просят не абстрактный SQL, а <em>расследование</em>: «как проверишь, что дублей нет», «найди зависшие платежи». Набор запросов ниже закрывает большинство таких просьб.</p>
+
+      <p><strong>Найти дубликаты</strong> — базовый приём через <code>GROUP BY … HAVING COUNT(*) &gt; 1</code>:</p>
+      <div class="code-block"><span class="cm">-- дубли платежей по внешнему id провайдера</span>
+<span class="kw">SELECT</span> external_payment_id, <span class="fn">COUNT</span>(*), <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> payments
+<span class="kw">GROUP BY</span> external_payment_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="val">1</span>;
+
+<span class="cm">-- два успешных списания по одному заказу за короткий интервал</span>
+<span class="kw">SELECT</span> order_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> charges
+<span class="kw">FROM</span> payments
+<span class="kw">WHERE</span> status = <span class="st">'captured'</span>
+<span class="kw">GROUP BY</span> order_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="val">1</span>;</div>
+
+      <p><strong>Найти «зависшие» сущности</strong> — те, что застряли в промежуточном статусе дольше нормы. Главный запрос при разборе таймаутов:</p>
+      <div class="code-block"><span class="kw">SELECT</span> id, order_id, amount, status, created_at
+<span class="kw">FROM</span> payments
+<span class="kw">WHERE</span> status = <span class="st">'pending'</span>
+  <span class="kw">AND</span> created_at &lt; <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="st">'15 minutes'</span>
+<span class="kw">ORDER BY</span> created_at;</div>
+
+      <p><strong>Найти рассогласование между таблицами</strong> — заказ оплачен, а платежа нет (или наоборот). Это ровно то, что ищут при разборе «деньги списались, а заказ не создался»:</p>
+      <div class="code-block"><span class="cm">-- заказы в статусе paid без успешного платежа</span>
+<span class="kw">SELECT</span> o.id, o.status, o.created_at
+<span class="kw">FROM</span> orders o
+<span class="kw">LEFT JOIN</span> payments p
+  <span class="kw">ON</span> p.order_id = o.id <span class="kw">AND</span> p.status = <span class="st">'captured'</span>
+<span class="kw">WHERE</span> o.status = <span class="st">'paid'</span>
+  <span class="kw">AND</span> p.id <span class="kw">IS NULL</span>;</div>
+      <div class="hl green"><span class="hl-label">Приём, который стоит назвать</span><code>LEFT JOIN … WHERE правая.id IS NULL</code> — «найти то, чему нет пары». Этим одним шаблоном ищут: заказы без платежей, платежи без webhook'ов, юзеров без профиля, события в Kafka без записи в БД. На SQL-секции его спрашивают почти всегда, иногда под именем «анти-джойн».</div>
+
+      <p style="margin-top:14px;"><strong>Что искать в логах:</strong></p>
+      <ul>
+        <li><strong>По request-id</strong> — вся цепочка одного запроса через сервисы</li>
+        <li><strong>По сущности</strong> — <code>order_id</code>, <code>payment_id</code>: все события её жизненного цикла по времени</li>
+        <li><strong>Всплеск ошибок</strong> — график error rate: началось внезапно (релиз, деплой провайдера) или росло плавно (утечка, заполнение диска)</li>
+        <li><strong>Корреляция с деплоем</strong> — совпадает ли начало проблем с временем выката. Первый вопрос при любом инциденте</li>
+        <li><strong>Retry-штормы</strong> — один и тот же вызов повторяется десятки раз: признак, что retry без backoff добивает лежащий сервис</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Про чтение логов вслух</span>Не «посмотрю логи», а <em>что именно ищу</em>: «беру request-id из ответа, ищу в OpenSearch по нему, смотрю первую по времени строку с уровнем ERROR — она обычно и есть причина, остальное следствие». Конкретика отличает опыт от общих слов.</div>
+    </div>
+  </section>
+
+  <!-- ─────── 04. PAYMENT TIMEOUT ─────── -->
+  <section class="section" id="timeout">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Кейс: payment timeout</span>
+      <span class="section-badge">payments</span>
+    </div>
+    <div class="section-body">
+
+      <p><em>«Пользователь нажал «Оплатить», крутился спиннер, потом ошибка. Деньги списались. Что происходит и что проверяешь?»</em></p>
+
+      <div class="hl"><span class="hl-label">Суть проблемы в одном предложении</span>Таймаут — это <strong>не «операция не прошла», а «мы не знаем, прошла ли она»</strong>. Ответ провайдера потерялся, но сам платёж на его стороне мог выполниться. Отсюда три возможных состояния вместо двух: <em>успех</em>, <em>отказ</em> и <strong>неизвестность</strong>. Вся сложность — в третьем.</div>
+
+      <p><strong>Где именно мог оборваться вызов</strong> — от этого зависит, списаны ли деньги:</p>
+      <table>
+        <thead><tr><th>Точка обрыва</th><th>Деньги</th><th>Что видит юзер</th></tr></thead>
+        <tbody>
+          <tr><td>Запрос не дошёл до провайдера</td><td>не списаны</td><td>ошибка — и это правда</td></tr>
+          <tr><td>Дошёл, провайдер выполнил, ответ потерялся</td><td><strong>списаны</strong></td><td>ошибка — а деньги ушли</td></tr>
+          <tr><td>Провайдер принял в обработку, ещё не завершил</td><td>решится позже</td><td>ошибка — а статус изменится через минуту</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Как система должна себя вести</strong> (и что проверяет QA):</p>
+      <ul>
+        <li><strong>Idempotency-Key на запросе к провайдеру</strong> — повтор после таймаута не создаёт второй платёж, а возвращает статус первого. Без этого retry = двойное списание</li>
+        <li><strong>Локальный статус до вызова.</strong> Запись <code>pending</code> в свою БД создаётся <em>до</em> обращения к провайдеру. Иначе при обрыве не останется даже следа, что попытка была</li>
+        <li><strong>Дозапрос статуса (reconciliation).</strong> Фоновая задача добирает «зависшие» <code>pending</code> и спрашивает провайдера: «что с платежом X?». Именно она закрывает состояние «неизвестность»</li>
+        <li><strong>UI не врёт.</strong> При таймауте честное «платёж обрабатывается, статус обновится» вместо «ошибка, попробуйте снова» — второе провоцирует юзера платить дважды</li>
+        <li><strong>Таймаут короче, чем терпение пользователя</strong>, и с запасом меньше таймаута вышестоящего вызова — иначе клиент отвалится раньше сервера</li>
+      </ul>
+
+      <p><strong>Что конкретно проверяю:</strong></p>
+      <div class="code-block"><span class="cm">-- 1. висящие платежи</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> payments
+<span class="kw">WHERE</span> status = <span class="st">'pending'</span> <span class="kw">AND</span> created_at &lt; <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="st">'15 minutes'</span>;
+
+<span class="cm">-- 2. не создалось ли два платежа на один заказ</span>
+<span class="kw">SELECT</span> order_id, <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> payments
+<span class="kw">GROUP BY</span> order_id <span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="val">1</span>;</div>
+      <p>Плюс логи вызова провайдера по <code>order_id</code>: был ли ответ вообще, какой был таймаут, сколько было ретраев. И сверка с личным кабинетом провайдера — там платёж есть?</p>
+
+      <div class="hl green"><span class="hl-label">Как воспроизвести в тесте</span>Не ждать реального таймаута, а <strong>смоделировать</strong>: замокать провайдера через WireMock с задержкой больше таймаута; оборвать соединение прокси (Charles/mitmproxy) в момент ответа; в Testcontainers — приостановить контейнер провайдера. Проверяем: создалась ли запись <code>pending</code>, ушёл ли повтор с тем же Idempotency-Key, подобрала ли реконсиляция статус, что показал UI.</div>
+
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«При таймауте делать retry?» — Только если запрос идемпотентный, то есть уходит с <code>Idempotency-Key</code>. Иначе retry на таймауте — прямой путь к двойному списанию, ведь первый запрос мог выполниться. Безопасная схема: не «повторить платёж», а <em>«спросить статус»</em> — сначала GET по своему идентификатору операции, и только если провайдер отвечает «такой не знаю» — повторять создание.</div>
+    </div>
+  </section>
+
+  <!-- ─────── 05. DUPLICATE WEBHOOK ─────── -->
+  <section class="section" id="webhook">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Кейс: дубль webhook</span>
+      <span class="section-badge">async</span>
+    </div>
+    <div class="section-body">
+
+      <p><em>«Провайдер прислал webhook о платеже дважды. Что произойдёт и как защититься?»</em></p>
+
+      <div class="hl"><span class="hl-label">Почему дубли — норма, а не аномалия</span>Платёжные провайдеры работают по <strong>at-least-once</strong>: если мы не ответили <code>2xx</code> за отведённое время, webhook присылается снова. Наш <code>200</code> мог потеряться по сети, обработка могла занять слишком долго — и приходит повтор. Поэтому правильная постановка не «как убрать дубли», а <strong>«как сделать обработку безопасной к повторам»</strong>. Тот же принцип, что у консьюмера Kafka.</div>
+
+      <p><strong>Четыре вещи, которые надо проверить</strong> — их часто путают между собой:</p>
+      <table>
+        <thead><tr><th>Проблема</th><th>Что должно быть</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Дубль</strong> — тот же webhook дважды</td><td>дедупликация по <code>event_id</code> провайдера: таблица обработанных событий с уникальным индексом, повтор → <code>200</code> без побочных эффектов</td></tr>
+          <tr><td><strong>Неверный порядок</strong> — <code>refunded</code> пришёл раньше <code>captured</code></td><td>переходы статусов проверяются по стейт-машине, «назад» не откатываем; ориентир — timestamp события, а не порядок получения</td></tr>
+          <tr><td><strong>Опоздавший</strong> — webhook о старом состоянии пришёл после нового</td><td>сравнение версии/времени события с текущим состоянием, устаревшее игнорируется</td></tr>
+          <tr><td><strong>Подделка</strong> — webhook прислали не мы и не провайдер</td><td>проверка подписи (HMAC по телу и секрету), иначе кто угодно «подтвердит» себе оплату</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Как выглядит защита в коде:</strong></p>
+      <div class="code-block"><span class="cm">-- уникальный индекс делает дедупликацию задачей БД, а не приложения</span>
+<span class="kw">CREATE TABLE</span> processed_events (
+  event_id     <span class="kw">TEXT PRIMARY KEY</span>,
+  processed_at <span class="kw">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+
+<span class="cm">-- вставка и обработка — в одной транзакции;</span>
+<span class="cm">-- повтор упадёт на PK и обработка не выполнится второй раз</span>
+<span class="kw">INSERT INTO</span> processed_events (event_id) <span class="kw">VALUES</span> (<span class="st">'evt_123'</span>)
+<span class="kw">ON CONFLICT</span> <span class="kw">DO NOTHING</span>;</div>
+      <p>Ключевая деталь: <strong>запись события и сам эффект должны быть в одной транзакции</strong>. Иначе между «отметили обработанным» и «начислили» может упасть процесс — и повтор уже не сработает, а эффекта не будет.</p>
+
+      <div class="hl orange"><span class="hl-label">Что ломается чаще всего</span>· <strong>Дедупликация по своему id вместо <code>event_id</code> провайдера</strong> — два разных события по одному платежу (<code>authorized</code> и <code>captured</code>) схлопываются в одно, и второе теряется.<br>· <strong>Долгая обработка внутри webhook-хендлера</strong> — провайдер не дожидается <code>200</code>, шлёт повтор, и дубли генерируем мы сами. Правильно: быстро принять, положить в очередь, ответить <code>200</code>, обработать асинхронно.<br>· <strong>Ответ <code>500</code> на неизвестное событие</strong> — провайдер будет ретраить его вечно. Неизвестный тип лучше залогировать и вернуть <code>200</code>.</div>
+
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как протестируешь обработку дублей, если провайдер шлёт webhook сам?» — Не ждать провайдера, а слать webhook самому: <code>curl</code> с тем же телом и валидной подписью дважды подряд, затем с задержкой, затем параллельно в два потока (это ловит гонку, когда дедупликация сделана через <code>SELECT</code>-проверку вместо уникального индекса). Проверяю: баланс/статус изменился ровно один раз, во второй раз вернулся <code>200</code>, в <code>processed_events</code> одна строка, в логах нет повторного побочного эффекта.</div>
+    </div>
+  </section>
+
+  <!-- ─────── 06. RELEASE RISK ─────── -->
+  <section class="section" id="release">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Кейс: решение о релизе</span>
+      <span class="section-badge">release risk</span>
+    </div>
+    <div class="section-body">
+
+      <p><em>«Релиз завтра, часть тестов не прошла / нашли баг / не успели регресс. Катим?»</em> Проверяют не смелость, а умение <strong>перевести технический риск в бизнес-термины и не решать единолично</strong>.</p>
+
+      <p><strong>Что оцениваю, прежде чем говорить да или нет:</strong></p>
+      <table>
+        <thead><tr><th>Вопрос</th><th>Зачем</th></tr></thead>
+        <tbody>
+          <tr><td>Кого затрагивает и сколько таких?</td><td>1% в редком сценарии и 100% на логине — разные решения</td></tr>
+          <tr><td>Есть ли потеря денег или данных?</td><td>необратимое — почти всегда стоп</td></tr>
+          <tr><td>Есть ли обходной путь?</td><td>наличие workaround снижает срочность на порядок</td></tr>
+          <tr><td>Насколько быстро откатимся?</td><td>откат за 5 минут делает риск приемлемым, откат за сутки — нет</td></tr>
+          <tr><td>Можно ли спрятать за флагом?</td><td>тогда релиз едет, а рискованная фича выключена</td></tr>
+          <tr><td>Что дороже — задержка или дефект?</td><td>у релиза бывает внешний дедлайн (маркетинг, договор)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl green"><span class="hl-label">Формулировка, которая работает</span>Не «я против релиза», а <strong>варианты с ценой каждого</strong>: «1) едем как есть — риск, что N юзеров упрутся в X, откат ~15 минут; 2) едем с выключенным флагом — фича не доедет, риск нулевой; 3) двигаем на день — успеваем регресс, но ломается анонс. Моя рекомендация — второй, потому что…». Решение принимает продакт, твоя работа — дать честную картину и рекомендацию.</div>
+
+      <p><strong>Отдельный случай: «упала часть автотестов».</strong> Сначала отвечаю на вопрос <em>«это баг продукта или баг теста?»</em> — и это разные разговоры. Порядок: посмотреть, что именно упало (одна зона или разрозненно), есть ли у теста история flaky, воспроизводится ли руками, совпадает ли падение с изменениями в этом релизе. Красный билд без разбора — не аргумент ни за, ни против.</p>
+
+      <div class="hl orange"><span class="hl-label">Два плохих ответа</span><strong>«Пропустим, дедлайн важнее»</strong> — скрыл риск от тех, кто принимает решение. <strong>«Категорически блокирую»</strong> — присвоил себе полномочия бизнеса. Оба читаются как незрелость. Senior выносит решение туда, где есть контекст и полномочия, со своей аргументированной позицией.</div>
+
+      <p><strong>После релиза сценарий не заканчивается</strong> — назови это отдельно: smoke на проде сразу после выката, наблюдение за error rate и latency против baseline в первые полчаса, заранее оговорённые критерии отката («если 5xx выше X% — катимся назад»). Это переводит ответ из «протестировали и отпустили» в «управляем риском до и после».</p>
+    </div>
+  </section>
+
+  <!-- ─────── 07. RISK-BASED СТРАТЕГИЯ ─────── -->
+  <section class="section" id="strategy">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Практика: risk-based стратегия</span>
+      <span class="section-badge">practical</span>
+    </div>
+    <div class="section-body">
+
+      <p>Практическая секция обычно звучит как <em>«вот наш продукт, набросай стратегию тестирования»</em>. Ждут не список видов тестирования, а <strong>приоритизацию: что тестируем в первую очередь и почему именно это</strong>.</p>
+
+      <p><strong>Шаблон ответа — пять шагов:</strong></p>
+      <table>
+        <thead><tr><th>Шаг</th><th>Что делаю</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1. Уточняю контекст</strong></td><td>Кто пользователи и сколько их? Есть ли деньги и персональные данные? Регуляторика? Как часто релизимся? Какая команда и что уже автоматизировано?</td></tr>
+          <tr><td><strong>2. Режу на области</strong></td><td>Разбиваю продукт на домены: auth, платежи, основной бизнес-флоу, интеграции, отчётность</td></tr>
+          <tr><td><strong>3. Оцениваю риск каждой</strong></td><td><em>вероятность сбоя × ущерб</em>. Вероятность: новый код, сложность, частота изменений, история багов. Ущерб: деньги, данные, число затронутых, репутация, штрафы</td></tr>
+          <tr><td><strong>4. Раздаю покрытие по риску</strong></td><td>High — автотесты на всех уровнях + мониторинг; Medium — базовые автотесты; Low — чек-лист и exploratory. <strong>Явно говорю, что не тестируем</strong></td></tr>
+          <tr><td><strong>5. Называю метрики</strong></td><td>Как пойму, что стратегия работает: escape rate, время прогона, доля упавших релизов</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl"><span class="hl-label">Матрица рисков — как проговорить</span>Рисуй словами таблицу «вероятность × ущерб»: <strong>высокий ущерб + высокая вероятность</strong> — сюда идёт основное покрытие и мониторинг; <strong>высокий ущерб + низкая вероятность</strong> (редкая, но дорогая операция вроде массового возврата) — обязательно покрыть, пусть даже вручную по чек-листу; <strong>низкий ущерб + высокая вероятность</strong> — автотесты, если дёшево; <strong>низкий + низкий</strong> — осознанно не тестируем. Последняя клетка — самая важная в ответе: <em>умение назвать, что мы сознательно не покрываем</em>, отличает стратегию от списка пожеланий.</div>
+
+      <p><strong>Пример на типовом кейсе — веб-магазин с оплатой:</strong></p>
+      <table>
+        <thead><tr><th>Область</th><th>Риск</th><th>Покрытие</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Оплата</strong></td><td>критический — прямая потеря денег, необратимо</td><td>unit + contract с провайдером + integration на идемпотентность и webhook'и + E2E happy path + мониторинг error rate и зависших pending + алерты</td></tr>
+          <tr><td><strong>Auth</strong></td><td>высокий — блокирует всё, есть security-риск</td><td>API-тесты на позитив/негатив, проверка прав и IDOR, E2E на логин, тесты сессий</td></tr>
+          <tr><td><strong>Корзина и заказ</strong></td><td>высокий — основной бизнес-флоу</td><td>API + E2E на ключевой путь, конкурентность на остатки товара</td></tr>
+          <tr><td><strong>Каталог и поиск</strong></td><td>средний — есть workaround, деньги не теряются</td><td>API-тесты, базовый E2E, без глубокой матрицы фильтров</td></tr>
+          <tr><td><strong>Личный кабинет, история</strong></td><td>низкий — read-only, обратимо</td><td>smoke + exploratory, автотесты по остаточному принципу</td></tr>
+          <tr><td><strong>Админка</strong></td><td>низкий по охвату, но высокий по правам</td><td>только проверка доступа: обычный юзер не должен туда попасть</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl green"><span class="hl-label">Что добавить в конце, чтобы ответ звучал завершённым</span>Три вещи, о которых забывают: <strong>тестовые данные</strong> (откуда берём, как чистим, как изолируем параллельные прогоны), <strong>окружения</strong> (где живут провайдеры — sandbox или моки) и <strong>прод</strong> (smoke после деплоя, алерты, кто дежурит). Стратегия, которая заканчивается на «прогнали тесты», выглядит неполной.</div>
+
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У вас неделя и продукт, который вы видите впервые. С чего начнёте?» — 1) Полчаса на разговор с продактом и разработчиком: что приносит деньги, что ломалось в прошлом, чего боятся сами. 2) Смотрю прод: где ошибки в мониторинге, о чём пишут в саппорт — это готовая карта рисков, добытая бесплатно. 3) Покрываю revenue-critical путь end-to-end, остальное — чек-лист и exploratory. 4) Ставлю smoke в пайплайн, чтобы не катить разломанное. История багов и жалобы пользователей — лучший источник приоритетов, чем собственные догадки о продукте.</div>
+    </div>
+  </section>
+
+</main>
+
+<button class="scroll-top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  // Scroll to top button
+  const scrollBtn = document.querySelector('.scroll-top');
+  if (scrollBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) scrollBtn.classList.add('visible');
+      else scrollBtn.classList.remove('visible');
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>
