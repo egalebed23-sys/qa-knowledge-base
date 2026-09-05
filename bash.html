@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -231,31 +205,6 @@
     color: #5de0b0;
   }
   .section-body { padding: 22px 26px; }
-
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
 
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
@@ -442,7 +391,6 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -482,7 +430,7 @@
   }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -522,11 +470,6 @@
 <main class="main">
   <div class="topbar">
     <div class="crumbs">QA Senior / <span>Bash · Docker · K8s</span></div>
-    <div class="level-switch" role="tablist">
-      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
-      <button class="level-btn" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
-      <button class="level-btn active" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
-    </div>
   </div>
 
   <div class="header">
@@ -543,23 +486,18 @@
       <span class="section-badge">cli basics</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Почти все серверы и CI-раннеры работают на Linux, а общение с ними — через <strong>shell</strong> (чаще bash). QA заходит в консоль, чтобы посмотреть логи, проверить сервис, запустить тесты. Базовая навигация:</p>
+        <p>Большинство серверов и CI-раннеров работают на Linux, а общение с ними идёт через <strong>shell</strong> (часто Bash). QA заходит в консоль, чтобы посмотреть логи, проверить сервис, запустить тесты или подготовить окружение.</p>
+        <div class="hl green"><span class="hl-label">Что закрыть перед скринингом</span>Bash: файлы и права, пайпы, редиректы, процессы, сеть, кавычки, переменные, exit codes и cleanup. Docker: image/container, Dockerfile, Compose, порты, volumes, сети, healthcheck и дебаг. Kubernetes: Pod, Deployment, Service, probes, namespace/context, requests/limits, rollout и разбор проблемных состояний.</div>
+        <p><strong>Базовая навигация:</strong></p>
         <div class="code-block">pwd              <span class="cm"># где я сейчас (путь)</span>
 ls -la           <span class="cm"># список файлов, включая скрытые и права</span>
 cd /var/log      <span class="cm"># перейти в директорию</span>
 cat app.log      <span class="cm"># вывести содержимое файла</span>
-cp / mv / rm     <span class="cm"># копировать / переместить / удалить</span>
+cp source target <span class="cm"># скопировать</span>
+mv old new       <span class="cm"># переместить или переименовать</span>
+rm file          <span class="cm"># удалить файл</span>
 mkdir tests      <span class="cm"># создать директорию</span></div>
         <div class="hl green"><span class="hl-label">Аналогия</span>Shell — это REPL операционной системы: вводишь команду, получаешь результат, как в интерактивном Python. Файловая система — дерево: <code>/</code> корень, ветки — директории, листья — файлы. <code>cd</code> — переход по дереву, <code>ls</code> — посмотреть, что в текущем узле.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <p><strong>Пути:</strong> <code>/</code> — корень (абсолютный путь), <code>~</code> — домашняя директория, <code>.</code> — текущая, <code>..</code> — родительская.</p>
         <p><strong>Права доступа</strong> (<code>ls -l</code> показывает <code>rwxr-xr-x</code>):</p>
         <ul>
@@ -571,20 +509,18 @@ mkdir tests      <span class="cm"># создать директорию</span></
         <p><strong>find</strong> — поиск файлов:</p>
         <div class="code-block">find . -name <span class="st">"*.log"</span>           <span class="cm"># все .log в текущем дереве</span>
 find /var -mtime -1            <span class="cm"># изменённые за последний день</span></div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
         <p><strong>Пайпы и редиректы</strong> — основа мощи shell: соединяешь простые команды в цепочки.</p>
         <div class="code-block">command > file.txt      <span class="cm"># вывод в файл (перезапись)</span>
 command >> file.txt     <span class="cm"># дописать в конец</span>
 command 2> errors.txt   <span class="cm"># перенаправить ошибки (stderr)</span>
-command 2>&1            <span class="cm"># stderr вместе со stdout</span>
+command 2>&1            <span class="cm"># stderr туда же, куда сейчас направлен stdout</span>
+command < input.txt     <span class="cm"># взять stdin из файла</span>
+command | tee out.txt   <span class="cm"># показать вывод и одновременно записать его</span>
 cmd1 | cmd2             <span class="cm"># вывод cmd1 на вход cmd2 (пайп)</span>
-cmd1 && cmd2            <span class="cm"># cmd2 только если cmd1 успешна</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Пайп <code>|</code> — это композиция функций: <code>cmd2(cmd1(input))</code>. Выход одной команды становится входом следующей, как в функциональном программировании. <code>cat log | grep error | wc -l</code> = «возьми лог → отфильтруй ошибки → посчитай» — конвейер обработки данных.</div>
+cmd1 && cmd2            <span class="cm"># cmd2 только при успехе cmd1</span>
+cmd1 || cmd2            <span class="cm"># cmd2 только при ошибке cmd1</span>
+cmd1 ; cmd2             <span class="cm"># выполнить обе независимо от результата</span></div>
+        <div class="hl green"><span class="hl-label">Аналогия</span>Пайп <code>|</code> — это композиция функций: <code>cmd2(cmd1(input))</code>. Выход одной команды становится входом следующей. <code>grep error app.log | wc -l</code> = «отфильтруй ошибки → посчитай».</div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что значит <code>2>&1</code>?» — Перенаправить stderr (поток ошибок, дескриптор 2) туда же, куда идёт stdout (вывод, дескриптор 1). Нужно, чтобы поймать <em>и</em> обычный вывод, <em>и</em> ошибки в один файл/пайп: <code>./script.sh > all.log 2>&1</code>.</div>
         <div class="hl red"><span class="hl-label">Безопасная работа в консоли</span>CLI не прощает ошибок — особенно на чужих/боевых машинах:
           <ul style="margin:8px 0 0;">
@@ -595,8 +531,6 @@ cmd1 && cmd2            <span class="cm"># cmd2 только если cmd1 ус�
             <li>На production — сначала <strong>read-only диагностика</strong> (смотреть логи/статус), а не команды, меняющие состояние</li>
           </ul>
         </div>
-      </div>
-
     </div>
   </section>
 
@@ -608,9 +542,6 @@ cmd1 && cmd2            <span class="cm"># cmd2 только если cmd1 ус�
       <span class="section-badge">главное для QA</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
         <p>Главное, зачем QA в консоли — <strong>разбирать логи</strong>. Когда тест упал или сервис ведёт себя странно, ответ обычно в логах. Базовый инструментарий:</p>
         <div class="code-block">grep <span class="st">"error"</span> app.log     <span class="cm"># найти строки со словом error</span>
 tail -f app.log            <span class="cm"># следить за логом в реальном времени</span>
@@ -618,12 +549,6 @@ tail -n 100 app.log        <span class="cm"># последние 100 строк<
 head app.log               <span class="cm"># первые строки</span>
 less app.log               <span class="cm"># листать большой файл</span></div>
         <div class="hl green"><span class="hl-label">Аналогия</span><code>grep</code> — это <code>filter()</code> по строкам файла: оставляет только те, что подходят под условие. <code>tail -f</code> — как подписка на поток событий: новые строки появляются на экране по мере записи, как live-лента.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <p><strong>grep с флагами</strong> — рабочая лошадка:</p>
         <table>
           <thead><tr><th>Флаг</th><th>Что делает</th></tr></thead>
@@ -648,12 +573,6 @@ grep -C 5 <span class="st">"Exception"</span> app.log</div>
         <p><strong>Обработка текста:</strong> <code>wc -l</code> (посчитать строки), <code>sort</code> (сортировать), <code>uniq -c</code> (уникальные + счётчик).</p>
         <div class="code-block"><span class="cm"># топ-10 самых частых ошибок в логе</span>
 grep <span class="st">"ERROR"</span> app.log | sort | uniq -c | sort -rn | head</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
         <p><strong>awk и sed</strong> — для более сложной обработки (знать базово):</p>
         <ul>
           <li><code>awk '{print $1}'</code> — вывести первый столбец каждой строки</li>
@@ -692,8 +611,6 @@ grep -r <span class="st">"abc-123"</span> /var/log/services/
         <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация команд:</strong> <em>«Напиши команду: найти в app.log все строки с ERROR за сегодня, сгруппировать по тексту ошибки и показать топ-5 по частоте.»</em><br><br>
           <strong>Разбор awk/sed:</strong> вставь непонятную команду → <em>«Объясни, что делает эта awk-команда построчно.»</em>
         </div>
-      </div>
-
     </div>
   </section>
 
@@ -705,22 +622,13 @@ grep -r <span class="st">"abc-123"</span> /var/log/services/
       <span class="section-badge">diagnostics</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
         <p>Вторая частая задача — проверить, <strong>жив ли сервис</strong> и что с ним. Процессы:</p>
-        <div class="code-block">ps aux | grep python    <span class="cm"># найти процессы python</span>
+        <div class="code-block">pgrep -af python        <span class="cm"># найти процессы python с аргументами</span>
+ps aux                  <span class="cm"># снимок всех процессов</span>
 top   <span class="cm"># или htop — что потребляет CPU/память в реальном времени</span>
-kill 1234               <span class="cm"># мягко остановить процесс по PID</span>
 kill 1234               <span class="cm"># обычное завершение (SIGTERM) — сначала пробуем это</span>
 kill -9 1234            <span class="cm"># принудительное (SIGKILL) — только если не завершается</span></div>
         <div class="hl green"><span class="hl-label">Аналогия</span>Процесс — это запущенный экземпляр программы, как объект — экземпляр класса. У каждого свой PID (как id объекта). <code>kill</code> — отправить сигнал процессу; <code>kill -9</code> — жёсткое завершение, как принудительно завершить зависший поток.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <p><strong>Порты</strong> — какой процесс на каком порту слушает (частая проверка «занят ли порт», «поднялся ли сервис»):</p>
         <div class="code-block">lsof -i :5432          <span class="cm"># кто слушает порт 5432</span>
 ss -tlnp               <span class="cm"># все слушающие TCP-порты + процессы</span>
@@ -731,7 +639,7 @@ ss -tlnp               <span class="cm"># все слушающие TCP-порт
           <tbody>
             <tr><td><code>curl url</code></td><td>выполнить запрос к API из консоли, посмотреть ответ</td></tr>
             <tr><td><code>curl -v</code></td><td>с деталями: заголовки, статус, TLS</td></tr>
-            <tr><td><code>ping host</code></td><td>доступен ли хост по сети</td></tr>
+            <tr><td><code>ping host</code></td><td>отвечает ли хост на ICMP; запрет ICMP ещё не означает, что сервис недоступен</td></tr>
             <tr><td><code>dig / nslookup</code></td><td>резолвится ли домен в IP (DNS)</td></tr>
             <tr><td><code>nc -zv host 443</code></td><td>открыт ли порт на хосте</td></tr>
           </tbody>
@@ -741,19 +649,16 @@ curl -X POST https://api.shop.com/orders \
   -H <span class="st">"Authorization: Bearer token"</span> \
   -H <span class="st">"Content-Type: application/json"</span> \
   -d <span class="st">'{"product_id": 42}'</span></div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
+        <p><code>curl --fail-with-body</code> удобен в CI: сохраняет тело ошибки, но возвращает non-zero для HTTP 4xx/5xx. Токены лучше брать из защищённой переменной окружения и не печатать через <code>set -x</code> или логи пайплайна.</p>
+        <p><strong>Если приложение запущено как Linux-сервис:</strong></p>
+        <div class="code-block">systemctl status my-service       <span class="cm"># состояние systemd-сервиса</span>
+journalctl -u my-service -n 100   <span class="cm"># последние 100 записей журнала</span>
+journalctl -u my-service -f       <span class="cm"># следить за новыми записями</span></div>
         <p><strong>SSH</strong> — подключиться к удалённому серверу (смотреть логи, проверить сервис):</p>
         <div class="code-block">ssh user@server.com          <span class="cm"># подключиться (по ключу, не паролю)</span>
 scp file.txt user@server:/tmp <span class="cm"># скопировать файл на сервер</span></div>
         <div class="hl modern"><span class="hl-label">В реальном мире</span>Для QA-автоматизатора этот набор — must-have: <code>curl</code> (проверить API), <code>grep</code>/<code>tail</code> (логи), <code>lsof</code>/<code>ss</code> (порты), <code>ssh</code> (на сервер). Это не «системное администрирование», а ежедневный дебаг. Глубокое системное администрирование (настройка демонов, iptables, тюнинг ядра) знать не нужно — это зона DevOps/SRE.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сервис не отвечает. Как по шагам диагностируешь в консоли?» — 1) процесс жив? <code>ps aux | grep service</code>, 2) слушает порт? <code>ss -tlnp | grep :8080</code>, 3) отвечает локально? <code>curl localhost:8080/health</code>, 4) что в логах? <code>tail -n 100 app.log | grep -i error</code>, 5) если в другом сервисе — DNS/сеть: <code>dig</code>, <code>nc</code>. Идёшь от процесса к сети к логам.</div>
-      </div>
-
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сервис не отвечает. Как по шагам диагностируешь в консоли?» — 1) процесс жив? <code>pgrep -af service</code> или <code>systemctl status</code>, 2) слушает порт? <code>ss -tlnp | grep :8080</code>, 3) отвечает локально? <code>curl localhost:8080/health</code>, 4) что в логах? <code>journalctl</code> или <code>tail</code>, 5) резолвится DNS и доступен ли порт? <code>dig</code>, <code>nc</code>. Идёшь от процесса к локальному порту, затем к сети и логам.</div>
     </div>
   </section>
 
@@ -765,63 +670,62 @@ scp file.txt user@server:/tmp <span class="cm"># скопировать файл
       <span class="section-badge">scripting</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
         <p>Скрипт — набор команд в файле, чтобы не вводить их каждый раз. Для QA — автоматизация рутины: поднять окружение, прогнать тесты, собрать логи.</p>
-        <div class="code-block"><span class="cm">#!/bin/bash</span>          <span class="cm"># shebang — чем исполнять</span>
+        <div class="code-block"><span class="cm">#!/usr/bin/env bash</span>   <span class="cm"># shebang — найти Bash через PATH</span>
 echo <span class="st">"Running tests..."</span>
 pytest tests/
 echo <span class="st">"Done"</span></div>
         <p>Запуск: <code>chmod +x run.sh</code> (сделать исполняемым) → <code>./run.sh</code>.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
+        <div class="hl"><span class="hl-label">Bash или sh</span><code>sh script.sh</code> явно запускает системный <code>sh</code> и может проигнорировать Bash-shebang. Конструкции <code>[[ ... ]]</code>, массивы и <code>pipefail</code> не гарантированы в POSIX sh. Если скрипт написан для Bash, запускай <code>./script.sh</code> или <code>bash script.sh</code>.</div>
         <p><strong>Переменные, условия, циклы:</strong></p>
-        <div class="code-block"><span class="cm">#!/bin/bash</span>
+        <div class="code-block"><span class="cm">#!/usr/bin/env bash</span>
 NAME=<span class="st">"staging"</span>            <span class="cm"># переменная (без пробелов вокруг =)</span>
 echo <span class="st">"Env: $NAME"</span>          <span class="cm"># использование через $</span>
+export NAME                 <span class="cm"># передать переменную дочерним процессам</span>
 
-<span class="kw">if</span> [ <span class="st">"$NAME"</span> = <span class="st">"prod"</span> ]; <span class="kw">then</span>
+<span class="kw">if</span> [[ <span class="st">"$NAME"</span> == <span class="st">"prod"</span> ]]; <span class="kw">then</span>
   echo <span class="st">"Production environment selected"</span>
 <span class="kw">fi</span>
 
 <span class="kw">for</span> file <span class="kw">in</span> *.log; <span class="kw">do</span>   <span class="cm"># цикл по файлам</span>
   echo <span class="st">"Processing $file"</span>
 <span class="kw">done</span></div>
-        <p><strong>Спецпеременные:</strong> <code>$1, $2</code> — аргументы скрипта, <code>$?</code> — код возврата последней команды (0 = успех), <code>$#</code> — число аргументов.</p>
-      </div>
+        <p><strong>Кавычки</strong> — частый вопрос и источник реальных ошибок. Одинарные кавычки сохраняют текст буквально: <code>'Hello $NAME'</code>. Двойные выполняют подстановку: <code>"Hello $NAME"</code>. Раскрытие переменной почти всегда пиши как <code>"$value"</code>, иначе пробелы и символы <code>* ? [</code> могут разбить один аргумент на несколько или запустить globbing.</p>
+        <p><strong>Спецпеременные:</strong> <code>$0</code> — имя скрипта, <code>$1, $2</code> — аргументы, <code>$#</code> — их число, <code>$?</code> — код последней команды, <code>$$</code> — PID shell. Для передачи всех аргументов используй <code>"$@"</code>: каждый исходный аргумент сохранится отдельно, включая значения с пробелами.</p>
+        <p><strong>Функции и подстановка команды:</strong></p>
+        <div class="code-block"><span class="fn">run_tests</span>() {
+  local report_dir=<span class="st">"$1"</span>
+  pytest tests/ --junitxml=<span class="st">"$report_dir/results.xml"</span>
+}
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
+current_branch=$(git branch --show-current)
+run_tests <span class="st">"${REPORT_DIR:-reports}"</span></div>
         <p><strong>Реальный кейс QA</strong> — скрипт поднимает окружение, ждёт сервис, гоняет тесты:</p>
-        <div class="code-block"><span class="cm">#!/bin/bash</span>
-<span class="kw">set</span> -e                      <span class="cm"># падать сразу при первой ошибке</span>
+        <div class="code-block"><span class="cm">#!/usr/bin/env bash</span>
+<span class="kw">set</span> -euo pipefail
+
+<span class="fn">cleanup</span>() {
+  docker compose down
+}
+<span class="kw">trap</span> cleanup EXIT          <span class="cm"># cleanup выполнится и при ошибке</span>
 
 docker compose up -d        <span class="cm"># поднять зависимости</span>
 
-<span class="cm"># ждём, пока БД ответит (polling вместо sleep)</span>
-<span class="kw">until</span> nc -z localhost 5432; <span class="kw">do</span>
-  echo <span class="st">"Ждём БД..."</span>; sleep 1
-<span class="kw">done</span>
+<span class="cm"># polling с дедлайном вместо фиксированного sleep</span>
+timeout 30 bash -c <span class="st">'until nc -z localhost 5432; do sleep 1; done'</span>
 
-pytest tests/ --maxfail=1
-RESULT=$?                    <span class="cm"># сохранили код возврата</span>
-
-docker compose down         <span class="cm"># остановили окружение</span>
-<span class="kw">exit</span> $RESULT</div>
-        <div class="hl orange"><span class="hl-label">Полезные привычки</span><code>set -e</code> — скрипт падает при первой ошибке (а не идёт дальше на сломанном). <code>set -u</code> — падать при использовании необъявленной переменной. <code>set -o pipefail</code> — без него пайп возвращает код <em>последней</em> команды и может скрыть ошибку ранней: в <code>failing_cmd | tee log</code> упадёт первая, но код будет 0 от tee. Together: <code>set -euo pipefail</code> — стандартная защитная шапка скрипта. Ожидание сервиса — через <strong>polling</strong> (<code>until nc -z</code>), а не <code>sleep 30</code> наугад.</div>
-        <div class="hl"><span class="hl-label">Exit codes — почему CI «видит» падение</span>Каждая команда возвращает код: <strong>0 = успех, не 0 = ошибка</strong>. CI считает шаг проваленным, если команда вернула non-zero — поэтому <code>pytest</code> с упавшими тестами возвращает не 0, и пайплайн краснеет. Проверить код последней команды: <code>echo $?</code>. В скрипте именно поэтому сохраняют <code>RESULT=$?</code> и пробрасывают через <code>exit $RESULT</code>.</div>
+<span class="kw">if</span> pytest tests/ --maxfail=1; <span class="kw">then</span>
+  result=0
+<span class="kw">else</span>
+  result=$?
+<span class="kw">fi</span>
+<span class="kw">exit</span> <span class="st">"$result"</span></div>
+        <div class="hl orange"><span class="hl-label">Полезные привычки</span><code>set -u</code> ловит необъявленные переменные, <code>pipefail</code> — ошибку в любой части пайпа, <code>trap ... EXIT</code> гарантирует cleanup. <code>set -e</code> полезен, но у него есть исключения в условиях, циклах и пайпах, поэтому его нельзя считать полной обработкой ошибок. Ожидание сервиса делай через polling с дедлайном, а не <code>sleep 30</code> наугад.</div>
+        <div class="hl"><span class="hl-label">Exit codes — почему CI «видит» падение</span>Каждая команда возвращает код: <strong>0 = успех, не 0 = ошибка</strong>. CI считает шаг проваленным, если команда вернула non-zero — поэтому <code>pytest</code> с упавшими тестами возвращает не 0, и пайплайн краснеет. Проверить код последней команды: <code>echo $?</code>. В примере код тестов сохраняется в <code>result</code> и возвращается через <code>exit "$result"</code>, а <code>trap</code> успевает остановить окружение.</div>
+        <p><strong>ShellCheck</strong> — статический анализатор shell-скриптов. Он ловит некавыченные переменные, недостижимый код, ошибки редиректов и проблемы совместимости: <code>shellcheck run-tests.sh</code>. Хороший ответ на вопрос «как ревьюить Bash кроме запуска».</p>
         <div class="hl llm"><span class="hl-label">Делегируй LLM</span>Bash-синтаксис легко забывается — отличная задача для LLM:<br><br>
           <em>«Напиши bash-скрипт: поднять docker compose, дождаться готовности Postgres на 5432, прогнать pytest, в конце остановить compose и вернуть код тестов.»</em>
         </div>
-      </div>
-
     </div>
   </section>
 
@@ -833,34 +737,29 @@ docker compose down         <span class="cm"># остановили окруже
       <span class="section-badge">containers</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Docker</strong> упаковывает приложение со всем окружением в изолированный <em>контейнер</em>, который одинаково работает везде. Для QA — поднять БД/сервис для тестов одной командой. Базовые команды:</p>
+        <p><strong>Docker</strong> запускает приложение с его файлами и зависимостями в изолированном <em>контейнере</em>. Для QA это воспроизводимое окружение: можно поднять нужную версию БД или сервиса одной командой и повторить тот же запуск в CI.</p>
         <div class="code-block">docker ps                    <span class="cm"># запущенные контейнеры</span>
 docker ps -a                 <span class="cm"># все, включая остановленные</span>
 docker logs container_id     <span class="cm"># логи контейнера</span>
-docker run -e POSTGRES_PASSWORD=test postgres:16   <span class="cm"># запустить (Postgres без пароля не стартует)</span>
+docker run --rm -e POSTGRES_PASSWORD=test postgres:16   <span class="cm"># удалить контейнер после остановки</span>
 docker stop &lt;container&gt;    <span class="cm"># остановить контейнер</span>
 docker rm &lt;container&gt;      <span class="cm"># удалить остановленный контейнер</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Контейнер — как <code>venv</code>, но для всего окружения: ОС, библиотеки, сама программа. <strong>Образ</strong> (image) = класс, <strong>контейнер</strong> = объект (запущенный экземпляр). Один образ → много контейнеров.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
+        <div class="hl green"><span class="hl-label">Image и container</span><strong>Образ</strong> — неизменяемый шаблон со слоями файловой системы и конфигурацией запуска. <strong>Контейнер</strong> — экземпляр образа с собственным процессом и изменяемым слоем. Один образ может породить много контейнеров; удаление контейнера не удаляет образ.</div>
+        <div class="hl"><span class="hl-label">Контейнер против VM</span>Виртуальная машина содержит гостевую ОС и собственное ядро. Контейнер — изолированный процесс, который разделяет ядро хоста, поэтому обычно стартует быстрее и требует меньше ресурсов. Это не «маленькая VM»: изоляция и модель безопасности отличаются.</div>
         <p><strong>Запуск с параметрами:</strong></p>
         <div class="code-block"><span class="cm"># поднять Postgres для тестов</span>
-docker run -d \                       <span class="cm"># -d = в фоне</span>
-  -p 5432:5432 \                       <span class="cm"># проброс порта host:container</span>
-  -e POSTGRES_PASSWORD=test \          <span class="cm"># переменная окружения</span>
-  --name test-db \                     <span class="cm"># имя контейнера</span>
+docker run -d \
+  -p 5432:5432 \
+  -e POSTGRES_PASSWORD=test \
+  --name test-db \
   postgres:16</div>
+        <p><code>-d</code> запускает в фоне, <code>-p host:container</code> публикует порт, <code>-e</code> передаёт переменную, <code>--name</code> задаёт читаемое имя.</p>
         <p><strong>docker compose</strong> (V2 — единая команда, не старый <code>docker-compose</code>) — поднять несколько сервисов вместе (app + БД + Redis) одним файлом:</p>
-        <div class="code-block">docker compose up -d     <span class="cm"># поднять всё из docker-compose.yml</span>
-docker compose down      <span class="cm"># остановить и удалить ресурсы</span>
-docker compose logs -f   <span class="cm"># логи всех сервисов</span></div>
+        <div class="code-block">docker compose up -d --build   <span class="cm"># пересобрать и поднять сервисы</span>
+docker compose ps              <span class="cm"># состояние контейнеров</span>
+docker compose logs -f app     <span class="cm"># следить за логами сервиса app</span>
+docker compose down            <span class="cm"># остановить и удалить контейнеры/сеть</span>
+docker compose down -v         <span class="cm"># дополнительно удалить volumes: данные пропадут</span></div>
         <p><strong>Dockerfile</strong> — рецепт сборки образа. Собирается командой <code>docker build -t myimage:1.0 .</code> (точка — контекст сборки):</p>
         <div class="code-block"><span class="kw">FROM</span> python:3.12
 <span class="kw">WORKDIR</span> /app
@@ -869,16 +768,17 @@ docker compose logs -f   <span class="cm"># логи всех сервисов</
 <span class="kw">COPY</span> . .                     <span class="cm"># код — последним</span>
 <span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
 
-        <p><strong>Слои и кэш сборки</strong> — самый частый вопрос по Dockerfile. Каждая инструкция создаёт <em>слой</em>, слои кэшируются. При пересборке Docker переиспользует кэш, пока не встретит изменившийся слой — <strong>дальше пересобирает всё</strong>.</p>
+        <p><strong>Слои и кэш сборки</strong> — частый вопрос по Dockerfile. Инструкции формируют кэшируемые результаты, а изменения файловой системы сохраняются слоями. При пересборке Docker переиспользует подходящий кэш; изменение раннего шага обычно инвалидирует зависящие от него следующие шаги.</p>
         <div class="hl green"><span class="hl-label">Почему requirements копируют отдельно</span>Если написать <code>COPY . .</code> до <code>pip install</code>, то <em>любая</em> правка кода инвалидирует слой и зависимости будут ставиться заново — каждая сборка по несколько минут. Копируя сначала только <code>requirements.txt</code>, ты добиваешься, что слой с <code>pip install</code> пересобирается лишь при изменении списка зависимостей. Правило: <strong>от редко меняющегося к часто меняющемуся</strong>.</div>
 
         <p><strong>Инструкции, которые путают:</strong></p>
         <table>
           <thead><tr><th>Пара</th><th>Разница</th></tr></thead>
           <tbody>
-            <tr><td><code>CMD</code> vs <code>ENTRYPOINT</code></td><td><code>CMD</code> — команда <em>по умолчанию</em>, её легко переопределить: <code>docker run img bash</code>. <code>ENTRYPOINT</code> — то, что выполнится <em>всегда</em>, а аргументы из <code>run</code> к нему дописываются. Частый приём: <code>ENTRYPOINT ["pytest"]</code> + <code>CMD ["tests/"]</code> — путь можно поменять, сам pytest — нет</td></tr>
+            <tr><td><code>CMD</code> vs <code>ENTRYPOINT</code></td><td><code>CMD</code> задаёт команду или аргументы по умолчанию и переопределяется аргументами <code>docker run</code>. <code>ENTRYPOINT</code> обычно фиксирует исполняемый файл, а аргументы из <code>run</code> дописываются; явно заменить его можно через <code>--entrypoint</code>. Частый приём: <code>ENTRYPOINT ["pytest"]</code> + <code>CMD ["tests/"]</code></td></tr>
             <tr><td><code>COPY</code> vs <code>ADD</code></td><td><code>COPY</code> просто копирует. <code>ADD</code> умеет ещё качать по URL и авто-распаковывать архивы — из-за этой «магии» рекомендуют всегда <code>COPY</code>, кроме случая, когда распаковка нужна осознанно</td></tr>
             <tr><td><code>RUN</code> vs <code>CMD</code></td><td><code>RUN</code> выполняется <em>при сборке</em> образа, <code>CMD</code> — <em>при запуске</em> контейнера</td></tr>
+            <tr><td><code>EXPOSE</code> vs <code>-p</code></td><td><code>EXPOSE 8080</code> документирует ожидаемый порт образа, но не открывает его на хосте. <code>-p 8080:80</code> при запуске действительно публикует порт контейнера</td></tr>
           </tbody>
         </table>
         <p><strong><code>.dockerignore</code></strong> — что не класть в контекст сборки (<code>.git</code>, <code>venv</code>, <code>__pycache__</code>, локальные артефакты). Без него контекст раздувается, сборка тормозит, а в образ могут утечь лишние файлы и секреты.</p>
@@ -893,18 +793,13 @@ docker run -v $(pwd)/tests:/app/tests myimage                <span class="cm"># 
 
         <p><strong>Сети — почему из контейнера не видно <code>localhost</code>.</strong> Классическая ловушка: внутри контейнера <code>localhost</code> — это <em>сам контейнер</em>, а не твоя машина и не соседний контейнер.</p>
         <div class="hl orange"><span class="hl-label">Как обращаться правильно</span>· <strong>Контейнер → контейнер в одном compose:</strong> по <em>имени сервиса</em> — <code>postgres:5432</code>, а не <code>localhost:5432</code>. Compose поднимает общую сеть и заводит DNS по именам сервисов.<br>· <strong>Контейнер → хост-машина:</strong> <code>host.docker.internal</code> (Docker Desktop на Windows/macOS).<br>· <strong>Хост → контейнер:</strong> только через проброшенный порт <code>-p 5432:5432</code>. Без <code>-p</code> порт снаружи недоступен, даже если сервис внутри слушает.<br>· Сервис внутри должен слушать <code>0.0.0.0</code>, а не <code>127.0.0.1</code> — иначе он принимает только соединения изнутри контейнера.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
         <p><strong>Дебаг контейнера</strong> — частая задача, когда «в контейнере не работает»:</p>
-        <div class="code-block">docker exec -it container bash   <span class="cm"># зайти ВНУТРЬ контейнера</span>
+        <div class="code-block">docker exec -it container sh     <span class="cm"># shell внутри; bash может не быть в slim-образе</span>
 docker logs -f --tail 100 cont   <span class="cm"># смотреть логи в реальном времени</span>
-docker inspect container         <span class="cm"># детали: сеть, env, volumes</span></div>
+docker inspect container         <span class="cm"># детали: сеть, env, volumes, health</span>
+docker stats container           <span class="cm"># CPU и память в реальном времени</span></div>
         <p>Зайдя внутрь через <code>exec</code>, проверяешь изнутри: переменные окружения (<code>env</code>), доступность других сервисов (<code>curl</code>, <code>nc</code>), файлы конфигов.</p>
-        <p><strong>Testcontainers</strong> — библиотека, поднимает реальные зависимости (Postgres, Kafka) в Docker прямо из автотеста и останавливает после теста. Тест работает с настоящей БД, а не моком. Это связка раздела с CI/CD (раздел 06).</p>
+        <p><strong>Testcontainers</strong> — библиотека, которая поднимает реальные зависимости (Postgres, Kafka) в Docker прямо из автотеста и останавливает их после теста. Тест работает с настоящей БД, а не моком. Это связка с разделом CI/CD (раздел 07).</p>
 
         <p style="margin-top:14px;"><strong>Multi-stage build</strong> — собрать в одном образе, а в финальный положить только результат. Так из образа исчезают компиляторы, dev-зависимости и исходники: меньше размер и меньше поверхность атаки.</p>
         <div class="code-block"><span class="kw">FROM</span> python:3.12 <span class="kw">AS</span> builder      <span class="cm"># стадия сборки</span>
@@ -916,7 +811,7 @@ docker inspect container         <span class="cm"># детали: сеть, env,
 <span class="kw">COPY</span> . .
 <span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
 
-        <p><strong><code>depends_on</code> не ждёт готовности</strong> — типичная причина flaky в CI. Он гарантирует только <em>порядок запуска</em>: Postgres «стартовал» ≠ Postgres «принимает подключения». Тесты бегут раньше, чем БД поднялась, и падают через раз. Лечится healthcheck-ом:</p>
+        <p><strong>Короткий <code>depends_on</code> не ждёт готовности</strong> — он гарантирует запуск зависимости раньше потребителя, но Postgres «стартовал» ещё не означает «принимает подключения». Для ожидания readiness нужен healthcheck и длинная форма с <code>condition: service_healthy</code>:</p>
         <div class="code-block">services:
   db:
     image: postgres:16
@@ -932,10 +827,9 @@ docker inspect container         <span class="cm"># детали: сеть, env,
 
         <p><strong>Registry и теги.</strong> Образы хранятся в реестре (Docker Hub, GitHub Container Registry, приватный Nexus/Harbor): <code>docker pull</code> / <code>docker push</code>. Про теги важно понимать: <code>latest</code> — <strong>не «последняя версия»</strong>, а просто тег по умолчанию, который можно перезаписать. Поэтому «у меня и в CI разное поведение на одном <code>latest</code>» — обычная история. Для воспроизводимости фиксируют версию (<code>postgres:16.2</code>) или digest (<code>postgres@sha256:...</code>).</p>
 
-        <p><strong>Жизненный цикл и restart policy.</strong> Контейнер живёт, пока жив его главный процесс (PID 1). <code>docker ps -a</code> показывает <strong>exit code</strong>: <code>0</code> — штатно завершился, <code>1</code> — ошибка приложения, <code>137</code> — убит по OOM (не хватило памяти), <code>143</code> — получил SIGTERM. Политика перезапуска задаётся флагом <code>--restart</code> (<code>no</code>, <code>on-failure</code>, <code>always</code>, <code>unless-stopped</code>) — при <code>always</code> упавший контейнер бесконечно перезапускается, и в логах это выглядит как «моргающий» сервис.</p>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Контейнер сразу падает после запуска. Как дебажить?» — 1) <code>docker logs container</code> — чаще всего причина видна в логах (упал процесс, не найден файл, нет env), 2) <code>docker ps -a</code> — посмотреть exit code, 3) запустить с переопределением команды на <code>bash</code> и зайти внутрь контейнера и проверить состояние, 4) проверить <code>docker inspect</code> — правильные ли env и volumes. Контейнер живёт, пока жив его главный процесс — если процесс упал, контейнер останавливается.</div>
-      </div>
-
+        <div class="hl red"><span class="hl-label">Безопасность образа</span>Не копируй в образ <code>.env</code>, приватные ключи и токены: слои и история сборки могут их сохранить. Для секретов сборки используй BuildKit secrets, для runtime — механизм секретов платформы. Бери минимальный доверенный base image, запускай процесс не от root через <code>USER</code>, сканируй образ и обновляй закреплённые версии осознанно.</div>
+        <p><strong>Жизненный цикл и restart policy.</strong> Контейнер живёт, пока жив его главный процесс (PID 1). <code>docker inspect</code> показывает exit code: <code>0</code> — штатное завершение, <code>1</code> — общая ошибка приложения, <code>137</code> — процесс получил SIGKILL (часто OOM, но причину надо подтвердить через <code>OOMKilled</code> и события), <code>143</code> — SIGTERM. Политика <code>--restart</code> задаёт перезапуск; при <code>always</code> падающий контейнер может перезапускаться по кругу.</p>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Контейнер сразу падает после запуска. Как дебажить?» — 1) <code>docker logs container</code>, 2) <code>docker inspect container</code> — exit code, OOM, env, mounts и health, 3) проверить команду/entrypoint и наличие файлов, 4) при необходимости запустить образ с переопределённым entrypoint: <code>docker run --rm -it --entrypoint sh image</code>. Контейнер останавливается, когда завершается его главный процесс.</div>
     </div>
   </section>
 
@@ -947,60 +841,63 @@ docker inspect container         <span class="cm"># детали: сеть, env,
       <span class="section-badge">orchestration</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
         <p><strong>Kubernetes (k8s)</strong> — оркестратор контейнеров. Когда контейнеров десятки и сотни, кто-то должен их запускать, перезапускать упавшие, масштабировать, распределять по серверам. Это и делает k8s.</p>
         <div class="hl green"><span class="hl-label">Аналогия</span>Docker запускает один контейнер на одной машине. Kubernetes — как оркестратор/супервизор для целого парка: следит, чтобы нужное число копий всегда работало, перезапускает упавшие, распределяет нагрузку. Как process manager (типа supervisord), но для контейнеров на кластере машин.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
+        <p><strong>Архитектура в одном абзаце.</strong> Control plane хранит желаемое состояние и принимает решения: API server принимает команды, scheduler выбирает node, controllers сводят фактическое состояние к желаемому, etcd хранит состояние кластера. На worker nodes kubelet следит за Pod, а container runtime запускает контейнеры.</p>
+        <p><strong>Декларативная модель.</strong> В YAML-манифесте обычно есть <code>apiVersion</code>, <code>kind</code>, <code>metadata</code> и <code>spec</code>: мы описываем желаемое состояние и применяем его через <code>kubectl apply -f file.yaml</code>. Поле <code>status</code> заполняет кластер фактическим состоянием. Поэтому при отладке важно сравнивать spec и status, а не только читать файл из Git.</p>
         <p><strong>Ключевые понятия:</strong></p>
         <ul>
-          <li><strong>Pod</strong> — минимальная единица, один или несколько контейнеров вместе. Обычно = один экземпляр сервиса</li>
+          <li><strong>Pod</strong> — минимальный развёртываемый объект: один или несколько тесно связанных контейнеров с общей сетью и подключёнными volumes</li>
           <li><strong>Deployment</strong> — управляет репликами подов: «держи 3 копии сервиса всегда живыми»</li>
-          <li><strong>Service</strong> — стабильная точка доступа к подам (поды меняются, адрес остаётся)</li>
+          <li><strong>Service</strong> — стабильная сеть и DNS для набора Pod: Pod пересоздаются и меняют IP, адрес Service остаётся</li>
           <li><strong>Namespace</strong> — логическое разделение (dev / staging / prod в одном кластере)</li>
           <li><strong>Ingress</strong> — маршрутизация внешнего HTTP-трафика внутрь кластера (какой домен/путь → какой Service)</li>
           <li><strong>ConfigMap</strong> — конфиг (env-переменные, файлы настроек) отдельно от образа</li>
           <li><strong>Secret</strong> — то же для чувствительного (пароли, токены). Хранится в base64, то есть <em>кодирование, а не шифрование</em> — без включённого шифрования etcd это не защита</li>
+          <li><strong>Labels и selectors</strong> — метки связывают объекты: например, Service направляет трафик только в Pod, которые совпали с его selector</li>
         </ul>
+
+        <p><strong>Какой workload выбрать:</strong></p>
+        <table>
+          <thead><tr><th>Объект</th><th>Когда нужен</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Deployment</strong></td><td>stateless-сервис, реплики, rolling update и rollback</td></tr>
+            <tr><td><strong>StatefulSet</strong></td><td>стабильные имена, порядок запуска и отдельное хранилище для каждой реплики</td></tr>
+            <tr><td><strong>DaemonSet</strong></td><td>по Pod на каждой подходящей node: лог-агент, мониторинг</td></tr>
+            <tr><td><strong>Job / CronJob</strong></td><td>одноразовая задача / запуск задачи по расписанию</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Типы Service:</strong> <code>ClusterIP</code> доступен внутри кластера и используется по умолчанию; <code>NodePort</code> публикует порт на nodes; <code>LoadBalancer</code> запрашивает внешний балансировщик у облачной платформы. Ingress — не тип Service, а HTTP/HTTPS-маршрутизация поверх Service.</p>
 
         <p><strong>Probes — как кластер понимает, жив ли под.</strong> Спрашивают почти всегда, и путают чаще всего:</p>
         <table>
           <thead><tr><th>Probe</th><th>Вопрос</th><th>Что будет при провале</th></tr></thead>
           <tbody>
-            <tr><td><strong>liveness</strong></td><td>приложение ещё живо?</td><td>под <strong>перезапускается</strong></td></tr>
-            <tr><td><strong>readiness</strong></td><td>готово принимать трафик?</td><td>под <strong>убирается из Service</strong>, но не перезапускается</td></tr>
-            <tr><td><strong>startup</strong></td><td>долгий старт закончился?</td><td>откладывает две другие проверки, пока приложение поднимается</td></tr>
+            <tr><td><strong>liveness</strong></td><td>контейнер ещё способен продолжать работу?</td><td>после порога ошибок контейнер перезапускается</td></tr>
+            <tr><td><strong>readiness</strong></td><td>готов принимать трафик?</td><td>Pod исключается из endpoints Service, но не перезапускается</td></tr>
+            <tr><td><strong>startup</strong></td><td>долгий старт закончился?</td><td>до успеха отключает liveness/readiness; после порога ошибок контейнер перезапускается</td></tr>
           </tbody>
         </table>
         <div class="hl orange"><span class="hl-label">Чем это оборачивается для QA</span>· <strong>Слишком строгая liveness</strong> — под перезапускается под нагрузкой, потому что не успел ответить на проверку. Снаружи выглядит как «сервис случайно рвёт соединения».<br>· <strong>Нет readiness</strong> — трафик идёт в под, который ещё не прогрелся: после каждого деплоя короткая пачка 502/503. Классический баг, который ловится smoke-тестом сразу после выката.<br>· <strong>Readiness ходит в БД</strong> — упала БД, все поды разом стали not ready, сервис пропал из балансировщика целиком.</div>
-        <p><strong>kubectl</strong> — команда для общения с кластером, основное для QA:</p>
-        <div class="code-block">kubectl get pods                  <span class="cm"># список подов</span>
-kubectl logs pod-name             <span class="cm"># логи пода</span>
-kubectl logs -f pod-name          <span class="cm"># следить за логами</span>
-kubectl describe pod pod-name     <span class="cm"># детали, события, почему не стартует</span></div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Что реально нужно QA в k8s</strong> — не писать манифесты, а уметь диагностировать:</p>
-        <div class="code-block">kubectl exec -it pod -- bash      <span class="cm"># зайти внутрь пода</span>
-kubectl get pods -w               <span class="cm"># следить за статусами подов</span>
-kubectl port-forward pod 8080:80  <span class="cm"># пробросить порт пода к себе</span></div>
+        <div class="hl red"><span class="hl-label">Сначала проверь контекст</span><code>kubectl</code> действует в текущем кластере и namespace. Перед изменяющими командами проверь <code>kubectl config current-context</code> и явно указывай <code>-n staging</code>. Одинаковые имена ресурсов в dev, staging и prod — обычная история.</div>
+        <p><strong>Основные команды диагностики:</strong></p>
+        <div class="code-block">kubectl get deploy,svc,pods -n staging       <span class="cm"># состояние объектов</span>
+kubectl get pods -n staging -o wide          <span class="cm"># node, IP и дополнительные детали</span>
+kubectl describe pod pod-name -n staging     <span class="cm"># conditions и события</span>
+kubectl logs pod-name -n staging --tail=100  <span class="cm"># последние логи</span>
+kubectl logs pod-name -n staging --previous  <span class="cm"># логи прошлого запуска контейнера</span>
+kubectl exec -it pod-name -n staging -- sh   <span class="cm"># shell; bash может отсутствовать</span>
+kubectl get pods -n staging -w                <span class="cm"># следить за изменениями</span>
+kubectl port-forward -n staging svc/api 8080:80 <span class="cm"># локальный доступ к Service</span></div>
+        <p>Если в Pod несколько контейнеров, для <code>logs</code> и <code>exec</code> укажи <code>-c container-name</code>. По label можно собрать логи всех реплик: <code>kubectl logs -n staging -l app=api --all-containers --prefix</code>.</p>
         <p><code>port-forward</code> особенно полезен — пробрасываешь порт сервиса из кластера на свою машину и тестируешь его локально через curl/Postman.</p>
 
-        <p style="margin-top:14px;"><strong>Requests и limits — почему под «сам умирает».</strong> <code>requests</code> — сколько ресурсов поду гарантированно выделить (по ним планировщик выбирает ноду), <code>limits</code> — потолок. Превысил лимит по <strong>памяти</strong> → контейнер убивают, статус <code>OOMKilled</code> (exit code 137). Превысил по <strong>CPU</strong> → не убивают, а <em>тормозят</em> (throttling) — и это выглядит как необъяснимо медленные ответы под нагрузкой. Для QA: «тест стабильно падает по таймауту только в кластере» — первым делом смотреть лимиты.</p>
+        <p style="margin-top:14px;"><strong>Requests и limits — почему Pod «сам умирает».</strong> <code>requests</code> — объём ресурсов, который scheduler учитывает при размещении, <code>limits</code> — верхняя граница. Превышение лимита памяти может завершить контейнер с причиной <code>OOMKilled</code> (часто exit code 137). При превышении CPU-limit контейнер не убивают, а замедляют через throttling. Если тесты падают по таймауту только в кластере, проверь usage, requests и limits.</p>
 
-        <p><strong>Типовые статусы пода</strong> — по ним сразу видно класс проблемы:</p>
+        <p><strong>Типовые состояния и причины</strong> — по ним сразу видно класс проблемы:</p>
         <table>
-          <thead><tr><th>Статус</th><th>Что означает</th></tr></thead>
+          <thead><tr><th>Состояние / причина</th><th>Что означает</th></tr></thead>
           <tbody>
             <tr><td><code>CrashLoopBackOff</code></td><td>контейнер стартует и падает по кругу — ошибка приложения, конфига или проваленная liveness</td></tr>
             <tr><td><code>ImagePullBackOff</code></td><td>не может скачать образ — опечатка в теге, нет доступа к приватному реестру</td></tr>
@@ -1009,11 +906,13 @@ kubectl port-forward pod 8080:80  <span class="cm"># пробросить пор
           </tbody>
         </table>
 
-        <p><strong>Выкатка и откат:</strong> <code>kubectl rollout status deploy/name</code> — дождаться завершения выката, <code>kubectl rollout undo deploy/name</code> — откатиться на предыдущую версию. Полезно знать, что Deployment по умолчанию катит <em>rolling update</em>: старые поды заменяются новыми постепенно, поэтому какое-то время в проде работают <strong>обе версии сразу</strong> — отсюда требование обратной совместимости API и схемы БД (см. раздел CI/CD).</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Kubernetes — зона DevOps/SRE, QA редко настраивает его сам. От QA-автоматизатора ждут понимания «что это и зачем» + умения <code>kubectl logs</code>, <code>kubectl describe</code> (посмотреть, почему под не поднялся), <code>kubectl exec</code> (зайти внутрь), <code>port-forward</code> (протестировать сервис локально). Писать YAML-манифесты и настраивать кластер — не задача QA.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Под в статусе CrashLoopBackOff. Что это и что делать?» — Под постоянно падает и перезапускается по кругу. Действия: <code>kubectl logs &lt;pod&gt; --previous</code> (логи <em>упавшего</em> контейнера — текущий мог уже перезапуститься, поэтому важен --previous), <code>kubectl describe pod</code> (события: нехватка ресурсов, не прошёл health-check, не скачался образ), <code>kubectl get events</code> (события неймспейса — проблемы scheduling/probe/image pull). Частые причины: ошибка в коде при старте, неверный конфиг/env, failed liveness probe.</div>
-      </div>
+        <p><strong>Хранилище.</strong> Обычный Pod эфемерен. <strong>PV</strong> описывает ресурс хранения, <strong>PVC</strong> — запрос workload на хранилище, <strong>StorageClass</strong> задаёт способ динамического создания volume. При <code>Pending</code> проверяй не только CPU/RAM, но и события PVC.</p>
+        <p><strong>Масштабирование.</strong> Deployment можно масштабировать вручную через <code>kubectl scale</code>. <strong>HPA</strong> меняет число реплик по метрикам, например CPU или latency. QA проверяет границы: scale-up под нагрузкой, scale-down после неё, отсутствие потери запросов и достаточные requests, без которых CPU-based HPA может работать некорректно.</p>
+        <p><strong>Helm</strong> пакетирует связанные Kubernetes-манифесты в chart и подставляет параметры из <code>values.yaml</code>. Для QA полезно уметь прочитать values окружения, сравнить фактический image tag/config и выполнить <code>helm template</code> или <code>helm lint</code> до установки.</p>
 
+        <p><strong>Выкатка и откат:</strong> <code>kubectl rollout status deploy/name</code> — дождаться завершения, <code>kubectl rollout history deploy/name</code> — посмотреть ревизии, <code>kubectl rollout undo deploy/name</code> — откатить. При rolling update какое-то время работают обе версии, поэтому QA проверяет backward compatibility API/БД, readiness новых Pod, отсутствие 5xx и правильный image tag.</p>
+        <div class="hl modern"><span class="hl-label">В реальном мире</span>На большинстве QA-позиций важнее уверенная диагностика, чем администрирование кластера. Но в infrastructure, security и platform-продуктах от SDET могут ждать чтения YAML/Helm, развёртывания тестовых сред и проверки autoscaling. Глубина зависит от продукта, базовые связи объектов и алгоритм диагностики нужны в любом случае.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Pod в CrashLoopBackOff. Что делать?» — 1) проверить context и namespace, 2) <code>kubectl get pod -o wide</code> и <code>describe</code> — conditions/events, 3) <code>logs --previous -c ...</code> — логи завершившегося контейнера, 4) проверить command/args, image tag, ConfigMap/Secret, probes и limits. CrashLoopBackOff — это увеличивающаяся пауза между повторными запусками; первопричина находится в завершении контейнера и событиях.</div>
     </div>
   </section>
 
@@ -1026,15 +925,6 @@ kubectl port-forward pod 8080:80  <span class="cm"># пробросить пор
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {

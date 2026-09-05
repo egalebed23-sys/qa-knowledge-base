@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -232,31 +206,6 @@
   }
   .section-body { padding: 22px 26px; }
 
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
-
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
   ul li {
@@ -267,6 +216,9 @@
   }
   ul li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
   ul li strong { color: #fff; font-weight: 700; }
+  ol { margin: 0 0 12px; padding-left: 22px; }
+  ol li { color: var(--text); padding: 4px 0 4px 4px; }
+  ol li::marker { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   p { font-size: 14px; margin-bottom: 8px; }
   p:last-child { margin-bottom: 0; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -442,7 +394,12 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
+  }
+  @media (max-width: 560px) {
+    .section-body { padding: 18px 16px; }
+    th, td { padding: 7px 8px; overflow-wrap: break-word; }
+    th:first-child, td:first-child { min-width: 82px; }
+    table { font-size: 12px; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -504,7 +461,7 @@
   .pipe-arr { color: var(--muted); font-size: 14px; }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -536,7 +493,7 @@
     <a href="#pipeline">02 · Pipeline и стадии</a>
     <a href="#gates">03 · Автотесты и quality gates</a>
     <a href="#deploy">04 · Стратегии деплоя</a>
-    <a href="#docker">05 · Docker для QA</a>
+    <a href="#artifacts">05 · Артефакты и окружения</a>
     <a href="#qa-cicd">06 · CI/CD в работе QA</a>
   </div>
 </aside>
@@ -544,16 +501,11 @@
 <main class="main">
   <div class="topbar">
     <div class="crumbs">QA Senior / <span>CI/CD</span></div>
-    <div class="level-switch" role="tablist">
-      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
-      <button class="level-btn" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
-      <button class="level-btn active" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
-    </div>
   </div>
 
   <div class="header">
     <h1>CI/CD</h1>
-    <p>// 6 подтем · пайплайны, quality gates, деплой, Docker</p>
+    <p>// 6 подтем · пайплайны, quality gates, артефакты, окружения и деплой</p>
   </div>
 
 
@@ -565,9 +517,6 @@
       <span class="section-badge">basics</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
         <p><strong>CI/CD</strong> — автоматизация сборки, тестирования и доставки кода. Три понятия, которые часто путают:</p>
         <ul>
           <li><strong>CI</strong> (Continuous Integration) — каждый коммит автоматически собирается и прогоняется через тесты. Баги ловятся сразу, а не «под релиз»</li>
@@ -575,12 +524,6 @@
           <li><strong>CD</strong> (Continuous Deployment) — деплой в прод полностью автоматический, без ручного шага</li>
         </ul>
         <div class="hl green"><span class="hl-label">Аналогия</span>CI — как автопрогон тестов при каждом сохранении файла, только для всей команды: каждый коммит сразу проверяется. Pipeline — конвейер функций, где выход одной стадии (собранный билд) идёт на вход следующей (тесты → деплой).</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <p><strong>Зачем это нужно:</strong></p>
         <ul>
           <li>Каждый разработчик делает мелкие изолированные коммиты — меньше конфликтов при слиянии</li>
@@ -588,18 +531,12 @@
           <li>Стандартизация: каждый коммит проходит одни и те же стадии (build, lint, тесты)</li>
           <li>Ранний поиск дефектов — баг виден через минуты после коммита, а не через неделю</li>
         </ul>
-        <p><strong>Delivery vs Deployment</strong> — разница в последнем шаге: Delivery доводит до состояния «готово, нажми кнопку», Deployment жмёт кнопку сам. Большинство команд — на Delivery (ручное подтверждение прод-релиза).</p>
-        <p><strong>Инструменты:</strong> GitHub Actions, GitLab CI, Jenkins, CircleCI, TeamCity. Принцип у всех один — описываешь стадии в конфиге, система их выполняет на каждый коммит/PR.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>CI/CD неразрывно связан с <strong>trunk-based development</strong> (см. раздел теории): мелкие частые коммиты в main, автотесты на каждый PR, релизы несколько раз в день. Здоровье процесса меряют <strong>DORA-метриками</strong>: deployment frequency, lead time for changes, change failure rate и failed deployment recovery time (раньше назывался MTTR). В последние годы DORA добавила пятую — rework / failed deployment recovery — суть та же: как быстро и надёжно команда доставляет изменения. Для QA это значит одно главное требование к автотестам — они должны быть <em>быстрыми и стабильными</em>, иначе становятся тормозом всего пайплайна.</div>
+        <p><strong>Delivery vs Deployment</strong> — разница в последнем шаге: Delivery доводит до состояния «готово к production», но выпуск подтверждает человек; Deployment выпускает автоматически после прохождения условий.</p>
+        <p><strong>Инструменты:</strong> GitHub Actions, GitLab CI, Jenkins, CircleCI, TeamCity. Принцип у всех один — процесс хранится как код, запускается по заданным событиям и оставляет воспроизводимую историю результатов.</p>
+        <div class="hl modern"><span class="hl-label">DORA-метрики</span>Актуальная модель состоит из пяти показателей. <strong>Throughput:</strong> change lead time, deployment frequency, failed deployment recovery time. <strong>Instability:</strong> change fail rate и deployment rework rate. Их смотрят вместе и в динамике для конкретного сервиса: скорость без стабильности не является успехом. Для QA связь прямая — медленные и нестабильные проверки увеличивают lead time, а слабые gates повышают долю неудачных изменений.</div>
+        <p><strong>CI — это инженерная практика, а не название сервера.</strong> GitHub Actions, GitLab CI, Jenkins и TeamCity только исполняют процесс. Частая интеграция небольших изменений, быстрый feedback и исправление красного main важнее выбора инструмента.</p>
+        <p><strong>CI/CD не равно DevOps.</strong> CI/CD — набор практик и автоматизации доставки. DevOps шире: совместная ответственность разработки и эксплуатации, инфраструктура, observability, incident response и постоянное улучшение процесса.</p>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница Continuous Delivery и Continuous Deployment?» — В обоих случаях код автоматически проходит все стадии и готов к проду. Разница в финале: Delivery требует <em>ручного нажатия</em> кнопки «выкатить», Deployment выкатывает в прод <em>автоматически</em>, без человека. Deployment требует очень зрелого тестирования и мониторинга.</div>
-      </div>
-
     </div>
   </section>
 
@@ -611,10 +548,7 @@
       <span class="section-badge">pipeline</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Pipeline</strong> — последовательность стадий, через которые проходит код от коммита до прода. Если стадия упала — пайплайн останавливается, дальше код не идёт.</p>
+        <p><strong>Pipeline</strong> — исполняемый граф работ от изменения кода до проверки и доставки. Это не всегда линейная цепочка: независимые работы идут параллельно, а зависимости образуют DAG.</p>
         <div class="pipeline">
           <span class="pipe-stage">build</span><span class="pipe-arr">→</span>
           <span class="pipe-stage">lint</span><span class="pipe-arr">→</span>
@@ -622,90 +556,71 @@
           <span class="pipe-stage">integration</span><span class="pipe-arr">→</span>
           <span class="pipe-stage deploy">deploy</span>
         </div>
-        <p>Типичные стадии: собрать (build) → проверить стиль кода (lint) → быстрые тесты (unit) → тесты посложнее (integration) → выкатить (deploy).</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
+        <table>
+          <thead><tr><th>Понятие</th><th>Что означает</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Pipeline / workflow</strong></td><td>весь запуск по конкретному commit SHA</td></tr>
+            <tr><td><strong>Stage</strong></td><td>логическая фаза; jobs одной стадии обычно могут идти параллельно</td></tr>
+            <tr><td><strong>Job</strong></td><td>независимая единица работы на runner; её результат влияет на статус pipeline</td></tr>
+            <tr><td><strong>Step</strong></td><td>отдельная команда или action внутри job; общий workspace обычно живёт только в пределах job</td></tr>
+            <tr><td><strong>Runner / agent</strong></td><td>машина или среда, которая выполняет job</td></tr>
+          </tbody>
+        </table>
+        <p>Названия у систем отличаются: GitHub Actions говорит <em>workflow → jobs → steps</em>, GitLab — <em>pipeline → stages → jobs</em>, Jenkins — <em>pipeline → stages → steps</em>. На собеседовании важнее понимать границы выполнения и передачи данных, чем помнить конкретный YAML.</p>
         <p><strong>На что запускается пайплайн</strong> (триггеры):</p>
         <ul>
           <li><strong>push</strong> — на каждый коммит в ветку</li>
-          <li><strong>pull/merge request</strong> — при создании или обновлении PR (главный момент для прогона тестов)</li>
+          <li><strong>pull/merge request</strong> — при создании или обновлении PR/MR</li>
           <li><strong>schedule</strong> — по расписанию (ночной полный регресс)</li>
-          <li><strong>manual</strong> — по кнопке (деплой в прод)</li>
+          <li><strong>manual</strong> — по кнопке, часто с параметрами и подтверждением</li>
+          <li><strong>tag/release или upstream pipeline</strong> — при выпуске версии либо после сборки другого сервиса</li>
         </ul>
-        <p><strong>Артефакты</strong> — то, что передаётся между стадиями или сохраняется: собранный билд, отчёты тестов, логи, скриншоты. Стадия deploy берёт артефакт стадии build.</p>
         <p>Простой пример конфига (GitHub Actions):</p>
         <div class="code-block"><span class="hdr">name:</span> CI
-<span class="hdr">on:</span> [push, pull_request]
+<span class="hdr">on:</span> [pull_request]
+<span class="hdr">permissions:</span>
+  <span class="hdr">contents:</span> read
+<span class="hdr">concurrency:</span>
+  <span class="hdr">group:</span> ci-${{ github.ref }}
+  <span class="hdr">cancel-in-progress:</span> true
 <span class="hdr">jobs:</span>
   test:
     <span class="hdr">runs-on:</span> ubuntu-latest
+    <span class="hdr">timeout-minutes:</span> 15
     <span class="hdr">steps:</span>
-      - <span class="hdr">uses:</span> actions/checkout@v4
-      - <span class="hdr">uses:</span> actions/setup-python@v5
+      - <span class="hdr">uses:</span> actions/checkout@v7
+      - <span class="hdr">uses:</span> actions/setup-python@v7
         <span class="hdr">with:</span>
           <span class="hdr">python-version:</span> <span class="st">'3.12'</span>
-          <span class="hdr">cache:</span> <span class="st">'pip'</span>          <span class="cm"># кэш зависимостей между прогонами</span>
+          <span class="hdr">cache:</span> <span class="st">'pip'</span>
       - <span class="hdr">run:</span> pip install -r requirements.txt
-      - <span class="hdr">run:</span> python -m pytest --maxfail=1</div>
+      - <span class="hdr">run:</span> pytest --junitxml=junit.xml</div>
+        <p>Major tags в примере оставлены для читаемости. В защищённом pipeline action фиксируют на проверенный полный commit SHA, чтобы ссылка была неизменяемой.</p>
 
-        <p><strong>Зависимости и условия между джобами:</strong> <code>needs:</code> задаёт порядок («деплой только после тестов»), без него джобы идут параллельно. <code>if:</code> ограничивает запуск условием — например, деплоить только из <code>main</code>:</p>
-        <div class="code-block"><span class="hdr">jobs:</span>
-  test:
-    <span class="hdr">runs-on:</span> ubuntu-latest
-    <span class="hdr">steps:</span> [...]
-  deploy:
-    <span class="hdr">needs:</span> test                                    <span class="cm"># ждать успешного test</span>
-    <span class="hdr">if:</span> github.ref == <span class="st">'refs/heads/main'</span>          <span class="cm"># только из main</span>
-    <span class="hdr">runs-on:</span> ubuntu-latest
-    <span class="hdr">steps:</span> [...]</div>
-
-        <p><strong><code>services:</code> — поднять зависимости для интеграционных тестов.</strong> CI сам стартует контейнер рядом с джобой; обращаться к нему нужно по имени сервиса, а не по <code>localhost</code>:</p>
-        <div class="code-block"><span class="hdr">jobs:</span>
-  test:
-    <span class="hdr">runs-on:</span> ubuntu-latest
-    <span class="hdr">services:</span>
-      postgres:
-        <span class="hdr">image:</span> postgres:16
-        <span class="hdr">env:</span>
-          <span class="hdr">POSTGRES_PASSWORD:</span> test
-        <span class="hdr">options:</span> >-                                <span class="cm"># дождаться готовности, а не старта</span>
-          --health-cmd pg_isready --health-interval 5s --health-retries 10
-        <span class="hdr">ports:</span> [<span class="st">'5432:5432'</span>]</div>
-        <p>Альтернатива — поднимать зависимости из самих тестов через Testcontainers: тогда тесты одинаково работают и локально, и в CI, без дублирования конфига пайплайна.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
+        <p><strong>Управление графом:</strong> <code>needs</code> задаёт зависимости между jobs, <code>if</code>/<code>rules</code> — условия запуска, а статус обязательных jobs образует gate. Без зависимости jobs могут выполняться параллельно; deploy должен ссылаться на проверки явно, а не надеяться на порядок строк в файле.</p>
+        <div class="hl orange"><span class="hl-label">Два зелёных PR сломали main</span>Каждый PR мог тестироваться против старого состояния target branch и проходить отдельно, хотя их изменения несовместимы вместе. Require up-to-date branch, merged-results pipeline и merge queue/train проверяют синтетический merge commit и сериализуют безопасное слияние.</div>
+        <div class="hl"><span class="hl-label">Тестовые зависимости</span>Для integration-тестов CI может предоставить БД или брокер как service, либо их создаёт сам test harness. На уровне pipeline важно обеспечить изоляцию, readiness/health check и гарантированную очистку. Реализация контейнерного окружения разобрана в <a href="bash.html">Bash · Docker · K8s</a>.</div>
         <p><strong>Оптимизация пайплайна:</strong></p>
         <ul>
-          <li><strong>Кэширование зависимостей</strong> — не качать пакеты заново каждый раз (кэш pip/npm)</li>
-          <li><strong>Параллельные стадии</strong> — lint и unit могут бежать одновременно</li>
-          <li><strong>Матричные сборки</strong> — один и тот же джоб размножается по комбинациям параметров и бежит параллельно. Для QA это обычно версии Python, браузеры или окружения: <code>strategy: matrix: python: ['3.11','3.12']</code>. Полезно помнить <code>fail-fast: false</code> — иначе падение одной комбинации гасит остальные, и ты не узнаешь, сломано ли только в одной</li>
-          <li><strong>Fail fast</strong> — <code>--maxfail=1</code>, чтобы не ждать весь прогон, если уже большая часть набора уже падает</li>
+          <li><strong>Параллелизм и шардинг</strong> — независимые jobs и части suite исполняются одновременно</li>
+          <li><strong>Матрица</strong> — один job запускается для набора версий Python, ОС или браузеров; <code>fail-fast: false</code> сохраняет результаты всех комбинаций</li>
+          <li><strong>Кэш</strong> — повторно использует скачанные зависимости; ключ обычно зависит от lock-файла, а cache miss не должен ломать сборку</li>
+          <li><strong>Concurrency</strong> — новый commit отменяет устаревший прогон того же PR и освобождает runner</li>
+          <li><strong>Timeout и fail fast</strong> — ограничивают зависшие jobs и останавливают заведомо бесполезную ветку графа. Это не то же самое, что оборвать pytest после первого падения и потерять диагностическую картину</li>
         </ul>
-        <p style="margin-top:14px;"><strong>Секреты в CI</strong> — отдельная тема, которую любят спрашивать у QA, потому что тесты почти всегда ходят куда-то с токеном:</p>
+        <p style="margin-top:14px;"><strong>Секреты и безопасность pipeline:</strong></p>
         <ul>
-          <li>Секреты хранятся в настройках репозитория/проекта и приходят в джобу как переменные окружения — <strong>в коде и в YAML их быть не должно</strong></li>
-          <li>CI <strong>маскирует</strong> известные ему секреты в логах (заменяет на <code>***</code>). Но маскировка работает по точному совпадению: залогировал в base64, в JSON-дампе или по частям — утечёт в открытом виде</li>
-          <li>Отсюда практическое правило: <strong>не печатать в лог тела запросов и заголовки целиком</strong>. Самый частый способ слить токен — отладочный <code>print(response.request.headers)</code>, забытый в тесте</li>
-          <li>Секреты обычно <strong>недоступны в пайплайнах для PR из форков</strong> — иначе любой желающий прислал бы PR, печатающий их. Отсюда «в моём PR интеграционные тесты падают на авторизации, а в main зелено»</li>
-          <li>Артефакты и отчёты тоже утекают: скриншоты, HAR-файлы и Allure-аттачи могут содержать токены и персональные данные</li>
+          <li>Секреты хранятся в secret store CI, выдаются только нужной job и среде; обычная переменная окружения сама по себе секретом не становится</li>
+          <li>Маскирование логов не гарантирует защиту преобразованного или составного значения. Нельзя печатать заголовки, дампы окружения и тела запросов целиком</li>
+          <li>Токен pipeline получает <strong>минимальные permissions</strong>. Для облака лучше OIDC и короткоживущие credentials, чем постоянный access key</li>
+          <li>Недоверенный код из fork PR не должен получать production secrets. Отсутствие секрета в таком PR — защитный механизм, а не случайная поломка CI</li>
+          <li>Сторонние actions/plugins проверяют и фиксируют на неизменяемый commit SHA; отчёты, HAR, traces и screenshots проверяют на токены и персональные данные</li>
         </ul>
 
-        <p><strong>Runners — где физически бегут джобы.</strong> <em>Hosted</em> (облачные, от провайдера CI): чистая машина на каждый запуск, ничего не настраивать, но ограничены по CPU/памяти и нет доступа во внутреннюю сеть. <em>Self-hosted</em> (свои): доступ к внутренним сервисам и БД, можно мощнее, но состояние между прогонами <strong>не сбрасывается</strong> — остаются кэши, контейнеры, файлы. Отсюда классика «локально и в CI ведёт себя по-разному» и «на одном раннере тесты проходят, на другом нет»: разные версии браузера, таймзона, локаль, оставшиеся от прошлого прогона данные. Для QA это первый вопрос при плавающих падениях — <em>на каком раннере это упало и чистый ли он</em>.</p>
+        <p><strong>Hosted vs self-hosted runners.</strong> Hosted runner обычно выдаёт чистую эфемерную среду, но имеет лимиты и не видит внутреннюю сеть. Self-hosted даёт нужную сеть, железо и ПО, однако требует патчей, изоляции и очистки; постоянный runner может сохранить файлы и состояние прошлого запуска. При расхождении local/CI проверяют версию runtime и браузера, архитектуру, timezone/locale, переменные, права, сеть, ресурсы и чистоту workspace.</p>
 
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Главная метрика пайплайна для команды — <strong>время от коммита до зелёного билда</strong>. Если CI идёт 40 минут, разработчики переключаются на другие задачи и теряют контекст. Цель — держать основной прогон в пределах 10–15 минут: быстрые тесты на каждый PR, тяжёлый полный регресс — ночью по расписанию.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация конфига:</strong> <em>«Напиши GitHub Actions workflow: на каждый PR установить зависимости, прогнать pytest с параллелизацией и собрать Allure-отчёт.»</em><br><br>
-          <strong>Дебаг пайплайна:</strong> вставь лог упавшей стадии → <em>«Почему упало и как починить?»</em>
-        </div>
-      </div>
-
+        <div class="hl modern"><span class="hl-label">Что измерять</span>Не существует универсальной цели «CI должен идти 10 минут». Смотрят отдельно queue time, длительность jobs и время от commit до обязательного зелёного результата, лучше по p50/p95. Оптимизируют критический путь; тяжёлые проверки переносят после merge или в расписание только после оценки риска, а не потому, что они неудобны.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему новая job не ускорила pipeline?» — Возможно, она всё ещё стоит на критическом пути из-за <code>needs</code>, ждёт свободный runner, конкурирует за CPU/БД, повторно скачивает зависимости или шардирование получилось неравномерным. Сначала измеряю queue time и длительность каждой job, затем меняю граф.</div>
     </div>
   </section>
 
@@ -717,55 +632,41 @@
       <span class="section-badge">quality gates</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Автотесты встраиваются в пайплайн как стадия. <strong>Quality gate</strong> — условие, которое должно выполниться, чтобы код прошёл дальше (например, в merge или deploy).</p>
+        <p><strong>Quality gate</strong> — формализованное условие, без которого изменение нельзя merge или продвинуть в следующую среду. Это может быть не только автотест: required status check, ревью, security policy или ручное подтверждение production deployment.</p>
         <div class="pipeline">
           <span class="pipe-stage">tests</span><span class="pipe-arr">→</span>
           <span class="pipe-stage gate">quality gate</span><span class="pipe-arr">→</span>
           <span class="pipe-stage deploy">merge / deploy</span>
         </div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Quality gate — это <code>if</code> в пайплайне, который пускает дальше только при выполнении условий. Не прошёл тесты или упало покрытие — <code>return</code>, merge заблокирован. Как assert перед критичной операцией.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Где какие тесты гонять</strong> (по скорости и стоимости):</p>
+        <div class="hl green"><span class="hl-label">Два типа проверок</span><strong>Blocking</strong> меняет статус pipeline и останавливает merge/deploy. <strong>Informational</strong> публикует результат, но разрешает движение дальше (<code>allow_failure</code> / continue-on-error). Для каждой проверки заранее определяют владельца, критерий успеха и действие при падении.</div>
+        <p><strong>Где запускать проверки</strong> — решают по скорости, надёжности и риску:</p>
         <table>
           <thead><tr><th>Когда</th><th>Что гоняем</th></tr></thead>
           <tbody>
-            <tr><td>На каждый коммит/PR</td><td>lint + unit + быстрые integration (должны быть быстрыми, 5–10 мин)</td></tr>
-            <tr><td>После merge в main</td><td>полный integration, smoke на staging</td></tr>
-            <tr><td>Ночью по расписанию</td><td>полный regression, E2E, нагрузочные</td></tr>
-            <tr><td>Перед prod-деплоем</td><td>smoke на prod-like окружении</td></tr>
+            <tr><td>На PR/MR</td><td>lint, unit, component/contract и быстрые integration; проверки изменённого кода</td></tr>
+            <tr><td>После merge в main</td><td>расширенный integration/E2E и сборка релизного кандидата</td></tr>
+            <tr><td>После deploy в test/staging</td><td>smoke, миграции, критичные сквозные сценарии</td></tr>
+            <tr><td>По расписанию</td><td>долгий regression, совместимость, периодические security/performance проверки</td></tr>
+            <tr><td>После deploy в prod</td><td>безопасный smoke/synthetic и контроль технических и бизнес-метрик</td></tr>
           </tbody>
         </table>
         <p><strong>Типичные quality gates перед merge:</strong></p>
         <ul>
-          <li>Все тесты прошли (зелёные)</li>
-          <li>Code coverage не упал ниже порога</li>
-          <li>Линтер и форматтер чисты</li>
-          <li>Нет critical/high уязвимостей (security scan)</li>
-          <li>Код-ревью одобрено (минимум N апрувов)</li>
+          <li>Обязательные тестовые jobs завершились успешно, flaky не спрятаны бесконечными retry</li>
+          <li>Линтер, статический анализ и проверка формата прошли</li>
+          <li>Coverage не ухудшился относительно принятой политики; новый критичный код покрыт осмысленными проверками</li>
+          <li>Нет уязвимостей запрещённой severity или нарушений license/policy</li>
+          <li>Получены требуемые approvals, ветка актуальна и защищена от прямого push</li>
         </ul>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
         <p><strong>Smoke / sanity / regression в CI</strong> — когда что:</p>
         <ul>
-          <li><strong>Smoke</strong> — 5–10 критичных проверок, гоняются на каждый деплой. «Сервис вообще жив?»</li>
-          <li><strong>Sanity</strong> — проверка конкретной зоны после фикса</li>
-          <li><strong>Regression</strong> — полный набор, тяжёлый. Ночью или перед релизом, не на каждый PR</li>
+          <li><strong>Smoke</strong> — короткий набор критичных проверок после каждого deploy: «версия поднялась и ключевой путь жив?»</li>
+          <li><strong>Sanity</strong> — узкая проверка изменённой зоны или исправления</li>
+          <li><strong>Regression</strong> — проверка ранее работавшего поведения; её объём и момент запуска зависят от риска и длительности, а не от самого названия</li>
         </ul>
-        <p><strong>Pre-merge vs post-merge:</strong> быстрые тесты — <em>до</em> merge (блокируют вливание сломанного кода). Тяжёлые E2E — часто <em>после</em> merge, чтобы не тормозить разработчиков, но с алертом, если что-то упало.</p>
-        <div class="hl orange"><span class="hl-label">Баланс</span>Слишком строгие gates → у команды появляется сопротивление процессу, пайплайн медленный, появляется соблазн «обойти». Слишком слабые → дефекты попадают в production. Senior ищет баланс: быстрый и обязательный pre-merge (unit, lint, smoke) + полный, но не блокирующий post-merge (E2E, regression).</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тесты идут 40 минут на каждый PR, разработчики жалуются. Что делаешь?» — Не «убрать тесты». А: 1) разделить на быстрые (pre-merge) и медленные (post-merge/ночью), 2) параллелизация (pytest-xdist, шардинг), 3) кэш зависимостей, 4) убрать дубли и flaky, 5) часть E2E заменить на более дешёвые contract/integration тесты.</div>
+        <p><strong>Pre-merge vs post-merge:</strong> быстрые надёжные проверки блокируют дефект до merge. Долгие проверки можно запускать после merge или по расписанию, но у красного main всё равно должны быть owner, уведомление и правило восстановления. «Не блокирует PR» не означает «можно игнорировать».</p>
+        <div class="hl orange"><span class="hl-label">Как проектировать gate</span>Гейт должен быть воспроизводимым, достаточно быстрым для своего места, иметь низкий flaky rate и отражать реальный риск. Исключения делаются явно и аудируемо. Если проверку постоянно обходят, разбирают её ценность, стабильность и стоимость, а не привыкают к красному статусу.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тесты идут 40 минут на каждый PR. Что делаешь?» — Сначала строю профиль времени и падений. Затем убираю дубли и ожидания, переношу проверки на более дешёвый уровень, шардирую сбалансированно, кэширую зависимости, чиню flaky и разделяю blocking/informational по риску. Просто вынести всё на ночь — увеличить время обнаружения дефекта.</div>
 
       <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">Виды покрытия: что вообще значит «покрытие 80%»</strong></p>
       <p>Гейт выше говорит «coverage не упал ниже порога». На собесе спросят, какое именно покрытие имеется в виду — и это разные метрики разной строгости.</p>
@@ -779,11 +680,9 @@
         </tbody>
       </table>
       <p>Наглядно: для <code>if a and b:</code> один тест с <code>a=True, b=True</code> даёт <strong>100% statement</strong> и всего <strong>50% branch</strong> — ветка «условие ложно» не исполнялась ни разу.</p>
-      <p><strong style="color:#fff;">Цикломатическая сложность</strong> — количество независимых путей в функции, примерно столько тестов нужно для покрытия ветвей. Значение выше 10 — сигнал, что функцию пора разбивать, и заодно объяснение, почему её тяжело тестировать.</p>
+      <p><strong style="color:#fff;">Цикломатическая сложность</strong> оценивает число линейно независимых путей. Рост значения означает больше вариантов для анализа и тест-дизайна, но сама метрика не сообщает, какие бизнес-риски покрыты и сколько тестов «достаточно».</p>
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У нас 85% покрытия. Это хорошо?» — Само по себе ни о чём не говорит. Уточню три вещи: какое покрытие — строк или ветвей; что именно в этих 85% — критичная бизнес-логика или геттеры и конфиги; есть ли в тестах утверждения. Тест без единого <code>assert</code> даёт покрытие, но не проверяет ничего. 60% на платёжном модуле с осмысленными проверками лучше 85% на автосгенерированных тестах.</div>
-      <div class="hl modern"><span class="hl-label">В реальном мире</span>Универсального «достаточного» процента не существует. Работает дифференцированный подход: высокая планка на критичный домен (платежи, расчёты, авторизация), низкая на UI-обвязку и генерируемый код. И гейтом ставят не абсолютное число, а <strong>непадение относительно текущего уровня</strong> — иначе команда с 40% покрытия никогда не пройдёт порог в 80% и просто отключит проверку.</div>
-      </div>
-
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>Универсального «достаточного» процента не существует. Работает дифференцированный подход: выше требования к критичной бизнес-логике, ниже — к UI-обвязке и генерируемому коду. Часто отдельно контролируют coverage нового кода и отсутствие деградации общего уровня, но процент остаётся индикатором, а не доказательством качества.</div>
     </div>
   </section>
 
@@ -795,114 +694,93 @@
       <span class="section-badge">deployment</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Как выкатить новую версию, не уронив всё для всех пользователей сразу. Четыре подхода:</p>
+        <p><strong>Deployment</strong> доставляет новую версию в среду. Основные стратегии отличаются наличием простоя, стоимостью инфраструктуры, скоростью отката и временем, когда старая и новая версии работают одновременно.</p>
         <div class="grid2">
           <div class="card">
-            <div class="card-title">Blue / Green</div>
-            Две одинаковые среды. На «blue» работает текущая версия, на «green» разворачивают новую. Когда готово — переключают весь трафик на green. Откат = переключить обратно.
-          </div>
-          <div class="card">
-            <div class="card-title">Canary</div>
-            Новую версию выкатывают на маленький % пользователей (5%), наблюдают метрики. Всё ок → постепенно 50% → 100%. Проблема → откат, затронуты немногие.
+            <div class="card-title">Recreate</div>
+            Старую версию останавливают, затем запускают новую. Просто и дёшево, но есть downtime; подходит не для каждого production-сервиса.
           </div>
           <div class="card">
             <div class="card-title">Rolling</div>
-            Обновляют инстансы по очереди: пока часть на новой версии, остальные ещё на старой. Без простоя, но обе версии какое-то время работают вместе.
+            Инстансы обновляют партиями. Простоя обычно нет, но две версии временно работают вместе и должны быть совместимы с API, данными и очередями.
           </div>
           <div class="card">
-            <div class="card-title">Feature flags</div>
-            Код новой фичи уже в проде, но спрятан за флагом. Включают для части юзеров без передеплоя. Выключают мгновенно, если что-то не так.
+            <div class="card-title">Blue / Green</div>
+            Новую версию разворачивают в параллельной среде, проверяют и переключают на неё трафик целиком. Откат быстр, но две среды стоят дороже, а данные остаются общим риском.
+          </div>
+          <div class="card">
+            <div class="card-title">Canary</div>
+            Новая версия получает малую долю трафика. Долю увеличивают поэтапно, если функциональные, технические и бизнес-метрики не ухудшаются.
           </div>
         </div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Blue/green — как переключение симлинка между двумя папками: <code>current → v1</code> или <code>current → v2</code>, мгновенно туда и обратно. Feature flag — обычный <code>if feature_enabled:</code> в коде, который решает, показывать фичу или нет.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Rollback (откат)</strong> — возврат на предыдущую рабочую версию, когда новая сломалась. Чем быстрее и надёжнее откат, тем смелее можно выкатывать.</p>
+        <div class="hl green"><span class="hl-label">Deployment ≠ release</span><strong>Feature flag</strong> управляет доступностью уже развернутой функции и отделяет release от deployment. Выключение флага может быстро убрать пользовательский эффект, но не откатывает миграцию, нагрузку, фоновую задачу или несовместимое изменение API.</div>
+        <p><strong>Rollback</strong> возвращает предыдущую версию; <strong>roll-forward</strong> выпускает исправленную следующую. Выбор зависит от обратной совместимости данных, скорости восстановления и цены повторного deploy. План восстановления и критерии решения готовят до релиза.</p>
         <p><strong>Как тестировать каждую стратегию:</strong></p>
         <ul>
-          <li><strong>Feature flag</strong> — проверить <em>обе</em> ветки: фича включена работает правильно, выключена — не ломает остальное и не видна</li>
-          <li><strong>Canary</strong> — на канареечной версии гоняют smoke + следят за метриками (error rate, latency). Рост ошибок → авто-откат</li>
-          <li><strong>Blue/green</strong> — прогнать тесты на green до переключения трафика</li>
-          <li><strong>Rollback</strong> — проверить, что откат реально возвращает рабочее состояние, данные не теряются</li>
+          <li><strong>Rolling</strong> — совместимость старых и новых инстансов, long-lived sessions, очереди, кэш и поведение во время частичного обновления</li>
+          <li><strong>Blue/green</strong> — smoke на новой среде до переключения, корректность маршрутизации и доступность общей БД после переключения</li>
+          <li><strong>Canary</strong> — репрезентативность выбранного трафика, smoke/synthetic и автоматические пороги error rate, latency и бизнес-метрик</li>
+          <li><strong>Feature flag</strong> — обе ветки, права и сегменты пользователей, значение по умолчанию, выключение без deploy и удаление устаревшего флага</li>
+          <li><strong>Rollback/roll-forward</strong> — версия действительно сменилась, сервис восстановился в целевое время, данные не потеряны и читаются</li>
         </ul>
-        <div class="hl"><span class="hl-label">Связь с теорией</span>Это shift-right тестирование: проверяем поведение уже в проде, на реальных пользователях, но контролируемо. Canary + feature flags + быстрый rollback — основа безопасных частых релизов.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
+        <div class="hl"><span class="hl-label">Progressive delivery</span>Canary, feature flags и автоматический анализ метрик уменьшают радиус воздействия, но не заменяют pre-production проверки. После каждого шага нужен наблюдаемый критерий продолжить, остановить или вернуть изменение.</div>
         <p><strong>Основной риск — миграции БД при rollback.</strong> Код откатить легко, а схему БД — нет. Если новая версия добавила/изменила колонку, откат кода на старую версию может сломаться о новую схему.</p>
         <ul>
           <li><strong>Решение</strong>: backward-compatible миграции. Сначала добавить колонку (старый код её игнорирует), потом выкатить код, который её использует. Удалять старое — только через несколько релизов</li>
           <li>Это называется <strong>expand-contract</strong> (или parallel change): расширяем схему → мигрируем → сужаем</li>
         </ul>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>В современных командах базовый набор — <strong>feature flags + canary + быстрый rollback</strong>. Флаги управляются через сервисы вроде LaunchDarkly, Unleash, Flagsmith. Часто фичу катят «тёмным запуском» (dark launch): код работает в проде, но результат скрыт от пользователя — так тестируют производительность и корректность на реальном трафике до публичного включения.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как тестировать rollback?» — Не только «нажали откат — вернулось». Проверить: 1) приложение реально откатилось на прошлую версию, 2) данные, созданные на новой версии, не потерялись и читаются старой, 3) миграции БД обратно совместимы (старый код работает с новой схемой), 4) время отката укладывается в требования (RTO). Rollback, который теряет данные — хуже бага, который чинили.</div>
-      </div>
-
+        <div class="hl modern"><span class="hl-label">Dark launch</span>Код выполняется в production на реальном или зеркалируемом трафике, но результат ещё не показывается пользователю и не должен менять бизнес-состояние. Так проверяют производительность и сравнивают результаты до публичного release.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Blue/green гарантирует мгновенный rollback?» — Только для stateless-кода. Общая БД уже могла получить новую схему и данные, сообщения могли уйти во внешние системы, а кэш и сессии — измениться. Поэтому проверяют backward compatibility и репетируют восстановление целиком, а не только переключение трафика.</div>
     </div>
   </section>
 
-  <!-- ─────── 05. DOCKER ─────── -->
-  <section class="section" id="docker">
+  <!-- ─────── 05. АРТЕФАКТЫ И ОКРУЖЕНИЯ ─────── -->
+  <section class="section" id="artifacts">
     <div class="section-header">
       <span class="section-num">05</span>
-      <span class="section-title">Docker для QA</span>
-      <span class="section-badge">containers</span>
+      <span class="section-title">Артефакты и окружения</span>
+      <span class="section-badge">delivery</span>
     </div>
     <div class="section-body">
+        <p><strong>Artifact</strong> — сохранённый результат job. Он нужен другой job, человеку для разбора или системе доставки. <strong>Cache</strong> — только ускоритель: его отсутствие не должно менять результат сборки.</p>
+        <table>
+          <thead><tr><th>Что</th><th>Примеры</th><th>Требование</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Release artifact</strong></td><td>wheel/JAR, бинарник, архив, container image</td><td>неизменяемый, однозначно связан с commit и продвигается между средами</td></tr>
+            <tr><td><strong>Test artifact</strong></td><td>JUnit XML, Allure results, screenshots, traces, coverage</td><td>доступен для диагностики, имеет retention и не содержит секретов</td></tr>
+            <tr><td><strong>Cache</strong></td><td>pip/npm packages, результаты компиляции</td><td>может устареть или отсутствовать; ключ зависит от lock-файла и платформы</td></tr>
+          </tbody>
+        </table>
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Docker</strong> упаковывает приложение со всем окружением (ОС, библиотеки, зависимости) в <em>контейнер</em> — изолированную коробку, которая одинаково работает на любой машине. «У меня работает, а на сервере нет» — Docker решает эту проблему.</p>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Контейнер — как <code>venv</code> в Python, но не только для пакетов, а для всего окружения целиком: ОС, системные библиотеки, сама программа. Запускается одинаково на ноутбуке и на сервере, потому что несёт окружение с собой.</div>
-        <p>Зачем QA: поднять БД или сервис для тестов одной командой, иметь одинаковое окружение локально и в CI, не засорять свою машину.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Ключевые понятия:</strong></p>
+        <p><strong>Build once, promote many:</strong> release artifact собирают один раз, тестируют именно его и затем продвигают в staging и production. Пересборка «того же commit» для каждой среды создаёт разные бинарные результаты и обесценивает проверку.</p>
+        <div class="pipeline">
+          <span class="pipe-stage">build + version</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage">verify</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage">staging</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage gate">approval</span><span class="pipe-arr">→</span>
+          <span class="pipe-stage deploy">production</span>
+        </div>
         <ul>
-          <li><strong>Образ (image)</strong> — шаблон, «рецепт» с приложением и окружением</li>
-          <li><strong>Контейнер (container)</strong> — запущенный экземпляр образа (образ : контейнер = класс : объект)</li>
-          <li><strong>Dockerfile</strong> — инструкция, как собрать образ</li>
-          <li><strong>docker-compose</strong> — поднять несколько контейнеров вместе (app + БД + Redis) одной командой</li>
+          <li>Версия содержит уникальный идентификатор: release version и/или commit SHA; тег вроде <code>latest</code> не даёт воспроизводимости</li>
+          <li>В metadata сохраняют source SHA, build ID, время, результаты проверок и зависимости; checksum/signature помогают убедиться, что artifact не подменился</li>
+          <li>SBOM перечисляет компоненты, provenance описывает происхождение сборки; это элементы защиты supply chain, а не замена тестам</li>
+          <li>Registry/artifact storage настраивают с retention, ограничением доступа и запретом перезаписи релизных версий</li>
         </ul>
-        <div class="code-block"><span class="cm"># Поднять Postgres для тестов одной командой</span>
-docker run -d -p 5432:5432 \
-  -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test \
-  postgres:16
 
-<span class="cm"># Или несколько сервисов через compose</span>
-docker compose up -d</div>
-        <p><strong>Testcontainers</strong> — библиотека, которая поднимает реальные зависимости (Postgres, Kafka, Redis) в Docker прямо из автотеста и останавливает после. Тест работает с настоящей БД, а не с моком.</p>
-      </div>
+        <p><strong>Environment</strong> — цель развертывания с собственными настройками, данными, интеграциями и правами: dev, test/qa, staging, production. Конфигурацию отделяют от artifact: одна версия получает разные environment-specific values и secrets без пересборки.</p>
+        <table>
+          <thead><tr><th>Среда</th><th>Главная задача</th><th>Что важно QA</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Preview / review app</strong></td><td>временная среда конкретного PR</td><td>уникальные данные, ограниченный доступ, автоматическое удаление</td></tr>
+            <tr><td><strong>Test / QA</strong></td><td>интеграционная проверка изменений</td><td>управляемые данные, моки/sandbox внешних систем, воспроизводимый reset</td></tr>
+            <tr><td><strong>Staging</strong></td><td>репетиция production deployment</td><td>максимально близкие topology/config, миграции и smoke; реальные PII не копируют без защиты</td></tr>
+            <tr><td><strong>Production</strong></td><td>работа с реальными пользователями</td><td>protected environment, approvals, минимальные secrets, post-deploy verification и аудит</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Environment parity не означает полную копию production.</strong> Важна эквивалентность по проверяемым рискам: версии сервисов, схема БД, конфигурация, маршрутизация и интеграционные контракты. Объём данных и нагрузка могут отличаться, поэтому зелёный staging не отменяет production monitoring.</p>
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Docker в CI</strong> — пайплайн поднимает контейнеры с зависимостями, гоняет интеграционные тесты против них, останавливает. Изолированное чистое окружение на каждый прогон — нет данных, оставшихся от предыдущих прогонов.</p>
-        <p><strong>Kubernetes (k8s)</strong> — оркестратор контейнеров: запускает, масштабирует, перезапускает упавшие, распределяет по серверам. QA напрямую трогает редко, но знать стоит:</p>
-        <ul>
-          <li><strong>Pod</strong> — минимальная единица, один или несколько контейнеров</li>
-          <li><strong>Deployment</strong> — управляет репликами подов (сколько копий держать)</li>
-          <li><strong>Service</strong> — стабильная точка доступа к подам</li>
-        </ul>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатору достаточно уметь: запустить контейнер, прочитать docker-compose, поднять зависимости для тестов, посмотреть логи (<code>docker logs</code>). Kubernetes — это уже зона DevOps; от QA ждут понимания «что это и зачем», а не умения писать манифесты. Testcontainers — самый практичный навык: реальные зависимости в тестах без ручного поднятия.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем поднимать реальную БД в Docker, если можно замокать?» — Мок проверяет твою логику, но не ловит реальные проблемы: SQL-синтаксис, схему, поведение транзакций, особенности конкретной СУБД. Testcontainers даёт настоящую БД — тесты ближе к проду. Мокать стоит <em>чужие внешние</em> сервисы, а свою БД лучше поднимать реальную.</div>
-      </div>
-
+        <div class="hl"><span class="hl-label">Граница с Docker</span>Pipeline может выполнять jobs и service dependencies в контейнерах, а release artifact может быть образом. Здесь важно, <em>как</em> artifact версионируется, проверяется и продвигается. Dockerfile, image/container, Compose, volumes, сети, Testcontainers и Kubernetes разобраны в <a href="bash.html">Bash · Docker · K8s</a> и здесь не повторяются.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем artifact отличается от cache?» — Artifact является результатом конкретной сборки и нужен для передачи, доставки или диагностики. Cache можно удалить и восстановить: он только сокращает время. Деплоить приложение из cache — потерять однозначную связь с проверенной сборкой.</div>
     </div>
   </section>
 
@@ -914,60 +792,55 @@ docker compose up -d</div>
       <span class="section-badge">practice</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Главные задачи QA-автоматизатора в CI/CD:</p>
+        <p>QA в CI/CD отвечает не за «последнюю зелёную кнопку», а за качество обратной связи: какие риски проверяются, где стоит gate, насколько результату можно доверять и достаточно ли данных для быстрого разбора.</p>
         <ul>
-          <li>Встроить автотесты в пайплайн как стадию</li>
-          <li>Настроить quality gates (что блокирует merge/deploy)</li>
-          <li>Держать тесты быстрыми и стабильными</li>
-          <li>Настроить отчёты, чтобы падения было легко разбирать</li>
+          <li>Встроить проверки в нужные триггеры и места pipeline, настроить exit codes и required checks</li>
+          <li>Подготовить изолированные test data, зависимости и cleanup для параллельных запусков</li>
+          <li>Держать suite быстрым, детерминированным и наблюдаемым</li>
+          <li>Публиковать machine-readable report и диагностические artifacts даже при падении job</li>
+          <li>Участвовать в post-deploy verification и правилах rollback/roll-forward</li>
         </ul>
-        <div class="hl"><span class="hl-label">Что QA смотрит в CI после падения</span>Когда билд красный, разбор идёт по порядку: <strong>failed stage</strong> (на какой стадии упало — lint/unit/e2e), <strong>test report</strong> (какие тесты, с какой ошибкой), <strong>artifacts</strong> (скриншоты, видео, request/response, browser traces — для UI-тестов незаменимо), <strong>logs</strong> приложения и теста, <strong>commit diff</strong> (что менялось — часто причина там), <strong>flaky history</strong> (падал ли этот тест раньше нестабильно), <strong>owner / assignee</strong> (кто отвечает за фикс). Хороший CI даёт всё это из коробки — иначе разбор превращается в чтение сырых логов.</div>
-      </div>
+        <p><strong>Как разбирать красный pipeline:</strong></p>
+        <ol>
+          <li>Найти первую причинную ошибку, а не десятки последующих: trigger, commit SHA, failed job/step и exit code.</li>
+          <li>Сравнить diff и предыдущий успешный запуск; проверить, воспроизводится ли проблема на том же artifact и окружении.</li>
+          <li>Изучить JUnit report, stack trace, логи приложения, screenshot/video/trace, request ID и метрики.</li>
+          <li>Классифицировать: дефект продукта, дефект теста, тестовые данные, environment/config, инфраструктура runner/network или известная flaky-проблема.</li>
+          <li>Назначить owner и действие. Перезапуск допустим как диагностический эксперимент, но «перезапустить до зелёного» не является исправлением.</li>
+        </ol>
+        <div class="hl"><span class="hl-label">Локально зелёное, в CI красное</span>Сравнивают точный commit и команды, версии runtime/dependencies/browser, OS/architecture, timezone/locale, переменные и secrets, права пользователя, сеть, ресурсы, порядок и параллельность тестов, состояние данных и readiness сервисов. Затем воспроизводят в максимально близкой среде, а не сразу добавляют retry.</div>
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Flaky-тест в main pipeline</strong> — тест, который иногда падает без причины. Это типичная проблема CI, потому что подрывает доверие к тестам («опять упало, перезапусти»). Что делать:</p>
+        <p><strong>Flaky test</strong> даёт разные результаты на одинаковом коде и входных условиях. Причина существует, даже если она пока не найдена: race condition, зависимость от порядка, общий state, случайность без seed, нестабильная сеть, неверное ожидание, ресурсы или время.</p>
         <ul>
-          <li><strong>Не игнорировать</strong> — flaky-тест хуже отсутствия теста, он учит команду игнорировать красное</li>
-          <li><strong>Изолировать</strong> — пометить (quarantine), убрать из блокирующих, чинить отдельно</li>
-          <li><strong>Найти причину</strong>: гонки, зависимость от порядка тестов, sleep вместо ожиданий, общие тест-данные, внешние сервисы</li>
-          <li><strong>retry — временная мера, а не устранение причины</strong>: <code>pytest-rerunfailures</code> прячет проблему, но не решает</li>
+          <li>Сохраняют pass-after-retry как flaky-событие, иначе статистика врёт</li>
+          <li>Собирают частоту, duration, runner, seed, порядок тестов и diagnostics; воспроизводят многократным запуском и меняют порядок/нагрузку</li>
+          <li>Нестабильную проверку временно выводят из blocking gate только по quarantine policy: задача, owner, срок и критерий возврата</li>
+          <li>Retry ограничивают и используют для диагностики или известной внешней нестабильности; он не устраняет первопричину</li>
         </ul>
-        <p><strong>Параллелизация</strong> — главный способ ускорить suite:</p>
+
+        <p><strong>Как ускорить suite, который идёт два часа:</strong></p>
         <ul>
-          <li><code>pytest-xdist</code> — запуск тестов в несколько процессов (<code>pytest -n 4</code>)</li>
-          <li><strong>Шардинг</strong> — разбить тесты на части и гонять на разных раннерах CI параллельно</li>
-          <li>Требование: тесты должны быть <em>изолированы</em> (не зависеть друг от друга и от общих данных)</li>
+          <li>Сначала измерить setup, collection и duration каждого теста; найти медленный хвост, повторы, ожидания и инфраструктурные паузы</li>
+          <li>Перенести проверки на более дешёвый уровень: часть E2E заменить component/contract/integration тестами без потери риска</li>
+          <li>Запускать независимые тесты через <code>pytest-xdist</code>, а suite делить на сбалансированные по истории времени shards</li>
+          <li>Изолировать аккаунты, данные и namespaces; иначе параллелизация создаст гонки и упрётся в общую БД</li>
+          <li>На PR выбирать релевантные тесты по изменению, сохраняя полный периодический прогон как контроль пропущенных зависимостей</li>
         </ul>
-        <div class="hl"><span class="hl-label">Environments (окружения)</span>Типичная цепочка: <strong>dev → test/qa → staging → pre-prod → prod</strong>. Staging — максимально похож на prod (та же конфигурация, близкие данные), но <em>«у нас на staging зелёное» не гарантирует prod</em>: отличаются объём и реальность данных, нагрузка, сторонние интеграции (в staging часто моки/sandbox), секреты и фича-флаги. Поэтому после деплоя в prod всё равно нужны проверки (smoke, мониторинг), а не только зелёный staging.</div>
-        <div class="hl orange"><span class="hl-label">Quarantine policy для flaky — формализуй</span>Карантин flaky-теста — не «убрал и забыл», а процесс: 1) flaky временно <em>не блокирует merge</em> (вынесен из gate), 2) <strong>сразу заводится задача</strong> на исправление, 3) есть <strong>SLA на починку</strong> (например, неделя), 4) <strong>нельзя держать в карантине бесконечно</strong> — иначе карантин становится свалкой мёртвых тестов. Без правил «временно отключим» превращается в «навсегда».</div>
-      </div>
 
-      <hr class="lvl-divider">
+        <p><strong>Отчётность:</strong> CI обычно читает JUnit XML и показывает статус, имя теста, duration и ошибку. Allure или аналог даёт человеку шаги, историю и attachments. Для UI/API полезны screenshot, video, trace, request/response без секретов, server logs и correlation ID. Публикацию настраивают с условием <code>always()</code>, чтобы отчет не исчезал именно при падении.</p>
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Как ускорить suite, который идёт 2 часа</strong> — частый Senior-вопрос:</p>
+        <p><strong>Что проверять на review pipeline-конфига:</strong></p>
         <ul>
-          <li><strong>Параллелизация</strong> — xdist + шардинг по раннерам (самый большой выигрыш)</li>
-          <li><strong>Разделить по уровням</strong> — быстрые на каждый PR, медленные E2E ночью</li>
-          <li><strong>Убрать дубли</strong> — E2E, повторяющие то, что уже покрыто integration</li>
-          <li><strong>Сдвинуть вниз по пирамиде</strong> — заменить часть медленных E2E на быстрые contract/integration</li>
-          <li><strong>Кэш</strong> зависимостей и тестовых данных</li>
-          <li><strong>Убрать <code>sleep</code></strong> — заменить на явные ожидания с polling</li>
+          <li>Нужные ли branches/events/paths запускают workflow, нет ли двойных запусков на push и PR</li>
+          <li>Верно ли построены dependencies и gates; действительно ли deploy получает проверенный artifact</li>
+          <li>Есть ли timeout, cleanup, отмена устаревших запусков и корректное поведение при concurrent pipelines</li>
+          <li>Минимальны ли token permissions и область secrets; безопасен ли запуск для fork PR и third-party actions</li>
+          <li>Сохраняются ли reports/artifacts при failure, ограничены ли доступ и retention</li>
         </ul>
-        <p><strong>Allure</strong> — главный инструмент отчётности в CI: показывает прошедшие/упавшие тесты, шаги, прикладывает запросы, ответы, скриншоты, логи. Без хорошего отчёта разбор падений в CI превращается в чтение сырых логов.</p>
-        <div class="hl"><span class="hl-label">Test impact / selective testing</span>Современная идея для больших suite: запускать не всё подряд, а <em>релевантный набор</em> — тесты, затронутые изменёнными файлами/сервисами. Экономит время на каждом PR. Полный регресс при этом гоняют по расписанию (ночью) или перед релизом. Не обязательно к собесу, но знать концепцию — плюс.</div>
-        <div class="hl"><span class="hl-label">Deployment verification — связка с observability</span>После деплоя проверка не заканчивается. Что делают: <strong>smoke</strong> (критичные сценарии сразу после выката), <strong>health checks</strong> (сервис поднялся и отвечает), <strong>synthetic checks</strong> (боты гоняют ключевые пути), <strong>error rate / latency</strong> (метрики не выросли против baseline), <strong>rollback criteria</strong> (заранее заданные пороги: если error rate &gt; X% — откат). Это мост между CI/CD и observability (раздел Архитектура): деплой «закончен», когда метрики подтвердили здоровье, а не в момент выката.</div>
-        <div class="hl orange"><span class="hl-label">Главная мысль про value</span>Зелёный пайплайн ≠ качество. Автотесты дают ценность, только если: ловят реальные баги (не просто «зелёная галочка»), стабильны (им доверяют), быстры (не тормозят разработку). Suite из 5000 flaky-тестов, которые все перезапускают не глядя, — такой набор снижает доверие к автоматизации и требует пересмотра.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как понять, что автотесты реально дают value, а не просто зелёную галочку?» — Смотреть на: 1) <strong>escape rate</strong> — сколько багов прошло тесты и нашлось в проде (мало = тесты ловят), 2) <strong>доверие команды</strong> — красный билд реально останавливает релиз или его игнорируют, 3) <strong>flaky rate</strong> — низкий, 4) тесты падали на <em>реальных</em> регрессиях, а не только на своих изменениях. Если suite всегда зелёный, но дефекты попадают в production — он ничего не проверяет.</div>
-      </div>
 
+        <div class="hl"><span class="hl-label">Deployment verification</span>После deploy сверяют ожидаемую версию, readiness и health, выполняют безопасный smoke/synthetic и наблюдают error rate, latency, saturation и ключевые бизнес-метрики относительно baseline. Заранее заданные пороги определяют продолжение canary, остановку, rollback или roll-forward. Deploy завершён технически не тогда, когда команда отработала без ошибки, а когда система подтвердила здоровье.</div>
+        <div class="hl orange"><span class="hl-label">Как оценивать value</span>Смотрят вместе: сколько реальных регрессий найдено до production, escaped defects, flaky rate и pass-after-retry, длительность и p95 feedback, время диагностики, долю ложных тревог и случаи обхода gates. Один счётчик тестов или высокий coverage легко улучшить без улучшения качества.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Кто должен чинить красный pipeline?» — Владение общее и определяется причиной: разработчик исправляет регрессию продукта, автор теста — дефект проверки, platform/DevOps — runner или инфраструктуру. QA помогает быстро классифицировать и обеспечить диагностику; роль QA не в том, чтобы молча перезапускать всё красное.</div>
     </div>
   </section>
 
@@ -980,15 +853,6 @@ docker compose up -d</div>
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {

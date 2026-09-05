@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -231,31 +205,6 @@
     color: #5de0b0;
   }
   .section-body { padding: 22px 26px; }
-
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
 
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
@@ -442,7 +391,11 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
+  }
+  @media (max-width: 560px) {
+    .section-body { padding: 18px 16px; }
+    table { display: block; overflow-x: auto; font-size: 12px; }
+    th, td { min-width: 120px; padding: 7px 8px; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -482,7 +435,7 @@
   }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -510,28 +463,23 @@
   </div>
   <div class="toc-inner">
     <div class="nav-group-title">На этой странице</div>
-    <a href="#basics">01 · Основы и базовые команды</a>
-    <a href="#branches">02 · Ветки</a>
-    <a href="#merge-rebase">03 · Merge, Rebase, Fast-forward</a>
+    <a href="#basics">01 · Модель и базовый цикл</a>
+    <a href="#branches">02 · Ветки, remote и tags</a>
+    <a href="#merge-rebase">03 · Merge, rebase и squash</a>
     <a href="#conflicts">04 · Конфликты</a>
-    <a href="#strategies">05 · Branching strategies</a>
-    <a href="#useful">06 · Полезные команды</a>
+    <a href="#strategies">05 · Командные workflows</a>
+    <a href="#useful">06 · Отмена, восстановление, поиск</a>
   </div>
 </aside>
 
 <main class="main">
   <div class="topbar">
     <div class="crumbs">QA Senior / <span>Git</span></div>
-    <div class="level-switch" role="tablist">
-      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
-      <button class="level-btn" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
-      <button class="level-btn active" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
-    </div>
   </div>
 
   <div class="header">
     <h1>Git</h1>
-    <p>// 6 подтем · команды, ветки, merge/rebase, стратегии</p>
+    <p>// 6 подтем · состояния, ветки, история, конфликты и восстановление</p>
   </div>
 
 
@@ -539,55 +487,51 @@
   <section class="section" id="basics">
     <div class="section-header">
       <span class="section-num">01</span>
-      <span class="section-title">Основы и базовые команды</span>
+      <span class="section-title">Модель и базовый цикл</span>
       <span class="section-badge">basics</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Git</strong> — система контроля версий: хранит всю историю изменений кода, позволяет откатываться и работать команде параллельно. Базовый цикл из трёх команд:</p>
-        <div class="code-block">git add file.py      <span class="cm"># добавить изменения в staging</span>
-git commit -m <span class="st">"fix login"</span>  <span class="cm"># зафиксировать снимок</span>
-git push             <span class="cm"># отправить на сервер (origin)</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Commit — как точка сохранения в игре: снимок всего проекта в этот момент, к которому можно вернуться. Staging area — это «корзина перед оформлением»: складываешь туда изменения, которые войдут в следующий снимок, остальное остаётся не зафиксированным.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Три состояния файла</strong> и где они живут:</p>
+        <p><strong>Git</strong> — распределённая система контроля версий. Обычный clone содержит локальную историю и позволяет создавать commits, branches и просматривать изменения без постоянного соединения с сервером.</p>
+        <div class="code-block">working tree  --git add--&gt;  index  --git commit--&gt;  local repository
+local repository  --git push--&gt;  remote repository</div>
         <ul>
-          <li><strong>Modified</strong> — изменён в рабочей директории, ещё не отмечен</li>
-          <li><strong>Staged</strong> — добавлен в staging (index) через <code>git add</code>, войдёт в следующий коммит</li>
-          <li><strong>Committed</strong> — зафиксирован в локальном репозитории</li>
+          <li><strong>Working tree</strong> — файлы, которые сейчас редактируются; они могут быть untracked или modified</li>
+          <li><strong>Index / staging area</strong> — точный набор изменений для следующего commit</li>
+          <li><strong>Local repository</strong> — сохранённый граф commits и refs внутри <code>.git</code></li>
+          <li><strong>Remote repository</strong> — отдельная копия; <code>origin</code> лишь обычное имя remote, не специальное слово Git</li>
         </ul>
-        <p><strong>Команды, которые нужны каждый день:</strong></p>
+        <div class="code-block">git clone &lt;url&gt;                    <span class="cm"># получить repository и working tree</span>
+git status --short                 <span class="cm"># состояние файлов</span>
+git diff                           <span class="cm"># working tree vs index</span>
+git add -p                         <span class="cm"># выбрать отдельные hunks</span>
+git diff --staged                  <span class="cm"># index vs HEAD: что попадёт в commit</span>
+git commit -m <span class="st">"fix login timeout"</span> <span class="cm"># локальный снимок</span>
+git push                           <span class="cm"># обновить remote ref</span></div>
+        <div class="hl green"><span class="hl-label">Зачем нужен index</span>Он позволяет собрать атомарный commit из части текущих правок. Если в одном файле одновременно исправлен баг и начат рефакторинг, <code>git add -p</code> помогает зафиксировать их отдельно.</div>
+        <p><code>git commit -am "message"</code> автоматически добавляет modified/deleted <em>tracked</em> files, но не включает новые untracked-файлы.</p>
+
+        <p><strong>Три варианта diff, которые важно не путать:</strong></p>
         <table>
-          <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
+          <thead><tr><th>Команда</th><th>Сравнение</th></tr></thead>
           <tbody>
-            <tr><td><code>git clone url</code></td><td>склонировать репозиторий</td></tr>
-            <tr><td><code>git status</code></td><td>что изменено, что в staging</td></tr>
-            <tr><td><code>git add .</code></td><td>добавить все изменения в staging</td></tr>
-            <tr><td><code>git commit -m "..."</code></td><td>зафиксировать снимок</td></tr>
-            <tr><td><code>git push / pull</code></td><td>отправить / забрать с сервера</td></tr>
-            <tr><td><code>git log</code></td><td>история коммитов</td></tr>
-            <tr><td><code>git diff</code></td><td>что именно изменилось</td></tr>
+            <tr><td><code>git diff</code></td><td>незастейдженные изменения: working tree ↔ index</td></tr>
+            <tr><td><code>git diff --staged</code></td><td>подготовленный commit: index ↔ HEAD</td></tr>
+            <tr><td><code>git diff HEAD</code></td><td>все локальные правки: working tree ↔ HEAD</td></tr>
+            <tr><td><code>git show &lt;commit&gt;</code></td><td>metadata и patch конкретного commit</td></tr>
           </tbody>
         </table>
-      </div>
 
-      <hr class="lvl-divider">
+        <p><strong>Commit</strong> содержит ссылку на tree проекта, parent commit или несколько parents у merge, автора/коммитера, время и сообщение. Его object ID зависит от содержимого. Логически Git показывает snapshots; физически packfiles могут хранить объекты с delta compression.</p>
+        <p><strong>HEAD</strong> обычно символически указывает на текущую branch, а через неё — на commit. В detached HEAD он указывает прямо на commit. Branch и tag — тоже refs: branch двигается с новыми commits, tag обычно фиксирует конкретную версию.</p>
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Что такое коммит на самом деле:</strong> снимок состояния всех файлов + уникальный хеш (по умолчанию SHA-1; Git также поддерживает переход на SHA-256), автор, время, ссылка на родительский коммит. Git хранит <em>снимки целиком</em> (с дедупликацией неизменённых файлов), а не дельты.</p>
-        <p><strong>HEAD</strong> — указатель на текущий коммит / ветку, где ты сейчас находишься. <strong>origin</strong> — стандартное имя удалённого репозитория.</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатору хватает уверенного владения базовым циклом + ветками + разрешением конфликтов + PR. Глубокое устройство Git (объектная модель, blob/tree/commit) знать не обязательно — спрашивают редко. Зато <code>git log</code>, <code>git diff</code> и умение разобраться, «какой коммит внёс регрессию», — ежедневный инструмент.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>git fetch</code> отличается от <code>git pull</code>?» — <code>fetch</code> только скачивает изменения с сервера, но не трогает твою рабочую ветку. <code>pull</code> = <code>fetch</code> + <code>merge</code> (сразу вливает в текущую ветку). <code>fetch</code> безопаснее: сначала посмотреть, что прилетело, потом решить, как влить.</div>
-      </div>
-
+        <p><strong>Fetch, pull и push:</strong></p>
+        <ul>
+          <li><code>git fetch --prune</code> скачивает новые objects/refs и обновляет remote-tracking refs вроде <code>origin/main</code>, не меняя текущую local branch и working tree</li>
+          <li><code>git pull</code> сначала делает fetch, затем интегрирует upstream по опциям или config: fast-forward only, rebase, merge либо squash. Поэтому нельзя считать, что pull всегда равен <code>fetch + merge</code></li>
+          <li><code>git push -u origin feature-x</code> публикует branch и задаёт upstream; после этого <code>pull</code>/<code>push</code> могут работать без явных имён</li>
+        </ul>
+        <div class="hl"><span class="hl-label">.gitignore</span>Он не даёт Git начать отслеживать подходящие untracked-файлы. Уже tracked-файл правило не исключит: его сначала убирают из index через <code>git rm --cached</code>. Секреты, локальные окружения, кэши и генерируемые отчёты лучше исключать до первого commit.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>fetch</code> отличается от <code>pull</code>?» — Fetch только обновляет моё локальное представление remote. Pull после fetch ещё меняет текущую branch выбранным способом интеграции. Когда важно сначала увидеть расхождение, делаю <code>fetch</code>, затем смотрю <code>log/diff</code> и явно выбираю merge, rebase или fast-forward.</div>
     </div>
   </section>
 
@@ -595,117 +539,88 @@ git push             <span class="cm"># отправить на сервер (or
   <section class="section" id="branches">
     <div class="section-header">
       <span class="section-num">02</span>
-      <span class="section-title">Ветки</span>
+      <span class="section-title">Ветки, remote и tags</span>
       <span class="section-badge">branches</span>
     </div>
     <div class="section-body">
+        <p><strong>Branch</strong> — двигающаяся ссылка на commit, а не копия каталога. Новый commit сдвигает текущую branch вперёд; создание branch почти ничего не стоит.</p>
+        <div class="code-block">git fetch origin
+git switch -c feature-login origin/main  <span class="cm"># branch от свежего origin/main</span>
+<span class="cm"># ... изменения, add, commit ...</span>
+git push -u origin feature-login         <span class="cm"># publish + upstream</span></div>
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Ветка (branch)</strong> — параллельная линия разработки. Делаешь фичу в своей ветке, не мешая main, потом вливаешь обратно.</p>
-        <div class="code-block">git branch feature-login        <span class="cm"># создать ветку</span>
-git switch feature-login        <span class="cm"># переключиться (или git checkout)</span>
-git switch -c feature-login     <span class="cm"># создать и переключиться сразу</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Ветка — это просто указатель (ссылка) на коммит, как переменная, хранящая адрес. <code>main</code> и <code>feature</code> — две ссылки на разные коммиты. Переключение ветки — это смена того, на что смотрит HEAD. Создать ветку дёшево: это новая ссылка, а не копия всего проекта.</div>
-      </div>
+        <table>
+          <thead><tr><th>Имя</th><th>Что это</th></tr></thead>
+          <tbody>
+            <tr><td><code>main</code></td><td>local branch; двигается локальными commits/merge/rebase/reset</td></tr>
+            <tr><td><code>origin</code></td><td>имя remote и набор настроек его URL/refspec</td></tr>
+            <tr><td><code>origin/main</code></td><td>local remote-tracking ref: состояние remote branch по последнему fetch</td></tr>
+            <tr><td><strong>upstream</strong></td><td>связь local branch с remote-tracking branch для pull, push и статуса ahead/behind</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Важное различие</span>Удаление local branch не удаляет remote branch и наоборот. <code>git branch -d feature-x</code> удаляет локальную ссылку, <code>git push origin --delete feature-x</code> — удалённую. <code>git fetch --prune</code> убирает устаревшие remote-tracking refs.</div>
 
-      <hr class="lvl-divider">
+        <p><strong>Detached HEAD</strong> — HEAD указывает прямо на commit, например после <code>git switch --detach &lt;sha&gt;</code>. Просматривать и тестировать старую версию безопасно. Если здесь созданы нужные commits, до их очистки создают ссылку: <code>git switch -c rescue-branch</code>.</p>
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Типичный рабочий цикл с веткой:</strong></p>
-        <div class="code-block">git switch -c feature-x      <span class="cm"># 1. создал ветку от main</span>
-<span class="cm"># ... делаешь изменения, коммитишь ...</span>
-git push -u origin feature-x <span class="cm"># 2. запушил ветку на сервер</span>
-<span class="cm"># 3. открыл Pull Request на GitHub/GitLab</span>
-<span class="cm"># 4. ревью → merge в main</span>
-git switch main
-git pull                     <span class="cm"># 5. забрал обновлённый main</span>
-git branch -d feature-x      <span class="cm"># 6. удалил локальную ветку</span></div>
-        <p><strong>Полезное про ветки:</strong></p>
-        <ul>
-          <li><code>git branch</code> — список локальных веток</li>
-          <li><code>git branch -a</code> — включая удалённые</li>
-          <li><code>git branch -d name</code> — удалить ветку</li>
-          <li><code>origin/main</code> — remote-tracking ветка: где main на сервере по последним данным</li>
-        </ul>
-      </div>
+        <p><strong>Tags фиксируют версии.</strong> Lightweight tag — простая ссылка. Annotated tag хранит автора, дату, сообщение и может быть подписан; он подходит для release:</p>
+        <div class="code-block">git tag -a v2.4.0 -m <span class="st">"release 2.4.0"</span>
+git push origin v2.4.0             <span class="cm"># отправить tag явно</span>
+git show v2.4.0</div>
+        <p>Release tag не передвигают молча: опубликованное имя версии должно продолжать указывать на тот же object. Исправление выпускают новым tag.</p>
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Detached HEAD</strong> — состояние, когда ты переключился не на ветку, а на конкретный коммит (<code>git checkout abc123</code>). Коммиты в этом состоянии «висят в воздухе» — без ветки их легко потерять. Выход: создать ветку отсюда (<code>git switch -c new-branch</code>).</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Современный workflow: короткоживущие feature-ветки (1–2 дня) → PR → merge в main. Долгие ветки на недели повышают риск конфликтов и поздней интеграции: чем дольше живёт ветка, тем больнее потом конфликты при слиянии. Это прямая связь с trunk-based development (раздел 05).</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>switch</code> отличается от <code>checkout</code>?» — <code>checkout</code> перегружен: и ветки переключает, и файлы восстанавливает, и на коммиты прыгает. В новых версиях Git его разделили: <code>switch</code> — только для веток, <code>restore</code> — для восстановления файлов. Логика та же, но <code>switch</code>/<code>restore</code> понятнее и безопаснее.</div>
-      </div>
-
+        <div class="hl"><span class="hl-label">Несколько задач одновременно</span><code>git worktree add ../hotfix -b hotfix origin/main</code> создаёт второе working tree того же repository. Можно держать feature и hotfix в разных каталогах без stash и постоянного switch; одна branch обычно не может быть checkout одновременно в двух worktrees.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>switch</code> отличается от <code>checkout</code>?» — <code>checkout</code> исторически и переключает branches/commits, и восстанавливает paths. <code>switch</code> отвечает за переход между branches/commits, <code>restore</code> — за содержимое working tree/index. Более узкие команды яснее показывают намерение, но <code>restore file</code> всё равно может уничтожить незакоммиченные правки.</div>
     </div>
   </section>
 
-  <!-- ─────── 03. MERGE / REBASE / FAST-FORWARD ─────── -->
+  <!-- ─────── 03. MERGE / REBASE / SQUASH ─────── -->
   <section class="section" id="merge-rebase">
     <div class="section-header">
       <span class="section-num">03</span>
-      <span class="section-title">Merge, Rebase, Fast-forward</span>
+      <span class="section-title">Merge, rebase и squash</span>
       <span class="section-badge">главная тема</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Три способа объединить изменения из одной ветки в другую:</p>
+        <p>Merge, rebase и squash решают похожую задачу — перенести изменения, но по-разному меняют commit graph.</p>
         <div class="grid3">
           <div class="card">
             <div class="card-title">Merge</div>
-            Объединяет две ветки, создавая <strong>merge-коммит</strong>. История сохраняется как есть, со всеми ответвлениями.
+            Сохраняет обе линии истории. При расхождении создаёт commit с несколькими parents; при возможности может сделать fast-forward без нового commit.
           </div>
           <div class="card">
             <div class="card-title">Rebase</div>
-            Переносит коммиты твоей ветки <strong>поверх</strong> другой, как будто ты ответвился от неё только что. История <strong>линейная</strong>.
+            Повторно применяет commits на новой базе. Получается линейная история, но создаются новые commits с другими object IDs.
           </div>
           <div class="card">
-            <div class="card-title">Fast-forward</div>
-            Частный случай merge: если в main не было новых коммитов, Git просто <strong>перематывает указатель</strong> вперёд, без merge-коммита.
+            <div class="card-title">Squash merge</div>
+            Берёт итоговый diff feature-ветки и создаёт один новый commit в target branch. В target не сохраняется ancestry отдельных feature commits.
           </div>
         </div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Merge — соединить две линии истории в одну точку, оставив развилку видимой. Rebase — переписать свою историю так, будто ты начал работу от самой свежей версии main: коммиты «перевешиваются» на новое основание. Fast-forward — просто сдвинуть закладку вперёд, потому что развилки и не было.</div>
-      </div>
+        <div class="hl green"><span class="hl-label">Fast-forward</span>Если current branch является предком вливаемой, Git может просто передвинуть её ref вперёд. <code>git merge --ff-only feature-x</code> разрешает только такой случай и откажется при расхождении; <code>--no-ff</code> требует merge commit даже когда fast-forward возможен.</div>
+        <div class="code-block"><span class="cm"># Merge feature в current branch</span>
+git switch main
+git merge --no-ff feature-x
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Merge</strong> — вливаем feature в main:</p>
-        <div class="code-block">git switch main
-git merge feature-x   <span class="cm"># создаст merge-коммит (если были расхождения)</span></div>
-        <p><strong>Rebase</strong> — переносим свои коммиты поверх свежего main:</p>
-        <div class="code-block">git switch feature-x
-git rebase main       <span class="cm"># коммиты feature-x встают ПОВЕРХ main</span></div>
+<span class="cm"># Обновить свою feature-ветку линейно</span>
+git switch feature-x
+git fetch origin
+git rebase origin/main</div>
 
         <p><strong>Когда что использовать:</strong></p>
         <table>
-          <thead><tr><th></th><th>Merge</th><th>Rebase</th></tr></thead>
+          <thead><tr><th></th><th>Merge</th><th>Rebase</th><th>Squash</th></tr></thead>
           <tbody>
-            <tr><td>История</td><td>сохраняется со всеми развилками</td><td>линейная, чистая</td></tr>
-            <tr><td>Merge-коммит</td><td>создаётся</td><td>нет</td></tr>
-            <tr><td>Когда</td><td>вливание feature в main, общие ветки</td><td>подтянуть свежий main в свою личную ветку</td></tr>
-            <tr><td>Риск</td><td>безопасно</td><td>переписывает историю — опасно для общих веток</td></tr>
+            <tr><td>История feature</td><td>сохраняется</td><td>сохраняется, но IDs меняются</td><td>сворачивается в один итоговый commit</td></tr>
+            <tr><td>Graph</td><td>может содержать развилки</td><td>линейный</td><td>линейный в target</td></tr>
+            <tr><td>Общие branches</td><td>обычно безопасный выбор</td><td>только при явном владении и договорённости</td><td>обычно выполняет hosting platform при merge PR</td></tr>
+            <tr><td>Компромисс</td><td>полная история, больше шума</td><td>чистая история, переписывание</td><td>простой revert feature, потеря granular history в main</td></tr>
           </tbody>
         </table>
-        <p><strong>Fast-forward</strong> происходит автоматически, когда возможно. Заставить создать merge-коммит всегда: <code>git merge --no-ff</code>. Это частая настройка в командах — чтобы в истории было видно, где была feature-ветка.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <div class="hl red"><span class="hl-label">Золотое правило rebase</span>Никогда не делай rebase ветки, которой пользуется кто-то ещё (например, общий <code>main</code> или ветка, которую кто-то уже забрал). Rebase <em>переписывает историю</em> — меняет хеши коммитов. Если ветка публичная, у других сломается история, и у команды возникнут расхождения в истории. Rebase — только для <strong>своих локальных</strong> веток до пуша.</div>
-        <p><strong>Interactive rebase</strong> (<code>git rebase -i</code>) — переписать историю своих коммитов перед PR: объединить (squash), переименовать, переупорядочить, удалить. Часто перед мержем «схлопывают» пачку мелких коммитов в один осмысленный.</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Холивар merge vs rebase решается командной договорённостью. Частый компромисс: <strong>rebase для подтягивания main в свою ветку</strong> (чистая локальная история) + <strong>squash-merge при вливании PR</strong> (одна фича = один коммит в main). Главное — единые правила в команде, а не «индивидуальные предпочтения без общей договорённости».</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В чём разница merge и rebase?» — Merge объединяет ветки и сохраняет историю как было, создавая merge-коммит (видна развилка). Rebase переносит твои коммиты поверх другой ветки, делая историю линейной, но переписывая хеши. Merge безопасен для общих веток, rebase — только для личных. Простыми словами: merge честно показывает «как было», rebase делает «как будто было красиво».</div>
-      </div>
-
+        <div class="hl red"><span class="hl-label">Правило rebase</span>Не переписывай protected branch и историю, на которую уже опираются другие люди, без координации. Свою опубликованную feature-ветку команды часто rebase-ят; после проверки remote tip её обновляют через <code>git push --force-with-lease</code>, а не голый <code>--force</code>.</div>
+        <p><strong>Interactive rebase</strong> (<code>git rebase -i origin/main</code>) позволяет <code>reword</code>, <code>squash/fixup</code>, переупорядочить или <code>drop</code> собственные commits. <code>git commit --amend</code> переписывает только последний commit. Обе операции меняют IDs.</p>
+        <p><strong><code>--force-with-lease</code></strong> разрешает non-fast-forward push, только если remote ref всё ещё имеет ожидаемое значение. Это защищает от случайного затирания неизвестных commits, но не превращает переписывание общей branch в хорошую идею.</p>
+        <div class="hl modern"><span class="hl-label">Командное решение</span>История — интерфейс для расследований и откатов. Команда заранее выбирает merge policy: merge commits для сохранения контекста, rebase merge для линейности или squash merge для «один PR — один commit». Последовательная политика полезнее личного предпочтения.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Merge всегда создаёт merge commit?» — Нет. Если current branch является предком другой, по умолчанию возможен fast-forward: двигается только ref. Merge commit гарантирует <code>--no-ff</code>; <code>--ff-only</code>, наоборот, запрещает merge commit и падает при diverged history.</div>
     </div>
   </section>
 
@@ -717,174 +632,144 @@ git rebase main       <span class="cm"># коммиты feature-x встают �
       <span class="section-badge">conflicts</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Конфликт</strong> возникает, когда две ветки изменили <em>одно и то же место</em> в файле, и Git не может решить сам, какую версию оставить. В файле появляются маркеры:</p>
+        <p><strong>Conflict</strong> означает, что Git не может автоматически построить результат трёхстороннего merge из общего предка (merge base) и двух версий. Это не только правка одной строки: одна branch могла удалить файл, который другая переименовала, обе могли добавить файл с одним именем, а binary-файл нельзя объединить построчно.</p>
         <div class="code-block"><span class="cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
-твоя версия строки
+current side
 <span class="cm">=======</span>
-версия из вливаемой ветки
+other side
 <span class="cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-x</span></div>
-        <p>Нужно вручную выбрать правильный вариант (или скомбинировать), убрать маркеры и сохранить.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <p><strong>Как разрешить конфликт по шагам:</strong></p>
         <div class="code-block">git merge feature-x          <span class="cm"># возник конфликт</span>
-<span class="cm"># 1. открываешь файл, видишь маркеры &lt;&lt;&lt; === &gt;&gt;&gt;</span>
-<span class="cm"># 2. редактируешь: оставляешь нужное, убираешь маркеры</span>
-git add file.py              <span class="cm"># 3. помечаешь как разрешённый</span>
-git commit                   <span class="cm"># 4. завершаешь merge</span>
-<span class="cm"># (при rebase вместо commit — git rebase --continue)</span></div>
+git status                   <span class="cm"># unmerged paths и подсказка операции</span>
+git diff --name-only --diff-filter=U
+<span class="cm"># понять намерение обеих сторон, отредактировать и протестировать</span>
+git add file.py              <span class="cm"># отметить path как resolved</span>
+git merge --continue         <span class="cm"># либо git commit</span>
+<span class="cm"># для rebase/cherry-pick: соответствующая команда --continue</span></div>
         <ul>
-          <li><strong>IDE решают конфликты удобнее</strong> — VS Code, IntelliJ показывают обе версии side-by-side с кнопками «accept current / incoming / both»</li>
-          <li><code>git merge --abort</code> / <code>git rebase --abort</code> — отменить и вернуться как было, если запутался</li>
+          <li><strong>Current/incoming не означают «моё/чужое» во всех операциях.</strong> Во время rebase смысл ours/theirs для пользователя выглядит перевёрнутым, потому что commits переигрываются на новую базу</li>
+          <li><strong>Accept both — не решение по умолчанию:</strong> можно получить дублированный код, два импорта или несовместимую бизнес-логику</li>
+          <li><strong>Rename/delete и binary conflicts</strong> требуют решить судьбу path или пересоздать artifact, а не просто убрать текстовые markers</li>
+          <li><code>git merge --abort</code>, <code>git rebase --abort</code>, <code>git cherry-pick --abort</code> возвращают состояние до незавершённой операции</li>
         </ul>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
         <p><strong>Как избегать конфликтов</strong> (лучше, чем уметь их разруливать):</p>
         <ul>
-          <li><strong>Мелкие частые мержи</strong> — чаще подтягивай main в свою ветку, чем реже — тем больше расхождений накопится</li>
-          <li><strong>Короткие ветки</strong> — фича на 1–2 дня конфликтует меньше, чем на 2 недели</li>
-          <li><strong>Не форматируй чужой код заодно</strong> — массовый реформат = конфликт в каждой строке</li>
-          <li><strong>Договорённости о структуре</strong> — если все правят один большой файл, конфликты неизбежны</li>
+          <li>Делать небольшие изменения и регулярно интегрировать свежий target branch</li>
+          <li>Не смешивать массовое форматирование, rename и функциональную правку в одном PR</li>
+          <li>Координировать изменения общих схем, lock-файлов, fixtures и больших конфигов</li>
+          <li>Разбивать файлы и зоны ответственности, которые постоянно становятся точкой столкновения</li>
         </ul>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Запутался в конфликте при rebase, история или рабочая директория оказались в неконсистентном состоянии. Как откатиться?» — <code>git rebase --abort</code> вернёт в состояние до rebase. Если уже завершил и нужно откатиться — <code>git reflog</code> покажет, где ты был до операции, и <code>git reset --hard HEAD@{N}</code> вернёт туда. reflog — спасательный круг (см. раздел 06).</div>
-      </div>
-
+        <div class="hl"><span class="hl-label">Повторяющиеся конфликты</span>Механизм <code>rerere</code> (<code>git config rerere.enabled true</code>) запоминает ранее выбранное resolution и может применить его снова. Это полезно при длительном rebase или повторном merge, но результат всё равно просматривают и тестируют.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«После ручного resolution Git разрешил продолжить. Значит всё правильно?» — Нет. Git знает только, что в index больше нет unmerged entries. Он не понимает бизнес-смысл результата. Проверяю diff, собираю проект и запускаю релевантные тесты до continue/commit.</div>
     </div>
   </section>
 
-  <!-- ─────── 05. BRANCHING STRATEGIES ─────── -->
+  <!-- ─────── 05. КОМАНДНЫЕ WORKFLOWS ─────── -->
   <section class="section" id="strategies">
     <div class="section-header">
       <span class="section-num">05</span>
-      <span class="section-title">Branching strategies</span>
+      <span class="section-title">Командные workflows</span>
       <span class="section-badge">workflows</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Стратегия ветвления — договорённость команды о том, как организованы ветки и как код попадает в прод. Три популярных подхода:</p>
+        <p>Branching workflow — договорённость о том, откуда создаются branches, как изменения проверяются и объединяются, где фиксируются releases и кто может переписывать refs. Название не заменяет конкретных правил команды.</p>
         <div class="grid3">
           <div class="card">
             <div class="card-title">Git Flow</div>
-            Много веток: main, develop, feature, release, hotfix. Мощно, но сложно. Для релизов по расписанию.
+            <code>main</code>, <code>develop</code>, feature/release/hotfix branches. Удобен при плановых версиях и параллельной поддержке, но интеграция сложнее.
           </div>
           <div class="card">
             <div class="card-title">GitHub Flow</div>
-            Просто: main + короткие feature-ветки → PR → merge. Для continuous deployment.
+            Deployable <code>main</code>, короткая branch, PR, review и merge. Частота deployment определяется процессом доставки, а не самим Git workflow.
           </div>
           <div class="card">
             <div class="card-title">Trunk-based</div>
-            Всё в main, очень короткие ветки, незаконченное прячут за feature flags. Для CI/CD и частых релизов.
+            Частая интеграция маленьких изменений в trunk напрямую или через очень короткие branches. Незавершённое поведение отделяют от release.
           </div>
         </div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
         <table>
-          <thead><tr><th>Стратегия</th><th>Ветки</th><th>Когда подходит</th></tr></thead>
+          <thead><tr><th>Workflow</th><th>Сильная сторона</th><th>Цена и риск</th></tr></thead>
           <tbody>
-            <tr><td><strong>Git Flow</strong></td><td>main + develop + feature/* + release/* + hotfix/*</td><td>продукты с версиями и релизами по расписанию (десктоп, мобайл-стор)</td></tr>
-            <tr><td><strong>GitHub Flow</strong></td><td>main + feature-ветки</td><td>веб-сервисы, частые деплои, небольшие команды</td></tr>
-            <tr><td><strong>Trunk-based</strong></td><td>main + очень короткие ветки</td><td>зрелые команды с сильным CI/CD, релизы много раз в день</td></tr>
+            <tr><td><strong>Git Flow</strong></td><td>явно моделирует release и hotfix; можно поддерживать несколько линий</td><td>долгоживущие branches расходятся, больше merges и backport</td></tr>
+            <tr><td><strong>GitHub Flow</strong></td><td>простой PR-процесс и понятный deployable main</td><td>нужны надёжные проверки и дисциплина маленьких PR</td></tr>
+            <tr><td><strong>Trunk-based</strong></td><td>минимальный integration delay и небольшой batch size</td><td>требует быстрой обратной связи и способов скрыть незавершённое поведение</td></tr>
           </tbody>
         </table>
-        <p><strong>GitHub Flow</strong> (самый частый сегодня): ответвился от main → сделал фичу → PR → автотесты + ревью → merge → деплой. Просто и достаточно для большинства команд.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Тренд — от сложного Git Flow к простому GitHub Flow / trunk-based. Git Flow с его develop и release-ветками всё чаще считают избыточным для веб-сервисов: он создан под эпоху редких релизов. Современный дефолт — короткие ветки от main + сильный CI + feature flags для незаконченного. Чем проще модель ветвления, тем меньше конфликтов и быстрее доставка (прямая связь с CI/CD и DORA-метриками).</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем нужны feature flags, если есть ветки?» — Долгая feature-ветка = сложное и рискованное слияние и поздняя интеграция. Feature flag позволяет влить незаконченный код в main <em>сразу</em> (спрятав за флагом), интегрировать его постоянно, а включить — когда готово. Это и есть суть trunk-based: интеграция через флаги, а не через долгоживущие ветки.</div>
-      </div>
-
+        <p><strong>Практичный PR workflow:</strong> создать branch от актуального target, делать небольшие осмысленные commits, регулярно обновляться, открыть PR, пройти review и обязательные проверки, выбрать согласованный merge method, затем удалить merged branch. Детали gates и merge queue находятся в <a href="cicd.html">CI/CD</a>; здесь важна история commits и refs.</p>
+        <ul>
+          <li><strong>Protected branch</strong> запрещает прямой/force push и требует установленный процесс merge</li>
+          <li><strong>Atomic commit</strong> решает одну связанную задачу и оставляет repository в рабочем состоянии; его проще review, cherry-pick, revert и bisect</li>
+          <li><strong>Маленький PR</strong> уменьшает время review и риск конфликтов; механический rename/format лучше отделять от изменения поведения</li>
+          <li><strong>Release branch</strong> полезна, когда версия стабилизируется отдельно или поддерживается несколько версий; иначе она добавляет backport и расхождение</li>
+        </ul>
+        <div class="hl modern"><span class="hl-label">Hooks и policy</span>Client-side hooks, включая pre-commit, помогают запускать format/lint до commit, но сами hooks не передаются clone-ом и пользователь может их обойти. Обязательные правила закрепляют server-side protection и required checks, а hook-конфигурацию хранят в repository.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем feature flags, если есть branches?» — Branch изолирует исходный код до merge; feature flag управляет release уже интегрированного и развернутого поведения. Флаг уменьшает срок жизни branch, но добавляет две ветки поведения, конфигурацию и обязанность удалить устаревший flag.</div>
     </div>
   </section>
 
-  <!-- ─────── 06. ПОЛЕЗНЫЕ КОМАНДЫ ─────── -->
+  <!-- ─────── 06. ОТМЕНА, ВОССТАНОВЛЕНИЕ, ПОИСК ─────── -->
   <section class="section" id="useful">
     <div class="section-header">
       <span class="section-num">06</span>
-      <span class="section-title">Полезные команды</span>
-      <span class="section-badge">toolbox</span>
+      <span class="section-title">Отмена, восстановление, поиск</span>
+      <span class="section-badge">recovery</span>
     </div>
     <div class="section-body">
-
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Команды, которые выручают в типичных ситуациях:</p>
-        <div class="code-block">git stash            <span class="cm"># отложить незакоммиченные изменения «в карман»</span>
-git stash pop        <span class="cm"># вернуть их обратно</span>
-git cherry-pick abc  <span class="cm"># взять один конкретный коммит в свою ветку</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span><code>stash</code> — как буфер обмена для незавершённой работы: сложил изменения в карман, переключился на срочную задачу, потом достал обратно. <code>cherry-pick</code> — скопировать один коммит из другой ветки, как взять одну строку из чужого файла, а не весь файл.</div>
-        <div class="hl"><span class="hl-label">Pull Request workflow — ежедневная рутина</span>Для QA это встречается чаще, чем <code>rebase -i</code>. Типичный цикл: 1) открыть PR (feature → main), 2) дождаться <strong>CI</strong> (тесты, линт — зелёные), 3) пройти <strong>code review</strong>, 4) исправить замечания (новые коммиты в ту же ветку), 5) <strong>squash & merge</strong> (слить в один коммит) или обычный merge, 6) удалить ветку после слияния. CI + review — это и есть quality gate перед попаданием в main.</div>
-        <div class="hl"><span class="hl-label">restore — безопасная отмена изменений</span>Современная замена перегруженного <code>checkout</code> для файлов: <code>git restore file.py</code> — откатить изменения в файле к последнему коммиту; <code>git restore --staged file.py</code> — убрать файл из staging (не теряя правок). Понятнее, чем старый <code>git checkout -- file.py</code>.</div>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>stash</strong> — когда нужно срочно переключиться, но коммитить полуготовое не хочется:</p>
-        <div class="code-block">git stash            <span class="cm"># временно сохранил незакоммиченные изменения, рабочая директория чистая</span>
-git switch main      <span class="cm"># переключился, сделал срочное</span>
-git switch feature-x
-git stash pop        <span class="cm"># вернул отложенное</span></div>
-        <p><strong>cherry-pick</strong> — перенести конкретный коммит (например, хотфикс) в другую ветку без полного мержа.</p>
-        <p><strong>reset vs revert</strong> — два способа «отменить», принципиально разные:</p>
+        <p>Сначала определяют, <strong>что именно</strong> нужно отменить: unstaged-файл, содержимое index, local commit, уже опубликованный commit или untracked-файл. Команды с похожими названиями меняют разные области.</p>
         <table>
-          <thead><tr><th></th><th>reset</th><th>revert</th></tr></thead>
+          <thead><tr><th>Команда</th><th>Что меняет</th><th>Риск</th></tr></thead>
           <tbody>
-            <tr><td>Что делает</td><td>двигает указатель назад, убирает коммиты</td><td>создаёт новый коммит, отменяющий изменения</td></tr>
-            <tr><td>История</td><td>переписывает (коммиты исчезают)</td><td>сохраняет (добавляет «обратный» коммит)</td></tr>
-            <tr><td>Безопасность</td><td>опасно для общих веток</td><td>безопасно для общих веток</td></tr>
+            <tr><td><code>restore file.py</code></td><td>working tree ← index</td><td>удаляет unstaged-правки файла</td></tr>
+            <tr><td><code>restore --staged file.py</code></td><td>index ← HEAD</td><td>unstage без удаления working-tree правок</td></tr>
+            <tr><td><code>reset [mode] &lt;commit&gt;</code></td><td>двигает current branch/HEAD; по mode меняет index и working tree</td><td>переписывает local history; <code>--hard</code> удаляет правки</td></tr>
+            <tr><td><code>revert &lt;commit&gt;</code></td><td>создаёт новый обратный commit</td><td>подходит для shared history, но возможен conflict</td></tr>
+            <tr><td><code>clean -fd</code></td><td>удаляет untracked files/directories</td><td>сначала preview через <code>git clean -nd</code></td></tr>
           </tbody>
         </table>
-      </div>
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>reset с режимами:</strong></p>
+        <p><strong>Reset modes:</strong></p>
         <ul>
-          <li><code>--soft</code> — убрать коммит, изменения остаются в staging</li>
-          <li><code>--mixed</code> (по умолчанию) — убрать коммит, изменения в рабочей директории</li>
-          <li><code>--hard</code> — убрать коммит и изменения совсем (<strong>опасно</strong>, данные теряются)</li>
+          <li><code>--soft</code> — двигает branch/HEAD, оставляет index и working tree</li>
+          <li><code>--mixed</code> (default) — двигает branch/HEAD и сбрасывает index, оставляет working tree</li>
+          <li><code>--hard</code> — приводит branch, index и tracked working-tree files к указанному commit; незакоммиченные правки могут быть невосстановимы</li>
         </ul>
-        <p><strong>git commit --amend</strong> — поправить последний коммит (сообщение или забытый файл). Тоже переписывает историю — не делай для запушенных коммитов.</p>
-        <div class="hl red"><span class="hl-label">reflog — спасательный круг</span><code>git reflog</code> показывает историю <em>всех</em> перемещений HEAD — даже после reset --hard, неудачного rebase или «потерянных» коммитов. Почти всё, что кажется удалённым, можно восстановить: найди нужное состояние в reflog и <code>git reset --hard HEAD@{N}</code>. Запомни эту команду — она помогает восстановиться после ошибочных операций.</div>
-        <div class="hl orange"><span class="hl-label">Правило безопасности</span>Всё, что <em>переписывает историю</em> (reset, rebase, amend, push --force), безопасно только для <strong>локальных</strong> коммитов, которые ещё никто не забрал. Для уже запушенного в общую ветку — только <code>revert</code> (новый коммит). Это то же золотое правило, что для rebase.</div>
-        <div class="hl"><span class="hl-label">Как найти, какой коммит внёс регрессию</span>Частая QA-задача — «тест/фича сломались, когда?»:
-          <ul style="margin:8px 0 0;">
-            <li><code>git log --oneline</code> — список коммитов кратко, посмотреть что менялось недавно</li>
-            <li><code>git show &lt;commit&gt;</code> — что именно изменил конкретный коммит</li>
-            <li><code>git diff main...feature</code> — разница между ветками</li>
-            <li><code>git blame file.py</code> — кто и в каком коммите менял каждую строку файла</li>
-            <li><code>git bisect</code> (L3/optional) — <strong>бинарный поиск</strong> коммита с багом: помечаешь «хороший» и «плохой» коммиты, Git делит диапазон пополам, ты проверяешь — за log(N) шагов находишь виновный коммит</li>
-          </ul>
-        </div>
-        <div class="hl orange"><span class="hl-label">Force push безопасно</span>Если после rebase <em>своей</em> ветки нужен форс-пуш — используй <code>git push --force-with-lease</code>, а не голый <code>--force</code>. Разница: <code>--force-with-lease</code> проверяет, что в удалённой ветке нет чужих новых коммитов, которые ты не видел, и откажется перезаписывать их. Голый <code>--force</code> затрёт чужую работу без предупреждения.</div>
-        <div class="hl"><span class="hl-label">.gitignore и секреты</span>В <code>.gitignore</code> кладут то, что не должно попадать в репозиторий: <code>.env</code> и файлы с секретами, артефакты сборки, кэши, отчёты тестов, виртуальные окружения (<code>.venv</code>). Правило: <strong>секрет, попавший в Git, считается скомпрометированным</strong> — даже если удалить его следующим коммитом, он останется в истории.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Закоммитил пароль в репозиторий. Что делать?» — Не просто <code>git rm</code> в новом коммите — он останется в истории. Нужно: 1) <strong>немедленно отозвать/сменить сам секрет</strong> (он уже скомпрометирован), 2) вычистить из истории (<code>git filter-repo</code> — современный предпочтительный инструмент, BFG — альтернатива; устаревший <code>filter-branch</code> использовать не стоит), 3) форс-пуш. Но главное — секрет считается скомпрометированным в момент пуша, поэтому первым делом его меняют.</div>
-      </div>
+        <div class="hl red"><span class="hl-label">Главная граница</span>Reflog помогает найти ранее существовавший commit, но не обязан спасать содержимое, которое никогда не было commit или stash. Перед destructive-командой проверяют <code>status</code>, делают backup branch/stash и используют dry-run, если он есть.</div>
 
+        <p><strong>Stash временно сохраняет незавершённое состояние:</strong></p>
+        <div class="code-block">git stash push -u -m <span class="st">"wip login debug"</span> <span class="cm"># -u включает untracked</span>
+git stash list
+git stash show -p stash@{0}
+git stash apply stash@{0}             <span class="cm"># применить, запись оставить</span>
+git stash pop                         <span class="cm"># применить и удалить при успехе</span></div>
+        <p>Без <code>-u</code> untracked-файлы обычно не входят в stash. При conflict не считают состояние потерянным: проверяют stash list, разрешают conflict и удаляют запись осознанно.</p>
+
+        <p><strong>Cherry-pick</strong> применяет изменение выбранного commit поверх current branch и создаёт новый commit с новым ID. Это удобно для backport/hotfix, но массовый cherry-pick между branches создаёт расходящуюся историю и будущие конфликты.</p>
+        <p><strong>Revert merge commit</strong> требует выбрать mainline parent: <code>git revert -m 1 &lt;merge-sha&gt;</code>. Опция говорит, какую сторону считать основной; её нельзя выбирать наугад.</p>
+
+        <div class="hl"><span class="hl-label">Reflog и восстановление</span>Reflog локально записывает обновления HEAD и других refs после rebase, reset и перемещения branches. Ищут прежний SHA через <code>git reflog</code> и сначала создают безопасную ссылку: <code>git switch -c rescue &lt;sha&gt;</code>. Reflog не синхронизируется с remote и его записи со временем expire, поэтому это страховка, а не backup.</div>
+
+        <p><strong>Как найти commit, внёсший регрессию:</strong></p>
+        <div class="code-block">git bisect start
+git bisect bad HEAD
+git bisect good v2.3.0
+git bisect run pytest tests/test_login.py  <span class="cm"># 0 = good, 1..127 кроме 125 = bad, 125 = skip</span>
+git bisect reset</div>
+        <p><code>bisect</code> делает binary search между известными good и bad revisions. Автоматический тест должен быть детерминированным и корректно возвращать exit code; иначе найденный «виновник» ненадёжен.</p>
+
+        <table>
+          <thead><tr><th>Задача</th><th>Команда</th></tr></thead>
+          <tbody>
+            <tr><td>Увидеть graph</td><td><code>git log --graph --oneline --decorate --all</code></td></tr>
+            <tr><td>Найти commit по строке</td><td><code>git log -S "needle" -- path</code></td></tr>
+            <tr><td>Найти commits, меняющие regex</td><td><code>git log -G "pattern" -- path</code></td></tr>
+            <tr><td>История конкретных строк</td><td><code>git blame -L 20,40 file.py</code>, затем <code>git show</code>; автор строки не обязательно автор дефекта</td></tr>
+            <tr><td>Изменения feature от общей базы</td><td><code>git diff main...feature</code></td></tr>
+          </tbody>
+        </table>
+        <div class="hl orange"><span class="hl-label">Две и три точки</span>Для <code>git diff A..B</code> две точки фактически сравнивают endpoints A и B. <code>git diff A...B</code> сравнивает merge base с B — обычно это «что принесла branch B». У <code>git log</code> range notation имеет другую семантику, поэтому правило нельзя переносить механически.</div>
+
+        <div class="hl"><span class="hl-label">Submodules</span>Superproject хранит не содержимое другого repository, а ссылку на точный commit. После clone зависимости получают через <code>git submodule update --init --recursive</code> или clone с <code>--recurse-submodules</code>. Пустой каталог часто означает, что submodule не инициализирован; обновление submodule требует также commit нового указателя в superproject.</div>
+        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В repository уже попал secret. Достаточно удалить файл?» — Нет: значение остаётся в старых commits и clones. Сначала немедленно revoke/rotate secret, затем при необходимости переписывают историю согласованным инструментом вроде <code>git filter-repo</code>, обновляют remote и координируют очистку clones. Переписывание истории не заменяет ротацию.</div>
     </div>
   </section>
 
@@ -897,15 +782,6 @@ git stash pop        <span class="cm"># вернул отложенное</span>
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {
