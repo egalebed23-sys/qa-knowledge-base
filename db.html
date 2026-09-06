@@ -606,23 +606,115 @@
             <tr><td><code>DROP</code></td><td>удаляет сам объект: таблицу, индекс, схему</td></tr>
           </tbody>
         </table>
-        <p><strong>Подзапросы</strong> — запрос внутри запроса:</p>
-        <div class="code-block"><span class="cm">-- пользователи, у которых есть хотя бы один заказ</span>
+        <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">Подзапросы</strong></p>
+        <p>Подзапрос — это <code>SELECT</code> внутри другого запроса. Внутренний считается первым, внешний использует его результат. Видов четыре, и на собесе полезно называть их своими именами:</p>
+        <table>
+          <thead><tr><th>Вид</th><th>Что возвращает</th><th>Где стоит</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Скалярный</strong></td><td>ровно одно значение (одна строка, один столбец)</td><td>везде, где ждут значение: <code>WHERE amount &gt; (SELECT AVG(...))</code>, в <code>SELECT</code></td></tr>
+            <tr><td><strong>Списочный</strong></td><td>один столбец, много строк</td><td>с <code>IN</code> / <code>NOT IN</code> / <code>ANY</code></td></tr>
+            <tr><td><strong>Коррелированный</strong></td><td>зависит от текущей строки внешнего запроса</td><td>обычно с <code>EXISTS</code></td></tr>
+            <tr><td><strong>В <code>FROM</code></strong> (derived table)</td><td>целую таблицу</td><td><code>FROM (SELECT ...) t</code> — «сначала посчитать, потом отфильтровать»</td></tr>
+          </tbody>
+        </table>
+        <div class="code-block"><span class="cm">-- 1. списочный: пользователи, у которых есть хотя бы один заказ</span>
 <span class="kw">SELECT</span> name <span class="kw">FROM</span> users
-<span class="kw">WHERE</span> id <span class="kw">IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders);</div>
-        <p><strong><code>EXISTS</code> vs <code>IN</code>:</strong> оба могут выразить «есть связанная строка». <code>EXISTS</code> особенно удобен для коррелированного подзапроса и проверки самого факта существования; современный оптимизатор часто строит для эквивалентных запросов схожий план. Для «не существует» безопаснее <code>NOT EXISTS</code>, чем <code>NOT IN</code>, если подзапрос может вернуть <code>NULL</code>.</p>
-        <div class="code-block"><span class="kw">SELECT</span> u.*
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders);
+
+<span class="cm">-- 2. скалярный: заказы дороже среднего чека</span>
+<span class="kw">SELECT</span> id, amount <span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> amount > (<span class="kw">SELECT</span> <span class="fn">AVG</span>(amount) <span class="kw">FROM</span> orders);
+
+<span class="cm">-- 3. в FROM: посчитали заказы по каждому юзеру, потом отфильтровали по счётчику</span>
+<span class="cm">--    (в WHERE так нельзя: COUNT(*) там ещё не существует)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt <span class="kw">FROM</span> orders <span class="kw">GROUP BY</span> user_id
+) t
+<span class="kw">WHERE</span> t.cnt > <span class="val">5</span>;</div>
+        <div class="hl"><span class="hl-label">Что значит «коррелированный»</span>Обычный подзапрос самодостаточен: его можно выполнить отдельно, один раз, и переиспользовать результат. <strong>Коррелированный</strong> ссылается на столбец внешнего запроса (<code>o.user_id = u.id</code>) — отдельно он не выполнится, потому что не знает, чему равен <code>u.id</code>. Логически он считается заново для каждой строки внешней выборки, отсюда репутация «медленного». На практике оптимизатор часто переписывает его в join, так что бояться заранее не нужно — смотри <code>EXPLAIN</code>.</div>
+
+        <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">EXISTS vs IN</strong></p>
+        <p>Оба отвечают на вопрос «есть ли связанная строка», но механика разная — и в этом весь вопрос на собесе:</p>
+        <ul>
+          <li><code>IN</code> <strong>сравнивает значения</strong>: подзапрос отдаёт список, внешний запрос проверяет, входит ли <code>id</code> в этот список</li>
+          <li><code>EXISTS</code> <strong>на значения не смотрит вообще</strong> — его интересует только «вернул подзапрос хоть одну строку или ноль». Поэтому внутри пишут <code>SELECT 1</code>: что именно выбрать, неважно, результат всё равно не читается. Можно написать <code>SELECT *</code> или <code>SELECT NULL</code> — разницы нет</li>
+        </ul>
+        <div class="code-block"><span class="cm">-- «у пользователя есть заказ» — через факт существования строки</span>
+<span class="kw">SELECT</span> u.*
 <span class="kw">FROM</span> users u
 <span class="kw">WHERE EXISTS</span> (
   <span class="kw">SELECT</span> <span class="val">1</span> <span class="kw">FROM</span> orders o <span class="kw">WHERE</span> o.user_id = u.id
-);</div>
+);   <span class="cm">-- o.user_id = u.id — та самая корреляция с внешней строкой</span></div>
+        <p>Пока речь про «существует», <code>IN</code> и <code>EXISTS</code> взаимозаменяемы, и современный оптимизатор обычно строит для них похожий план. Разница вылезает на отрицании.</p>
+        <div class="hl red"><span class="hl-label">NOT IN ломается о NULL — классический вопрос</span>Если подзапрос вернёт хотя бы один <code>NULL</code>, <code>NOT IN</code> вернёт <strong>ноль строк. Всегда.</strong> Не ошибку, не предупреждение — просто пустой результат, и запрос выглядит рабочим. Причина в трёхзначной логике SQL: сравнение с <code>NULL</code> даёт не <code>FALSE</code>, а <code>UNKNOWN</code>, а в результат строка попадает только если условие <code>TRUE</code>.</div>
+        <div class="code-block"><span class="cm">-- допустим, в orders есть строка с user_id = NULL</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> id <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders);   <span class="cm">-- 0 строк, хотя данные есть</span>
 
-        <p><strong><code>CASE</code></strong> добавляет условную логику в результат, а <strong><code>UNION</code></strong> объединяет результаты совместимых запросов:</p>
-        <div class="code-block"><span class="kw">SELECT</span> id,
-  <span class="kw">CASE WHEN</span> amount >= <span class="val">10000</span> <span class="kw">THEN</span> <span class="st">'large'</span> <span class="kw">ELSE</span> <span class="st">'regular'</span> <span class="kw">END AS</span> kind
-<span class="kw">FROM</span> orders;</div>
-        <div class="hl"><span class="hl-label">UNION vs UNION ALL</span><code>UNION</code> удаляет дубликаты и поэтому требует дополнительной работы. <code>UNION ALL</code> сохраняет все строки и обычно быстрее. Число столбцов и совместимые типы в объединяемых запросах должны совпадать.</div>
-        <div class="hl red"><span class="hl-label">NULL — отдельная ловушка</span>NULL ломает SQL-задачи чаще всего. Что помнить: <code>NULL != NULL</code> (сравнение даёт «неизвестно», не True) → нельзя <code>= NULL</code>, только <code>IS NULL</code> / <code>IS NOT NULL</code>. <code>COUNT(column)</code> <em>не считает</em> NULL (а <code>COUNT(*)</code> считает все строки). <code>NOT IN</code> с подзапросом, где есть NULL, может вернуть пустой результат неожиданно. При сложении/конкатенации NULL «заражает» результат (нужен <code>COALESCE</code>).</div>
+<span class="cm">-- потому что условие разворачивается в цепочку:</span>
+<span class="cm">--   id &lt;&gt; 1 AND id &lt;&gt; 2 AND id &lt;&gt; NULL</span>
+<span class="cm">--                           ^^^^^^^^^^ это UNKNOWN, а не FALSE</span>
+<span class="cm">--   TRUE AND UNKNOWN = UNKNOWN  ->  строка не проходит фильтр</span>
+
+<span class="cm">-- NOT EXISTS этой проблемы не имеет: он смотрит на наличие строк, а не на значения</span>
+<span class="kw">SELECT</span> u.name <span class="kw">FROM</span> users u
+<span class="kw">WHERE NOT EXISTS</span> (<span class="kw">SELECT</span> <span class="val">1</span> <span class="kw">FROM</span> orders o <span class="kw">WHERE</span> o.user_id = u.id);</div>
+        <table>
+          <thead><tr><th></th><th><code>IN</code></th><th><code>EXISTS</code></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Что проверяет</strong></td><td>значение входит в список</td><td>подзапрос вернул хотя бы одну строку</td></tr>
+            <tr><td><strong>Подзапрос</strong></td><td>обычно независимый</td><td>обычно коррелированный</td></tr>
+            <tr><td><strong>NULL в подзапросе</strong></td><td>ломает <code>NOT IN</code></td><td>не мешает</td></tr>
+            <tr><td><strong>Когда удобнее</strong></td><td>короткий список значений, в том числе заданный руками</td><td>проверка связи с другой таблицей, «есть/нет»</td></tr>
+          </tbody>
+        </table>
+        <div class="hl green"><span class="hl-label">Три способа сказать «нет связанных строк»</span><code>NOT EXISTS</code> — самый безопасный. <code>NOT IN</code> — только если гарантированно нет <code>NULL</code> (или добавить <code>WHERE user_id IS NOT NULL</code> в подзапрос). <code>LEFT JOIN</code> + <code>WHERE right.id IS NULL</code> — «анти-join», тот же смысл через соединение; на больших объёмах иногда быстрее. Хорошо, если на собесе назовёшь все три и скажешь, чем они отличаются — см. задачу 13 в разделе «Задачи».</div>
+
+        <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">CASE — условная логика внутри запроса</strong></p>
+        <p>Это <code>if / elif / else</code> для SQL: возвращает значение в зависимости от условия. Работает в <code>SELECT</code>, в <code>ORDER BY</code>, в <code>WHERE</code> и внутри агрегатов. Форм две:</p>
+        <div class="code-block"><span class="cm">-- searched CASE: произвольные условия, проверяются сверху вниз</span>
+<span class="kw">SELECT</span> id,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> amount >= <span class="val">10000</span> <span class="kw">THEN</span> <span class="st">'large'</span>
+    <span class="kw">WHEN</span> amount >= <span class="val">1000</span>  <span class="kw">THEN</span> <span class="st">'medium'</span>
+    <span class="kw">ELSE</span> <span class="st">'small'</span>
+  <span class="kw">END</span> <span class="kw">AS</span> kind
+<span class="kw">FROM</span> orders;
+
+<span class="cm">-- simple CASE: один столбец сравнивается с вариантами</span>
+<span class="kw">CASE</span> status <span class="kw">WHEN</span> <span class="st">'paid'</span> <span class="kw">THEN</span> <span class="st">'оплачен'</span>
+            <span class="kw">WHEN</span> <span class="st">'new'</span>  <span class="kw">THEN</span> <span class="st">'новый'</span>
+            <span class="kw">ELSE</span> <span class="st">'прочее'</span> <span class="kw">END</span></div>
+        <p>Две детали, на которых спотыкаются: условия проверяются <strong>по порядку</strong> и срабатывает первое подошедшее — поэтому <code>&gt;= 1000</code> обязано идти после <code>&gt;= 10000</code>, иначе всё крупное станет <code>medium</code>. И если <code>ELSE</code> не написан, а ни одно условие не подошло, вернётся <code>NULL</code>, а не пустая строка.</p>
+        <div class="hl green"><span class="hl-label">Приём, который стоит знать наизусть</span><code>CASE</code> внутри агрегата разворачивает строки в столбцы — так считают несколько статусов <em>одним</em> запросом вместо трёх отдельных. Это самый частый практический сценарий <code>CASE</code> и любимая задача на собесе.</div>
+        <div class="code-block"><span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total,
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> status = <span class="st">'paid'</span>      <span class="kw">THEN</span> <span class="val">1</span> <span class="kw">ELSE</span> <span class="val">0</span> <span class="kw">END</span>) <span class="kw">AS</span> paid,
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> status = <span class="st">'cancelled'</span> <span class="kw">THEN</span> <span class="val">1</span> <span class="kw">ELSE</span> <span class="val">0</span> <span class="kw">END</span>) <span class="kw">AS</span> cancelled
+<span class="kw">FROM</span> orders;
+
+<span class="cm">-- то же через COUNT: он не считает NULL, поэтому ELSE не нужен</span>
+<span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> status = <span class="st">'paid'</span> <span class="kw">THEN</span> <span class="val">1</span> <span class="kw">END</span>)
+
+<span class="cm">-- в PostgreSQL то же самое короче:</span>
+<span class="fn">COUNT</span>(*) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> status = <span class="st">'paid'</span>)</div>
+
+        <p style="margin-top:18px;"><strong style="color:#fff;font-size:15px;">UNION — склейка результатов</strong></p>
+        <p>Главное, что стоит понять сразу: <code>UNION</code> и <code>JOIN</code> склеивают в разные стороны. <strong><code>JOIN</code> добавляет столбцы</strong> — расширяет строку вправо, дотягивая данные из соседней таблицы. <strong><code>UNION</code> добавляет строки</strong> — ставит результат второго запроса под результат первого, таблица растёт вниз.</p>
+        <div class="code-block"><span class="cm">-- один список контактов: и клиенты, и сотрудники</span>
+<span class="kw">SELECT</span> name, email <span class="kw">FROM</span> customers
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> name, email <span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> name;   <span class="cm">-- ORDER BY пишется один раз, в самом конце, ко всему результату</span></div>
+        <p><strong>Требования к объединяемым запросам:</strong></p>
+        <ul>
+          <li>одинаковое <strong>число столбцов</strong> в каждом запросе</li>
+          <li>совместимые типы <strong>по позициям</strong>, а не по именам: второй столбец сопоставляется со вторым, как бы они ни назывались</li>
+          <li>имена колонок в итоговом результате берутся из <strong>первого</strong> запроса</li>
+        </ul>
+        <div class="hl"><span class="hl-label">UNION vs UNION ALL</span><code>UNION</code> убирает дубликаты — строки, совпавшие сразу по <em>всем</em> столбцам. Чтобы их найти, СУБД должна дополнительно отсортировать или захешировать результат, а это работа. <code>UNION ALL</code> отдаёт всё как есть и обычно заметно быстрее. Правило: по умолчанию <code>UNION ALL</code>, а <code>UNION</code> — только когда дубликаты реально возможны и мешают. На собесе часто спрашивают именно так: «чем отличаются и что быстрее».</div>
+        <div class="hl modern"><span class="hl-label">Соседи UNION — пригодятся QA</span><code>INTERSECT</code> оставляет строки, которые есть <em>в обоих</em> запросах; <code>EXCEPT</code> (в Oracle — <code>MINUS</code>) — те, что есть в первом, но нет во втором. Отличный инструмент для сверки выгрузок при миграции или рефакторинге запроса: <code>old EXCEPT new</code> покажет, что пропало, <code>new EXCEPT old</code> — что появилось. Оба результата пусты — выгрузки идентичны.</div>
+        <div class="hl red"><span class="hl-label">NULL — отдельная ловушка</span>NULL ломает SQL-задачи чаще всего. Что помнить: <code>NULL != NULL</code> (сравнение даёт «неизвестно», не True) → нельзя <code>= NULL</code>, только <code>IS NULL</code> / <code>IS NOT NULL</code>. <code>COUNT(column)</code> <em>не считает</em> NULL (а <code>COUNT(*)</code> считает все строки). <code>NOT IN</code> с подзапросом, где есть NULL, молча возвращает ноль строк (разобрано выше). При сложении/конкатенации NULL «заражает» результат (нужен <code>COALESCE</code>).</div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>WHERE</code> отличается от <code>HAVING</code>?» — <code>WHERE</code> фильтрует строки <em>до</em> группировки, <code>HAVING</code> — группы <em>после</em> агрегации. Нельзя в <code>WHERE</code> написать <code>COUNT(*) > 5</code> — для этого есть <code>HAVING</code> (см. раздел 04).</div>
 
     </div>
