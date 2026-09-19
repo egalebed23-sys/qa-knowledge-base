@@ -837,7 +837,6 @@
     <div class="section-body">
 
         <p>Типовые задачи, которые реально дают на собесах. Везде две таблицы: <code>users (id, name, city)</code> и <code>orders (id, user_id, amount, status, created_at)</code>.</p>
-        <div class="hl green"><span class="hl-label">Что закрыть перед скринингом</span>Основной набор: <code>SELECT</code>, фильтры, сортировка, агрегаты, <code>GROUP BY / HAVING</code>, <code>INNER / LEFT JOIN</code>, <code>NULL</code>, дубликаты, даты, подзапросы, <code>CASE</code>, <code>EXISTS</code>, CTE, оконные функции, транзакции и изоляция, constraints, индексы и базовое чтение <code>EXPLAIN</code>. Кроме написания запроса будь готов объяснить его построчно и предсказать результат на маленьком наборе данных.</div>
 
         <p style="margin-top:12px;"><strong>Задача 1. Все пользователи из Москвы, отсортированные по имени.</strong></p>
         <div class="code-block"><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
