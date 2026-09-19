@@ -1086,7 +1086,9 @@ app.log  db.log</span></div>
         <thead><tr><th>Условие</th><th>Что ищет</th></tr></thead>
         <tbody>
           <tr><td><code>-iname "*.LOG"</code></td><td>как <code>-name</code>, но без учёта регистра</td></tr>
-          <tr><td><code>-size +10k</code></td><td>файлы больше 10 КБ; <code>-size -1M</code> — меньше мегабайта</td></tr>
+          <tr><td><code>! -name "*.env"</code></td><td>отрицание: всё, что под условие <em>не</em> подходит. То же самое — <code>-not -name "*.env"</code></td></tr>
+          <tr><td><code>-name "*.env" -o -name "*.sh"</code></td><td>«или»: подходит хотя бы одно из условий. Условия без <code>-o</code> между ними должны выполняться все сразу</td></tr>
+          <tr><td><code>-size +10k</code></td><td>файлы больше 10 КБ; <code>-size -1M</code> — меньше мегабайта. Единицы: <code>c</code> — байты, <code>k</code> — килобайты, <code>M</code> — мегабайты, без буквы — блоки по 512 байт. Размер округляется вверх до целой единицы, поэтому <code>-size -1k</code> находит только пустые файлы</td></tr>
           <tr><td><code>-mtime -1</code></td><td>изменённые за последние сутки — «что поменялось после деплоя». В тренажёре все файлы считаются изменёнными сегодня, поэтому <code>-mtime -1</code> находит всё</td></tr>
           <tr><td><code>-exec cmd {} \;</code></td><td>выполнить команду для каждого найденного файла — разберём в главе 09</td></tr>
         </tbody>
@@ -1339,6 +1341,7 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
         <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
         <tbody>
           <tr><td><code>sort -n</code>, <code>sort -r</code>, <code>sort -u</code></td><td>числовая сортировка, обратный порядок, сразу убрать дубли</td></tr>
+          <tr><td><code>uniq -d</code>, <code>uniq -u</code></td><td>только строки, у которых был повтор, — по одной на группу; только строки без повторов</td></tr>
           <tr><td><code>sort -t ',' -k2,2</code></td><td>разделитель — запятая, ключ — только второе поле. Так сортируют CSV</td></tr>
           <tr><td><code>cut -d ' ' -f3-</code></td><td>вырезать поля: с третьего до конца строки. <code>cut -d ',' -f1</code> — первая колонка CSV</td></tr>
           <tr><td><code>awk '{print $4}'</code></td><td>напечатать четвёртое поле каждой строки</td></tr>
@@ -1554,6 +1557,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
       <div class="task" data-task="b10-1"></div>
       <div class="task" data-task="b10-2"></div>
       <div class="task" data-task="b10-3"></div>
+      <div class="task" data-task="b10-4"></div>
     </div>
   </section>
 
@@ -1636,6 +1640,7 @@ udp        0      0 127.0.0.53:53           0.0.0.0:*</span>
       <div class="task" data-task="b11-1"></div>
       <div class="task" data-task="b11-2"></div>
       <div class="task" data-task="b11-3"></div>
+      <div class="task" data-task="b11-4"></div>
     </div>
   </section>
 
@@ -3268,25 +3273,27 @@ COMMANDS.sort = function (args, stdin) {
   try { text = readInputs(this, 'sort', rest, stdin); } catch (e) {
     throw new CmdError(e.message.replace(/^sort: (.*): (No such file or directory|Permission denied)/, 'sort: cannot read: $1: $2'), 2);
   }
-  let spec = null;
+  let spec = null, kf = f;
   if (f.k !== undefined) {
-    const m = String(f.k).match(/^(\d+)(?:\.\d+)?[a-z]*(?:,(\d+)(?:\.\d+)?[a-z]*)?$/);
+    const m = String(f.k).match(/^(\d+)(?:\.\d+)?([a-z]*)(?:,(\d+)(?:\.\d+)?([a-z]*))?$/);
     if (!m || +m[1] === 0) throw new CmdError("sort: invalid number at field start: invalid count at start of '" + f.k + "'\n", 2);
-    spec = { start: +m[1], end: m[2] ? +m[2] : 0, sep: f.t };
+    spec = { start: +m[1], end: m[3] ? +m[3] : 0, sep: f.t };
+    // флаги внутри ключа (-k4,4nr) заменяют для него все глобальные -n -r -f -b
+    const own = (m[2] || '') + (m[4] || '');
+    if (own) kf = { n: /[ng]/.test(own), r: own.includes('r'), f: own.includes('f'), b: own.includes('b') };
   }
   const num = (s) => { const m = s.match(/^\s*(-?\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
   const bytes = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
   const keyCmp = (a, b) => {
     let ka = sortKey(a, spec), kb = sortKey(b, spec);
-    if (f.b) { ka = ka.replace(/^\s+/, ''); kb = kb.replace(/^\s+/, ''); }
-    if (f.n) return num(ka) - num(kb);
-    if (f.f) { ka = ka.toUpperCase(); kb = kb.toUpperCase(); }
-    return bytes(ka, kb);
+    if (kf.b) { ka = ka.replace(/^\s+/, ''); kb = kb.replace(/^\s+/, ''); }
+    if (kf.f) { ka = ka.toUpperCase(); kb = kb.toUpperCase(); }
+    const c = kf.n ? num(ka) - num(kb) : bytes(ka, kb);
+    return kf.r ? -c : c;
   };
-  const sign = f.r ? -1 : 1;
   const ls = splitLines(text);
-  // при равных ключах GNU sort сравнивает строки целиком — и это сравнение тоже разворачивает -r
-  ls.sort((a, b) => sign * (keyCmp(a, b) || (f.u ? 0 : bytes(a, b))));
+  // при равных ключах GNU sort сравнивает строки целиком; это сравнение разворачивает только глобальный -r
+  ls.sort((a, b) => keyCmp(a, b) || (f.u ? 0 : (f.r ? -1 : 1) * bytes(a, b)));
   const out = joinLines(f.u ? ls.filter((l, i) => i === 0 || keyCmp(ls[i - 1], l) !== 0) : ls);
   if (f.o !== undefined) {
     const problem = this.writeText(f.o, out, false);
@@ -4165,6 +4172,7 @@ COMMANDS.logout = COMMANDS.exit;
    Решение и эталон выполняются на двух свежих копиях сервера,
    потом сравнивается то, что перечислено в check:
      'out'              — вывод на экран (stdout) совпадает с эталонным
+     'lines'            — те же строки, что у эталона, в любом порядке
      'quiet'            — на экран не выведено ничего, даже ошибок
      { contains: str }  — в выводе есть строка
      { file: path }     — файл есть и совпадает с эталонным
@@ -4175,7 +4183,10 @@ COMMANDS.logout = COMMANDS.exit;
      { procs: true }    — набор процессов совпадает
      { pkg: name }      — пакет установлен так же, как в эталоне
    uses — [регулярка, пояснение]: конструкция, ради которой задача
-   prep — команды, которые молча выполняются до решения и до эталона
+   prep — команды, которые выполняются до решения и до эталона;
+          в задаче они показаны в блоке «Уже выполнено»
+   setup — то же, что prep, но не показывается: это состояние
+          нужно выяснить самому
    ══════════════════════════════════════════════════════════════ */
 const ERRORS_CHAIN = 'find . -type f -name "*.log" | xargs cat | grep ERROR';
 
@@ -4196,336 +4207,345 @@ const CHAPTER_VOCAB = {
 
 const TASKS = {
   'b01-1': {
-    title: 'Что лежит в logs',
-    statement: '<p>Не выходя из <code>~/shop</code>, покажи содержимое папки <code>logs</code>.</p>',
-    hint: '<code>ls</code> принимает путь аргументом — переходить в папку не нужно.',
-    solution: 'ls logs',
+    title: 'Январь и март рядом',
+    statement: '<p>Не выходя из <code>~/shop</code>, покажи одной командой <code>ls</code> содержимое папок за январь и за март.</p>',
+    hint: '<code>ls</code> принимает сразу несколько путей и печатает каждую папку под своим заголовком.',
+    solution: 'ls logs/2026-01 logs/2026-03',
     check: ['out']
   },
   'b01-2': {
-    title: 'Всё дерево разом',
-    statement: '<p>Покажи содержимое <code>~/shop</code> вместе со всеми вложенными папками — одной командой.</p>',
-    hint: 'Рекурсивный флаг <code>ls</code> — заглавная <code>R</code>.',
-    solution: 'ls -R',
+    title: 'Строка про секреты',
+    statement: '<p>В <code>~/shop</code> лежит скрытый файл с паролями. Выведи подробную строку только о нём: права, владелец, размер, дата изменения.</p>',
+    hint: 'Имя покажет <code>ls -a</code>. Если передать <code>ls -l</code> не папку, а файл, он напечатает одну строку — про этот файл.',
+    solution: 'ls -l .env',
     check: ['out']
   },
   'b01-3': {
-    title: 'Скрытое и размеры',
-    statement: '<p>В <code>~/shop</code> есть файл, которого не видно в обычном <code>ls</code>. Выведи подробный список текущей папки со скрытыми файлами и размерами в K и M.</p>',
-    hint: 'Три флага: <code>-l</code> — подробно, <code>-a</code> — со скрытыми, <code>-h</code> — размеры для человека. Их можно склеить.',
-    solution: 'ls -lah',
-    check: ['out']
+    title: 'Из логов в конфиги',
+    statement: '<p>Ты разбирал январские логи и стоишь в <code>logs/2026-01</code>. Перейди в папку <code>config</code> проекта относительным путём — без <code>~</code> и без <code>/</code> в начале — и выведи, где оказался.</p>',
+    hint: '<code>..</code> поднимает на уровень вверх, в одном пути его можно повторить: <code>../..</code>. Посчитай, сколько уровней до <code>~/shop</code>.',
+    prep: 'cd logs/2026-01',
+    solution: 'cd ../../config\npwd',
+    check: ['out', { cwd: true }],
+    uses: [/(^|[\s;&|])cd\s+\.\.(\/|\s|$)/m, 'Путь должен быть относительным — через ..']
   },
   'b01-4': {
-    title: 'Туда и обратно',
-    statement: '<p>Перейди в <code>logs/2026-03</code>, выведи полный путь командой <code>pwd</code>, затем вернись в предыдущую директорию командой, которая помнит, где ты был.</p><p>Каждая команда — с новой строки.</p>',
-    hint: 'У <code>cd</code> есть короткий аргумент для предыдущей директории — дефис.',
-    solution: 'cd logs/2026-03\npwd\ncd -',
-    check: ['out', { cwd: true }],
-    uses: [/(^|[\s;&|])cd\s+-(\s|$)/m, 'Вернуться нужно через cd -']
+    title: 'Что лежит у qa дома',
+    statement: '<p>Не выходя из <code>~/shop</code>, покажи всё содержимое домашней папки пользователя <code>qa</code>, включая скрытые файлы.</p>',
+    hint: 'Домашняя папка — <code>~</code>, скрытые файлы показывает <code>-a</code>.',
+    solution: 'ls -a ~',
+    check: ['out']
   },
 
   'b02-1': {
-    title: 'Только папки',
-    statement: '<p>Выведи все директории внутри <code>~/shop</code>, включая вложенные. Файлы не нужны.</p>',
-    hint: '<code>find . -type d</code> — «от текущей папки, только директории».',
-    solution: 'find . -type d',
-    check: ['out']
+    title: 'Все скрытые файлы',
+    statement: '<p>Найди все скрытые файлы в домашней папке <code>qa</code> и во всех вложенных папках. Поиск начни с домашней папки: пути должны начинаться с <code>/home/qa</code>.</p>',
+    hint: 'Скрытый файл — тот, чьё имя начинается с точки. Опиши это маской для <code>-name</code> и не забудь кавычки.',
+    solution: 'find ~ -name ".*"',
+    check: ['lines']
   },
   'b02-2': {
-    title: 'Все app.log с путями',
-    statement: '<p>Найди все файлы <code>app.log</code> во всех подпапках. Нужен путь к каждому.</p>',
-    hint: '<code>-type f</code> — только файлы, <code>-name</code> — по имени.',
-    solution: 'find . -type f -name "app.log"',
-    check: ['out']
+    title: 'Всё, кроме логов',
+    statement: '<p>Выведи все файлы в <code>~/shop</code>, кроме логов <code>.log</code>. Папки не нужны.</p>',
+    hint: 'Условия, записанные подряд, действуют вместе. <code>!</code> перед условием переворачивает его.',
+    solution: 'find . -type f ! -name "*.log"',
+    check: ['lines']
   },
   'b02-3': {
-    title: 'Логи всех сервисов',
-    statement: '<p>Найди все файлы с расширением <code>.log</code>, как бы они ни назывались.</p>',
-    hint: 'Маска <code>"*.log"</code> в кавычках — чтобы её получил <code>find</code>, а не shell.',
-    solution: 'find . -type f -name "*.log"',
-    check: ['out']
+    title: 'Меньше 100 байт',
+    statement: '<p>Найди в <code>~/shop</code> файлы размером меньше 100 байт.</p>',
+    hint: 'Число без суффикса <code>find</code> считает в блоках по 512 байт. Байты задаёт суффикс <code>c</code>.',
+    solution: 'find . -type f -size -100c',
+    check: ['lines']
   },
   'b02-4': {
-    title: 'Кто занимает место',
-    statement: '<p>Найди в <code>~/shop</code> файлы больше 10 килобайт.</p>',
-    hint: '<code>-size +10k</code> — больше 10 КБ.',
-    solution: 'find . -type f -size +10k',
-    check: ['out']
+    title: 'Платежи и база',
+    statement: '<p>Одной командой <code>find</code> найди логи платежей (<code>payment.log</code>) и логи базы данных (<code>db.log</code>) за все месяцы.</p>',
+    hint: 'Нужны файлы, которые подходят под одно имя <em>или</em> под другое. «Или» у <code>find</code> — <code>-o</code>.',
+    solution: 'find . -name "payment.log" -o -name "db.log"',
+    check: ['lines']
   },
 
   'b03-1': {
-    title: 'Январский лог приложения',
-    statement: '<p>Выведи целиком лог приложения за январь.</p>',
-    hint: 'Путь: <code>logs/2026-01/app.log</code>.',
-    solution: 'cat logs/2026-01/app.log',
+    title: 'С чего начался февраль',
+    statement: '<p>Выведи первую строку каждого лога за февраль — одной командой.</p>',
+    hint: '<code>head</code>, как и <code>wc</code>, принимает несколько файлов, например через маску. Перед строками каждого файла он печатает его имя.',
+    solution: 'head -n 1 logs/2026-02/*.log',
     check: ['out']
   },
   'b03-2': {
-    title: 'Последние события марта',
-    statement: '<p>Покажи три последние строки лога приложения за март.</p>',
-    hint: '<code>tail</code> с флагом <code>-n</code>.',
-    solution: 'tail -n 3 logs/2026-03/app.log',
+    title: 'Без строки о старте',
+    statement: '<p>Первая строка лога приложения — <code>Server started</code>, для разбора она не нужна. Выведи лог приложения за март целиком, кроме первой строки.</p>',
+    hint: 'Узнай, сколько в файле строк, — станет ясно, сколько последних строк оставить. Есть и способ без подсчёта: <code>tail -n +2</code> печатает файл начиная со второй строки.',
+    solution: 'tail -n +2 logs/2026-03/app.log',
     check: ['out']
   },
   'b03-3': {
-    title: 'Строки в январских логах',
-    statement: '<p>Одной командой посчитай строки в каждом логе за январь — с итоговой суммой.</p>',
-    hint: 'Маска <code>logs/2026-01/*.log</code> передаст <code>wc</code> все три файла, <code>-l</code> оставит только строки.',
-    solution: 'wc -l logs/2026-01/*.log',
+    title: 'Кто писал последним',
+    statement: '<p>В марте на сервере два лога. Выясни, в каком из них последняя запись сделана позже, и выведи только эту запись.</p>',
+    hint: 'Посмотри последние строки обоих мартовских логов и сравни время. В ответе — одна строка одного файла.',
+    solution: 'tail -n 1 logs/2026-03/db.log',
     check: ['out']
   },
   'b03-4': {
-    title: 'Staging против prod',
-    statement: '<p>Сравни конфиг staging с конфигом prod. Staging — первым аргументом.</p>',
-    hint: 'Конфиги лежат в <code>config/</code>.',
-    solution: 'diff config/staging.env config/prod.env',
+    title: 'Что поменяли в конфиге',
+    statement: '<p>Перед деплоем конфиги сохранили рядом с оригиналами: <code>config/prod.env.bak</code> и <code>config/staging.env.bak</code>. Потом один из конфигов поправили руками. Выясни, какой, и покажи его изменения через <code>diff</code>: первой — версия до правки.</p>',
+    hint: 'Сравни каждый конфиг с его <code>.bak</code>. Для одинаковых файлов <code>diff</code> ничего не печатает.',
+    setup: 'cp config/prod.env config/prod.env.bak\ncp config/staging.env config/staging.env.bak\nsed -i "s/PAYMENT_TIMEOUT=30/PAYMENT_TIMEOUT=3/" config/staging.env',
+    solution: 'diff config/staging.env.bak config/staging.env',
     check: ['out']
   },
 
   'b04-1': {
-    title: 'Сколько всего логов',
-    statement: '<p>Посчитай, сколько <code>.log</code>-файлов лежит в <code>~/shop</code>, одной цепочкой из <code>find</code> и <code>wc</code>.</p>',
-    hint: '<code>find</code> печатает по строке на файл, <code>wc -l</code> считает строки. Соедини их пайпом.',
-    solution: 'find . -type f -name "*.log" | wc -l',
-    check: ['out'],
-    uses: [/\|/, 'Нужна цепочка через пайп |']
-  },
-  'b04-2': {
-    title: 'Все логи приложения разом',
-    statement: '<p>Выведи содержимое всех <code>app.log</code> подряд. Пути руками не перечисляй — пусть их найдёт <code>find</code>.</p>',
-    hint: '<code>find ... | cat</code> напечатает только пути. Превратить строки в аргументы для <code>cat</code> умеет <code>xargs</code>.',
-    solution: 'find . -type f -name "app.log" | xargs cat',
-    check: ['out'],
-    uses: [/\bxargs\b|-exec\b/, 'Пути должен найти find и передать дальше — через xargs']
-  },
-  'b04-3': {
-    title: 'Строки во всех логах',
-    statement: '<p>Посчитай, сколько всего строк во всех <code>.log</code>-файлах вместе.</p>',
-    hint: 'Цепочка из прошлой задачи, только для <code>"*.log"</code>, и в конце <code>wc -l</code>.',
-    solution: 'find . -type f -name "*.log" | xargs cat | wc -l',
+    title: 'Третья строка',
+    statement: '<p>Выведи только третью строку январского лога платежей.</p>',
+    hint: '<code>head</code> отрезает начало файла, <code>tail</code> — конец. Их можно соединить пайпом.',
+    solution: 'head -n 3 logs/2026-01/payment.log | tail -n 1',
     check: ['out']
   },
+  'b04-2': {
+    title: 'Январь одним числом',
+    statement: '<p>Сколько строк во всех январских логах вместе? Нужно одно число: без имён файлов и без строки <code>total</code>.</p>',
+    hint: 'С файлами в аргументах <code>wc -l</code> печатает строку на каждый файл. Если склеить файлы в один поток и передать его <code>wc -l</code> через пайп, останется одно число.',
+    solution: 'cat logs/2026-01/*.log | wc -l',
+    check: ['out']
+  },
+  'b04-3': {
+    title: 'Строки в каждом app.log',
+    statement: '<p>Посчитай строки в логе приложения за каждый месяц и их сумму. Пути к файлам не перечисляй руками — их должен найти <code>find</code>.</p>',
+    hint: '<code>xargs</code> дописывает строки входа аргументами к любой команде, не только к <code>cat</code>.',
+    solution: 'find . -type f -name "app.log" | xargs wc -l',
+    check: ['lines'],
+    uses: [/\bxargs\b|-exec\b/, 'Пути должен найти find и передать wc — через xargs']
+  },
   'b04-4': {
-    title: 'Только если получилось',
-    statement: '<p>Перейди в <code>logs/2026-02</code> и сразу покажи список файлов. <code>ls</code> должна выполниться, только если переход удался.</p>',
-    hint: 'Связка «вторая команда только при успехе первой» — <code>&amp;&amp;</code>.',
-    solution: 'cd logs/2026-02 && ls',
+    title: 'Запасной месяц',
+    statement: '<p>Перейди в папку с логами за апрель, а если её нет — в папку за март. В конце выведи содержимое папки, в которой оказался. Всё — одной строкой.</p>',
+    hint: '<code>||</code> запускает команду, только если предыдущая упала, <code>&amp;&amp;</code> — только если она прошла. Связки выполняются слева направо.',
+    solution: 'cd logs/2026-04 || cd logs/2026-03 && ls',
     check: ['out', { cwd: true }],
-    uses: [/&&/, 'Свяжи команды через &&']
+    uses: [/\|\|/, 'Запасной вариант задаётся через ||']
   },
 
   'b05-1': {
-    title: 'Только ошибки',
-    statement: '<p>Выведи строки с <code>ERROR</code> из всех <code>.log</code>-файлов. Имён файлов в начале строк быть не должно.</p>',
-    hint: 'Добавь <code>grep ERROR</code> в конец цепочки из главы 04.',
-    solution: ERRORS_CHAIN,
-    check: ['out']
+    title: 'История заказа 1042',
+    statement: '<p>Поддержка просит всю историю заказа 1042. Найди во всех логах каждую строку, где он упоминается, — с именем файла и номером строки.</p>',
+    hint: 'Сервисы пишут сообщения в разном стиле. Сравни результат с поиском по одному числу <code>1042</code> и посмотри в таблице флагов, как не зависеть от регистра.',
+    solution: 'grep -rni "order 1042" logs',
+    check: ['lines']
   },
   'b05-2': {
-    title: 'Ошибки февраля по файлам',
-    statement: '<p>Посчитай, сколько строк с <code>ERROR</code> в каждом логе за февраль.</p>',
-    hint: '<code>grep -c</code> и маска <code>logs/2026-02/*.log</code>.',
-    solution: 'grep -c ERROR logs/2026-02/*.log',
-    check: ['out']
+    title: 'Что случилось в 10:05',
+    statement: '<p>В 10:05 14 января приложение потеряло связь с Redis. Собери из всех январских логов события этой минуты — без имён файлов в начале строк.</p>',
+    hint: 'Время в строке записано как <code>10:05:13</code>. Имена файлов убирает <code>-h</code>.',
+    solution: 'grep -h " 10:05:" logs/2026-01/*.log',
+    check: ['lines']
   },
   'b05-3': {
-    title: 'История заказа 1043',
-    statement: '<p>Найди во всех логах строки про заказ 1043 — с именем файла и номером строки.</p>',
-    hint: '<code>-r</code> — по папке рекурсивно, <code>-n</code> — номера строк. Шаблон с пробелом — в кавычки.',
-    solution: 'grep -rn "order 1043" logs',
+    title: 'Ошибки платежей одним числом',
+    statement: '<p>Сколько строк с <code>ERROR</code> во всех логах платежей за все месяцы? Нужно одно число.</p>',
+    hint: 'Маска может стоять и на месте папки: <code>logs/*/payment.log</code>. По нескольким файлам <code>grep -c</code> считает каждый отдельно, а по одному потоку — всё вместе.',
+    solution: 'cat logs/*/payment.log | grep -c ERROR',
     check: ['out']
   },
   'b05-4': {
-    title: 'Без шума',
-    statement: '<p>Покажи лог приложения за март без строк <code>INFO</code>.</p>',
-    hint: 'Инвертирующий флаг <code>grep</code> — <code>-v</code>.',
-    solution: 'grep -v INFO logs/2026-03/app.log',
+    title: 'Что было перед NPE',
+    statement: '<p><code>NullPointerException</code> в <code>CartService</code> повторяется из месяца в месяц. Выведи из логов приложения каждую такую ошибку вместе со строкой, которая записана прямо перед ней.</p>',
+    hint: 'Строки до совпадения добавляет <code>-B</code> с их количеством.',
+    solution: 'grep -B 1 NullPointerException logs/*/app.log',
     check: ['out']
   },
 
   'b06-1': {
-    title: 'Одинаковые ошибки рядом',
-    statement: '<p>В редакторе — цепочка, которая выводит все строки с <code>ERROR</code>. Отсортируй результат по тексту сообщения: он начинается с четвёртого поля.</p>',
-    hint: '<code>sort -k4</code> — ключ сортировки с четвёртого поля до конца строки.',
-    starter: ERRORS_CHAIN,
-    solution: ERRORS_CHAIN + ' | sort -k4',
+    title: 'Худший месяц',
+    statement: '<p>В каком месяце больше всего ошибок? Для каждого месяца выведи число строк с <code>ERROR</code> — месяц в виде <code>2026-01</code>, сначала самые плохие.</p>',
+    hint: 'Считать нужно месяцы: вырежи месяц из каждой строки ошибки через <code>cut</code> — из даты (разделитель <code>-</code>) или из пути, который печатает <code>grep -r</code> (разделитель <code>/</code>). Дальше — та же связка, что для топа ошибок.',
+    solution: 'grep -rh ERROR logs | cut -d - -f1,2 | sort | uniq -c | sort -rn',
     check: ['out']
   },
   'b06-2': {
-    title: 'Каждая ошибка один раз',
-    statement: '<p>Продолжи цепочку: оставь по одной строке на каждую уникальную ошибку. Дату, время и уровень при сравнении не учитывай.</p>',
-    hint: '<code>uniq -f3</code> пропускает три первых поля. Перед <code>uniq</code> строки должны быть отсортированы.',
-    starter: ERRORS_CHAIN + ' | sort -k4',
-    solution: ERRORS_CHAIN + ' | sort -k4 | uniq -f3',
+    title: 'Что повторяется',
+    statement: '<p>Какие ошибки случались больше одного раза? Выведи их тексты — без даты, времени и уровня, — каждую по одному разу.</p>',
+    hint: 'Текст сообщения начинается с четвёртого поля: <code>cut -d " " -f4-</code>. Из отсортированных строк <code>uniq -d</code> оставляет только те, у которых был повтор.',
+    solution: ERRORS_CHAIN + ' | cut -d " " -f4- | sort | uniq -d',
     check: ['out']
   },
   'b06-3': {
-    title: 'Топ-3 проблем',
-    statement: '<p>Выведи три самые частые ошибки со счётчиком повторов, самые частые — сверху. Используй <code>uniq -c</code> вместе с <code>-f3</code>.</p>',
-    hint: '<code>uniq -c -f3</code> → <code>sort -rn</code> → <code>head -n 3</code>.',
-    starter: ERRORS_CHAIN + ' | sort -k4',
-    solution: ERRORS_CHAIN + ' | sort -k4 | uniq -c -f3 | sort -rn | head -n 3',
+    title: 'Три самых тяжёлых лога',
+    statement: '<p>Место на диске заканчивается. Выведи пути трёх самых больших логов в виде <code>logs/2026-01/app.log</code> — самый большой первым.</p>',
+    hint: 'Размер в байтах покажет <code>wc -c</code>. По нескольким файлам он добавит строку <code>total</code> — она больше любого файла, её нужно убрать. Путь из строки вырежет <code>awk \'{print $2}\'</code>.',
+    solution: "wc -c logs/*/*.log | grep -v total | sort -rn | head -n 3 | awk '{print $2}'",
     check: ['out']
   },
 
   'b07-1': {
-    title: 'Отчёт в файл',
-    statement: '<p>Сохрани список уникальных ошибок (результат задачи 06.2) в файл <code>errors.log</code> в <code>~/shop</code>. На экран ничего выводить не нужно.</p>',
-    hint: 'В конец цепочки — <code>&gt; errors.log</code>.',
-    starter: ERRORS_CHAIN + ' | sort -k4 | uniq -f3',
-    solution: ERRORS_CHAIN + ' | sort -k4 | uniq -f3 > errors.log',
-    check: [{ file: '~/shop/errors.log' }]
+    title: 'Отчёт с заголовком',
+    statement: '<p>Собери отчёт в <code>~/shop/report.txt</code>: первая строка — <code>Errors by month:</code>, под ней — число ошибок по месяцам, как в задаче 06.1. На экран ничего не выводи.</p>',
+    hint: 'Заголовок запиши через <code>echo</code> и <code>&gt;</code>. Таблицу добавь вторым шагом — тем оператором, который не стирает файл.',
+    solution: 'echo "Errors by month:" > report.txt\ngrep -rh ERROR logs | cut -d - -f1,2 | sort | uniq -c | sort -rn >> report.txt',
+    check: [{ file: '~/shop/report.txt' }, 'quiet']
   },
   'b07-2': {
-    title: 'Допиши март',
-    statement: '<p>В <code>errors.log</code> уже лежит отчёт за январь и февраль. Допиши в конец строки с <code>ERROR</code> из <code>logs/2026-03/app.log</code>, не затерев то, что уже есть.</p>',
-    hint: '<code>&gt;</code> перезаписывает, <code>&gt;&gt;</code> дописывает.',
-    prep: 'find logs/2026-01 logs/2026-02 -type f -name "*.log" | xargs cat | grep ERROR | sort -k4 | uniq -f3 > errors.log',
-    solution: 'grep ERROR logs/2026-03/app.log >> errors.log',
+    title: 'Отсортировать на месте',
+    statement: '<p>В <code>errors.log</code> — все строки с ошибками, сгруппированные по файлам. Отсортируй их по времени так, чтобы результат оказался в том же <code>errors.log</code>.</p>',
+    hint: 'Посмотри, что остаётся в файле после <code>sort errors.log &gt; errors.log</code>: bash очищает файл для <code>&gt;</code> ещё до запуска <code>sort</code>. Запиши результат во временный файл, а потом перенеси его содержимое обратно.',
+    prep: ERRORS_CHAIN + ' > errors.log',
+    solution: 'sort errors.log > sorted.log\ncat sorted.log > errors.log',
     check: [{ file: '~/shop/errors.log' }]
   },
   'b07-3': {
-    title: 'Ошибки — в отдельный файл',
-    statement: '<p>Одной командой <code>cat</code> выведи в <code>all.txt</code> содержимое <code>logs/2026-01/app.log</code> и <code>logs/2026-04/app.log</code> — апреля нет, будет ошибка. Сообщение об ошибке отправь в <code>problems.txt</code>. На экране должно быть пусто.</p>',
-    hint: '<code>&gt;</code> перенаправляет stdout, <code>2&gt;</code> — stderr. В одной команде можно оба.',
-    solution: 'cat logs/2026-01/app.log logs/2026-04/app.log > all.txt 2> problems.txt',
-    check: [{ file: '~/shop/all.txt' }, { file: '~/shop/problems.txt' }, 'quiet']
+    title: 'Сохранить всё, показать число',
+    statement: '<p>Одной цепочкой сохрани все строки с <code>ERROR</code> из всех логов в <code>errors-all.txt</code>, а на экран выведи только их количество.</p>',
+    hint: '<code>tee</code> не обязан стоять в конце: в середине цепочки он пишет поток в файл и передаёт его дальше.',
+    solution: ERRORS_CHAIN + ' | tee errors-all.txt | wc -l',
+    check: ['out', { file: '~/shop/errors-all.txt' }],
+    uses: [/\btee\b/, 'Нужен tee — он пишет поток в файл и передаёт его дальше']
   },
   'b07-4': {
-    title: 'И на экран, и в файл',
-    statement: '<p>Посчитай строки с <code>ERROR</code> в каждом январском логе, покажи результат на экране и одновременно сохрани его в <code>counts.txt</code>.</p>',
-    hint: '<code>tee</code> пропускает поток дальше и попутно пишет его в файл.',
-    solution: 'grep -c ERROR logs/2026-01/*.log | tee counts.txt',
-    check: ['out', { file: '~/shop/counts.txt' }],
-    uses: [/\btee\b/, 'Нужен tee — он и печатает, и пишет в файл']
+    title: 'Каких логов нет',
+    statement: '<p>Мониторинг проверяет логи приложения за три месяца: <code>logs/2026-03/app.log</code>, <code>logs/2026-04/app.log</code> и <code>logs/2026-05/app.log</code>. Выведи одним числом, сколько из этих файлов не существует. Содержимое логов на экран попасть не должно.</p>',
+    hint: '<code>cat</code> с тремя путями пишет в stderr по сообщению на каждый отсутствующий файл. Направь stderr в пайп, а stdout выброси в <code>/dev/null</code>. Порядок редиректов важен: <code>2&gt;&amp;1</code> направляет stderr туда, куда stdout смотрит в этот момент.',
+    solution: 'cat logs/2026-03/app.log logs/2026-04/app.log logs/2026-05/app.log 2>&1 > /dev/null | wc -l',
+    check: ['out'],
+    uses: [/2>/, 'Сообщения об ошибках нужно перенаправить']
   },
 
   'b08-1': {
-    title: 'Папка для бэкапа',
-    statement: '<p>Создай папку <code>backup</code> в домашней директории, не выходя из <code>~/shop</code>.</p>',
-    hint: 'Домашняя директория — <code>~</code>.',
-    solution: 'mkdir ~/backup',
+    title: 'Платежи с месяцем в имени',
+    statement: '<p>Скопируй в <code>~/backup</code> логи платежей за все месяцы, в которых они есть. Имена копий не должны совпадать: <code>payment-2026-01.log</code> и дальше по месяцам.</p>',
+    hint: 'Сначала выясни, в каких месяцах есть <code>payment.log</code>. Если вторым аргументом <code>cp</code> указать путь к файлу, а не к папке, копия сразу получит это имя.',
+    prep: 'mkdir ~/backup',
+    solution: 'cp logs/2026-01/payment.log ~/backup/payment-2026-01.log\ncp logs/2026-02/payment.log ~/backup/payment-2026-02.log',
     check: [{ tree: '~/backup' }]
   },
   'b08-2': {
-    title: 'Первый файл в бэкап',
-    statement: '<p>Папка <code>~/backup</code> уже создана. Скопируй в неё лог платежей за январь.</p>',
-    hint: '<code>cp что куда</code>. Если цель — папка, файл ляжет в неё с тем же именем.',
-    prep: 'mkdir ~/backup',
-    solution: 'cp logs/2026-01/payment.log ~/backup/',
-    check: [{ tree: '~/backup' }]
+    title: 'Дамп — из проекта',
+    statement: '<p>Дамп памяти не должен лежать в проекте. Перенеси <code>tmp/heap.dump</code> в папку <code>~/dumps</code> — её ещё нет — под именем <code>heap-2026-03-16.dump</code>, а опустевшую <code>tmp</code> удали.</p>',
+    hint: 'Папку создай до переноса. <code>mv</code> переименовывает на лету, если в цели указано имя файла. Пустую папку <code>rm</code> удалит только с <code>-r</code>.',
+    solution: 'mkdir ~/dumps\nmv tmp/heap.dump ~/dumps/heap-2026-03-16.dump\nrm -r tmp',
+    check: [{ tree: '~/dumps' }, { tree: '~/shop' }]
   },
   'b08-3': {
-    title: 'Понятное имя',
-    statement: '<p>В <code>~/backup</code> лежит <code>payment.log</code>. Переименуй его в <code>payment-2026-01.log</code>, чтобы не спутать с другими месяцами.</p>',
-    hint: 'Переименование — это <code>mv</code> внутри одной папки.',
-    prep: 'mkdir ~/backup\ncp logs/2026-01/payment.log ~/backup/',
-    solution: 'mv ~/backup/payment.log ~/backup/payment-2026-01.log',
-    check: [{ tree: '~/backup' }]
+    title: 'Январь — в архив',
+    statement: '<p>Перенеси январские логи в архив: папка <code>logs/2026-01</code> со всеми файлами должна оказаться в <code>~/archive/2026-01</code>, а из <code>logs</code> — исчезнуть. Шаги свяжи так, чтобы после ошибки на любом из них следующие не выполнялись.</p>',
+    hint: 'Порядок: создать <code>~/archive</code>, скопировать папку, удалить оригинал. Если <code>~/archive</code> ещё нет, <code>cp -r logs/2026-01 ~/archive</code> создаст её как копию самой папки <code>2026-01</code>.',
+    solution: 'mkdir -p ~/archive && cp -r logs/2026-01 ~/archive/ && rm -r logs/2026-01',
+    check: [{ tree: '~/archive' }, { tree: '~/shop/logs' }],
+    uses: [/&&/, 'Свяжи шаги через &&']
   },
   'b08-4': {
-    title: 'Убрать дамп',
-    statement: '<p>Удали папку <code>tmp</code> вместе с содержимым — дамп памяти больше не нужен.</p>',
-    hint: 'Папку с файлами удаляет только <code>rm -r</code>.',
-    solution: 'rm -r tmp',
-    check: [{ tree: '~/shop' }]
+    title: 'Бэкап без лишней вложенности',
+    statement: '<p>В <code>~/backup/logs</code> лежит старая частичная копия — только <code>2026-01/app.log</code>. Скопируй туда всю папку <code>logs</code>, чтобы получилось <code>~/backup/logs/2026-01/…</code>, <code>~/backup/logs/2026-02/…</code> и так далее — без <code>logs</code> внутри <code>logs</code>.</p>',
+    hint: 'Если цель <code>cp -r</code> — существующая папка, копия ложится внутрь неё. Поэтому целью указывают папку, в которой <code>logs</code> должна оказаться.',
+    prep: 'mkdir -p ~/backup/logs/2026-01\ncp logs/2026-01/app.log ~/backup/logs/2026-01/',
+    solution: 'cp -r logs ~/backup/',
+    check: [{ tree: '~/backup' }]
   },
 
   'b09-1': {
-    title: 'Все логи через -exec',
-    statement: '<p>Папка <code>~/backup</code> уже создана. Скопируй в неё все <code>.log</code> из <code>~/shop</code> одной командой <code>find</code> с <code>-exec</code>. Потом посмотри <code>ls ~/backup</code>: сколько файлов доехало?</p>',
-    hint: '<code>-exec cp {} ~/backup \\;</code> — <code>{}</code> заменится путём файла, <code>\\;</code> закроет команду.',
-    prep: 'mkdir ~/backup',
-    solution: 'find . -type f -name "*.log" -exec cp {} ~/backup \\;',
-    check: [{ tree: '~/backup' }],
-    uses: [/-exec\b/, 'Копировать нужно через find -exec']
+    title: 'Ошибки по файлам',
+    statement: '<p>Найди все логи через <code>find</code> и для каждого выведи число строк с <code>ERROR</code> так, чтобы было видно, к какому файлу относится число.</p>',
+    hint: 'С одним файлом <code>grep -c</code> печатает только число, с несколькими — ещё и имя файла. <code>-exec … \\;</code> запускает команду для каждого файла отдельно, <code>-exec … +</code> — один раз для всех.',
+    solution: 'find . -type f -name "*.log" -exec grep -c ERROR {} +',
+    check: ['lines'],
+    uses: [/-exec\b|\bxargs\b/, 'Файлы должен найти find и передать grep']
   },
   'b09-2': {
-    title: 'С сохранением структуры',
-    statement: '<p>Скопируй все <code>.log</code> в <code>~/backup</code> так, чтобы сохранились папки месяцев: <code>~/backup/logs/2026-01/app.log</code> и так далее.</p>',
-    hint: 'Тот же <code>find -exec</code>, но вместо <code>cp</code> — <code>rsync -R</code>.',
+    title: 'Бэкап без января',
+    statement: '<p>Скопируй в <code>~/backup</code> логи только за февраль и март, сохранив пути: <code>~/backup/logs/2026-02/app.log</code> и так далее.</p>',
+    hint: '<code>rsync -R</code> воссоздаёт в цели путь источника. <code>find</code> принимает несколько стартовых папок, <code>rsync</code> — несколько файлов.',
     prep: 'mkdir ~/backup',
-    solution: 'find . -type f -name "*.log" -exec rsync -R {} ~/backup \\;',
-    check: [{ tree: '~/backup' }],
-    uses: [/\brsync\b/, 'Для этой задачи нужен rsync -R']
+    solution: 'find logs/2026-02 logs/2026-03 -type f -name "*.log" -exec rsync -R {} ~/backup \\;',
+    check: [{ tree: '~/backup' }]
   },
   'b09-3': {
-    title: 'Прибраться в бэкапе',
-    statement: '<p>В <code>~/backup</code> лежат плоские копии из задачи 09.1 и правильная папка <code>logs</code>. Удали плоские <code>.log</code> из корня <code>~/backup</code>, не трогая <code>logs</code>.</p>',
-    hint: 'Маска <code>~/backup/*.log</code> не заходит во вложенные папки, а <code>rm</code> без <code>-r</code> папки не удаляет.',
-    prep: 'mkdir ~/backup\nfind . -type f -name "*.log" -exec cp {} ~/backup \\;\nfind . -type f -name "*.log" -exec rsync -R {} ~/backup \\;',
-    solution: 'rm ~/backup/*.log',
-    check: [{ tree: '~/backup' }]
+    title: 'Вернуть февраль',
+    statement: '<p>Ротация удалила февральские логи из проекта, но в <code>~/backup</code> есть полная копия со структурой папок. Верни февраль на место: должны снова появиться <code>logs/2026-02/app.log</code> и <code>logs/2026-02/payment.log</code>.</p>',
+    hint: 'Путь в бэкапе повторяет путь в проекте: <code>~/backup/logs/2026-02</code>. Копируй эту папку целиком в <code>logs</code>.',
+    prep: 'mkdir ~/backup\nfind . -type f -name "*.log" -exec rsync -R {} ~/backup \\;\nrm -r logs/2026-02',
+    solution: 'cp -r ~/backup/logs/2026-02 logs/',
+    check: [{ tree: '~/shop/logs' }]
   },
 
   'b10-1': {
-    title: 'Запусти деплой',
-    statement: '<p><code>./deploy.sh</code> падает с <code>Permission denied</code>. Дай скрипту право на выполнение и запусти его.</p>',
-    hint: '<code>chmod +x</code>, затем <code>./deploy.sh</code> — с новой строки.',
-    solution: 'chmod +x deploy.sh\n./deploy.sh',
-    check: ['out', { exec: '~/shop/deploy.sh' }]
+    title: 'Запуск только для владельца',
+    statement: '<p>Запускать <code>deploy.sh</code> должен только владелец, остальным хватит чтения, как сейчас. Дай право на выполнение одному владельцу и запусти скрипт.</p>',
+    hint: '<code>chmod +x</code> добавит <code>x</code> всем трём тройкам. Кому добавить право, задаёт буква перед <code>+</code>.',
+    solution: 'chmod u+x deploy.sh\n./deploy.sh',
+    check: ['out', { mode: '~/shop/deploy.sh' }]
   },
   'b10-2': {
-    title: 'Спрячь секреты',
-    statement: '<p><code>.env</code> с паролями читают все пользователи сервера. Сделай так, чтобы читать и менять его мог только владелец, а остальные — ничего.</p>',
-    hint: 'Владельцу rw- = 4 + 2, группе и остальным — 0.',
-    solution: 'chmod 600 .env',
+    title: 'Секреты для группы',
+    statement: '<p>Приложение работает от пользователя из группы <code>qa</code> и должно читать <code>.env</code>. Настрой права: владелец читает и пишет, группа только читает, остальные — ничего.</p>',
+    hint: 'Каждая тройка — сумма: r = 4, w = 2, x = 1.',
+    solution: 'chmod 640 .env',
     check: [{ mode: '~/shop/.env' }]
   },
   'b10-3': {
-    title: 'Файл и папка',
-    statement: '<p><code>README.md</code> должны читать все, а менять — только владелец. Папка <code>config</code> — закрыта для всех, кроме владельца, но владельцу можно всё.</p>',
-    hint: 'Обычный файл — 644. Для папки «владельцу всё, остальным ничего» — 700.',
-    solution: 'chmod 644 README.md\nchmod 700 config',
-    check: [{ mode: '~/shop/README.md' }, { mode: '~/shop/config' }]
+    title: 'Список виден, войти нельзя',
+    statement: '<p>Группа и остальные должны видеть, какие файлы лежат в <code>config</code>, но не должны заходить в неё и открывать файлы. Владельцу — все права.</p>',
+    hint: 'У папки <code>r</code> — право прочитать список имён, <code>x</code> — право войти в неё и обращаться к файлам внутри.',
+    solution: 'chmod 744 config',
+    check: [{ mode: '~/shop/config' }]
+  },
+  'b10-4': {
+    title: 'Лог не открывается',
+    statement: '<p><code>cat logs/2026-03/db.log</code> отвечает <code>Permission denied</code>. Верни файлу такие же права, как у соседнего <code>app.log</code>, и выведи его содержимое.</p>',
+    hint: 'Права соседей видно в <code>ls -l logs/2026-03</code>. Переведи строку прав в цифры.',
+    prep: 'chmod 000 logs/2026-03/db.log',
+    solution: 'chmod 644 logs/2026-03/db.log\ncat logs/2026-03/db.log',
+    check: ['out', { mode: '~/shop/logs/2026-03/db.log' }]
   },
 
   'b11-1': {
-    title: 'Место и память',
-    statement: '<p>Проверь, сколько свободно на дисках и сколько свободной памяти. Обе команды — в человекочитаемом виде, диск первым.</p>',
-    hint: '<code>df</code> и <code>free</code>, обеим — флаг <code>-h</code>.',
-    solution: 'df -h\nfree -h',
-    check: ['out']
+    title: 'Кто съел память',
+    statement: '<p>Памяти мало. Выведи из <code>ps aux</code> строку процесса, который занимает больше всего памяти.</p>',
+    hint: 'Процент памяти — колонка <code>%MEM</code>, четвёртая по счёту. Отсортируй вывод по ней как по числу, по убыванию, и оставь первую строку.',
+    solution: 'ps aux | sort -k4 -rn | head -n 1',
+    check: ['out'],
+    uses: [/\bsort\b/, 'Отсортируй вывод ps по колонке памяти']
   },
   'b11-2': {
-    title: 'Завис воркер платежей',
-    statement: '<p>Воркер платежей завис и держит заказы. Найди его PID и заверши процесс. Остальные процессы не трогай.</p>',
-    hint: '<code>ps aux | grep payment</code> покажет PID во второй колонке. Или сразу <code>kill $(pgrep -f payment_worker)</code>.',
-    solution: 'ps aux | grep payment\nkill 1244',
-    check: [{ procs: true }],
-    uses: [/\bkill\b/, 'Процесс завершает kill']
+    title: 'Остановить воркер, не задев приложение',
+    statement: '<p>Воркер платежей завис. Заверши его, не задев приложение — оно тоже запущено через <code>python</code>. Потом проверь, что приложение по-прежнему отвечает на <code>localhost:8080/health</code>.</p>',
+    hint: '<code>pgrep -a python</code> покажет оба процесса с командами запуска. Завершай по PID.',
+    solution: 'kill 1244\ncurl localhost:8080/health',
+    check: [{ procs: true }, { contains: '"status":"ok"' }]
   },
   'b11-3': {
-    title: 'Сервис жив?',
-    statement: '<p>Приложение должно слушать порт 8080. Проверь, что порт слушается, а потом запроси <code>localhost:8080/health</code>.</p>',
-    hint: '<code>netstat -tuln | grep 8080</code>, затем <code>curl localhost:8080/health</code>.',
-    solution: 'netstat -tuln | grep 8080\ncurl localhost:8080/health',
-    check: [{ contains: '"status":"ok"' }],
-    uses: [/\b(netstat|ss|lsof)\b/, 'Сначала проверь порт: netstat, ss или lsof'],
-    uses2: [/\bcurl\b/, 'Опроси /health через curl']
+    title: 'request-id для тикета',
+    statement: '<p><code>localhost:8080/api/orders</code> отвечает ошибкой. Разработчикам нужен request-id этого ответа: выведи только ту строку заголовков, в которой он есть.</p>',
+    hint: 'Заголовки ответа печатает <code>curl -I</code>. Нужную строку оставит <code>grep</code>.',
+    solution: 'curl -I localhost:8080/api/orders | grep request-id',
+    check: ['out']
+  },
+  'b11-4': {
+    title: 'Redis без grep',
+    statement: '<p>Выведи из <code>ps aux</code> строку процесса Redis — и только её: строки самого <code>grep</code> в ответе быть не должно.</p>',
+    hint: 'В цепочку можно поставить второй фильтр: <code>grep -v</code> убирает строки с совпадением.',
+    solution: 'ps aux | grep redis | grep -v grep',
+    check: ['out']
   },
 
   'b12-1': {
-    title: 'Поставь tree',
-    statement: '<p>Установи пакет <code>tree</code>. Попробуй сначала без <code>sudo</code> и прочитай ошибку.</p>',
-    hint: 'Пакеты ставит root: <code>sudo apt install tree</code>.',
-    solution: 'sudo apt install tree',
-    check: [{ pkg: 'tree' }]
+    title: 'Чужой процесс',
+    statement: '<p>Redis завис, его нужно завершить. Процесс запущен не от <code>qa</code>: посмотри, что ответит обычный <code>kill</code>, и заверши процесс.</p>',
+    hint: 'Чужие процессы завершает только root. Одну команду от его имени выполняет <code>sudo</code>.',
+    solution: 'sudo kill 1302',
+    check: [{ procs: true }]
   },
   'b12-2': {
-    title: 'Дерево логов',
-    statement: '<p><code>tree</code> уже установлен. Выведи им дерево папки <code>logs</code>.</p>',
-    hint: '<code>tree</code> принимает путь, как <code>ls</code>.',
-    prep: 'sudo apt install tree',
-    solution: 'tree logs',
+    title: 'Версия curl',
+    statement: '<p>Какая версия <code>curl</code> стоит на сервере? Выведи строку о нём из списка установленных пакетов.</p>',
+    hint: 'Список установленных пакетов <code>apt</code> показывает и без root, нужную строку найдёт <code>grep</code>.',
+    solution: 'apt list --installed | grep curl',
     check: ['out']
   },
   'b12-3': {
-    title: 'Кто на порту базы',
-    statement: '<p>Узнай через <code>lsof</code>, какой процесс слушает порт 5432. Без прав root <code>lsof</code> покажет только твои процессы.</p>',
-    hint: '<code>lsof -i :5432</code> — с <code>sudo</code> впереди.',
-    solution: 'sudo lsof -i :5432',
+    title: 'Кто на каких портах',
+    statement: '<p>Выведи в формате <code>netstat</code> все слушающие TCP-порты вместе с PID и именами процессов — для всех процессов, а не только своих.</p>',
+    hint: 'Колонку с процессами добавляет флаг <code>-p</code>. Без root чужие процессы в ней будут прочерками.',
+    solution: 'sudo netstat -tlnp',
     check: ['out']
   }
 };
@@ -4567,22 +4587,29 @@ function flatten(node, base) {
   return map;
 }
 
+// сервер в том состоянии, с которого начинается задача: сначала скрытый setup, потом показанный prep
+function prepareShell(task) {
+  const sh = freshShell();
+  [task.setup, task.prep].filter(Boolean).forEach((script) => runScript(sh, script));
+  sh.history = [];
+  return sh;
+}
+
 function evaluateTask(task, code) {
-  const user = freshShell(), ref = freshShell();
-  if (task.prep) {
-    [user, ref].forEach((sh) => { runScript(sh, task.prep); sh.history = []; });
-  }
+  const user = prepareShell(task), ref = prepareShell(task);
   const got = runScript(user, code);
   const exp = runScript(ref, task.solution);
   const results = [];
   const add = (ok, label, msg, extra) => results.push(Object.assign({ ok: ok, label: label, msg: ok ? '' : msg }, extra || {}));
+  const sortedLines = (s) => normOut(s).split('\n').sort().join('\n');
 
   (task.check || ['out']).forEach((c) => {
-    if (c === 'out') {
-      const ok = normOut(got.stdout) === normOut(exp.stdout);
+    if (c === 'out' || c === 'lines') {
+      const ok = c === 'out' ? normOut(got.stdout) === normOut(exp.stdout) : sortedLines(got.stdout) === sortedLines(exp.stdout);
       const why = !got.stdout && got.stderr ? 'Вывода нет, зато есть ошибки — они в терминале выше.'
         : !got.stdout ? 'Команда ничего не вывела.' : 'Вывод отличается от эталонного.';
-      add(ok, 'Вывод совпадает с эталоном', why, { expected: exp.stdout, got: got.stdout });
+      add(ok, c === 'out' ? 'Вывод совпадает с эталоном' : 'Вывод совпадает с эталоном, порядок строк не важен', why,
+        { expected: exp.stdout, got: got.stdout });
     } else if (c === 'quiet') {
       add(!got.stdout && !got.stderr, 'На экран ничего не выведено',
         'На экране что-то осталось — это нужно перенаправить в файлы.', { got: got.stdout + got.stderr });
@@ -4629,8 +4656,9 @@ function evaluateTask(task, code) {
 /* ══════════════════════════════════════════════════════════════
    ИНТЕРФЕЙС: задачи, редактор, дополнение, прогресс, песочница
    ══════════════════════════════════════════════════════════════ */
-const LS_CODE = 'qa-bash:code:';
-const LS_SOLVED = 'qa-bash:solved';
+// v2: задачи переписаны, прежние код и отметки о решении к ним не относятся
+const LS_CODE = 'qa-bash:v2:code:';
+const LS_SOLVED = 'qa-bash:v2:solved';
 
 function loadSolved() {
   try { return new Set(JSON.parse(localStorage.getItem(LS_SOLVED) || '[]')); } catch (e) { return new Set(); }
@@ -4766,14 +4794,11 @@ function autoSize(ta) {
 
 /* ── задачи ── */
 const allTasks = [];
-const prepServers = {};
-function taskServer(task) {
-  if (!prepServers[task.id]) {
-    const sh = freshShell();
-    if (task.prep) runScript(sh, task.prep);
-    prepServers[task.id] = sh.srv;
-  }
-  return prepServers[task.id];
+const prepShells = {};
+// стартовое состояние задачи — для дополнения по Tab и пути в заголовке редактора
+function taskShell(task) {
+  if (!prepShells[task.id]) prepShells[task.id] = prepareShell(task);
+  return prepShells[task.id];
 }
 
 function refreshTask(id) {
@@ -4826,7 +4851,7 @@ document.querySelectorAll('.task[data-task]').forEach((el) => {
     + '</span><span class="task-status">не решено</span></div><div class="task-body"><div class="task-statement">' + task.statement + '</div>'
     + (task.prep ? '<div class="hl" style="margin:0 0 12px;"><span class="hl-label">Уже выполнено</span><div class="code-block" style="margin-top:6px;">' + highlightBash(task.prep).replace(/\n$/, '') + '</div></div>' : '')
     + '<details class="hint"><summary>Подсказка</summary><div class="inner">' + task.hint + '</div></details>'
-    + '<div class="editor-wrap"><div class="editor-bar"><span class="dot"></span> bash · qa@shop-staging:~/shop</div>'
+    + '<div class="editor-wrap"><div class="editor-bar"><span class="dot"></span> bash · qa@shop-staging:' + esc(task.prep ? taskShell(task).promptPath() : '~/shop') + '</div>'
     + '<div class="editor-stack"><pre class="editor-hl" aria-hidden="true"></pre><textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Команды для задачи ' + num + '"></textarea></div>'
     + '<div class="cmp-hint" hidden></div></div><div class="task-actions"><button class="btn btn-run">▶ Выполнить и проверить</button>'
     + '<button class="btn btn-ghost btn-reset">Очистить</button><button class="btn btn-ghost btn-toggle-solution">Показать решение</button>'
@@ -4836,7 +4861,7 @@ document.querySelectorAll('.task[data-task]').forEach((el) => {
 
   const editor = el.querySelector('.editor'), hl = el.querySelector('.editor-hl'), hint = el.querySelector('.cmp-hint');
   const results = el.querySelector('.results'), solBtn = el.querySelector('.btn-toggle-solution'), solution = el.querySelector('.solution');
-  const ctx = { vocab: () => vocabUpTo(task.chapter), srv: () => taskServer(task), cwd: () => HOME + '/shop' };
+  const ctx = { vocab: () => vocabUpTo(task.chapter), srv: () => taskShell(task).srv, cwd: () => taskShell(task).cwd };
   const sync = () => { hl.innerHTML = highlightBash(editor.value); autoSize(editor); };
   const saved = loadCode(id);
   editor.value = saved !== null ? saved : (task.starter || '');
