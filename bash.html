@@ -882,7 +882,7 @@
 
   <div class="header">
     <h1>Bash, Docker, Kubernetes</h1>
-    <p>// тренажёр Bash на живом сценарии · справочник · контейнеры и оркестрация</p>
+    <p>// команды · назначение · синтаксис · особенности · примеры</p>
   </div>
 
   <div class="progress-bar">
@@ -895,11 +895,11 @@
   <section class="section" id="how">
     <div class="section-header">
       <span class="section-num">—</span>
-      <span class="section-title">Как устроен тренажёр</span>
+      <span class="section-title">Формат раздела</span>
     </div>
     <div class="section-body">
-      <p>Команды здесь не идут списком. Весь раздел — <strong>одна рабочая история</strong>: на staging-сервере магазина копятся логи, пользователи жалуются на ошибки при оплате, и мы шаг за шагом доходим от <code>ls</code> до цепочки, которая собирает отчёт об уникальных ошибках, а потом делаем бэкап логов. Каждая следующая глава опирается на предыдущую.</p>
-      <p>В главе сначала идёт объяснение с тем выводом, который ты увидишь в терминале, затем задачи. Задача выполняется на <strong>свежей копии сервера</strong>. Её вывод сравнивается с выводом эталонного решения, а если задача меняет файлы, проверяется и итоговое состояние файловой системы. Решение может отличаться от эталона: засчитывается результат, а не буквы команды.</p>
+      <p>Раздел состоит из справочных глав и практических задач. В каждой главе указаны назначение команд, синтаксис, основные флаги, ограничения и примеры применения.</p>
+      <p>Каждая задача запускается на <strong>свежей копии виртуальной файловой системы</strong>. Проверяется результат команды и, при необходимости, итоговое состояние файлов. Допускается любое решение с корректным результатом.</p>
       <div class="hl green"><span class="hl-label">Где выполняются команды</span>В браузере работает эмулятор bash на JavaScript с виртуальной файловой системой. Ничего не отправляется наружу, страница работает и с GitHub Pages, и из локального файла. Поддержаны команды, которые разбираются в главах; незнакомая команда ответит <code>command not found</code>.</div>
       <div class="hl orange"><span class="hl-label">Отличия от настоящего сервера</span><code>find</code> и <code>ls</code> выдают имена в алфавитном порядке, а на настоящей файловой системе порядок <code>find</code> не гарантирован. <code>sort</code> сравнивает строки побайтово, как при <code>LC_ALL=C</code>. <code>less</code>, <code>top</code> и <code>tail -f</code> не интерактивны, а процессы, диск и сеть — правдоподобный муляж.</div>
       <ul>
@@ -912,10 +912,10 @@
   </section>
 
   <div class="part-head" id="trainer">
-    <div class="part-title">Тренажёр: разбираем логи магазина</div>
-    <div class="part-sub">12 глав · от ls до отчёта об ошибках и бэкапа</div>
+    <div class="part-title">Bash: команды и практика</div>
+    <div class="part-sub">12 глав · файловая система, логи, процессы и сеть</div>
     <div class="part-lead">
-      <p>Ты QA и зашёл по SSH на сервер <code>shop-staging</code> под пользователем <code>qa</code>. В <code>~/shop</code> лежит сервис заказов: логи по месяцам, конфиги окружений и скрипт деплоя. Пользователи жалуются на ошибки при оплате. Задача — понять, что происходит, собрать отчёт и сохранить логи до того, как их удалит ротация.</p>
+      <p>Практические команды выполняются от пользователя <code>qa</code> в каталоге <code>~/shop</code>. В файловой системе есть логи, конфигурация, скрипт запуска и временные файлы:</p>
       <div class="code-block">~/shop
 ├── .env                <span class="cm"># скрытый файл с секретами</span>
 ├── README.md
@@ -936,7 +936,7 @@
 │       └── db.log
 └── tmp
     └── heap.dump       <span class="cm"># большой файл, пригодится для find -size</span></div>
-      <p style="margin-top:10px;">Строка лога устроена одинаково во всех файлах: дата, время, уровень, сообщение. Через пробел — значит, у каждой строки есть поля: первое, второе, третье, четвёртое и дальше. Это пригодится в главе про <code>sort</code> и <code>uniq</code>.</p>
+      <p style="margin-top:10px;">Формат строки лога: дата, время, уровень и сообщение. Поля разделены пробелами; это используется в примерах с <code>sort</code>, <code>uniq</code>, <code>cut</code> и <code>awk</code>.</p>
       <div class="code-block"><span class="out">2026-01-14 10:02:11 ERROR Order 1042 failed: payment timeout</span>
 <span class="cm">#  поле 1    поле 2  поле 3 поле 4 и дальше — текст сообщения</span></div>
     </div>
@@ -949,7 +949,7 @@
       <span class="section-badge">free play</span>
     </div>
     <div class="section-body">
-      <p>Свободный терминал на той же копии сервера. Пробуй команды из глав, ломай и чини: изменения живут до перезагрузки страницы или до кнопки «Сбросить сервер». Начни с <code>ls</code>, <code>tree</code> здесь пока не установлен — до него дойдём в главе 12.</p>
+      <p>Свободный терминал использует ту же виртуальную файловую систему. Изменения сохраняются до перезагрузки страницы или нажатия «Сбросить сервер». Поддерживаются команды, описанные в главах.</p>
       <div class="term">
         <div class="editor-bar"><span class="dot"></span> qa@shop-staging · bash
           <button class="btn btn-ghost" id="sb-reset" style="margin-left:auto;font-size:10px;padding:3px 9px;">Сбросить сервер</button>
@@ -969,19 +969,19 @@
   <section class="section" id="b01">
     <div class="section-header">
       <span class="section-num">01</span>
-      <span class="section-title">Осмотреться: pwd, ls, cd</span>
+      <span class="section-title">Навигация: pwd, ls, cd</span>
       <span class="section-badge zero" data-chapter-badge="b01"></span>
     </div>
     <div class="section-body">
-      <p>Большинство серверов и CI-раннеров работают на Linux, а общение с ними идёт через <strong>shell</strong>, чаще всего Bash. На незнакомом сервере первым делом выясняешь две вещи: где ты находишься и что лежит вокруг.</p>
+      <p><code>pwd</code>, <code>ls</code> и <code>cd</code> показывают текущий каталог, выводят содержимое каталогов и меняют рабочий каталог.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · где я</div>
-        <p><code>pwd</code> (print working directory) печатает текущую директорию. После входа по SSH это домашняя папка пользователя, а мы уже перешли в проект:</p>
+        <div class="step-title">pwd · текущий каталог</div>
+        <p><code>pwd</code> (print working directory) печатает абсолютный путь текущего рабочего каталога:</p>
         <div class="code-block"><span class="pr">$</span> pwd
 <span class="out">/home/qa/shop</span></div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · что вокруг</div>
+        <div class="step-title">ls · содержимое каталога</div>
         <p><code>ls</code> (list) показывает содержимое директории. Без аргументов — текущей, с аргументом — указанной. Переходить в папку, чтобы заглянуть в неё, не нужно:</p>
         <div class="code-block"><span class="pr">$</span> ls
 <span class="out">config  deploy.sh  logs  README.md  tmp</span>
@@ -1011,7 +1011,7 @@ logs/2026-03:
 app.log  db.log</span></div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · перемещаться</div>
+        <div class="step-title">cd · смена каталога</div>
         <p><code>cd</code> (change directory) переходит в другую директорию. Путь бывает <strong>абсолютным</strong> — от корня <code>/</code>, и <strong>относительным</strong> — от текущей папки. Несколько коротких имён пригодятся постоянно:</p>
         <table>
           <thead><tr><th>Запись</th><th>Смысл</th></tr></thead>
@@ -1029,8 +1029,7 @@ app.log  db.log</span></div>
 <span class="pr">$</span> cd -
 <span class="out">/home/qa/shop</span></div>
       </div>
-      <div class="hl green"><span class="hl-label">Аналогия</span>Shell — это REPL операционной системы: вводишь команду, получаешь результат, как в интерактивном Python. Файловая система — дерево: <code>/</code> корень, ветки — директории, листья — файлы. <code>cd</code> — переход по дереву, <code>ls</code> — посмотреть, что в текущем узле.</div>
-      <div class="hl"><span class="hl-label">Мелочи, которые экономят время</span><span class="kbd">Ctrl</span> + <span class="kbd">L</span> или <code>clear</code> очищают экран. <span class="kbd">Tab</span> дописывает имя файла или команды — на реальном сервере это главный способ не опечататься в длинном пути.</div>
+      <div class="hl"><span class="hl-label">Горячие клавиши</span><span class="kbd">Ctrl</span> + <span class="kbd">L</span> или <code>clear</code> очищают экран. <span class="kbd">Tab</span> дополняет имя команды или путь.</div>
 
       <div class="task" data-task="b01-1"></div>
       <div class="task" data-task="b01-2"></div>
@@ -1047,9 +1046,9 @@ app.log  db.log</span></div>
       <span class="section-badge zero" data-chapter-badge="b02"></span>
     </div>
     <div class="section-body">
-      <p><code>ls -R</code> показывает всё подряд, а на живом сервере месяцев может быть двенадцать, сервисов — десятки. Нужен инструмент, который обходит дерево и оставляет только то, что подходит под условие. Это <code>find</code>: первым аргументом — откуда начинать поиск, дальше — условия.</p>
+      <p><code>find</code> рекурсивно ищет объекты файловой системы. Синтаксис: <code>find &lt;начальный путь&gt; &lt;условия&gt; &lt;действия&gt;</code>.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · только папки</div>
+        <div class="step-title">Поиск по типу</div>
         <p><code>-type d</code> — только директории, <code>-type f</code> — только обычные файлы. Точка — начать с текущей папки:</p>
         <div class="code-block"><span class="pr">$</span> find . -type d
 <span class="out">.
@@ -1061,7 +1060,7 @@ app.log  db.log</span></div>
 ./tmp</span></div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · по имени</div>
+        <div class="step-title">Поиск по точному имени</div>
         <p><code>-name</code> ищет по имени файла. В отличие от <code>ls</code>, <code>find</code> печатает <strong>путь</strong> к каждому найденному файлу — сразу видно, в каком месяце он лежит:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"app.log"</span>
 <span class="out">./logs/2026-01/app.log
@@ -1069,7 +1068,7 @@ app.log  db.log</span></div>
 ./logs/2026-03/app.log</span></div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · по маске</div>
+        <div class="step-title">Поиск по маске</div>
         <p>Имена сервисов часто неизвестны заранее. Маска (glob) описывает имя шаблоном: <code>*</code> — любое количество любых символов, <code>?</code> — ровно один символ. <code>"*.log"</code> — всё, что заканчивается на <code>.log</code>:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"*.log"</span>
 <span class="out">./logs/2026-01/app.log
@@ -1080,7 +1079,7 @@ app.log  db.log</span></div>
 ./logs/2026-03/app.log
 ./logs/2026-03/db.log</span></div>
       </div>
-      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем кавычки вокруг <code>*.log</code>?» — Маску без кавычек раскрывает сам shell <em>до</em> запуска команды. Если в текущей папке уже есть, например, <code>errors.log</code>, то <code>find . -name *.log</code> превратится в <code>find . -name errors.log</code> и молча найдёт не то. В кавычках маска доходит до <code>find</code> нетронутой, и он применяет её на каждом уровне дерева. В главе 07 появится <code>errors.log</code> — там это можно проверить руками.</div>
+      <div class="hl purple"><span class="hl-label">Особенность</span>Маску в аргументе <code>-name</code> заключают в кавычки: <code>find . -name "*.log"</code>. Без кавычек shell раскрывает маску до запуска <code>find</code>, используя только содержимое текущего каталога.</div>
       <p><strong>Другие полезные условия:</strong></p>
       <table>
         <thead><tr><th>Условие</th><th>Что ищет</th></tr></thead>
@@ -1105,13 +1104,13 @@ app.log  db.log</span></div>
   <section class="section" id="b03">
     <div class="section-header">
       <span class="section-num">03</span>
-      <span class="section-title">Заглянуть внутрь: cat, less, head, tail, wc, diff</span>
+      <span class="section-title">Просмотр и сравнение: cat, less, head, tail, wc, diff</span>
       <span class="section-badge zero" data-chapter-badge="b03"></span>
     </div>
     <div class="section-body">
-      <p>Файлы найдены, но список имён ничего не говорит об ошибках. Пора смотреть содержимое. Путь, который напечатал <code>find</code>, можно передать команде как есть: <code>./</code> в начале означает «от текущей папки».</p>
+      <p>Команды этого блока выводят содержимое файлов, отдельные части файла, статистику и различия. Путь с префиксом <code>./</code> отсчитывается от текущего каталога.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · весь файл целиком</div>
+        <div class="step-title">cat и less · содержимое файла</div>
         <p><code>cat</code> выводит файл полностью. Название пошло от concatenate: если передать несколько файлов, <code>cat</code> склеит их в один поток.</p>
         <div class="code-block"><span class="pr">$</span> cat logs/2026-01/app.log
 <span class="out">2026-01-14 09:58:02 INFO Server started on port 8080
@@ -1121,28 +1120,28 @@ app.log  db.log</span></div>
 2026-01-14 10:05:43 ERROR Cannot connect to redis:6379
 2026-01-14 10:07:01 INFO Health check OK
 2026-01-14 10:09:27 ERROR NullPointerException in CartService.applyCoupon</span></div>
-        <p>Для лога на сотни тысяч строк <code>cat</code> бесполезен — всё пролетит мимо. Для него есть <code>less</code>: листает файл постранично, <span class="kbd">Space</span> — вниз, <span class="kbd">b</span> — назад, <code>/timeout</code> — поиск, <span class="kbd">n</span> — следующее совпадение, <span class="kbd">q</span> — выход. В тренажёре <code>less</code> просто печатает файл.</p>
+        <p>Для больших файлов используется <code>less</code>: <span class="kbd">Space</span> — следующая страница, <span class="kbd">b</span> — предыдущая, <code>/timeout</code> — поиск, <span class="kbd">n</span> — следующее совпадение, <span class="kbd">q</span> — выход. В тренажёре интерактивный режим не эмулируется.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · начало и конец</div>
+        <div class="step-title">head и tail · начало и конец</div>
         <p><code>head</code> показывает первые строки, <code>tail</code> — последние. По умолчанию по 10, число задаёт <code>-n</code>. Свежие события в логе всегда внизу, поэтому <code>tail</code> — одна из самых частых команд QA:</p>
         <div class="code-block"><span class="pr">$</span> head -n 2 logs/2026-02/app.log
 <span class="out">2026-02-03 11:20:00 INFO Server started on port 8080
 2026-02-03 11:24:18 ERROR Cannot connect to redis:6379</span>
 <span class="pr">$</span> tail -n 1 logs/2026-02/app.log
 <span class="out">2026-02-03 11:40:09 ERROR NullPointerException in CartService.applyCoupon</span></div>
-        <p><code>tail -f app.log</code> не завершается, а ждёт новые строки и печатает их по мере записи — как подписка на поток событий. Запускаешь, воспроизводишь баг в браузере и видишь, что сервис пишет в эту секунду. Останавливается через <span class="kbd">Ctrl</span> + <span class="kbd">C</span>.</p>
+        <p><code>tail -f app.log</code> продолжает работу и выводит новые строки по мере записи в файл. Используется для наблюдения за логом во время воспроизведения ошибки. Остановка: <span class="kbd">Ctrl</span> + <span class="kbd">C</span>.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · посчитать</div>
+        <div class="step-title">wc · подсчёт строк, слов и байтов</div>
         <p><code>wc</code> (word count) считает строки, слова и символы. Чаще всего нужен <code>-l</code>: сколько строк в логе, сколько ошибок нашлось, сколько файлов вернул поиск.</p>
         <div class="code-block"><span class="pr">$</span> wc -l logs/2026-01/app.log
 <span class="out">7 logs/2026-01/app.log</span></div>
         <p><code>-w</code> — слова, <code>-m</code> — символы, <code>-c</code> — байты. Без флагов <code>wc</code> печатает строки, слова и байты сразу. Если передать несколько файлов, внизу появится строка <code>total</code>.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 4 · сравнить два файла</div>
-        <p>На staging всё работает, на prod — нет. Первое, что стоит проверить, — чем отличаются конфиги. <code>diff</code> печатает только различающиеся строки:</p>
+        <div class="step-title">diff · сравнение файлов</div>
+        <p><code>diff</code> сравнивает два файла и печатает различия. Частый сценарий — сравнение конфигураций разных окружений:</p>
         <div class="code-block"><span class="pr">$</span> diff config/staging.env config/prod.env
 <span class="out">2,3c2,3
 &lt; DB_HOST=db-staging
@@ -1168,17 +1167,17 @@ app.log  db.log</span></div>
       <span class="section-badge zero" data-chapter-badge="b04"></span>
     </div>
     <div class="section-body">
-      <p>Выводить логи по одному — долго: нашёл путь, скопировал, вставил в <code>cat</code>, повторил семь раз. Сила shell не в отдельных командах, а в том, что их можно соединять: каждая делает одну простую вещь, а вместе они решают задачу.</p>
+      <p>Пайп <code>|</code> передаёт стандартный вывод одной команды на стандартный ввод другой. <code>xargs</code> преобразует входные строки в аргументы команды.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · пайп</div>
+        <div class="step-title">Пайп · передача потока</div>
         <p>Символ <code>|</code> (pipe) передаёт вывод левой команды на вход правой. Сколько всего логов на сервере? <code>find</code> выдаёт по строке на файл, <code>wc -l</code> считает строки:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"*.log"</span> | wc -l
 <span class="out">7</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Пайп — это композиция функций: <code>cmd2(cmd1(input))</code>. Вывод одной команды становится входом следующей. <code>grep error app.log | wc -l</code> — «отфильтруй ошибки → посчитай».</div>
+        <div class="hl green"><span class="hl-label">Схема</span><code>cmd1 | cmd2</code> эквивалентно обработке <code>cmd2(cmd1(input))</code>. Пример: <code>grep ERROR app.log | wc -l</code> фильтрует ошибки и считает их количество.</div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · почему «| cat» не работает</div>
-        <p>Логично попробовать так же склеить содержимое всех <code>app.log</code>. Но результат разочарует:</p>
+        <div class="step-title">Пайп передаёт данные, а не имена файлов</div>
+        <p><code>cat</code> без аргументов читает stdin, поэтому следующая команда выводит полученные пути, а не содержимое файлов:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"app.log"</span> | cat
 <span class="out">./logs/2026-01/app.log
 ./logs/2026-02/app.log
@@ -1186,7 +1185,7 @@ app.log  db.log</span></div>
         <p>Пайп передаёт <strong>текст</strong>, а не файлы. <code>cat</code> без аргументов читает свой вход и честно печатает то, что пришло, — строки с путями. Чтобы <code>cat</code> открыл файлы, пути должны оказаться у него в <strong>аргументах</strong>.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · xargs превращает строки в аргументы</div>
+        <div class="step-title">xargs · преобразование stdin в аргументы</div>
         <p><code>xargs</code> читает вход, разбивает его на слова и дописывает их аргументами к указанной команде. Цепочка ниже выполняет <code>cat ./logs/2026-01/app.log ./logs/2026-02/app.log ./logs/2026-03/app.log</code>:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"app.log"</span> | xargs cat
 <span class="out">2026-01-14 09:58:02 INFO Server started on port 8080
@@ -1201,7 +1200,7 @@ app.log  db.log</span></div>
 cmd1 &amp;&amp; cmd2    <span class="cm"># cmd2 только если cmd1 завершилась успешно</span>
 cmd1 || cmd2    <span class="cm"># cmd2 только если cmd1 упала</span>
 cmd1 ; cmd2     <span class="cm"># обе, независимо от результата</span></div>
-      <p>Классика: <code>cd /opt/app &amp;&amp; rm -rf build</code>. Если папки нет, <code>cd</code> упадёт, и <code>rm</code> не выполнится в текущей директории, где он мог бы снести не то.</p>
+      <p>Безопасный пример: <code>cd /opt/app &amp;&amp; rm -rf build</code>. Если переход не выполнен, удаление не запускается в другом каталоге.</p>
 
       <div class="task" data-task="b04-1"></div>
       <div class="task" data-task="b04-2"></div>
@@ -1218,9 +1217,9 @@ cmd1 ; cmd2     <span class="cm"># обе, независимо от резул�
       <span class="section-badge zero" data-chapter-badge="b05"></span>
     </div>
     <div class="section-body">
-      <p>Цепочка из главы 04 выводит все 31 строку логов, но большая часть — это <code>INFO</code> и <code>WARN</code>. Нас интересуют ошибки. <code>grep</code> оставляет только строки, в которых есть совпадение с шаблоном, — это <code>filter()</code> по строкам.</p>
+      <p><code>grep</code> выводит строки, совпавшие с текстовым шаблоном или регулярным выражением. Синтаксис: <code>grep [флаги] 'шаблон' [файл...]</code>.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · добавить фильтр в цепочку</div>
+        <div class="step-title">Фильтрация входного потока</div>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"*.log"</span> | xargs cat | grep ERROR
 <span class="out">2026-01-14 10:02:11 ERROR Order 1042 failed: payment timeout
 2026-01-14 10:05:13 ERROR Cannot connect to redis:6379
@@ -1229,10 +1228,10 @@ cmd1 ; cmd2     <span class="cm"># обе, независимо от резул�
 2026-01-14 10:02:11 ERROR Gateway timeout after 30s
 ...
 2026-03-02 08:12:50 ERROR FATAL: sorry, too many clients already</span></div>
-        <p>Осталось 16 строк из 31. Уже видно, что проблем меньше, чем строк: одни и те же ошибки повторяются. Этим займёмся в следующей главе.</p>
+        <p>Команда выводит только строки с подстрокой <code>ERROR</code>.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · grep умеет читать файлы сам</div>
+        <div class="step-title">Поиск непосредственно в файлах</div>
         <p><code>grep</code> принимает файлы аргументами, а с <code>-r</code> сам обходит папки. Если файлов несколько, перед каждой строкой появляется имя файла — видно, откуда ошибка:</p>
         <div class="code-block"><span class="pr">$</span> grep -c ERROR logs/2026-01/*.log
 <span class="out">logs/2026-01/app.log:4
@@ -1241,12 +1240,12 @@ logs/2026-01/redis.log:1</span></div>
         <p>Здесь маску <code>*.log</code> без кавычек раскрыл shell: <code>grep</code> получил три пути аргументами. <code>-c</code> вместо строк печатает их количество.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · найти всё про конкретный заказ</div>
-        <p>Пользователь пишет в поддержку: «заказ 1043 оплатился со второго раза». <code>-r</code> ищет по всем логам, <code>-n</code> добавляет номер строки:</p>
+        <div class="step-title">Рекурсивный поиск с номерами строк</div>
+        <p><code>-r</code> обходит каталог рекурсивно, <code>-n</code> добавляет номер строки:</p>
         <div class="code-block"><span class="pr">$</span> grep -rn <span class="st">"order 1043"</span> logs
 <span class="out">logs/2026-01/payment.log:3:2026-01-14 10:15:22 WARN Retry 1 for order 1043
 logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1043</span></div>
-        <p>Шаблон с пробелом нужно взять в кавычки, иначе <code>grep</code> примет <code>1043</code> за имя файла. Так же ищут по <code>X-Request-ID</code> из ответа API: <code>grep -r "abc-123" /var/log/services/</code> собирает путь одного запроса через все сервисы.</p>
+        <p>Шаблон с пробелом заключают в кавычки, иначе следующая часть будет воспринята как имя файла. Поиск по request ID выполняется аналогично: <code>grep -r "abc-123" /var/log/services/</code>.</p>
       </div>
       <p><strong>Флаги, которые нужны постоянно:</strong></p>
       <table>
@@ -1264,7 +1263,7 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
         </tbody>
       </table>
       <div class="hl"><span class="hl-label">Шаблон — это регулярное выражение</span><code>.</code> — любой символ, <code>^</code> — начало строки, <code>$</code> — конец, <code>\.</code> — настоящая точка. <code>grep "^2026-02"</code> — строки, которые начинаются с февральской даты. Шаблон почти всегда стоит брать в кавычки.</div>
-      <div class="hl green"><span class="hl-label">В связке с tail</span><code>tail -f app.log | grep -i error</code> — следить за логом в реальном времени, но видеть только ошибки. Воспроизводишь баг и сразу видишь, что упало.</div>
+      <div class="hl green"><span class="hl-label">Пример</span><code>tail -f app.log | grep -i error</code> выводит только строки с ошибками, которые добавляются в лог в реальном времени.</div>
 
       <div class="task" data-task="b05-1"></div>
       <div class="task" data-task="b05-2"></div>
@@ -1281,9 +1280,9 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
       <span class="section-badge zero" data-chapter-badge="b06"></span>
     </div>
     <div class="section-body">
-      <p>16 строк ошибок, но проблем меньше: сервис, который не может достучаться до Redis, пишет одно и то же при каждой попытке, различается только время. Хочется увидеть одинаковые ошибки рядом, а потом оставить каждую по одному разу.</p>
+      <p><code>sort</code> сортирует строки, а <code>uniq</code> обрабатывает соседние одинаковые строки. Комбинация используется для группировки и подсчёта повторов.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · просто sort</div>
+        <div class="step-title">sort · сортировка всей строки</div>
         <p><code>sort</code> сортирует строки. Но строка лога начинается с даты, поэтому сортировка по всей строке — это сортировка по времени:</p>
         <div class="code-block"><span class="pr">$</span> ... | grep ERROR | sort
 <span class="out">2026-01-14 10:02:11 ERROR Gateway timeout after 30s
@@ -1292,10 +1291,10 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
 2026-01-14 10:05:13 ERROR Cannot connect to redis:6379
 2026-01-14 10:05:43 ERROR Cannot connect to redis:6379
 ...</span></div>
-        <p>Полезно, если нужна хронология: что упало первым. Но дубли по-прежнему разбросаны.</p>
+        <p>При формате даты <code>YYYY-MM-DD HH:MM:SS</code> лексикографическая сортировка всей строки сохраняет хронологический порядок.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · сортировать по сообщению</div>
+        <div class="step-title">sort -k · сортировка по полю</div>
         <p>Поля в строке разделены пробелами: дата — первое, время — второе, уровень — третье, текст начинается с четвёртого. <code>-k4</code> говорит: ключ сортировки начинается с четвёртого поля и идёт до конца строки.</p>
         <div class="code-block"><span class="pr">$</span> ... | grep ERROR | sort -k4
 <span class="out">2026-01-14 10:05:13 ERROR Cannot connect to redis:6379
@@ -1312,7 +1311,7 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
         <p>Теперь одинаковые сообщения стоят рядом. Если ключи совпали, <code>sort</code> сравнивает строки целиком, поэтому внутри группы порядок остаётся хронологическим.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · каждая ошибка один раз</div>
+        <div class="step-title">uniq · удаление соседних повторов</div>
         <p><code>uniq</code> схлопывает <strong>соседние</strong> одинаковые строки — поэтому перед ним почти всегда стоит <code>sort</code>. Но просто <code>uniq</code> здесь ничего не сделает: время в строках разное, и все они уникальны. <code>-f3</code> велит пропустить три первых поля при сравнении:</p>
         <div class="code-block"><span class="pr">$</span> ... | grep ERROR | sort -k4 | uniq -f3
 <span class="out">2026-01-14 10:05:13 ERROR Cannot connect to redis:6379
@@ -1325,16 +1324,15 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
 2026-01-14 10:02:11 ERROR Order 1042 failed: payment timeout
 2026-02-03 11:31:45 ERROR Order 2107 failed: card declined
 2026-03-02 08:20:44 ERROR Order 3310 failed: payment timeout</span></div>
-        <p>10 разных проблем вместо 16 строк. Из каждой группы осталась первая строка — с самым ранним временем.</p>
+        <p>Из каждой группы одинаковых сообщений остаётся одна строка. В этом примере сохраняется строка с самым ранним временем.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 4 · что чинить первым</div>
+        <div class="step-title">uniq -c · подсчёт повторов</div>
         <p><code>uniq -c</code> дописывает перед строкой, сколько раз она встретилась. <code>sort -rn</code> сортирует по этому числу: <code>-n</code> — как числа, а не как текст, <code>-r</code> — по убыванию. <code>head</code> оставляет верх списка:</p>
         <div class="code-block"><span class="pr">$</span> ... | grep ERROR | sort -k4 | uniq -c -f3 | sort -rn | head -n 3
 <span class="out">      3 2026-01-14 10:05:13 ERROR Cannot connect to redis:6379
       3 2026-01-14 10:02:11 ERROR Gateway timeout after 30s
       2 2026-03-02 08:12:55 ERROR Database connection failed: too many clients</span></div>
-        <p>Готов ответ для тикета: чаще всего сервис теряет Redis и получает таймаут от платёжного шлюза.</p>
       </div>
       <p><strong>Ещё о sort и соседях:</strong></p>
       <table>
@@ -1348,7 +1346,7 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
           <tr><td><code>sed 's/old/new/g'</code></td><td>заменить текст в каждой строке</td></tr>
         </tbody>
       </table>
-      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему <code>uniq</code> не убрал дубли?» — Он сравнивает только соседние строки. Без <code>sort</code> перед ним одинаковые строки, разделённые другими, останутся. Второй частый ответ — строки различаются полями, которые глазом не замечаешь: время, id запроса, пробел в конце. Для этого есть <code>-f</code> или предварительный <code>cut</code>.</div>
+      <div class="hl purple"><span class="hl-label">Особенность uniq</span><code>uniq</code> сравнивает только соседние строки, поэтому вход обычно предварительно сортируют. Строки могут отличаться временем, request ID или пробелами; ненужные поля исключают через <code>-f</code>, <code>cut</code> или <code>awk</code>.</div>
 
       <div class="task" data-task="b06-1"></div>
       <div class="task" data-task="b06-2"></div>
@@ -1364,24 +1362,24 @@ logs/2026-01/payment.log:5:2026-01-14 10:16:30 INFO Charge succeeded for order 1
       <span class="section-badge zero" data-chapter-badge="b07"></span>
     </div>
     <div class="section-body">
-      <p>Отчёт об уникальных ошибках готов, но живёт только на экране. Его нужно приложить к тикету и открыть потом без повторного набора длинной цепочки. Для этого вывод перенаправляют в файл.</p>
+      <p>Редиректы направляют stdin, stdout и stderr между командами и файлами. <code>tee</code> одновременно выводит данные на экран и записывает их в файл.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · записать в файл</div>
+        <div class="step-title">&gt; · запись stdout с перезаписью</div>
         <p><code>&gt;</code> отправляет вывод последней команды в файл вместо экрана. Если файла нет, он создаётся, если есть — <strong>перезаписывается</strong> без предупреждения:</p>
         <div class="code-block"><span class="pr">$</span> ... | grep ERROR | sort -k4 | uniq -f3 &gt; errors.log
 <span class="pr">$</span> wc -l errors.log
 <span class="out">10 errors.log</span></div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · дописать</div>
+        <div class="step-title">&gt;&gt; · добавление в конец файла</div>
         <p><code>&gt;&gt;</code> добавляет вывод в конец файла, ничего не стирая. Так в один отчёт собирают результаты по нескольким месяцам или прогонам:</p>
         <div class="code-block"><span class="pr">$</span> grep ERROR logs/2026-03/db.log &gt;&gt; errors.log
 <span class="pr">$</span> wc -l errors.log
 <span class="out">11 errors.log</span></div>
-        <p>Запустишь то же с <code>&gt;</code> — в файле останется одна строка. Это частая причина потерянных отчётов.</p>
+        <p>При использовании <code>&gt;</code> существующее содержимое файла удаляется до запуска команды.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · два потока вывода</div>
+        <div class="step-title">stdout и stderr · раздельные потоки</div>
         <p>У каждой команды два выходных потока: <strong>stdout</strong> (номер 1) — обычный результат и <strong>stderr</strong> (номер 2) — сообщения об ошибках. На экране они смешаны, но перенаправляются отдельно. <code>&gt;</code> — это на самом деле <code>1&gt;</code>, поэтому ошибка всё равно попадёт на экран:</p>
         <div class="code-block"><span class="pr">$</span> cat logs/2026-04/app.log &gt; april.txt
 <span class="err">cat: logs/2026-04/app.log: No such file or directory</span>
@@ -1396,8 +1394,7 @@ command &gt; all.txt 2&gt;&amp;1  <span class="cm"># stderr туда же, ку�
 command &lt; input.txt     <span class="cm"># взять stdin из файла</span>
 command | tee out.txt   <span class="cm"># показать вывод и одновременно записать его</span>
 command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</span></div>
-      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что значит <code>2&gt;&amp;1</code>?» — Перенаправить stderr (дескриптор 2) туда же, куда сейчас идёт stdout (дескриптор 1). Нужно, чтобы поймать <em>и</em> обычный вывод, <em>и</em> ошибки в один файл или пайп: <code>./script.sh &gt; all.log 2&gt;&amp;1</code>. Порядок важен: в <code>./script.sh 2&gt;&amp;1 &gt; all.log</code> stderr уйдёт на экран, потому что в момент перенаправления stdout ещё смотрел туда.</div>
-      <div class="hl orange"><span class="hl-label">Вернись к главе 02</span>Теперь в <code>~/shop</code> есть <code>errors.log</code>. Выполни в песочнице <code>find . -name *.log</code> без кавычек и сравни с <code>find . -name "*.log"</code>: shell раскроет маску в <code>errors.log</code>, и <code>find</code> найдёт только его.</div>
+      <div class="hl purple"><span class="hl-label">Порядок редиректов</span><code>2&gt;&amp;1</code> направляет stderr туда, куда stdout направлен в этот момент. <code>./script.sh &gt; all.log 2&gt;&amp;1</code> пишет оба потока в файл, а <code>./script.sh 2&gt;&amp;1 &gt; all.log</code> оставляет stderr в исходном назначении.</div>
 
       <div class="task" data-task="b07-1"></div>
       <div class="task" data-task="b07-2"></div>
@@ -1414,9 +1411,9 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
       <span class="section-badge zero" data-chapter-badge="b08"></span>
     </div>
     <div class="section-body">
-      <p>Ошибки разобраны, фикс в работе. Но на сервере по расписанию работает ротация: логи старше пары месяцев удаляются, чтобы не кончилось место. А в них ещё может понадобиться что-то найти. Значит, логи нужно сохранить в отдельное место. На реальном проекте это другой сервер или объектное хранилище, у нас — папка <code>~/backup</code>.</p>
+      <p><code>mkdir</code> и <code>touch</code> создают объекты, <code>cp</code> копирует, <code>mv</code> перемещает или переименовывает, <code>rm</code> удаляет.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · создать папку</div>
+        <div class="step-title">mkdir и touch · создание</div>
         <p><code>mkdir</code> создаёт директорию. Вторая попытка создать ту же папку закончится ошибкой, а <code>-p</code> создаёт всю цепочку вложенных папок и молчит, если они уже есть:</p>
         <div class="code-block"><span class="pr">$</span> mkdir ~/backup
 <span class="pr">$</span> mkdir ~/backup
@@ -1427,7 +1424,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p><code>ls</code> пустой папки ничего не печатает, а несуществующей — ругается <code>No such file or directory</code>. Так заодно удобно проверять, что папка есть. Пустой файл создаёт <code>touch name</code>; для существующего файла он просто обновляет дату изменения.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · копировать и перемещать</div>
+        <div class="step-title">cp и mv · копирование и перемещение</div>
         <p><code>cp что куда</code> копирует. Если цель — существующая папка, файл ляжет в неё с тем же именем. Папку целиком копируют с <code>-r</code>. <code>mv</code> работает так же, но переносит, а внутри одной папки — переименовывает:</p>
         <div class="code-block"><span class="pr">$</span> cp logs/2026-01/app.log ~/backup/
 <span class="pr">$</span> mv ~/backup/app.log ~/backup/app-2026-01.log
@@ -1437,16 +1434,16 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p>Если в цели уже есть файл с таким именем, <code>cp</code> и <code>mv</code> молча его перезапишут. <code>-i</code> заставляет спросить подтверждение.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · удалять</div>
+        <div class="step-title">rm · удаление</div>
         <p><code>rm</code> удаляет файлы, <code>rm -r</code> — папку со всем содержимым, <code>-f</code> — без вопросов и без ошибки, если файла нет. Корзины нет:</p>
         <div class="code-block"><span class="pr">$</span> rm ~/backup
 <span class="err">rm: cannot remove '/home/qa/backup': Is a directory</span>
 <span class="pr">$</span> rm -r ~/backup/2026</div>
       </div>
-      <div class="hl red"><span class="hl-label">Безопасная работа в консоли</span>CLI не прощает ошибок — особенно на чужих и боевых машинах:
+      <div class="hl red"><span class="hl-label">Безопасное выполнение</span>Перед командами, изменяющими файловую систему:
         <ul style="margin:8px 0 0;">
-          <li>Перед <code>rm</code> — проверь, где ты: <code>pwd</code> и <code>ls</code>, что именно удаляешь</li>
-          <li><code>rm -rf</code> — осознанно: один неверный путь сносит дерево без корзины и без отмены. Особенно опасна переменная в пути: <code>rm -rf "$DIR/"*</code> при пустом <code>DIR</code> превращается в <code>rm -rf /*</code></li>
+          <li>Проверьте текущий каталог и цель: <code>pwd</code>, <code>ls</code></li>
+          <li><code>rm -rf</code> удаляет дерево без корзины и отмены. Проверяйте переменные в путях: <code>rm -rf "$DIR/"*</code> при пустом <code>DIR</code> превращается в <code>rm -rf /*</code></li>
           <li><code>cp -i</code>, <code>mv -i</code> — режим с подтверждением перезаписи</li>
           <li>Не запускать <code>curl ... | bash</code> из интернета, не прочитав, что внутри — это выполнение чужого кода</li>
           <li>На production — сначала <strong>read-only диагностика</strong> (смотреть логи и статус), а не команды, меняющие состояние</li>
@@ -1468,9 +1465,9 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
       <span class="section-badge zero" data-chapter-badge="b09"></span>
     </div>
     <div class="section-body">
-      <p>Копировать логи по одному — та же ловушка, что и с <code>cat</code> в главе 04: на живом сервере их сотни. Можно снова позвать <code>xargs</code>, но у <code>find</code> есть собственный способ сделать что-то с каждым найденным файлом.</p>
+      <p><code>find -exec</code> выполняет команду для найденных объектов. <code>rsync</code> синхронизирует файлы локально или по сети и передаёт только изменения.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · -exec</div>
+        <div class="step-title">find -exec · команда для результатов поиска</div>
         <p><code>-exec</code> — это не новая команда, а ещё один параметр <code>find</code>: «для каждого найденного файла выполни вот это». <code>{}</code> — место, куда подставится путь к файлу, <code>\;</code> — конец команды. Работает как цикл: <code>cp ./logs/2026-01/app.log ~/backup</code>, потом следующий файл, и так далее.</p>
         <div class="code-block"><span class="pr">$</span> mkdir ~/backup
 <span class="pr">$</span> find . -type f -name <span class="st">"*.log"</span> -exec cp {} ~/backup \;
@@ -1479,11 +1476,11 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p>Почему точка с запятой с обратным слешем? Голая <code>;</code> для shell — разделитель команд: он обрезал бы строку раньше, чем <code>find</code> её увидит. Обратный слеш <strong>экранирует</strong> символ: «передай его как есть». Вместо <code>\;</code> можно написать <code>';'</code>. Вариант <code>-exec cp -t ~/backup {} +</code> передаёт файлы пачкой, как <code>xargs</code>, и работает быстрее.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · куда делись файлы</div>
-        <p>Логов было семь, а в бэкапе четыре. В одной папке не бывает двух файлов с одинаковым именем, поэтому три <code>app.log</code> из разных месяцев по очереди перезаписали друг друга, и остался последний. <code>cp</code> не предупредил — это его обычное поведение. Данные двух месяцев потеряны.</p>
+        <div class="step-title">Коллизии имён при копировании</div>
+        <p>При копировании файлов с одинаковыми именами в один каталог последующие файлы перезаписывают предыдущие. Чтобы сохранить исходную структуру каталогов, используйте <code>rsync -R</code> или создавайте целевые каталоги явно.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · rsync сохраняет структуру</div>
+        <div class="step-title">rsync -R · сохранение структуры путей</div>
         <p><code>rsync</code> — стандартный инструмент для бэкапов и синхронизации. С <code>-R</code> (relative) он воссоздаёт в цели весь путь до файла, а не кладёт файлы в одну кучу:</p>
         <div class="code-block"><span class="pr">$</span> find . -type f -name <span class="st">"*.log"</span> -exec rsync -R {} ~/backup \;
 <span class="pr">$</span> find ~/backup/logs -type f
@@ -1497,7 +1494,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p>На реальных серверах <code>rsync</code> чаще используют целыми папками и по сети: <code>rsync -av logs/ backup-host:/backups/shop/</code>. <code>-a</code> сохраняет права и даты, <code>-v</code> печатает, что копируется, <code>-n</code> — пробный прогон без изменений. Главное преимущество перед <code>cp</code> — при повторном запуске он передаёт только изменившиеся файлы.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 4 · прибраться</div>
+        <div class="step-title">Удаление выбранных файлов</div>
         <p>Плоские копии из шага 1 больше не нужны. Маска удаляет их одной командой, а папка <code>logs</code> с правильной структурой останется — <code>rm</code> без <code>-r</code> папки не трогает:</p>
         <div class="code-block"><span class="pr">$</span> rm ~/backup/*.log
 <span class="pr">$</span> ls ~/backup
@@ -1519,9 +1516,9 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
       <span class="section-badge zero" data-chapter-badge="b10"></span>
     </div>
     <div class="section-body">
-      <p>Чтобы выкатить фикс, нужно запустить <code>deploy.sh</code>. Попытка заканчивается ошибкой, и причина видна в первой колонке <code>ls -l</code>.</p>
+      <p><code>ls -l</code> показывает права доступа, <code>chmod</code> меняет их, <code>chown</code> меняет владельца и группу.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · прочитать права</div>
+        <div class="step-title">ls -l · чтение прав</div>
         <div class="code-block"><span class="pr">$</span> ./deploy.sh
 <span class="err">bash: ./deploy.sh: Permission denied</span>
 <span class="pr">$</span> ls -l deploy.sh
@@ -1529,7 +1526,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p>Первый символ — тип: <code>-</code> файл, <code>d</code> директория. Дальше три тройки <code>rwx</code>: для <strong>владельца</strong>, для <strong>группы</strong> и для <strong>остальных</strong>. <code>r</code> — чтение, <code>w</code> — запись, <code>x</code> — выполнение (для папки — право войти в неё). Прочерк — права нет. Затем число ссылок, владелец, группа, размер в байтах, дата изменения и имя.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · дать право на запуск</div>
+        <div class="step-title">chmod · символьная форма</div>
         <p><code>chmod +x</code> добавляет право выполнения. <code>./</code> перед именем обязателен: shell ищет команды только в папках из <code>$PATH</code>, а текущей папки там нет.</p>
         <div class="code-block"><span class="pr">$</span> chmod +x deploy.sh
 <span class="pr">$</span> ls -l deploy.sh
@@ -1539,7 +1536,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         <p>Символьная форма точнее: <code>u+x</code> — только владельцу, <code>g-w</code> — убрать запись у группы, <code>o=</code> — остальным ничего. Дата в <code>ls -l</code> не изменилась: <code>chmod</code> меняет права, а не содержимое файла.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · числовая запись</div>
+        <div class="step-title">chmod · числовая форма</div>
         <p>Каждая тройка — сумма: <strong>r = 4</strong>, <strong>w = 2</strong>, <strong>x = 1</strong>. <code>7</code> = rwx, <code>6</code> = rw-, <code>5</code> = r-x, <code>4</code> = r--, <code>0</code> = ---. Три цифры — владелец, группа, остальные.</p>
         <table>
           <thead><tr><th>Права</th><th>Когда</th></tr></thead>
@@ -1552,7 +1549,7 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
         </table>
         <p><code>chown user:group file</code> меняет владельца, но это может только root — через <code>sudo</code>, о нём в главе 12. <code>chmod -R</code> меняет права рекурсивно для всего дерева.</p>
       </div>
-      <div class="hl orange"><span class="hl-label">Важно для QA</span>«Permission denied» в CI после <code>git clone</code> — классика: скрипт закоммитили без бита выполнения. Лечится <code>git update-index --chmod=+x script.sh</code> в репозитории или вызовом через интерпретатор: <code>bash script.sh</code>. А <code>chmod 777</code> «чтобы заработало» — не решение, а новая дыра.</div>
+      <div class="hl orange"><span class="hl-label">CI и права выполнения</span>Если после <code>git clone</code> скрипт возвращает <code>Permission denied</code>, проверьте бит выполнения. Его фиксируют в репозитории командой <code>git update-index --chmod=+x script.sh</code> или запускают файл через <code>bash script.sh</code>. Не используйте <code>chmod 777</code>: он выдаёт избыточные права всем пользователям.</div>
 
       <div class="task" data-task="b10-1"></div>
       <div class="task" data-task="b10-2"></div>
@@ -1569,20 +1566,20 @@ command 2&gt; /dev/null    <span class="cm"># выбросить ошибки</s
       <span class="section-badge zero" data-chapter-badge="b11"></span>
     </div>
     <div class="section-body">
-      <p>Фикс выкачен, но пользователи снова жалуются: заказы висят. Логи — это прошлое, а сейчас нужно понять, что происходит на сервере в эту минуту: хватает ли места и памяти, жив ли процесс, слушает ли он порт.</p>
+      <p>Команды блока показывают сведения о системе, использование диска и памяти, процессы, открытые порты и доступность сетевых сервисов.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · что за машина</div>
+        <div class="step-title">Сведения о системе</div>
         <table>
           <thead><tr><th>Команда</th><th>Что покажет</th></tr></thead>
           <tbody>
-            <tr><td><code>whoami</code>, <code>hostname</code></td><td>под каким пользователем ты работаешь и на каком сервере. Перед опасной командой полезно убедиться, что это не prod</td></tr>
+            <tr><td><code>whoami</code>, <code>hostname</code></td><td>текущий пользователь и имя сервера; проверяйте перед изменяющими командами</td></tr>
             <tr><td><code>uname -a</code></td><td>ядро и архитектура; дистрибутив — в <code>cat /etc/os-release</code></td></tr>
             <tr><td><code>who</code>, <code>uptime</code></td><td>кто ещё залогинен; сколько сервер работает без перезагрузки и средняя нагрузка</td></tr>
           </tbody>
         </table>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · диск и память</div>
+        <div class="step-title">df, du, free · диск и память</div>
         <p>Кончившееся место — одна из самых частых причин «всё сломалось»: база не может писать, логи перестают появляться. <code>df -h</code> показывает диски, <code>free -h</code> — память:</p>
         <div class="code-block"><span class="pr">$</span> df -h
 <span class="out">Filesystem      Size  Used Avail Use% Mounted on
@@ -1597,7 +1594,7 @@ Swap:          1.0Gi       310Mi       714Mi</span></div>
         <p>Смотри на <code>Use%</code> корня <code>/</code> и на колонку <code>available</code>, а не <code>free</code>: кэш ядро отдаст приложениям по первому требованию. Какая папка съела место, покажет <code>du -sh *</code>.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · процессы</div>
+        <div class="step-title">ps, pgrep, top, kill · процессы</div>
         <p><code>ps aux</code> — снимок всех процессов. Их десятки, поэтому вывод сразу фильтруют:</p>
         <div class="code-block"><span class="pr">$</span> ps aux | grep payment
 <span class="out">qa         1244  0.7  2.3 804200 47000 ?        Sl   08:01   0:21 python payment_worker.py
@@ -1606,10 +1603,10 @@ qa         2302  0.0  0.0   6500  2100 pts/0    S+   10:05   0:00 grep payment</
         <p><code>kill PID</code> отправляет процессу SIGTERM — вежливую просьбу завершиться: приложение успевает закрыть соединения и дописать данные. <code>kill -9 PID</code> — SIGKILL, ядро убивает процесс сразу, без уборки. Сначала всегда пробуют обычный <code>kill</code>. Чужой процесс без прав root не завершить:</p>
         <div class="code-block"><span class="pr">$</span> kill 1302
 <span class="err">bash: kill: (1302) - Operation not permitted</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Процесс — запущенный экземпляр программы, как объект — экземпляр класса. У каждого свой PID, как id объекта. <code>kill</code> — отправить процессу сигнал, <code>kill -9</code> — жёсткое завершение, как принудительно остановить зависший поток.</div>
+        <div class="hl green"><span class="hl-label">Сигналы</span><code>kill PID</code> отправляет SIGTERM и позволяет процессу корректно завершиться. <code>kill -9 PID</code> отправляет SIGKILL; процесс завершается немедленно и не выполняет cleanup.</div>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 4 · порты и сеть</div>
+        <div class="step-title">ss, lsof, curl, ping · сеть</div>
         <p>Процесс жив — но принимает ли он соединения? <code>netstat -tuln</code> показывает слушающие порты: <code>-t</code> TCP, <code>-u</code> UDP, <code>-l</code> только слушающие, <code>-n</code> цифрами, без имён. Современная замена — <code>ss -tulnp</code>, а <code>lsof -i :8080</code> покажет, какой процесс держит конкретный порт.</p>
         <div class="code-block"><span class="pr">$</span> netstat -tuln
 <span class="out">Active Internet connections (only servers)
@@ -1634,8 +1631,7 @@ udp        0      0 127.0.0.53:53           0.0.0.0:*</span>
         </tbody>
       </table>
       <p>Этих команд в тренажёре нет — нужна настоящая сеть и systemd.</p>
-      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Сервис не отвечает. Как по шагам диагностируешь в консоли?» — 1) процесс жив? <code>pgrep -af service</code> или <code>systemctl status</code>, 2) слушает порт? <code>ss -tlnp | grep :8080</code>, 3) отвечает локально? <code>curl localhost:8080/health</code>, 4) что в логах? <code>journalctl</code> или <code>tail</code>, 5) хватает ли места и памяти? <code>df -h</code>, <code>free -h</code>, 6) резолвится DNS и доступен ли порт снаружи? <code>dig</code>, <code>nc</code>. Идёшь от процесса к локальному порту, затем к сети и логам.</div>
-      <div class="hl modern"><span class="hl-label">В реальном мире</span>Для QA-автоматизатора этот набор — must-have: <code>curl</code> (проверить API), <code>grep</code>/<code>tail</code> (логи), <code>ss</code>/<code>lsof</code> (порты), <code>ssh</code> (на сервер). Это не системное администрирование, а ежедневный дебаг. Настройка демонов, iptables и тюнинг ядра — зона DevOps и SRE.</div>
+      <div class="hl purple"><span class="hl-label">Алгоритм диагностики сервиса</span>1) процесс: <code>pgrep -af service</code> или <code>systemctl status</code>; 2) порт: <code>ss -tlnp | grep :8080</code>; 3) локальный запрос: <code>curl localhost:8080/health</code>; 4) логи: <code>journalctl</code> или <code>tail</code>; 5) ресурсы: <code>df -h</code>, <code>free -h</code>; 6) DNS и внешний порт: <code>dig</code>, <code>nc</code>.</div>
 
       <div class="task" data-task="b11-1"></div>
       <div class="task" data-task="b11-2"></div>
@@ -1652,20 +1648,20 @@ udp        0      0 127.0.0.53:53           0.0.0.0:*</span>
       <span class="section-badge zero" data-chapter-badge="b12"></span>
     </div>
     <div class="section-body">
-      <p>Разбирать структуру логов через <code>ls -R</code> неудобно, хочется нормальное дерево. Для этого есть утилита <code>tree</code>, но на сервере её нет. Установка программ меняет систему, а это может только <strong>root</strong> — суперпользователь.</p>
+      <p><strong>root</strong> — суперпользователь без обычных ограничений доступа. <code>sudo</code> выполняет отдельную команду с повышенными правами. Пакетные менеджеры устанавливают и обновляют программы.</p>
       <div class="step">
-        <div class="step-title">Шаг 1 · без прав</div>
+        <div class="step-title">Операция без необходимых прав</div>
         <div class="code-block"><span class="pr">$</span> tree
 <span class="err">Command 'tree' not found, but can be installed with:
 sudo apt install tree</span>
 <span class="pr">$</span> apt install tree
 <span class="err">E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
 E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?</span></div>
-        <p>Последние слова ошибки подсказывают причину: are you root? Нет, мы <code>qa</code>.</p>
+        <p>Сообщение <code>are you root?</code> указывает на отсутствие прав для изменения системных пакетов.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 2 · sudo</div>
-        <p><code>sudo команда</code> выполняет одну команду от имени root. Спрашивает <em>твой</em> пароль, а не пароль root, и записывает в журнал, кто и что запускал. Право на <code>sudo</code> выдают через группу <code>sudo</code> или файл <code>/etc/sudoers</code>.</p>
+        <div class="step-title">sudo · выполнение от root</div>
+        <p><code>sudo команда</code> выполняет одну команду от имени root, запрашивает пароль текущего пользователя и записывает операцию в журнал. Право на <code>sudo</code> настраивается через группу <code>sudo</code> или файл <code>/etc/sudoers</code>.</p>
         <div class="code-block"><span class="pr">$</span> sudo apt install tree
 <span class="out">Reading package lists... Done
 Building dependency tree... Done
@@ -1688,7 +1684,7 @@ Setting up tree (2.1.1-2ubuntu3) ...</span>
         <p><code>sudo su</code> или <code>sudo -i</code> открывают целый root-shell: дальше каждая команда выполняется от root до <code>exit</code>. Удобно и опасно — одна опечатка с правами root стоит дорого. <code>su</code> без sudo просит пароль самого root, который обычно никому не выдают. <code>passwd</code> меняет пароль текущего пользователя.</p>
       </div>
       <div class="step">
-        <div class="step-title">Шаг 3 · менеджер пакетов</div>
+        <div class="step-title">apt, dnf, yum, apk · менеджеры пакетов</div>
         <table>
           <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
           <tbody>
@@ -1712,7 +1708,7 @@ Setting up tree (2.1.1-2ubuntu3) ...</span>
   <div class="part-head" id="reference">
     <div class="part-title">Справочник</div>
     <div class="part-sub">без тренажёра · то, что нужно знать, но не запустить в браузере</div>
-    <div class="part-lead">История команд и Vim, SSH, логи на реальном проекте и bash-скрипты. Эти темы спрашивают на собеседованиях, но им нужен настоящий терминал, другой сервер или системный журнал.</div>
+    <div class="part-lead">История команд, редакторы, SSH, централизованные логи и Bash-скрипты.</div>
   </div>
 
   <!-- ─────── 13. ИСТОРИЯ, VIM, SSH ─────── -->
@@ -1723,20 +1719,20 @@ Setting up tree (2.1.1-2ubuntu3) ...</span>
       <span class="section-badge">reference</span>
     </div>
     <div class="section-body">
-      <p><strong>История команд</strong> экономит больше времени, чем любой алиас. Bash помнит всё, что ты вводил:</p>
+      <p><strong>История команд</strong> хранит ранее выполненные команды и позволяет искать или повторять их:</p>
       <table>
         <thead><tr><th>Что</th><th>Как работает</th></tr></thead>
         <tbody>
           <tr><td><span class="kbd">↑</span> / <span class="kbd">↓</span></td><td>листать прошлые команды</td></tr>
           <tr><td><code>history</code></td><td>список с номерами; <code>history | grep rsync</code> — найти ту самую длинную команду</td></tr>
-          <tr><td><code>!!</code></td><td>повторить последнюю команду. Классика: <code>sudo !!</code> после <code>Permission denied</code></td></tr>
+          <tr><td><code>!!</code></td><td>повторить последнюю команду; пример: <code>sudo !!</code> после ошибки прав</td></tr>
           <tr><td><code>!42</code>, <code>!grep</code></td><td>выполнить команду номер 42 / последнюю, начинавшуюся с <code>grep</code></td></tr>
-          <tr><td><span class="kbd">Ctrl</span> + <span class="kbd">R</span></td><td>поиск по истории: печатаешь кусок команды, повторный Ctrl+R — совпадение постарше, Enter — выполнить, стрелка — поправить перед запуском</td></tr>
+          <tr><td><span class="kbd">Ctrl</span> + <span class="kbd">R</span></td><td>поиск по истории; повторный Ctrl+R — более старое совпадение, Enter — выполнить, стрелка — перейти к редактированию</td></tr>
         </tbody>
       </table>
       <p>В песочнице работают <code>history</code>, <code>!!</code> и стрелки, а <span class="kbd">Ctrl</span> + <span class="kbd">R</span> — нет.</p>
 
-      <p style="margin-top:14px;"><strong>Vim</strong> открывается там, где его не ждёшь: <code>git commit</code> без <code>-m</code>, <code>crontab -e</code>, <code>kubectl edit</code>. Главное — понимать, что у Vim есть режимы и нажатые клавиши значат разное в зависимости от режима.</p>
+      <p style="margin-top:14px;"><strong>Vim</strong> может запускаться из <code>git commit</code> без <code>-m</code>, <code>crontab -e</code> и <code>kubectl edit</code>. Команды клавиатуры зависят от текущего режима редактора.</p>
       <table>
         <thead><tr><th>Режим</th><th>Как попасть</th><th>Что делать</th></tr></thead>
         <tbody>
@@ -1759,7 +1755,7 @@ scp report.txt qa@shop-staging:/tmp/        <span class="cm"># скопиров�
 scp qa@shop-staging:~/shop/errors.log .     <span class="cm"># и обратно, в текущую папку</span>
 scp -r qa@shop-staging:~/shop/logs ./logs   <span class="cm"># папку целиком</span></div>
       <p><code>ssh-keygen</code> создаёт два файла: <code>~/.ssh/id_ed25519</code> — <strong>приватный</strong> ключ, он никогда не покидает твою машину и должен иметь права <code>600</code>. <code>id_ed25519.pub</code> — <strong>публичный</strong>, его можно показывать кому угодно. <code>ssh-copy-id</code> дописывает публичный ключ в <code>~/.ssh/authorized_keys</code> на сервере, после чего вход идёт без пароля. Для частых подключений в <code>~/.ssh/config</code> заводят короткие имена: <code>Host staging</code>, <code>HostName 10.0.0.12</code>, <code>User qa</code> — и дальше просто <code>ssh staging</code>.</p>
-      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какой ключ куда кладут и почему это безопасно?» — Приватный остаётся у тебя, на сервер уходит только публичный. При входе сервер проверяет, что ты владеешь приватным ключом, парным к записи в <code>authorized_keys</code>, но сам приватный ключ по сети не передаётся. Поэтому утечка публичного ключа ничем не грозит, а приватный защищают правами <code>600</code> и passphrase.</div>
+      <div class="hl purple"><span class="hl-label">Модель SSH-ключей</span>Приватный ключ остаётся на клиенте, публичный добавляется в <code>authorized_keys</code> на сервере. Сервер проверяет владение парным приватным ключом, не получая его по сети. Приватный ключ защищают правами <code>600</code> и passphrase.</div>
     </div>
   </section>
 
@@ -1771,8 +1767,8 @@ scp -r qa@shop-staging:~/shop/logs ./logs   <span class="cm"># папку цел
       <span class="section-badge">главное для QA</span>
     </div>
     <div class="section-body">
-      <p>Тренажёр учит разбирать логи на одном сервере. На реальном проекте сервисов десятки, логи в контейнерах исчезают при перезапуске, и принцип тот же — поиск, фильтр, контекст, — но инструменты другие.</p>
-      <div class="hl"><span class="hl-label">jq — работа с JSON (важнее awk и sed для QA)</span>API отдаёт JSON, structured-логи тоже в JSON. <code>jq</code> вытаскивает поля без регулярок:
+      <p>В распределённых системах логи обычно собираются централизованно. Для локальных файлов используются <code>grep</code>, <code>tail</code> и <code>jq</code>; для поиска по нескольким сервисам — системы агрегации логов.</p>
+      <div class="hl"><span class="hl-label">jq · обработка JSON</span><code>jq</code> извлекает и фильтрует поля JSON без текстовых регулярных выражений:
         <div class="code-block"><span class="cm"># достать поле из ответа API</span>
 curl -s api/orders/1 | jq <span class="st">'.status'</span>
 
@@ -1782,7 +1778,7 @@ curl -s api/orders | jq <span class="st">'.[] | select(.status != "paid")'</span
 <span class="cm"># из structured-логов вытащить request_id ошибок</span>
 jq <span class="st">'select(.level=="error") | .request_id'</span> app.log</div>
         Полезнее, чем углублять awk и sed: большинство данных у QA — это JSON.</div>
-      <p style="margin-top:14px;"><strong>Реальный кейс — найти ошибку по request-id</strong> (связка с дебагом 500 из раздела API):</p>
+      <p style="margin-top:14px;"><strong>Поиск ошибки по request ID:</strong></p>
       <div class="code-block"><span class="cm"># 1. из ответа API взял X-Request-ID: abc-123</span>
 <span class="cm"># 2. ищем все логи этого запроса через все сервисы</span>
 grep -r <span class="st">"abc-123"</span> /var/log/services/
@@ -1792,18 +1788,15 @@ grep -r <span class="st">"abc-123"</span> /var/log/services/
       <table>
         <thead><tr><th>Система</th><th>Кратко</th></tr></thead>
         <tbody>
-          <tr><td><strong>ELK / Kibana</strong></td><td>Elasticsearch + Kibana-UI. Классика, часто self-hosted</td></tr>
+          <tr><td><strong>ELK / Kibana</strong></td><td>Elasticsearch и интерфейс Kibana; часто разворачивается в собственной инфраструктуре</td></tr>
           <tr><td><strong>Grafana Loki</strong></td><td>логи рядом с метриками в Grafana, популярен с Kubernetes</td></tr>
           <tr><td><strong>Datadog</strong></td><td>облачный all-in-one (логи + метрики + трейсы + APM), платный</td></tr>
           <tr><td><strong>Splunk</strong></td><td>энтерпрайз, мощный язык запросов, дорогой</td></tr>
         </tbody>
       </table>
       <p>Принцип у всех один — тот же, что у grep, но через UI и по всем сервисам сразу: поиск по тексту, фильтр по полям (<code>service:payment AND level:error</code>), time range, дашборды и алерты, корреляция по <code>request-id</code>.</p>
-      <div class="hl"><span class="hl-label">Structured logging</span>Современные сервисы пишут логи не строками, а <strong>JSON</strong>: <code>{"level":"error","service":"payment","request_id":"abc-123","msg":"..."}</code>. Это позволяет фильтровать по полям (<code>level:error</code>), а не разбирать текст регулярками, как мы делали с <code>sort -k4</code> и <code>uniq -f3</code>.</div>
-      <div class="hl modern"><span class="hl-label">В реальном мире</span>QA-автоматизатор использует <em>оба</em> подхода. <strong>Kibana / Datadog / Grafana</strong> — для дебага в проде и на staging: найти ошибку по request-id, посмотреть всплеск 500-х, собрать путь запроса через микросервисы. <strong>grep / tail</strong> на сервере — когда централизованного сбора нет: CI-раннер, локальный контейнер, быстрый дебаг. Принцип одинаковый (поиск → фильтр → контекст), меняется только инструмент.</div>
-      <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Генерация команд:</strong> <em>«Напиши команду: найти в app.log все строки с ERROR за сегодня, сгруппировать по тексту ошибки и показать топ-5 по частоте.»</em><br><br>
-        <strong>Разбор awk и sed:</strong> вставь непонятную команду → <em>«Объясни, что делает эта awk-команда построчно.»</em> Проверь ответ в песочнице выше, прежде чем запускать на сервере.
-      </div>
+      <div class="hl"><span class="hl-label">Structured logging</span>Структурированные логи записываются в <strong>JSON</strong>: <code>{"level":"error","service":"payment","request_id":"abc-123","msg":"..."}</code>. Это позволяет фильтровать данные по полям, например <code>level:error</code>, без разбора текста регулярными выражениями.</div>
+      <div class="hl modern"><span class="hl-label">Выбор инструмента</span><strong>Kibana, Datadog, Grafana</strong> подходят для поиска по логам нескольких сервисов, анализа всплесков ошибок и корреляции по request ID. <strong>grep, tail, jq</strong> используются для локальных файлов, CI-раннеров и контейнеров.</div>
     </div>
   </section>
 
@@ -1845,7 +1838,7 @@ export NAME                 <span class="cm"># передать переменн
 
 current_branch=$(git branch --show-current)
 run_tests <span class="st">"${REPORT_DIR:-reports}"</span></div>
-        <p><strong>Реальный кейс QA</strong> — скрипт поднимает окружение, ждёт сервис, гоняет тесты:</p>
+        <p><strong>Пример:</strong> скрипт поднимает окружение, ожидает готовность сервиса, запускает тесты и выполняет cleanup:</p>
         <div class="code-block"><span class="cm">#!/usr/bin/env bash</span>
 <span class="kw">set</span> -euo pipefail
 
@@ -1867,17 +1860,14 @@ timeout 30 bash -c <span class="st">'until nc -z localhost 5432; do sleep 1; don
 <span class="kw">exit</span> <span class="st">"$result"</span></div>
         <div class="hl orange"><span class="hl-label">Полезные привычки</span><code>set -u</code> ловит необъявленные переменные, <code>pipefail</code> — ошибку в любой части пайпа, <code>trap ... EXIT</code> гарантирует cleanup. <code>set -e</code> полезен, но у него есть исключения в условиях, циклах и пайпах, поэтому его нельзя считать полной обработкой ошибок. Ожидание сервиса делай через polling с дедлайном, а не <code>sleep 30</code> наугад.</div>
         <div class="hl"><span class="hl-label">Exit codes — почему CI «видит» падение</span>Каждая команда возвращает код: <strong>0 = успех, не 0 = ошибка</strong>. CI считает шаг проваленным, если команда вернула non-zero — поэтому <code>pytest</code> с упавшими тестами возвращает не 0, и пайплайн краснеет. Проверить код последней команды: <code>echo $?</code>. В примере код тестов сохраняется в <code>result</code> и возвращается через <code>exit "$result"</code>, а <code>trap</code> успевает остановить окружение.</div>
-        <p><strong>ShellCheck</strong> — статический анализатор shell-скриптов. Он ловит некавыченные переменные, недостижимый код, ошибки редиректов и проблемы совместимости: <code>shellcheck run-tests.sh</code>. Хороший ответ на вопрос «как ревьюить Bash кроме запуска».</p>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span>Bash-синтаксис легко забывается — отличная задача для LLM:<br><br>
-          <em>«Напиши bash-скрипт: поднять docker compose, дождаться готовности Postgres на 5432, прогнать pytest, в конце остановить compose и вернуть код тестов.»</em>
-        </div>
+        <p><strong>ShellCheck</strong> — статический анализатор shell-скриптов. Он находит незакавыченные переменные, недостижимый код, ошибки редиректов и проблемы совместимости: <code>shellcheck run-tests.sh</code>.</p>
     </div>
   </section>
 
   <div class="part-head" id="containers">
     <div class="part-title">Контейнеры и оркестрация</div>
     <div class="part-sub">Docker и Kubernetes · окружения для тестов и диагностика</div>
-    <div class="part-lead">Всё, что выше, работает и внутри контейнера: <code>docker exec -it container sh</code> и <code>kubectl exec</code> открывают тот же shell, где пригодятся <code>grep</code>, <code>tail</code>, <code>ps</code> и <code>curl</code>.</div>
+    <div class="part-lead"><code>docker exec</code> и <code>kubectl exec</code> запускают команды внутри контейнера. Для диагностики используются те же <code>grep</code>, <code>tail</code>, <code>ps</code>, <code>env</code> и <code>curl</code>.</div>
   </div>
 
   <!-- ─────── 16. DOCKER ─────── -->
@@ -1888,13 +1878,18 @@ timeout 30 bash -c <span class="st">'until nc -z localhost 5432; do sleep 1; don
       <span class="section-badge">containers</span>
     </div>
     <div class="section-body">
-        <p><strong>Docker</strong> запускает приложение с его файлами и зависимостями в изолированном <em>контейнере</em>. Для QA это воспроизводимое окружение: можно поднять нужную версию БД или сервиса одной командой и повторить тот же запуск в CI.</p>
+        <p><strong>Docker</strong> собирает образы и запускает из них изолированные контейнеры. Основные сценарии: воспроизводимое окружение, локальный запуск зависимостей, интеграционные тесты и выполнение тех же образов в CI.</p>
+        <p><strong>Основные команды:</strong></p>
         <div class="code-block">docker ps                    <span class="cm"># запущенные контейнеры</span>
 docker ps -a                 <span class="cm"># все, включая остановленные</span>
-docker logs container_id     <span class="cm"># логи контейнера</span>
+docker images                <span class="cm"># локальные образы</span>
+docker pull postgres:16      <span class="cm"># скачать образ</span>
+docker build -t app:1.0 .    <span class="cm"># собрать образ из текущего каталога</span>
 docker run --rm -e POSTGRES_PASSWORD=test postgres:16   <span class="cm"># удалить контейнер после остановки</span>
+docker logs container_id     <span class="cm"># логи контейнера</span>
 docker stop &lt;container&gt;    <span class="cm"># остановить контейнер</span>
-docker rm &lt;container&gt;      <span class="cm"># удалить остановленный контейнер</span></div>
+docker rm &lt;container&gt;      <span class="cm"># удалить остановленный контейнер</span>
+docker rmi &lt;image&gt;          <span class="cm"># удалить неиспользуемый образ</span></div>
         <div class="hl green"><span class="hl-label">Image и container</span><strong>Образ</strong> — неизменяемый шаблон со слоями файловой системы и конфигурацией запуска. <strong>Контейнер</strong> — экземпляр образа с собственным процессом и изменяемым слоем. Один образ может породить много контейнеров; удаление контейнера не удаляет образ.</div>
         <div class="hl"><span class="hl-label">Контейнер против VM</span>Виртуальная машина содержит гостевую ОС и собственное ядро. Контейнер — изолированный процесс, который разделяет ядро хоста, поэтому обычно стартует быстрее и требует меньше ресурсов. Это не «маленькая VM»: изоляция и модель безопасности отличаются.</div>
         <p><strong>Запуск с параметрами:</strong></p>
@@ -1919,10 +1914,10 @@ docker compose down -v         <span class="cm"># дополнительно у�
 <span class="kw">COPY</span> . .                     <span class="cm"># код — последним</span>
 <span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
 
-        <p><strong>Слои и кэш сборки</strong> — частый вопрос по Dockerfile. Инструкции формируют кэшируемые результаты, а изменения файловой системы сохраняются слоями. При пересборке Docker переиспользует подходящий кэш; изменение раннего шага обычно инвалидирует зависящие от него следующие шаги.</p>
-        <div class="hl green"><span class="hl-label">Почему requirements копируют отдельно</span>Если написать <code>COPY . .</code> до <code>pip install</code>, то <em>любая</em> правка кода инвалидирует слой и зависимости будут ставиться заново — каждая сборка по несколько минут. Копируя сначала только <code>requirements.txt</code>, ты добиваешься, что слой с <code>pip install</code> пересобирается лишь при изменении списка зависимостей. Правило: <strong>от редко меняющегося к часто меняющемуся</strong>.</div>
+        <p><strong>Слои и кэш сборки.</strong> Инструкции Dockerfile формируют кэшируемые результаты, а изменения файловой системы сохраняются слоями. При пересборке Docker переиспользует подходящий кэш; изменение раннего шага обычно инвалидирует зависящие от него следующие шаги.</p>
+        <div class="hl green"><span class="hl-label">Порядок COPY</span>Если выполнить <code>COPY . .</code> до <code>pip install</code>, любая правка кода инвалидирует кэш установки зависимостей. Отдельный <code>COPY requirements.txt .</code> позволяет пересобирать этот слой только при изменении списка зависимостей. Инструкции размещают от редко меняющихся к часто меняющимся.</div>
 
-        <p><strong>Инструкции, которые путают:</strong></p>
+        <p><strong>Различия инструкций и параметров:</strong></p>
         <table>
           <thead><tr><th>Пара</th><th>Разница</th></tr></thead>
           <tbody>
@@ -1939,18 +1934,18 @@ docker compose down -v         <span class="cm"># дополнительно у�
 docker run -v $(pwd)/tests:/app/tests myimage                <span class="cm"># bind mount — папка с хоста</span></div>
         <ul>
           <li><strong>Named volume</strong> — Docker хранит сам, переживает пересоздание контейнера. Для данных БД</li>
-          <li><strong>Bind mount</strong> — конкретная папка хоста внутрь контейнера. Удобно подсунуть тесты или конфиг без пересборки образа</li>
+          <li><strong>Bind mount</strong> — конкретная папка хоста внутри контейнера; позволяет подключить тесты или конфигурацию без пересборки образа</li>
         </ul>
 
-        <p><strong>Сети — почему из контейнера не видно <code>localhost</code>.</strong> Классическая ловушка: внутри контейнера <code>localhost</code> — это <em>сам контейнер</em>, а не твоя машина и не соседний контейнер.</p>
+        <p><strong>Сети и <code>localhost</code>.</strong> Внутри контейнера <code>localhost</code> указывает на сам контейнер, а не на хост и не на соседний контейнер.</p>
         <div class="hl orange"><span class="hl-label">Как обращаться правильно</span>· <strong>Контейнер → контейнер в одном compose:</strong> по <em>имени сервиса</em> — <code>postgres:5432</code>, а не <code>localhost:5432</code>. Compose поднимает общую сеть и заводит DNS по именам сервисов.<br>· <strong>Контейнер → хост-машина:</strong> <code>host.docker.internal</code> (Docker Desktop на Windows/macOS).<br>· <strong>Хост → контейнер:</strong> только через проброшенный порт <code>-p 5432:5432</code>. Без <code>-p</code> порт снаружи недоступен, даже если сервис внутри слушает.<br>· Сервис внутри должен слушать <code>0.0.0.0</code>, а не <code>127.0.0.1</code> — иначе он принимает только соединения изнутри контейнера.</div>
-        <p><strong>Дебаг контейнера</strong> — частая задача, когда «в контейнере не работает»:</p>
+        <p><strong>Диагностика контейнера:</strong></p>
         <div class="code-block">docker exec -it container sh     <span class="cm"># shell внутри; bash может не быть в slim-образе</span>
 docker logs -f --tail 100 cont   <span class="cm"># смотреть логи в реальном времени</span>
 docker inspect container         <span class="cm"># детали: сеть, env, volumes, health</span>
 docker stats container           <span class="cm"># CPU и память в реальном времени</span></div>
-        <p>Зайдя внутрь через <code>exec</code>, проверяешь изнутри: переменные окружения (<code>env</code>), доступность других сервисов (<code>curl</code>, <code>nc</code>), файлы конфигов.</p>
-        <p><strong>Testcontainers</strong> — библиотека, которая поднимает реальные зависимости (Postgres, Kafka) в Docker прямо из автотеста и останавливает их после теста. Тест работает с настоящей БД, а не моком. Это связка с разделом CI/CD (раздел 07).</p>
+        <p>После входа через <code>exec</code> проверяют переменные окружения (<code>env</code>), доступность других сервисов (<code>curl</code>, <code>nc</code>) и содержимое конфигурационных файлов.</p>
+        <p><strong>Testcontainers</strong> — библиотека для запуска реальных зависимостей, например Postgres или Kafka, из автотеста. Контейнер создаётся перед тестом и удаляется после него.</p>
 
         <p style="margin-top:14px;"><strong>Multi-stage build</strong> — собрать в одном образе, а в финальный положить только результат. Так из образа исчезают компиляторы, dev-зависимости и исходники: меньше размер и меньше поверхность атаки.</p>
         <div class="code-block"><span class="kw">FROM</span> python:3.12 <span class="kw">AS</span> builder      <span class="cm"># стадия сборки</span>
@@ -1962,7 +1957,7 @@ docker stats container           <span class="cm"># CPU и память в ре�
 <span class="kw">COPY</span> . .
 <span class="kw">CMD</span> [<span class="st">"pytest"</span>]</div>
 
-        <p><strong>Короткий <code>depends_on</code> не ждёт готовности</strong> — он гарантирует запуск зависимости раньше потребителя, но Postgres «стартовал» ещё не означает «принимает подключения». Для ожидания readiness нужен healthcheck и длинная форма с <code>condition: service_healthy</code>:</p>
+        <p><strong><code>depends_on</code> и готовность.</strong> Короткая форма гарантирует порядок запуска, но не готовность приложения принимать подключения. Для ожидания используется <code>healthcheck</code> и длинная форма с <code>condition: service_healthy</code>:</p>
         <div class="code-block">services:
   db:
     image: postgres:16
@@ -1974,13 +1969,13 @@ docker stats container           <span class="cm"># CPU и память в ре�
     depends_on:
       db:
         condition: service_healthy   <span class="cm"># ждать ЗДОРОВЬЯ, а не старта</span></div>
-        <p>Альтернатива без compose — <code>wait-for-it.sh</code> / retry в самом тесте. Testcontainers делает это за тебя из коробки.</p>
+        <p>Альтернатива: polling с таймаутом в entrypoint или тестовом коде. Testcontainers предоставляет стратегии ожидания готовности контейнера.</p>
 
-        <p><strong>Registry и теги.</strong> Образы хранятся в реестре (Docker Hub, GitHub Container Registry, приватный Nexus/Harbor): <code>docker pull</code> / <code>docker push</code>. Про теги важно понимать: <code>latest</code> — <strong>не «последняя версия»</strong>, а просто тег по умолчанию, который можно перезаписать. Поэтому «у меня и в CI разное поведение на одном <code>latest</code>» — обычная история. Для воспроизводимости фиксируют версию (<code>postgres:16.2</code>) или digest (<code>postgres@sha256:...</code>).</p>
+        <p><strong>Registry и теги.</strong> Образы хранятся в реестре: Docker Hub, GitHub Container Registry, Nexus или Harbor. Основные команды: <code>docker login</code>, <code>docker pull</code>, <code>docker tag</code>, <code>docker push</code>. <code>latest</code> — перезаписываемый тег по умолчанию, а не гарантия последней версии. Для воспроизводимости закрепляют версию (<code>postgres:16.2</code>) или digest (<code>postgres@sha256:...</code>).</p>
 
-        <div class="hl red"><span class="hl-label">Безопасность образа</span>Не копируй в образ <code>.env</code>, приватные ключи и токены: слои и история сборки могут их сохранить. Для секретов сборки используй BuildKit secrets, для runtime — механизм секретов платформы. Бери минимальный доверенный base image, запускай процесс не от root через <code>USER</code>, сканируй образ и обновляй закреплённые версии осознанно.</div>
+        <div class="hl red"><span class="hl-label">Безопасность образа</span>Не копируйте в образ <code>.env</code>, приватные ключи и токены: они могут сохраниться в слоях и истории сборки. Для сборки используйте BuildKit secrets, для runtime — механизм секретов платформы. Выбирайте минимальный доверенный base image, запускайте процесс не от root через <code>USER</code> и сканируйте образ.</div>
         <p><strong>Жизненный цикл и restart policy.</strong> Контейнер живёт, пока жив его главный процесс (PID 1). <code>docker inspect</code> показывает exit code: <code>0</code> — штатное завершение, <code>1</code> — общая ошибка приложения, <code>137</code> — процесс получил SIGKILL (часто OOM, но причину надо подтвердить через <code>OOMKilled</code> и события), <code>143</code> — SIGTERM. Политика <code>--restart</code> задаёт перезапуск; при <code>always</code> падающий контейнер может перезапускаться по кругу.</p>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Контейнер сразу падает после запуска. Как дебажить?» — 1) <code>docker logs container</code>, 2) <code>docker inspect container</code> — exit code, OOM, env, mounts и health, 3) проверить команду/entrypoint и наличие файлов, 4) при необходимости запустить образ с переопределённым entrypoint: <code>docker run --rm -it --entrypoint sh image</code>. Контейнер останавливается, когда завершается его главный процесс.</div>
+        <div class="hl purple"><span class="hl-label">Алгоритм диагностики</span>Если контейнер завершается сразу: 1) <code>docker logs container</code>; 2) <code>docker inspect container</code> — exit code, OOM, env, mounts и health; 3) проверить command, entrypoint и наличие файлов; 4) при необходимости запустить <code>docker run --rm -it --entrypoint sh image</code>. Контейнер работает, пока выполняется его главный процесс.</div>
     </div>
   </section>
 
@@ -1992,10 +1987,9 @@ docker stats container           <span class="cm"># CPU и память в ре�
       <span class="section-badge">orchestration</span>
     </div>
     <div class="section-body">
-        <p><strong>Kubernetes (k8s)</strong> — оркестратор контейнеров. Когда контейнеров десятки и сотни, кто-то должен их запускать, перезапускать упавшие, масштабировать, распределять по серверам. Это и делает k8s.</p>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Docker запускает один контейнер на одной машине. Kubernetes — как оркестратор/супервизор для целого парка: следит, чтобы нужное число копий всегда работало, перезапускает упавшие, распределяет нагрузку. Как process manager (типа supervisord), но для контейнеров на кластере машин.</div>
-        <p><strong>Архитектура в одном абзаце.</strong> Control plane хранит желаемое состояние и принимает решения: API server принимает команды, scheduler выбирает node, controllers сводят фактическое состояние к желаемому, etcd хранит состояние кластера. На worker nodes kubelet следит за Pod, а container runtime запускает контейнеры.</p>
-        <p><strong>Декларативная модель.</strong> В YAML-манифесте обычно есть <code>apiVersion</code>, <code>kind</code>, <code>metadata</code> и <code>spec</code>: мы описываем желаемое состояние и применяем его через <code>kubectl apply -f file.yaml</code>. Поле <code>status</code> заполняет кластер фактическим состоянием. Поэтому при отладке важно сравнивать spec и status, а не только читать файл из Git.</p>
+        <p><strong>Kubernetes (K8s)</strong> управляет контейнерными workload в кластере: размещает их на узлах, поддерживает заданное число реплик, выполняет перезапуск, масштабирование и обновление.</p>
+        <p><strong>Архитектура.</strong> API server принимает запросы, scheduler выбирает node, controllers приводят фактическое состояние к желаемому, etcd хранит состояние кластера. На worker nodes kubelet управляет Pod, а container runtime запускает контейнеры.</p>
+        <p><strong>Декларативная модель.</strong> YAML-манифест содержит <code>apiVersion</code>, <code>kind</code>, <code>metadata</code> и <code>spec</code> с желаемым состоянием; <code>kubectl apply -f file.yaml</code> передаёт его кластеру. Поле <code>status</code> содержит фактическое состояние. При диагностике сравнивают <code>spec</code> и <code>status</code>.</p>
         <p><strong>Ключевые понятия:</strong></p>
         <ul>
           <li><strong>Pod</strong> — минимальный развёртываемый объект: один или несколько тесно связанных контейнеров с общей сетью и подключёнными volumes</li>
@@ -2021,7 +2015,7 @@ docker stats container           <span class="cm"># CPU и память в ре�
 
         <p><strong>Типы Service:</strong> <code>ClusterIP</code> доступен внутри кластера и используется по умолчанию; <code>NodePort</code> публикует порт на nodes; <code>LoadBalancer</code> запрашивает внешний балансировщик у облачной платформы. Ingress — не тип Service, а HTTP/HTTPS-маршрутизация поверх Service.</p>
 
-        <p><strong>Probes — как кластер понимает, жив ли под.</strong> Спрашивают почти всегда, и путают чаще всего:</p>
+        <p><strong>Probes — проверки состояния контейнера:</strong></p>
         <table>
           <thead><tr><th>Probe</th><th>Вопрос</th><th>Что будет при провале</th></tr></thead>
           <tbody>
@@ -2030,10 +2024,15 @@ docker stats container           <span class="cm"># CPU и память в ре�
             <tr><td><strong>startup</strong></td><td>долгий старт закончился?</td><td>до успеха отключает liveness/readiness; после порога ошибок контейнер перезапускается</td></tr>
           </tbody>
         </table>
-        <div class="hl orange"><span class="hl-label">Чем это оборачивается для QA</span>· <strong>Слишком строгая liveness</strong> — под перезапускается под нагрузкой, потому что не успел ответить на проверку. Снаружи выглядит как «сервис случайно рвёт соединения».<br>· <strong>Нет readiness</strong> — трафик идёт в под, который ещё не прогрелся: после каждого деплоя короткая пачка 502/503. Классический баг, который ловится smoke-тестом сразу после выката.<br>· <strong>Readiness ходит в БД</strong> — упала БД, все поды разом стали not ready, сервис пропал из балансировщика целиком.</div>
-        <div class="hl red"><span class="hl-label">Сначала проверь контекст</span><code>kubectl</code> действует в текущем кластере и namespace. Перед изменяющими командами проверь <code>kubectl config current-context</code> и явно указывай <code>-n staging</code>. Одинаковые имена ресурсов в dev, staging и prod — обычная история.</div>
-        <p><strong>Основные команды диагностики:</strong></p>
-        <div class="code-block">kubectl get deploy,svc,pods -n staging       <span class="cm"># состояние объектов</span>
+        <div class="hl orange"><span class="hl-label">Ошибки настройки probes</span>· <strong>Слишком строгая liveness</strong> вызывает перезапуски под нагрузкой.<br>· <strong>Отсутствие readiness</strong> направляет трафик в непрогретый Pod и может вызывать 502/503 после деплоя.<br>· <strong>Readiness, зависящая от БД</strong>, при отказе БД может исключить из Service все реплики одновременно.</div>
+        <div class="hl red"><span class="hl-label">Контекст и namespace</span><code>kubectl</code> действует в текущем кластере и namespace. Перед изменяющими командами проверяйте <code>kubectl config current-context</code> и явно указывайте namespace, например <code>-n staging</code>.</div>
+        <p><strong>Основные команды:</strong></p>
+        <div class="code-block">kubectl config current-context                <span class="cm"># текущий кластер</span>
+kubectl config get-contexts                   <span class="cm"># доступные контексты</span>
+kubectl get namespaces                        <span class="cm"># пространства имён</span>
+kubectl apply -f app.yaml                     <span class="cm"># создать или обновить объекты</span>
+kubectl delete -f app.yaml                    <span class="cm"># удалить объекты из манифеста</span>
+kubectl get deploy,svc,pods -n staging        <span class="cm"># состояние объектов</span>
 kubectl get pods -n staging -o wide          <span class="cm"># node, IP и дополнительные детали</span>
 kubectl describe pod pod-name -n staging     <span class="cm"># conditions и события</span>
 kubectl logs pod-name -n staging --tail=100  <span class="cm"># последние логи</span>
@@ -2042,11 +2041,11 @@ kubectl exec -it pod-name -n staging -- sh   <span class="cm"># shell; bash мо
 kubectl get pods -n staging -w                <span class="cm"># следить за изменениями</span>
 kubectl port-forward -n staging svc/api 8080:80 <span class="cm"># локальный доступ к Service</span></div>
         <p>Если в Pod несколько контейнеров, для <code>logs</code> и <code>exec</code> укажи <code>-c container-name</code>. По label можно собрать логи всех реплик: <code>kubectl logs -n staging -l app=api --all-containers --prefix</code>.</p>
-        <p><code>port-forward</code> особенно полезен — пробрасываешь порт сервиса из кластера на свою машину и тестируешь его локально через curl/Postman.</p>
+        <p><code>port-forward</code> временно связывает локальный порт с Pod или Service и позволяет обращаться к нему через <code>localhost</code>. Команда работает только пока запущен процесс <code>kubectl</code>.</p>
 
-        <p style="margin-top:14px;"><strong>Requests и limits — почему Pod «сам умирает».</strong> <code>requests</code> — объём ресурсов, который scheduler учитывает при размещении, <code>limits</code> — верхняя граница. Превышение лимита памяти может завершить контейнер с причиной <code>OOMKilled</code> (часто exit code 137). При превышении CPU-limit контейнер не убивают, а замедляют через throttling. Если тесты падают по таймауту только в кластере, проверь usage, requests и limits.</p>
+        <p style="margin-top:14px;"><strong>Requests и limits.</strong> <code>requests</code> — объём ресурсов, который scheduler учитывает при размещении, <code>limits</code> — верхняя граница. Превышение лимита памяти может завершить контейнер с причиной <code>OOMKilled</code> (часто exit code 137). При превышении CPU-limit контейнер не убивают, а замедляют через throttling. Текущее потребление при установленном Metrics Server показывает <code>kubectl top pod -n staging</code>.</p>
 
-        <p><strong>Типовые состояния и причины</strong> — по ним сразу видно класс проблемы:</p>
+        <p><strong>Типовые состояния и причины:</strong></p>
         <table>
           <thead><tr><th>Состояние / причина</th><th>Что означает</th></tr></thead>
           <tbody>
@@ -2058,12 +2057,11 @@ kubectl port-forward -n staging svc/api 8080:80 <span class="cm"># локаль�
         </table>
 
         <p><strong>Хранилище.</strong> Обычный Pod эфемерен. <strong>PV</strong> описывает ресурс хранения, <strong>PVC</strong> — запрос workload на хранилище, <strong>StorageClass</strong> задаёт способ динамического создания volume. При <code>Pending</code> проверяй не только CPU/RAM, но и события PVC.</p>
-        <p><strong>Масштабирование.</strong> Deployment можно масштабировать вручную через <code>kubectl scale</code>. <strong>HPA</strong> меняет число реплик по метрикам, например CPU или latency. QA проверяет границы: scale-up под нагрузкой, scale-down после неё, отсутствие потери запросов и достаточные requests, без которых CPU-based HPA может работать некорректно.</p>
-        <p><strong>Helm</strong> пакетирует связанные Kubernetes-манифесты в chart и подставляет параметры из <code>values.yaml</code>. Для QA полезно уметь прочитать values окружения, сравнить фактический image tag/config и выполнить <code>helm template</code> или <code>helm lint</code> до установки.</p>
+        <p><strong>Масштабирование.</strong> <code>kubectl scale deployment/api --replicas=5 -n staging</code> меняет число реплик вручную. <strong>HPA</strong> меняет его автоматически по метрикам, например CPU. Проверяют scale-up под нагрузкой, scale-down после неё, отсутствие потери запросов и корректные requests, без которых CPU-based HPA работает неправильно.</p>
+        <p><strong>Helm.</strong> Helm пакетирует связанные Kubernetes-манифесты в chart и подставляет параметры из <code>values.yaml</code>. Полезные команды: <code>helm lint ./chart</code>, <code>helm template app ./chart -f values-staging.yaml</code>, <code>helm upgrade --install app ./chart -n staging</code>, <code>helm list -n staging</code>.</p>
 
-        <p><strong>Выкатка и откат:</strong> <code>kubectl rollout status deploy/name</code> — дождаться завершения, <code>kubectl rollout history deploy/name</code> — посмотреть ревизии, <code>kubectl rollout undo deploy/name</code> — откатить. При rolling update какое-то время работают обе версии, поэтому QA проверяет backward compatibility API/БД, readiness новых Pod, отсутствие 5xx и правильный image tag.</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>На большинстве QA-позиций важнее уверенная диагностика, чем администрирование кластера. Но в infrastructure, security и platform-продуктах от SDET могут ждать чтения YAML/Helm, развёртывания тестовых сред и проверки autoscaling. Глубина зависит от продукта, базовые связи объектов и алгоритм диагностики нужны в любом случае.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Pod в CrashLoopBackOff. Что делать?» — 1) проверить context и namespace, 2) <code>kubectl get pod -o wide</code> и <code>describe</code> — conditions/events, 3) <code>logs --previous -c ...</code> — логи завершившегося контейнера, 4) проверить command/args, image tag, ConfigMap/Secret, probes и limits. CrashLoopBackOff — это увеличивающаяся пауза между повторными запусками; первопричина находится в завершении контейнера и событиях.</div>
+        <p><strong>Выкатка и откат:</strong> <code>kubectl rollout status deploy/name -n staging</code> — дождаться завершения, <code>kubectl rollout history deploy/name -n staging</code> — посмотреть ревизии, <code>kubectl rollout undo deploy/name -n staging</code> — откатить. При rolling update одновременно могут работать разные версии; проверяют совместимость API и схемы БД, readiness новых Pod, отсутствие 5xx и фактический image tag.</p>
+        <div class="hl purple"><span class="hl-label">Диагностика CrashLoopBackOff</span>1) проверить context и namespace; 2) выполнить <code>kubectl get pod -o wide</code> и <code>kubectl describe pod</code>; 3) получить логи завершившегося контейнера через <code>kubectl logs --previous -c ...</code>; 4) проверить command/args, image tag, ConfigMap, Secret, probes и limits. <code>CrashLoopBackOff</code> означает увеличивающуюся паузу между повторными запусками, а не первопричину сбоя.</div>
     </div>
   </section>
 
