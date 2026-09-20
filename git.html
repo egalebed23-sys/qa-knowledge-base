@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
 <title>QA Senior · Git</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
   :root {
     --bg: #0d0f14;
@@ -378,8 +378,401 @@
     letter-spacing: 0.8px;
   }
 
+  /* ─── ТРЕНАЖЁР: РАЗДЕЛЫ И ПРОГРЕСС ─── */
+  .part-head {
+    max-width: var(--content-max);
+    margin: 40px auto 20px;
+    padding: 18px 24px;
+    background: linear-gradient(180deg, rgba(0,201,167,0.09), rgba(0,201,167,0.02));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 12px 12px 0;
+    scroll-margin-top: 24px;
+  }
+  .part-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .part-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+  .part-lead { font-size: 13.5px; line-height: 1.65; margin-top: 10px; max-width: 90ch; }
+  .part-lead p { font-size: 13.5px; }
+  .toc-part { margin-top: 14px; color: var(--accent2) !important; opacity: 0.85; }
+  .toc-inner > .toc-part:first-of-type { margin-top: 0; }
+  .toc-inner a .done {
+    float: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+  }
+  .toc-inner a .done.full { color: #5de0b0; }
+  .section-badge.zero { background: #1a1d26; color: var(--muted-2); }
+  .section-badge.partial { background: #2a2a0d; color: #e0c05a; }
+
+  .progress-bar {
+    max-width: var(--content-max);
+    margin: 0 auto 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .progress-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .progress-label b { color: #5de0b0; font-size: 14px; }
+  .progress-track {
+    flex: 1;
+    min-width: 160px;
+    height: 6px;
+    background: var(--tag-bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s;
+  }
+  .runtime-state { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #5de0b0; }
+
+  /* шаг сценария: что делаем и какой вывод увидим */
+  .step {
+    border-left: 2px solid var(--border);
+    padding: 2px 0 2px 16px;
+    margin: 14px 0;
+  }
+  .step-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  /* длинные пути и команды внутри текста переносятся, а не обрезаются на узком экране */
+  p code, li code, td code, .hl code, .part-lead code, .inner code { overflow-wrap: anywhere; }
+  .code-block .pr { color: #5de0b0; }
+  .code-block .out { color: #8b93a8; }
+  .code-block .err { color: #f0a0a0; }
+  .kbd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 5px;
+    background: #1a1d26;
+    color: var(--text);
+  }
+
+  /* ─── ТРЕНАЖЁР: ЗАДАЧА ─── */
+  .task {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .task.solved { border-color: rgba(0, 201, 167, 0.45); }
+  .task-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #14171f;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .task-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    background: #1a1d26;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .task-title { font-size: 14.5px; font-weight: 700; color: #fff; }
+  .task-status {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1a1d26;
+    color: var(--muted-2);
+  }
+  .task.solved .task-status { background: #0d2a1f; color: #5de0b0; }
+  .task-body { padding: 16px 18px; }
+  .task-statement { font-size: 14px; line-height: 1.72; margin-bottom: 12px; }
+  .task-statement p { margin-bottom: 7px; }
+
+  details.hint, details.solution {
+    background: #14171f;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  details.hint summary, details.solution summary {
+    cursor: pointer;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    list-style: none;
+    user-select: none;
+  }
+  details.hint summary::-webkit-details-marker,
+  details.solution summary::-webkit-details-marker { display: none; }
+  details.hint summary::before, details.solution summary::before { content: '▸ '; color: var(--muted-2); }
+  details.hint[open] summary::before, details.solution[open] summary::before { content: '▾ '; }
+  details.hint summary:hover, details.solution summary:hover { color: var(--text); }
+  details.hint .inner, details.solution .inner {
+    padding: 0 14px 12px;
+    font-size: 13px;
+    color: #b0c8f0;
+    line-height: 1.65;
+  }
+  details.solution .inner { color: var(--text); }
+  details.solution .code-block { margin: 0 0 8px; }
+
+  .editor-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a0c12;
+  }
+  .editor-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #101319;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.5px;
+  }
+  .editor-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2f3d; }
+  /* <pre> с подсветкой снизу, прозрачная textarea сверху — метрики должны совпадать */
+  .editor-stack { position: relative; }
+  .editor, .editor-hl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    padding: 12px 14px;
+    tab-size: 4;
+    white-space: pre;
+    overflow-wrap: normal;
+    letter-spacing: normal;
+    border: 0;
+    margin: 0;
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
+  }
+  .editor-hl {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    color: #c9d1e8;
+    pointer-events: none;
+    background: transparent;
+  }
+  .editor {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: 64px;
+    background: transparent;
+    outline: none;
+    resize: vertical;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: #e8eaf0;
+    overflow-x: auto;
+  }
+  .editor::selection { background: rgba(0, 91, 255, 0.45); }
+  .editor-hl .kw, .term-line .kw { color: #79b8ff; }
+  .editor-hl .fn, .term-line .fn { color: #b5bd68; }
+  .editor-hl .cm, .term-line .cm { color: #586480; font-style: italic; }
+  .editor-hl .st, .term-line .st { color: #f0a050; }
+  .editor-hl .op, .term-line .op { color: #c79af5; }
+  .editor-hl .val, .term-line .val { color: #5de0b0; }
+  .cmp-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    padding: 6px 14px;
+    border-top: 1px solid var(--border);
+    background: #101319;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .cmp-hint b { color: #a0c4ff; font-weight: 600; }
+  .cmp-hint i { font-style: normal; opacity: 0.55; white-space: pre; }
+
+  .task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--tag-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { border-color: var(--accent); color: #fff; }
+  .btn-run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn-run:hover { background: #0a6bff; }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .run-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    margin-left: auto;
+  }
+
+  .results { margin-top: 12px; }
+  .results:empty { display: none; }
+  .verdict {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 9px 13px;
+    border-radius: 7px;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .verdict.ok { background: #0d2a1f; color: #5de0b0; border: 1px solid rgba(93,224,176,0.25); }
+  .verdict.bad { background: #2a0d0d; color: #f0a0a0; border: 1px solid rgba(240,90,90,0.25); }
+  .verdict.warn { background: #2a1a0d; color: #f0b090; border: 1px solid rgba(255,107,53,0.25); }
+  .case {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #101319;
+    padding: 9px 13px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+  }
+  .case-head {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+  }
+  .case-mark { font-weight: 700; }
+  .case.pass .case-mark { color: #5de0b0; }
+  .case.fail .case-mark { color: #f05a5a; }
+  .case-label { color: var(--muted); }
+  .case-msg {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: #f0b090;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+  .case-out {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: #8b93a8;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    border-top: 1px dashed var(--border);
+    padding-top: 6px;
+    max-height: 260px;
+    overflow: auto;
+  }
+  .case-out .oh { display: block; font-size: 10px; color: var(--muted-2); letter-spacing: 0.6px; margin-bottom: 2px; }
+  details.all-cases summary {
+    cursor: pointer;
+    padding: 5px 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    list-style: none;
+    user-select: none;
+  }
+  details.all-cases summary::-webkit-details-marker { display: none; }
+  details.all-cases summary::before { content: '▸ '; }
+  details.all-cases[open] summary::before { content: '▾ '; }
+
+  /* ─── ТЕРМИНАЛ: вывод прогона и песочница ─── */
+  .term-out, .term-screen {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    background: #07090d;
+    color: #c9d1e8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: auto;
+  }
+  .term-out {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 13px;
+    margin-bottom: 8px;
+    max-height: 340px;
+  }
+  .term-out .oh { display: block; font-size: 10px; color: var(--muted-2); letter-spacing: 0.6px; margin-bottom: 4px; }
+  .term-line .pr, .term-prompt { color: #5de0b0; }
+  .term-line .pr b, .term-prompt b { color: #79b8ff; font-weight: 500; }
+  .term-err { color: #f0a0a0; }
+  .term-note { color: #e0c05a; }
+  .term {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #07090d;
+  }
+  .term-screen { padding: 12px 14px 4px; height: 340px; }
+  .term-input-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 2px 14px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .term-prompt { white-space: nowrap; }
+  .term-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #e8eaf0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    caret-color: #e8eaf0;
+  }
+  .term .cmp-hint { border-top: 1px solid var(--border); }
+
   /* ─── RESPONSIVE ─── */
   @media (max-width: 900px) {
+    .run-note { margin-left: 0; width: 100%; }
     .sidebar {
       position: static;
       width: 100%;
@@ -391,11 +784,6 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-  }
-  @media (max-width: 560px) {
-    .section-body { padding: 18px 16px; }
-    table { display: block; overflow-x: auto; font-size: 12px; }
-    th, td { min-width: 120px; padding: 7px 8px; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -462,13 +850,23 @@
     <a class="nav-item" href="scenarios.html"><span class="nav-num">15</span> Сценарные кейсы</a>
   </div>
   <div class="toc-inner">
-    <div class="nav-group-title">На этой странице</div>
-    <a href="#basics">01 · Модель и базовый цикл</a>
-    <a href="#branches">02 · Ветки, remote и tags</a>
-    <a href="#merge-rebase">03 · Merge, rebase и squash</a>
-    <a href="#conflicts">04 · Конфликты</a>
-    <a href="#strategies">05 · Командные workflows</a>
-    <a href="#useful">06 · Отмена, восстановление, поиск</a>
+    <div class="nav-group-title toc-part">Тренажёр Git</div>
+    <a href="#how">— · Формат раздела</a>
+    <a href="#sandbox">— · Песочница</a>
+    <a href="#g01">01 · init, status, add, commit<span class="done" data-toc-done="g01"></span></a>
+    <a href="#g02">02 · diff, restore, .gitignore<span class="done" data-toc-done="g02"></span></a>
+    <a href="#g03">03 · log, show, ссылки<span class="done" data-toc-done="g03"></span></a>
+    <a href="#g04">04 · Ветки<span class="done" data-toc-done="g04"></span></a>
+    <a href="#g05">05 · Слияние<span class="done" data-toc-done="g05"></span></a>
+    <a href="#g06">06 · Конфликты<span class="done" data-toc-done="g06"></span></a>
+    <a href="#g07">07 · Отмена изменений<span class="done" data-toc-done="g07"></span></a>
+    <a href="#g08">08 · Rebase<span class="done" data-toc-done="g08"></span></a>
+    <a href="#g09">09 · Stash<span class="done" data-toc-done="g09"></span></a>
+    <a href="#g10">10 · Удалённый репозиторий<span class="done" data-toc-done="g10"></span></a>
+    <div class="nav-group-title toc-part">Справочник</div>
+    <a href="#g11">11 · Командные процессы</a>
+    <a href="#g12">12 · Переписывание и поиск</a>
+    <a href="#g13">13 · Тэги, worktree, секреты</a>
   </div>
 </aside>
 
@@ -479,297 +877,778 @@
 
   <div class="header">
     <h1>Git</h1>
-    <p>// 6 подтем · состояния, ветки, история, конфликты и восстановление</p>
+    <p>// команды · состояния · ветки · история · конфликты</p>
   </div>
 
+  <div class="progress-bar">
+    <div class="progress-label">Решено <b id="p-done">0</b> из <span id="p-total">0</span></div>
+    <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
+    <div class="runtime-state">репозиторий работает прямо в браузере</div>
+    <button class="btn btn-ghost" id="reset-progress" style="font-size:10.5px;padding:5px 10px;">Сбросить прогресс</button>
+  </div>
 
-  <!-- ─────── 01. ОСНОВЫ ─────── -->
-  <section class="section" id="basics">
+  <section class="section" id="how">
+    <div class="section-header">
+      <span class="section-num">—</span>
+      <span class="section-title">Формат раздела</span>
+    </div>
+    <div class="section-body">
+      <p>Раздел состоит из глав с теорией и практических задач. В каждой главе разобраны команды, их назначение и вывод, который вы увидите в терминале. Задачи выполняются в виртуальном репозитории: git работает прямо в браузере, ничего не отправляется наружу.</p>
+      <p>Каждая задача запускается на <strong>свежей копии репозитория</strong>. Проверяется результат, а не текст команды: сравниваются история и ветки, содержимое рабочего каталога и индекса, состояние origin и вывод на экран. Решение, отличающееся от эталонного, засчитывается, если приводит к тому же состоянию.</p>
+      <div class="hl green"><span class="hl-label">Репозиторий задач</span>Каталог <code>~/shop-tests</code> — репозиторий автотестов: <code>README.md</code>, <code>conftest.py</code>, <code>config.py</code>, тесты в <code>tests/</code> и <code>.env</code> с токеном. В истории три коммита, ветка <code>main</code> связана с <code>origin/main</code>. Файлы меняют так же, как в разделе Linux: <code>printf 'текст\n' &gt; файл</code> перезаписывает файл, <code>sed -i 's/старое/новое/' файл</code> правит строку.</div>
+      <div class="hl orange"><span class="hl-label">Отличия от настоящего git</span>Идентификаторы коммитов условные: они устойчивы к повторному запуску, но не равны хешам настоящего git. <code>git log --graph</code> рисует упрощённую схему. Интерактивные операции — редактор сообщения, <code>rebase -i</code>, <code>add -p</code> — и работа по сети не поддержаны: <code>origin</code> живёт внутри страницы. Остальные команды выводят то же, что настоящий git: вывод сверен с ним построчно.</div>
+      <ul>
+        <li><strong>Ctrl + Enter</strong> — выполнить команды из редактора и проверить задачу. Можно писать несколько команд, каждую с новой строки</li>
+        <li><strong>Tab</strong> дополняет команды, подкоманды, пути и имена веток</li>
+        <li>В песочнице <strong>Enter</strong> выполняет команду, <strong>↑ / ↓</strong> листают историю, <strong>Ctrl + L</strong> очищает экран</li>
+        <li>Код и прогресс сохраняются в этом браузере</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-head" id="trainer">
+    <div class="part-title">Тренажёр: репозиторий автотестов</div>
+    <div class="part-sub">10 глав · от первого коммита до работы с origin</div>
+    <div class="part-lead">
+      <p>Практические команды выполняются в репозитории <code>~/shop-tests</code> от пользователя <code>qa</code>. В репозитории лежат автотесты и конфигурация, история состоит из трёх коммитов, а у ветки <code>main</code> настроено отслеживание <code>origin/main</code>. В первой главе состояние другое: те же файлы лежат на диске, но <code>.git</code> ещё не создан и <code>.gitignore</code> не написан.</p>
+      <div class="code-block">~/shop-tests
+├── .env                <span class="cm"># токен, в историю не попадает</span>
+├── .gitignore
+├── README.md
+├── conftest.py
+├── config.py
+└── tests
+    ├── test_cart.py
+    └── test_login.py</div>
+    </div>
+  </div>
+
+  <section class="section" id="sandbox">
+    <div class="section-header">
+      <span class="section-num">—</span>
+      <span class="section-title">Песочница</span>
+      <span class="section-badge">free play</span>
+    </div>
+    <div class="section-body">
+      <p>Свободный терминал на той же копии репозитория. Команды можно пробовать в любом порядке: ломать историю, делать ветки и откаты. Изменения живут до перезагрузки страницы или до кнопки «Сбросить репозиторий».</p>
+      <div class="term">
+        <div class="editor-bar"><span class="dot"></span> git · qa@shop-tests:~/shop-tests
+          <button class="btn btn-ghost" id="sb-reset" style="margin-left:auto;font-size:10px;padding:3px 9px;">Сбросить репозиторий</button>
+        </div>
+        <div class="term-screen" id="sb-screen"></div>
+        <div class="term-input-row">
+          <span class="term-prompt" id="sb-prompt"></span>
+          <input class="term-input" id="sb-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Команда">
+        </div>
+        <div class="cmp-hint" id="sb-hint" hidden></div>
+      </div>
+    </div>
+  </section>
+
+<!-- ─────── 01. ПЕРВЫЙ КОММИТ ─────── -->
+  <section class="section" id="g01">
     <div class="section-header">
       <span class="section-num">01</span>
-      <span class="section-title">Модель и базовый цикл</span>
-      <span class="section-badge">basics</span>
+      <span class="section-title">Репозиторий: init, status, add, commit</span>
+      <span class="section-badge zero" data-chapter-badge="g01"></span>
     </div>
     <div class="section-body">
-        <p><strong>Git</strong> — распределённая система контроля версий. Обычный clone содержит локальную историю и позволяет создавать commits, branches и просматривать изменения без постоянного соединения с сервером.</p>
-        <div class="code-block">working tree  --git add--&gt;  index  --git commit--&gt;  local repository
-local repository  --git push--&gt;  remote repository</div>
-        <ul>
-          <li><strong>Working tree</strong> — файлы, которые сейчас редактируются; они могут быть untracked или modified</li>
-          <li><strong>Index / staging area</strong> — точный набор изменений для следующего commit</li>
-          <li><strong>Local repository</strong> — сохранённый граф commits и refs внутри <code>.git</code></li>
-          <li><strong>Remote repository</strong> — отдельная копия; <code>origin</code> лишь обычное имя remote, не специальное слово Git</li>
-        </ul>
-        <div class="code-block">git clone &lt;url&gt;                    <span class="cm"># получить repository и working tree</span>
-git status --short                 <span class="cm"># состояние файлов</span>
-git diff                           <span class="cm"># working tree vs index</span>
-git add -p                         <span class="cm"># выбрать отдельные hunks</span>
-git diff --staged                  <span class="cm"># index vs HEAD: что попадёт в commit</span>
-git commit -m <span class="st">"fix login timeout"</span> <span class="cm"># локальный снимок</span>
-git push                           <span class="cm"># обновить remote ref</span></div>
-        <div class="hl green"><span class="hl-label">Зачем нужен index</span>Он позволяет собрать атомарный commit из части текущих правок. Если в одном файле одновременно исправлен баг и начат рефакторинг, <code>git add -p</code> помогает зафиксировать их отдельно.</div>
-        <p><code>git commit -am "message"</code> автоматически добавляет modified/deleted <em>tracked</em> files, но не включает новые untracked-файлы.</p>
+      <p>Git хранит историю проекта в каталоге <code>.git</code> рядом с файлами. Изменение проходит три области: рабочий каталог, индекс и репозиторий.</p>
+      <div class="code-block">рабочий каталог  --git add--&gt;  индекс  --git commit--&gt;  репозиторий</div>
+      <ul>
+        <li><strong>Рабочий каталог</strong> — файлы, которые лежат на диске прямо сейчас</li>
+        <li><strong>Индекс</strong> (staging area) — набор изменений, подготовленных к следующему коммиту</li>
+        <li><strong>Репозиторий</strong> — сохранённые коммиты и ссылки на них внутри <code>.git</code></li>
+      </ul>
 
-        <p><strong>Три варианта diff, которые важно не путать:</strong></p>
-        <table>
-          <thead><tr><th>Команда</th><th>Сравнение</th></tr></thead>
-          <tbody>
-            <tr><td><code>git diff</code></td><td>незастейдженные изменения: working tree ↔ index</td></tr>
-            <tr><td><code>git diff --staged</code></td><td>подготовленный commit: index ↔ HEAD</td></tr>
-            <tr><td><code>git diff HEAD</code></td><td>все локальные правки: working tree ↔ HEAD</td></tr>
-            <tr><td><code>git show &lt;commit&gt;</code></td><td>metadata и patch конкретного commit</td></tr>
-          </tbody>
-        </table>
+      <div class="step">
+        <div class="step-title">git init · создать репозиторий</div>
+        <p><code>git init</code> создаёт <code>.git</code> в текущем каталоге. Файлы при этом не меняются: они просто становятся видны git как неотслеживаемые.</p>
+        <div class="code-block"><span class="pr">$</span> git init
+<span class="out">Initialized empty Git repository in /home/qa/shop-tests/.git/</span></div>
+      </div>
 
-        <p><strong>Commit</strong> содержит ссылку на tree проекта, parent commit или несколько parents у merge, автора/коммитера, время и сообщение. Его object ID зависит от содержимого. Логически Git показывает snapshots; физически packfiles могут хранить объекты с delta compression.</p>
-        <p><strong>HEAD</strong> обычно символически указывает на текущую branch, а через неё — на commit. В detached HEAD он указывает прямо на commit. Branch и tag — тоже refs: branch двигается с новыми commits, tag обычно фиксирует конкретную версию.</p>
+      <div class="step">
+        <div class="step-title">git status · что git видит сейчас</div>
+        <p>Команда показывает три группы: что подготовлено к коммиту, что изменено, но не подготовлено, и что git не отслеживает.</p>
+        <div class="code-block"><span class="pr">$</span> git status
+<span class="out">On branch main
 
-        <p><strong>Fetch, pull и push:</strong></p>
-        <ul>
-          <li><code>git fetch --prune</code> скачивает новые objects/refs и обновляет remote-tracking refs вроде <code>origin/main</code>, не меняя текущую local branch и working tree</li>
-          <li><code>git pull</code> сначала делает fetch, затем интегрирует upstream по опциям или config: fast-forward only, rebase, merge либо squash. Поэтому нельзя считать, что pull всегда равен <code>fetch + merge</code></li>
-          <li><code>git push -u origin feature-x</code> публикует branch и задаёт upstream; после этого <code>pull</code>/<code>push</code> могут работать без явных имён</li>
-        </ul>
-        <div class="hl"><span class="hl-label">.gitignore</span>Он не даёт Git начать отслеживать подходящие untracked-файлы. Уже tracked-файл правило не исключит: его сначала убирают из index через <code>git rm --cached</code>. Секреты, локальные окружения, кэши и генерируемые отчёты лучше исключать до первого commit.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>fetch</code> отличается от <code>pull</code>?» — Fetch только обновляет моё локальное представление remote. Pull после fetch ещё меняет текущую branch выбранным способом интеграции. Когда важно сначала увидеть расхождение, делаю <code>fetch</code>, затем смотрю <code>log/diff</code> и явно выбираю merge, rebase или fast-forward.</div>
+No commits yet
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	.env
+	README.md
+	config.py
+	conftest.py
+	tests/
+
+nothing added to commit but untracked files present (use "git add" to track)</span></div>
+        <p><code>git status --short</code> печатает то же самое двумя колонками: первая — состояние в индексе, вторая — в рабочем каталоге. <code>??</code> означает неотслеживаемый файл. В списке видно и <code>.env</code> с токеном: git предложит закоммитить и его, пока в репозитории нет правил исключения.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git add · положить в индекс</div>
+        <p>Аргументом может быть файл, каталог или <code>.</code> — всё дерево от текущего каталога. Добавление каталога берёт все файлы внутри него.</p>
+        <div class="code-block"><span class="pr">$</span> git add conftest.py
+<span class="pr">$</span> git status --short
+<span class="out">A  conftest.py
+?? .env
+?? README.md
+?? config.py
+?? tests/</span></div>
+        <p><code>A</code> в первой колонке — файл добавлен в индекс. Пока он только там: коммита ещё нет.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git commit · зафиксировать снимок</div>
+        <p>Коммит сохраняет то, что лежит в индексе, а не то, что в рабочем каталоге. Сообщение задаётся флагом <code>-m</code>.</p>
+        <div class="code-block"><span class="pr">$</span> git commit -m <span class="st">"add fixtures"</span>
+<span class="out">[main (root-commit) 8f2d4c1] add fixtures
+ 1 file changed, 6 insertions(+)
+ create mode 100644 conftest.py</span></div>
+        <p>В скобках — ветка и сокращённый идентификатор коммита. <code>root-commit</code> значит, что это первый коммит в репозитории.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git log · посмотреть историю</div>
+        <div class="code-block"><span class="pr">$</span> git log --oneline
+<span class="out">8f2d4c1 (HEAD -&gt; main) add fixtures</span></div>
+        <p><code>--oneline</code> сжимает каждый коммит до строки. <code>HEAD -&gt; main</code> показывает, где вы находитесь: HEAD указывает на ветку main, а она — на этот коммит.</p>
+      </div>
+
+      <div class="hl"><span class="hl-label">Что попадает в коммит</span>Ровно содержимое индекса на момент команды. Если файл изменён после <code>git add</code>, в коммит уйдёт версия, которая была добавлена, а новая правка останется незастейдженной. Это видно в <code>git status --short</code> как <code>MM</code>: изменён и в индексе, и поверх него.</div>
+
+      <div class="task" data-task="g01-1"></div>
+      <div class="task" data-task="g01-2"></div>
+      <div class="task" data-task="g01-3"></div>
     </div>
   </section>
 
-  <!-- ─────── 02. ВЕТКИ ─────── -->
-  <section class="section" id="branches">
+  <!-- ─────── 02. ТРИ СОСТОЯНИЯ И DIFF ─────── -->
+  <section class="section" id="g02">
     <div class="section-header">
       <span class="section-num">02</span>
-      <span class="section-title">Ветки, remote и tags</span>
-      <span class="section-badge">branches</span>
+      <span class="section-title">Изменения: diff, restore, .gitignore</span>
+      <span class="section-badge zero" data-chapter-badge="g02"></span>
     </div>
     <div class="section-body">
-        <p><strong>Branch</strong> — двигающаяся ссылка на commit, а не копия каталога. Новый commit сдвигает текущую branch вперёд; создание branch почти ничего не стоит.</p>
-        <div class="code-block">git fetch origin
-git switch -c feature-login origin/main  <span class="cm"># branch от свежего origin/main</span>
-<span class="cm"># ... изменения, add, commit ...</span>
-git push -u origin feature-login         <span class="cm"># publish + upstream</span></div>
+      <p>Одно и то же изменение существует в трёх версиях: в последнем коммите, в индексе и в рабочем каталоге. Команды <code>diff</code> сравнивают пары из этих трёх.</p>
+      <table>
+        <thead><tr><th>Команда</th><th>Что с чем сравнивает</th></tr></thead>
+        <tbody>
+          <tr><td><code>git diff</code></td><td>рабочий каталог ↔ индекс: что ещё не подготовлено</td></tr>
+          <tr><td><code>git diff --staged</code></td><td>индекс ↔ последний коммит: что уйдёт в коммит</td></tr>
+          <tr><td><code>git diff HEAD</code></td><td>рабочий каталог ↔ последний коммит: все правки целиком</td></tr>
+        </tbody>
+      </table>
 
-        <table>
-          <thead><tr><th>Имя</th><th>Что это</th></tr></thead>
-          <tbody>
-            <tr><td><code>main</code></td><td>local branch; двигается локальными commits/merge/rebase/reset</td></tr>
-            <tr><td><code>origin</code></td><td>имя remote и набор настроек его URL/refspec</td></tr>
-            <tr><td><code>origin/main</code></td><td>local remote-tracking ref: состояние remote branch по последнему fetch</td></tr>
-            <tr><td><strong>upstream</strong></td><td>связь local branch с remote-tracking branch для pull, push и статуса ahead/behind</td></tr>
-          </tbody>
-        </table>
-        <div class="hl green"><span class="hl-label">Важное различие</span>Удаление local branch не удаляет remote branch и наоборот. <code>git branch -d feature-x</code> удаляет локальную ссылку, <code>git push origin --delete feature-x</code> — удалённую. <code>git fetch --prune</code> убирает устаревшие remote-tracking refs.</div>
+      <div class="step">
+        <div class="step-title">git diff · читать патч</div>
+        <div class="code-block"><span class="pr">$</span> git diff
+<span class="out">diff --git a/config.py b/config.py
+index 4a1f7e2..b30c95d 100644
+--- a/config.py
++++ b/config.py
+@@ -1,3 +1,3 @@
+ BASE_URL = "https://staging.shop.test"
+-TIMEOUT = 30
++TIMEOUT = 45
+ RETRIES = 2</span></div>
+        <p><code>-</code> — строка из старой версии, <code>+</code> — из новой, пробел в начале — контекст без изменений. <code>@@ -1,3 +1,3 @@</code> — номера строк: три строки начиная с первой в обеих версиях.</p>
+      </div>
 
-        <p><strong>Detached HEAD</strong> — HEAD указывает прямо на commit, например после <code>git switch --detach &lt;sha&gt;</code>. Просматривать и тестировать старую версию безопасно. Если здесь созданы нужные commits, до их очистки создают ссылку: <code>git switch -c rescue-branch</code>.</p>
+      <div class="step">
+        <div class="step-title">git restore · вернуть как было</div>
+        <p>Восстанавливает файл из индекса. Незастейдженная правка при этом теряется без предупреждения.</p>
+        <div class="code-block"><span class="pr">$</span> git restore config.py
+<span class="pr">$</span> git status --short
+<span class="out"></span></div>
+        <p><code>git restore --staged файл</code> работает на уровень выше: убирает файл из индекса, но оставляет правку в рабочем каталоге. Это отмена <code>git add</code>, а не отмена изменений.</p>
+      </div>
 
-        <p><strong>Tags фиксируют версии.</strong> Lightweight tag — простая ссылка. Annotated tag хранит автора, дату, сообщение и может быть подписан; он подходит для release:</p>
-        <div class="code-block">git tag -a v2.4.0 -m <span class="st">"release 2.4.0"</span>
-git push origin v2.4.0             <span class="cm"># отправить tag явно</span>
-git show v2.4.0</div>
-        <p>Release tag не передвигают молча: опубликованное имя версии должно продолжать указывать на тот же object. Исправление выпускают новым tag.</p>
+      <div class="step">
+        <div class="step-title">.gitignore · что git не должен видеть</div>
+        <p>Файл со списком шаблонов. Git перестаёт предлагать такие файлы к добавлению, но только если они ещё не отслеживаются.</p>
+        <div class="code-block"><span class="pr">$</span> cat .gitignore
+<span class="out">.env
+__pycache__/
+*.log</span></div>
+        <p>Уже отслеживаемый файл правило не исключит: его сначала убирают из индекса командой <code>git rm --cached файл</code>, оставляя на диске. Сам <code>.gitignore</code> коммитят — он часть договорённостей команды.</p>
+      </div>
 
-        <div class="hl"><span class="hl-label">Несколько задач одновременно</span><code>git worktree add ../hotfix -b hotfix origin/main</code> создаёт второе working tree того же repository. Можно держать feature и hotfix в разных каталогах без stash и постоянного switch; одна branch обычно не может быть checkout одновременно в двух worktrees.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>switch</code> отличается от <code>checkout</code>?» — <code>checkout</code> исторически и переключает branches/commits, и восстанавливает paths. <code>switch</code> отвечает за переход между branches/commits, <code>restore</code> — за содержимое working tree/index. Более узкие команды яснее показывают намерение, но <code>restore file</code> всё равно может уничтожить незакоммиченные правки.</div>
+      <div class="hl orange"><span class="hl-label">Секреты в истории</span>Если файл с токеном попал в коммит, удаление файла следующим коммитом не убирает значение из истории: оно остаётся в старых коммитах и во всех клонах. Токен отзывают и выпускают заново, а историю чистят отдельно — см. справочник.</div>
+
+      <div class="task" data-task="g02-1"></div>
+      <div class="task" data-task="g02-2"></div>
+      <div class="task" data-task="g02-3"></div>
+      <div class="task" data-task="g02-4"></div>
     </div>
   </section>
 
-  <!-- ─────── 03. MERGE / REBASE / SQUASH ─────── -->
-  <section class="section" id="merge-rebase">
+  <!-- ─────── 03. ИСТОРИЯ ─────── -->
+  <section class="section" id="g03">
     <div class="section-header">
       <span class="section-num">03</span>
-      <span class="section-title">Merge, rebase и squash</span>
-      <span class="section-badge">главная тема</span>
+      <span class="section-title">История: log, show, ссылки на коммиты</span>
+      <span class="section-badge zero" data-chapter-badge="g03"></span>
     </div>
     <div class="section-body">
-        <p>Merge, rebase и squash решают похожую задачу — перенести изменения, но по-разному меняют commit graph.</p>
-        <div class="grid3">
-          <div class="card">
-            <div class="card-title">Merge</div>
-            Сохраняет обе линии истории. При расхождении создаёт commit с несколькими parents; при возможности может сделать fast-forward без нового commit.
-          </div>
-          <div class="card">
-            <div class="card-title">Rebase</div>
-            Повторно применяет commits на новой базе. Получается линейная история, но создаются новые commits с другими object IDs.
-          </div>
-          <div class="card">
-            <div class="card-title">Squash merge</div>
-            Берёт итоговый diff feature-ветки и создаёт один новый commit в target branch. В target не сохраняется ancestry отдельных feature commits.
-          </div>
-        </div>
-        <div class="hl green"><span class="hl-label">Fast-forward</span>Если current branch является предком вливаемой, Git может просто передвинуть её ref вперёд. <code>git merge --ff-only feature-x</code> разрешает только такой случай и откажется при расхождении; <code>--no-ff</code> требует merge commit даже когда fast-forward возможен.</div>
-        <div class="code-block"><span class="cm"># Merge feature в current branch</span>
-git switch main
-git merge --no-ff feature-x
+      <p>Коммит адресуют идентификатором, именем ветки или относительной ссылкой от них.</p>
+      <table>
+        <thead><tr><th>Ссылка</th><th>Куда указывает</th></tr></thead>
+        <tbody>
+          <tr><td><code>HEAD</code></td><td>текущая позиция: обычно последний коммит текущей ветки</td></tr>
+          <tr><td><code>HEAD~1</code>, <code>HEAD~2</code></td><td>на один и на два коммита назад по первому родителю</td></tr>
+          <tr><td><code>main</code>, <code>origin/main</code></td><td>последний коммит этой ветки</td></tr>
+          <tr><td><code>8f2d4c1</code></td><td>конкретный коммит по началу идентификатора</td></tr>
+        </tbody>
+      </table>
 
-<span class="cm"># Обновить свою feature-ветку линейно</span>
-git switch feature-x
-git fetch origin
-git rebase origin/main</div>
+      <div class="step">
+        <div class="step-title">git log · история в разных видах</div>
+        <div class="code-block"><span class="pr">$</span> git log --oneline -n 2
+<span class="out">3a2487b (HEAD -&gt; main, origin/main) add cart test and config
+0fb39c5 add login test</span></div>
+        <p>Полный <code>git log</code> печатает идентификатор, автора, дату и сообщение. <code>-n</code> ограничивает число коммитов, <code>--all</code> показывает историю всех веток, а не только текущей.</p>
+      </div>
 
-        <p><strong>Когда что использовать:</strong></p>
-        <table>
-          <thead><tr><th></th><th>Merge</th><th>Rebase</th><th>Squash</th></tr></thead>
-          <tbody>
-            <tr><td>История feature</td><td>сохраняется</td><td>сохраняется, но IDs меняются</td><td>сворачивается в один итоговый commit</td></tr>
-            <tr><td>Graph</td><td>может содержать развилки</td><td>линейный</td><td>линейный в target</td></tr>
-            <tr><td>Общие branches</td><td>обычно безопасный выбор</td><td>только при явном владении и договорённости</td><td>обычно выполняет hosting platform при merge PR</td></tr>
-            <tr><td>Компромисс</td><td>полная история, больше шума</td><td>чистая история, переписывание</td><td>простой revert feature, потеря granular history в main</td></tr>
-          </tbody>
-        </table>
-        <div class="hl red"><span class="hl-label">Правило rebase</span>Не переписывай protected branch и историю, на которую уже опираются другие люди, без координации. Свою опубликованную feature-ветку команды часто rebase-ят; после проверки remote tip её обновляют через <code>git push --force-with-lease</code>, а не голый <code>--force</code>.</div>
-        <p><strong>Interactive rebase</strong> (<code>git rebase -i origin/main</code>) позволяет <code>reword</code>, <code>squash/fixup</code>, переупорядочить или <code>drop</code> собственные commits. <code>git commit --amend</code> переписывает только последний commit. Обе операции меняют IDs.</p>
-        <p><strong><code>--force-with-lease</code></strong> разрешает non-fast-forward push, только если remote ref всё ещё имеет ожидаемое значение. Это защищает от случайного затирания неизвестных commits, но не превращает переписывание общей branch в хорошую идею.</p>
-        <div class="hl modern"><span class="hl-label">Командное решение</span>История — интерфейс для расследований и откатов. Команда заранее выбирает merge policy: merge commits для сохранения контекста, rebase merge для линейности или squash merge для «один PR — один commit». Последовательная политика полезнее личного предпочтения.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Merge всегда создаёт merge commit?» — Нет. Если current branch является предком другой, по умолчанию возможен fast-forward: двигается только ref. Merge commit гарантирует <code>--no-ff</code>; <code>--ff-only</code>, наоборот, запрещает merge commit и падает при diverged history.</div>
+      <div class="step">
+        <div class="step-title">git show · что именно изменил коммит</div>
+        <div class="code-block"><span class="pr">$</span> git show HEAD~1
+<span class="out">commit 0fb39c5cc4c7c0b1c50c3f0e4f1a3d2c7b8e9a01
+Author: QA Engineer &lt;qa@shop.test&gt;
+Date:   Mon Mar 16 10:00:00 2026 +0000
+
+    add login test
+
+diff --git a/tests/test_login.py b/tests/test_login.py
+new file mode 100644
+index 0000000..7c1e2a4
+--- /dev/null
++++ b/tests/test_login.py
+@@ -0,0 +1,2 @@
++def test_login_ok(api):
++    assert api.login("qa", "secret").status_code == 200</span></div>
+        <p><code>new file mode</code> и <code>/dev/null</code> в левой части означают, что файл создан этим коммитом.</p>
+      </div>
+
+      <div class="hl"><span class="hl-label">Сообщение коммита</span>Первая строка — краткая суть в повелительном наклонении: «add retry to login test», а не «исправления». По такому сообщению потом ищут причину регрессии в <code>git log</code>, не открывая патч.</div>
+
+      <div class="task" data-task="g03-1"></div>
+      <div class="task" data-task="g03-2"></div>
+      <div class="task" data-task="g03-3"></div>
     </div>
   </section>
 
-  <!-- ─────── 04. КОНФЛИКТЫ ─────── -->
-  <section class="section" id="conflicts">
+  <!-- ─────── 04. ВЕТКИ ─────── -->
+  <section class="section" id="g04">
     <div class="section-header">
       <span class="section-num">04</span>
-      <span class="section-title">Конфликты слияния</span>
-      <span class="section-badge">conflicts</span>
+      <span class="section-title">Ветки: branch, switch</span>
+      <span class="section-badge zero" data-chapter-badge="g04"></span>
     </div>
     <div class="section-body">
-        <p><strong>Conflict</strong> означает, что Git не может автоматически построить результат трёхстороннего merge из общего предка (merge base) и двух версий. Это не только правка одной строки: одна branch могла удалить файл, который другая переименовала, обе могли добавить файл с одним именем, а binary-файл нельзя объединить построчно.</p>
-        <div class="code-block"><span class="cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
-current side
-<span class="cm">=======</span>
-other side
-<span class="cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-x</span></div>
-        <p><strong>Как разрешить конфликт по шагам:</strong></p>
-        <div class="code-block">git merge feature-x          <span class="cm"># возник конфликт</span>
-git status                   <span class="cm"># unmerged paths и подсказка операции</span>
-git diff --name-only --diff-filter=U
-<span class="cm"># понять намерение обеих сторон, отредактировать и протестировать</span>
-git add file.py              <span class="cm"># отметить path как resolved</span>
-git merge --continue         <span class="cm"># либо git commit</span>
-<span class="cm"># для rebase/cherry-pick: соответствующая команда --continue</span></div>
-        <ul>
-          <li><strong>Current/incoming не означают «моё/чужое» во всех операциях.</strong> Во время rebase смысл ours/theirs для пользователя выглядит перевёрнутым, потому что commits переигрываются на новую базу</li>
-          <li><strong>Accept both — не решение по умолчанию:</strong> можно получить дублированный код, два импорта или несовместимую бизнес-логику</li>
-          <li><strong>Rename/delete и binary conflicts</strong> требуют решить судьбу path или пересоздать artifact, а не просто убрать текстовые markers</li>
-          <li><code>git merge --abort</code>, <code>git rebase --abort</code>, <code>git cherry-pick --abort</code> возвращают состояние до незавершённой операции</li>
-        </ul>
-        <p><strong>Как избегать конфликтов</strong> (лучше, чем уметь их разруливать):</p>
-        <ul>
-          <li>Делать небольшие изменения и регулярно интегрировать свежий target branch</li>
-          <li>Не смешивать массовое форматирование, rename и функциональную правку в одном PR</li>
-          <li>Координировать изменения общих схем, lock-файлов, fixtures и больших конфигов</li>
-          <li>Разбивать файлы и зоны ответственности, которые постоянно становятся точкой столкновения</li>
-        </ul>
-        <div class="hl"><span class="hl-label">Повторяющиеся конфликты</span>Механизм <code>rerere</code> (<code>git config rerere.enabled true</code>) запоминает ранее выбранное resolution и может применить его снова. Это полезно при длительном rebase или повторном merge, но результат всё равно просматривают и тестируют.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«После ручного resolution Git разрешил продолжить. Значит всё правильно?» — Нет. Git знает только, что в index больше нет unmerged entries. Он не понимает бизнес-смысл результата. Проверяю diff, собираю проект и запускаю релевантные тесты до continue/commit.</div>
+      <p>Ветка — это подвижная ссылка на коммит, а не копия файлов. Создание ветки почти ничего не стоит: git записывает имя и идентификатор коммита.</p>
+
+      <div class="step">
+        <div class="step-title">git switch -c · создать и перейти</div>
+        <div class="code-block"><span class="pr">$</span> git switch -c feature-timeout
+<span class="out">Switched to a new branch 'feature-timeout'</span>
+<span class="pr">$</span> git branch
+<span class="out">* feature-timeout
+  main</span></div>
+        <p>Звёздочка отмечает текущую ветку. Новая ветка начинается с того же коммита, на котором вы стояли: пока в ней нет коммитов, она неотличима от main.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Коммит двигает только текущую ветку</div>
+        <div class="code-block"><span class="pr">$</span> git commit -am <span class="st">"raise timeout to 45"</span>
+<span class="out">[feature-timeout 9c4b2e1] raise timeout to 45
+ 1 file changed, 1 insertion(+), 1 deletion(-)</span>
+<span class="pr">$</span> git log --oneline -n 2
+<span class="out">9c4b2e1 (HEAD -&gt; feature-timeout) raise timeout to 45
+3a2487b (main, origin/main) add cart test and config</span></div>
+        <p><code>-am</code> коммитит все изменения отслеживаемых файлов без отдельного <code>git add</code>. Новые файлы так не попадут: git о них ещё не знает.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git switch · переключиться обратно</div>
+        <p>При переключении git приводит рабочий каталог к состоянию целевой ветки. Незакоммиченные правки он попытается сохранить, а если они мешают — откажется переключаться.</p>
+        <div class="code-block"><span class="pr">$</span> git switch main
+<span class="out">Switched to branch 'main'</span>
+<span class="pr">$</span> cat config.py
+<span class="out">BASE_URL = "https://staging.shop.test"
+TIMEOUT = 30
+RETRIES = 2</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Удаление веток</div>
+        <p><code>git branch -d имя</code> удаляет ветку и отказывается это делать, если её коммиты ещё никуда не влиты. <code>-D</code> удаляет в любом случае.</p>
+        <div class="code-block"><span class="pr">$</span> git branch -d feature-timeout
+<span class="err">error: The branch 'feature-timeout' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D feature-timeout'.</span></div>
+      </div>
+
+      <div class="hl"><span class="hl-label">Отделённый HEAD</span><code>git switch --detach 3a2487b</code> ставит HEAD прямо на коммит, минуя ветку. Файлы переключатся на эту версию — удобно посмотреть старое состояние. Коммиты, сделанные в таком состоянии, ни к какой ветке не привязаны: чтобы не потерять их, создают ветку <code>git switch -c имя</code>.</div>
+
+      <div class="task" data-task="g04-1"></div>
+      <div class="task" data-task="g04-2"></div>
+      <div class="task" data-task="g04-3"></div>
     </div>
   </section>
 
-  <!-- ─────── 05. КОМАНДНЫЕ WORKFLOWS ─────── -->
-  <section class="section" id="strategies">
+  <!-- ─────── 05. СЛИЯНИЕ ─────── -->
+  <section class="section" id="g05">
     <div class="section-header">
       <span class="section-num">05</span>
-      <span class="section-title">Командные workflows</span>
+      <span class="section-title">Слияние: merge и fast-forward</span>
+      <span class="section-badge zero" data-chapter-badge="g05"></span>
+    </div>
+    <div class="section-body">
+      <p><code>git merge ветка</code> вливает указанную ветку в текущую. Результат зависит от того, разошлись ли ветки.</p>
+
+      <div class="step">
+        <div class="step-title">Fast-forward · ветка просто сдвигается</div>
+        <p>Если в main не было новых коммитов с момента ответвления, git переставляет ссылку main вперёд. Нового коммита не появляется.</p>
+        <div class="code-block"><span class="pr">$</span> git merge feature-timeout
+<span class="out">Updating 3a2487b..9c4b2e1
+Fast-forward
+ config.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Коммит слияния · когда истории разошлись</div>
+        <p>Если коммиты появились в обеих ветках, git строит результат из общего предка и двух вершин и сохраняет его новым коммитом с двумя родителями.</p>
+        <div class="code-block"><span class="pr">$</span> git merge feature-retries
+<span class="out">Merge made by the 'ort' strategy.
+ config.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Управление формой истории</div>
+        <table>
+          <thead><tr><th>Флаг</th><th>Что делает</th></tr></thead>
+          <tbody>
+            <tr><td><code>--no-ff</code></td><td>всегда создавать коммит слияния, даже когда возможна перемотка: в истории остаётся след, что была ветка</td></tr>
+            <tr><td><code>--ff-only</code></td><td>разрешить только перемотку; если истории разошлись, команда откажется работать</td></tr>
+            <tr><td><code>--abort</code></td><td>вернуть состояние до начала слияния</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hl"><span class="hl-label">Что значит «влито»</span>Ветка считается влитой, если её последний коммит достижим из текущей. После fast-forward ветку можно удалять: её коммиты уже в main. Именно это проверяет <code>git branch -d</code>.</div>
+
+      <div class="task" data-task="g05-1"></div>
+      <div class="task" data-task="g05-2"></div>
+      <div class="task" data-task="g05-3"></div>
+    </div>
+  </section>
+
+<!-- ─────── 06. КОНФЛИКТЫ ─────── -->
+  <section class="section" id="g06">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Конфликты слияния</span>
+      <span class="section-badge zero" data-chapter-badge="g06"></span>
+    </div>
+    <div class="section-body">
+      <p>Конфликт возникает, когда обе ветки изменили один и тот же участок файла относительно общего предка. Разные участки одного файла git объединяет сам.</p>
+
+      <div class="step">
+        <div class="step-title">Как выглядит конфликт</div>
+        <div class="code-block"><span class="pr">$</span> git merge feature-retries
+<span class="out">Auto-merging config.py</span>
+<span class="err">CONFLICT (content): Merge conflict in config.py
+Automatic merge failed; fix conflicts and then commit the result.</span></div>
+        <p>Слияние не завершено: git оставил рабочий каталог в промежуточном состоянии и ждёт решения.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git status · что именно не сошлось</div>
+        <div class="code-block"><span class="pr">$</span> git status --short
+<span class="out">UU config.py</span>
+<span class="pr">$</span> git diff --name-only --diff-filter=U
+<span class="out">config.py</span></div>
+        <p><code>UU</code> — файл изменён с обеих сторон и не разрешён. Полный <code>git status</code> печатает блок <code>Unmerged paths</code> и подсказывает две команды: пометить разрешение через <code>git add</code> или отменить слияние через <code>git merge --abort</code>.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Маркеры в файле</div>
+        <div class="code-block"><span class="out">BASE_URL = "https://staging.shop.test"
+TIMEOUT = 30</span>
+<span class="cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="out">RETRIES = 3</span>
+<span class="cm">=======</span>
+<span class="out">RETRIES = 5</span>
+<span class="cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-retries</span></div>
+        <p>Между <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> и <code>=======</code> — версия текущей ветки, ниже до <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> — версия вливаемой. Разрешить конфликт значит оставить в файле нужный текст и убрать все три строки-маркера.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Завершить или отменить</div>
+        <div class="code-block"><span class="pr">$</span> git add config.py
+<span class="pr">$</span> git commit --no-edit
+<span class="out">[main 5e7a0d3] Merge branch 'feature-retries'</span></div>
+        <p><code>git add</code> помечает файл разрешённым, <code>git commit</code> завершает слияние: с <code>--no-edit</code> git берёт своё сообщение вида <code>Merge branch '…'</code>. Если решение пока непонятно, <code>git merge --abort</code> возвращает репозиторий к состоянию до слияния.</p>
+      </div>
+
+      <div class="hl orange"><span class="hl-label">Git проверяет только маркеры</span>После <code>git add</code> git считает конфликт разрешённым, потому что в индексе больше нет неразрешённых путей. Он не знает, осмысленный ли получился код: «оставить обе стороны» легко даёт дубль импорта или две несовместимые константы. Результат смотрят глазами и прогоняют тесты.</div>
+
+      <div class="task" data-task="g06-1"></div>
+      <div class="task" data-task="g06-2"></div>
+      <div class="task" data-task="g06-3"></div>
+    </div>
+  </section>
+
+  <!-- ─────── 07. ОТМЕНА ─────── -->
+  <section class="section" id="g07">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Отмена: amend, reset, revert, reflog</span>
+      <span class="section-badge zero" data-chapter-badge="g07"></span>
+    </div>
+    <div class="section-body">
+      <p>Сначала определяют, что именно отменяют: правку файла, содержимое индекса, последний коммит или коммит, который уже видят другие. Команды с похожими именами работают в разных областях.</p>
+      <table>
+        <thead><tr><th>Команда</th><th>Что делает</th><th>Когда подходит</th></tr></thead>
+        <tbody>
+          <tr><td><code>git commit --amend</code></td><td>заменяет последний коммит новым</td><td>пока коммит не опубликован</td></tr>
+          <tr><td><code>git reset --soft HEAD~1</code></td><td>убирает коммит, правки остаются в индексе</td><td>пересобрать коммит иначе</td></tr>
+          <tr><td><code>git reset --mixed HEAD~1</code></td><td>убирает коммит и очищает индекс, файлы не трогает</td><td>вернуться к правкам и пересобрать</td></tr>
+          <tr><td><code>git reset --hard HEAD~1</code></td><td>убирает коммит вместе с правками</td><td>когда работа точно не нужна</td></tr>
+          <tr><td><code>git revert &lt;коммит&gt;</code></td><td>добавляет новый коммит с обратными изменениями</td><td>история уже у других</td></tr>
+        </tbody>
+      </table>
+
+      <div class="step">
+        <div class="step-title">git commit --amend · переписать последний коммит</div>
+        <p>Заменяет сообщение и может добавить забытые файлы из индекса. Старый коммит исчезает из ветки, у нового другой идентификатор.</p>
+        <div class="code-block"><span class="pr">$</span> git add tests/test_search.py
+<span class="pr">$</span> git commit --amend -m <span class="st">"add search tests"</span>
+<span class="out">[main 41c8b90] add search tests
+ 2 files changed, 7 insertions(+)
+ create mode 100644 tests/test_search.py</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git reset · сдвинуть ветку назад</div>
+        <p>Reset переставляет текущую ветку на другой коммит. Режим решает судьбу индекса и файлов.</p>
+        <div class="code-block"><span class="pr">$</span> git reset --soft HEAD~1
+<span class="pr">$</span> git status --short
+<span class="out">M  config.py</span></div>
+        <p>Коммита больше нет, а его содержимое лежит в индексе: <code>M</code> в первой колонке. После <code>--mixed</code> тот же файл был бы помечен <code>M</code> во второй колонке, после <code>--hard</code> правка исчезла бы совсем.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git revert · отмена без переписывания</div>
+        <p>Создаёт новый коммит, который возвращает изменения указанного. История остаётся прежней, поэтому это безопасный способ для веток, с которыми работают другие.</p>
+        <div class="code-block"><span class="pr">$</span> git revert --no-edit HEAD
+<span class="out">[main 7d1e4a6] Revert "raise timeout to 45"
+ 1 file changed, 1 insertion(+), 1 deletion(-)</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git reflog · куда указывал HEAD раньше</div>
+        <p>Reflog хранит локальную историю перемещений HEAD: коммиты, переключения веток, reset и rebase. По нему находят коммит, который после reset пропал из истории ветки.</p>
+        <div class="code-block"><span class="pr">$</span> git reflog -n 3
+<span class="out">3a2487b HEAD@{0}: reset: moving to HEAD~1
+9c4b2e1 HEAD@{1}: commit: raise timeout to 45
+3a2487b HEAD@{2}: checkout: moving from feature-timeout to main</span></div>
+        <p>Без <code>-n</code> выводится весь журнал, до самого первого коммита. Запись <code>HEAD@{1}</code> — это ссылка: <code>git reset --hard HEAD@{1}</code> вернёт ветку туда, где она была до reset.</p>
+      </div>
+
+      <div class="hl red"><span class="hl-label">Граница восстановления</span>Reflog помнит коммиты, но не хранит то, что коммитом никогда не было. <code>git reset --hard</code> и <code>git restore</code> уничтожают незакоммиченные правки безвозвратно. Перед такими командами состояние сохраняют коммитом в черновую ветку или через stash.</div>
+
+      <div class="task" data-task="g07-1"></div>
+      <div class="task" data-task="g07-2"></div>
+      <div class="task" data-task="g07-3"></div>
+      <div class="task" data-task="g07-4"></div>
+      <div class="task" data-task="g07-5"></div>
+    </div>
+  </section>
+
+  <!-- ─────── 08. REBASE ─────── -->
+  <section class="section" id="g08">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Rebase: линейная история</span>
+      <span class="section-badge zero" data-chapter-badge="g08"></span>
+    </div>
+    <div class="section-body">
+      <p><code>git rebase main</code> переносит коммиты текущей ветки так, будто они были сделаны от свежего main. Коммиты не переезжают, а создаются заново: содержимое то же, идентификаторы другие.</p>
+      <div class="code-block">до:     A---B---C  main
+             \
+              D---E  feature
+
+после:  A---B---C  main
+                  \
+                   D'---E'  feature</div>
+
+      <div class="step">
+        <div class="step-title">git rebase · перенести ветку на свежую базу</div>
+        <div class="code-block"><span class="pr">$</span> git switch feature-timeout
+<span class="pr">$</span> git rebase main
+<span class="out">Successfully rebased and updated refs/heads/feature-timeout.</span>
+<span class="pr">$</span> git log --oneline -n 3
+<span class="out">b81f0a2 (HEAD -&gt; feature-timeout) raise timeout to 45
+6d0c3e7 (main) add search test
+3a2487b (origin/main) add cart test and config</span></div>
+        <p>После rebase ветка выглядит как продолжение main: слияние в main станет перемоткой, и развилки в истории не останется.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Конфликт при переносе</div>
+        <p>Git применяет коммиты по одному и останавливается на том, который не ложится на новую базу.</p>
+        <div class="code-block"><span class="err">CONFLICT (content): Merge conflict in config.py
+error: could not apply 9c4b2e1... raise timeout to 45</span></div>
+        <p>Дальше три варианта: разрешить файл и продолжить <code>git add</code> + <code>git rebase --continue</code>; пропустить коммит <code>git rebase --skip</code>; вернуть всё как было <code>git rebase --abort</code>.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Merge или rebase</div>
+        <table>
+          <thead><tr><th></th><th>merge</th><th>rebase</th></tr></thead>
+          <tbody>
+            <tr><td>История</td><td>сохраняет развилку и момент слияния</td><td>линейная, развилки не видно</td></tr>
+            <tr><td>Идентификаторы</td><td>прежние</td><td>новые: коммиты пересозданы</td></tr>
+            <tr><td>Чужие ветки</td><td>безопасно</td><td>ломает работу тем, кто уже скачал ветку</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hl red"><span class="hl-label">Правило</span>Rebase переписывает историю. Свою неопубликованную ветку переносить безопасно; общую ветку вроде main — нет: у остальных останется старая версия тех же коммитов, и следующий merge размножит их копии.</div>
+
+      <div class="task" data-task="g08-1"></div>
+      <div class="task" data-task="g08-2"></div>
+      <div class="task" data-task="g08-3"></div>
+    </div>
+  </section>
+
+  <!-- ─────── 09. STASH ─────── -->
+  <section class="section" id="g09">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Stash: отложить незавершённое</span>
+      <span class="section-badge zero" data-chapter-badge="g09"></span>
+    </div>
+    <div class="section-body">
+      <p>Stash убирает незакоммиченные правки в отдельное хранилище и возвращает рабочий каталог к состоянию последнего коммита. Это нужно, когда надо срочно переключиться, а текущая работа не готова к коммиту.</p>
+
+      <div class="step">
+        <div class="step-title">git stash push · отложить</div>
+        <div class="code-block"><span class="pr">$</span> git stash push -u -m <span class="st">"wip retry logic"</span>
+<span class="out">Saved working directory and index state On main: wip retry logic</span>
+<span class="pr">$</span> git status --short
+<span class="out"></span></div>
+        <p>Флаг <code>-u</code> добавляет в stash и неотслеживаемые файлы: без него новые файлы останутся в рабочем каталоге.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git stash list и pop · вернуть</div>
+        <div class="code-block"><span class="pr">$</span> git stash list
+<span class="out">stash@{0}: On main: wip retry logic</span>
+<span class="pr">$</span> git stash pop
+<span class="out">On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   config.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (2f9c1b7)</span></div>
+        <p><code>pop</code> применяет запись и удаляет её из списка, <code>apply</code> применяет и оставляет. Когда записей несколько, их адресуют как <code>stash@{1}</code>.</p>
+      </div>
+
+      <div class="hl"><span class="hl-label">Stash — не бэкап</span>Записи лежат только локально, не уезжают в origin и легко теряются при чистке репозитория. Для работы дольше одного дня надёжнее черновой коммит в отдельной ветке: его видно в истории и можно отправить на сервер.</div>
+
+      <div class="task" data-task="g09-1"></div>
+      <div class="task" data-task="g09-2"></div>
+    </div>
+  </section>
+
+  <!-- ─────── 10. REMOTE ─────── -->
+  <section class="section" id="g10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Удалённый репозиторий: fetch, pull, push</span>
+      <span class="section-badge zero" data-chapter-badge="g10"></span>
+    </div>
+    <div class="section-body">
+      <p><code>origin</code> — обычное имя удалённого репозитория, а не специальное слово git. Рядом с локальными ветками существуют ссылки вида <code>origin/main</code>: это локальная копия того, что было на сервере в момент последнего обмена.</p>
+      <table>
+        <thead><tr><th>Имя</th><th>Что это</th></tr></thead>
+        <tbody>
+          <tr><td><code>main</code></td><td>локальная ветка: двигается вашими коммитами</td></tr>
+          <tr><td><code>origin/main</code></td><td>состояние ветки на сервере по последнему <code>fetch</code></td></tr>
+          <tr><td>upstream</td><td>связь локальной ветки с веткой на сервере: по ней считается «впереди/позади»</td></tr>
+        </tbody>
+      </table>
+
+      <div class="step">
+        <div class="step-title">git fetch · узнать, что на сервере</div>
+        <p>Скачивает новые коммиты и двигает <code>origin/main</code>. Текущая ветка и файлы не меняются: это безопасная команда.</p>
+        <div class="code-block"><span class="pr">$</span> git fetch origin
+<span class="out">From git@git.shop.test:qa/shop-tests
+   3a2487b..7f1c9d4  main       -&gt; origin/main</span>
+<span class="pr">$</span> git status
+<span class="out">On branch main
+Your branch is behind 'origin/main' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+nothing to commit, working tree clean</span></div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git pull · скачать и влить</div>
+        <p><code>git pull</code> = <code>fetch</code> + интеграция. По умолчанию это слияние, с флагом <code>--rebase</code> — перенос ваших коммитов поверх серверных, без коммита слияния.</p>
+        <div class="code-block"><span class="pr">$</span> git pull --rebase
+<span class="out">From git@git.shop.test:qa/shop-tests
+   3a2487b..7f1c9d4  main       -&gt; origin/main
+Successfully rebased and updated refs/heads/main.</span></div>
+        <p>Первые две строки — это шаг <code>fetch</code> внутри <code>pull</code>. Если локальных коммитов нет, интегрировать нечего: обе формы команды просто перематывают ветку и печатают <code>Fast-forward</code>.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">git push · отправить свои коммиты</div>
+        <div class="code-block"><span class="pr">$</span> git push -u origin feature-timeout
+<span class="out">branch 'feature-timeout' set up to track 'origin/feature-timeout'.
+To git@git.shop.test:qa/shop-tests.git
+ * [new branch]      feature-timeout -&gt; feature-timeout</span></div>
+        <p><code>-u</code> задаёт upstream: дальше в этой ветке хватает <code>git push</code> и <code>git pull</code> без имён. Если на сервере появились коммиты, которых нет у вас, push будет отклонён — сначала <code>fetch</code> и интеграция.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">Отправка переписанной ветки</div>
+        <p>После rebase локальные коммиты заменены новыми, и обычный push отклоняется. <code>--force-with-lease</code> перезаписывает ветку на сервере, но только если она там осталась такой, какой вы её видели при последнем fetch.</p>
+        <div class="code-block"><span class="pr">$</span> git push --force-with-lease origin feature-timeout</div>
+        <p>Голый <code>--force</code> такой проверки не делает и затирает чужие коммиты, появившиеся после вашего fetch.</p>
+      </div>
+
+      <div class="hl"><span class="hl-label">Fetch против pull</span>Fetch только обновляет представление о сервере: после него можно посмотреть <code>git log main..origin/main</code> и решить, сливать или переносить. Pull делает оба шага сразу, поэтому на общих ветках его поведение задают заранее: политика команды — merge или rebase.</div>
+
+      <div class="task" data-task="g10-1"></div>
+      <div class="task" data-task="g10-2"></div>
+      <div class="task" data-task="g10-3"></div>
+      <div class="task" data-task="g10-4"></div>
+    </div>
+  </section>
+
+  <div class="part-head" id="reference">
+    <div class="part-title">Справочник</div>
+    <div class="part-sub">без тренажёра · то, что нужно знать, но не запустить в браузере</div>
+  </div>
+
+<!-- ─────── 11. КОМАНДНЫЕ ПРОЦЕССЫ ─────── -->
+  <section class="section" id="g11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <span class="section-title">Командные процессы</span>
       <span class="section-badge">workflows</span>
     </div>
     <div class="section-body">
-        <p>Branching workflow — договорённость о том, откуда создаются branches, как изменения проверяются и объединяются, где фиксируются releases и кто может переписывать refs. Название не заменяет конкретных правил команды.</p>
-        <div class="grid3">
-          <div class="card">
-            <div class="card-title">Git Flow</div>
-            <code>main</code>, <code>develop</code>, feature/release/hotfix branches. Удобен при плановых версиях и параллельной поддержке, но интеграция сложнее.
-          </div>
-          <div class="card">
-            <div class="card-title">GitHub Flow</div>
-            Deployable <code>main</code>, короткая branch, PR, review и merge. Частота deployment определяется процессом доставки, а не самим Git workflow.
-          </div>
-          <div class="card">
-            <div class="card-title">Trunk-based</div>
-            Частая интеграция маленьких изменений в trunk напрямую или через очень короткие branches. Незавершённое поведение отделяют от release.
-          </div>
+      <p>Branching workflow — договорённость о том, откуда создаются ветки, как изменения проверяются и объединяются, где фиксируются релизы и кто может переписывать ссылки. Название не заменяет конкретных правил команды.</p>
+      <div class="grid3">
+        <div class="card">
+          <div class="card-title">Git Flow</div>
+          <code>main</code>, <code>develop</code>, ветки feature / release / hotfix. Удобен при плановых версиях и параллельной поддержке, но интеграция сложнее.
         </div>
-        <table>
-          <thead><tr><th>Workflow</th><th>Сильная сторона</th><th>Цена и риск</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Git Flow</strong></td><td>явно моделирует release и hotfix; можно поддерживать несколько линий</td><td>долгоживущие branches расходятся, больше merges и backport</td></tr>
-            <tr><td><strong>GitHub Flow</strong></td><td>простой PR-процесс и понятный deployable main</td><td>нужны надёжные проверки и дисциплина маленьких PR</td></tr>
-            <tr><td><strong>Trunk-based</strong></td><td>минимальный integration delay и небольшой batch size</td><td>требует быстрой обратной связи и способов скрыть незавершённое поведение</td></tr>
-          </tbody>
-        </table>
-        <p><strong>Практичный PR workflow:</strong> создать branch от актуального target, делать небольшие осмысленные commits, регулярно обновляться, открыть PR, пройти review и обязательные проверки, выбрать согласованный merge method, затем удалить merged branch. Детали gates и merge queue находятся в <a href="cicd.html">CI/CD</a>; здесь важна история commits и refs.</p>
-        <ul>
-          <li><strong>Protected branch</strong> запрещает прямой/force push и требует установленный процесс merge</li>
-          <li><strong>Atomic commit</strong> решает одну связанную задачу и оставляет repository в рабочем состоянии; его проще review, cherry-pick, revert и bisect</li>
-          <li><strong>Маленький PR</strong> уменьшает время review и риск конфликтов; механический rename/format лучше отделять от изменения поведения</li>
-          <li><strong>Release branch</strong> полезна, когда версия стабилизируется отдельно или поддерживается несколько версий; иначе она добавляет backport и расхождение</li>
-        </ul>
-        <div class="hl modern"><span class="hl-label">Hooks и policy</span>Client-side hooks, включая pre-commit, помогают запускать format/lint до commit, но сами hooks не передаются clone-ом и пользователь может их обойти. Обязательные правила закрепляют server-side protection и required checks, а hook-конфигурацию хранят в repository.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем feature flags, если есть branches?» — Branch изолирует исходный код до merge; feature flag управляет release уже интегрированного и развернутого поведения. Флаг уменьшает срок жизни branch, но добавляет две ветки поведения, конфигурацию и обязанность удалить устаревший flag.</div>
+        <div class="card">
+          <div class="card-title">GitHub Flow</div>
+          Деплоимый <code>main</code>, короткая ветка, PR, ревью и merge. Частота поставки определяется процессом доставки, а не самим workflow.
+        </div>
+        <div class="card">
+          <div class="card-title">Trunk-based</div>
+          Частая интеграция маленьких изменений в trunk напрямую или через очень короткие ветки. Незавершённое поведение прячут за флагами.
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Workflow</th><th>Сильная сторона</th><th>Цена и риск</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Git Flow</strong></td><td>явно моделирует релиз и hotfix, можно вести несколько линий</td><td>долгоживущие ветки расходятся, больше слияний и backport</td></tr>
+          <tr><td><strong>GitHub Flow</strong></td><td>простой PR-процесс и понятный деплоимый main</td><td>нужны надёжные проверки и дисциплина маленьких PR</td></tr>
+          <tr><td><strong>Trunk-based</strong></td><td>минимальная задержка интеграции и небольшой объём изменений за раз</td><td>требует быстрой обратной связи и способов скрыть незавершённое</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Практичный PR-процесс:</strong> создать ветку от актуального target, делать небольшие осмысленные коммиты, регулярно обновляться, открыть PR, пройти ревью и обязательные проверки, выбрать согласованный способ слияния, затем удалить влитую ветку. Детали гейтов и merge queue — в <a href="cicd.html">CI/CD</a>; здесь важны история коммитов и ссылки.</p>
+      <ul>
+        <li><strong>Защищённая ветка</strong> запрещает прямой и force push и требует установленный процесс слияния</li>
+        <li><strong>Атомарный коммит</strong> решает одну связанную задачу и оставляет репозиторий в рабочем состоянии: его проще ревьюить, переносить, откатывать и искать через bisect</li>
+        <li><strong>Маленький PR</strong> уменьшает время ревью и риск конфликтов; механический rename или форматирование лучше отделять от изменения поведения</li>
+        <li><strong>Release branch</strong> полезна, когда версия стабилизируется отдельно или поддерживается несколько версий; иначе она добавляет backport и расхождение</li>
+      </ul>
+      <div class="hl modern"><span class="hl-label">Hooks и правила</span>Клиентские хуки, включая pre-commit, запускают формат и линтер до коммита, но сами хуки не передаются при клонировании, и пользователь может их обойти. Обязательные правила закрепляют на сервере: защита веток и required checks, а конфигурацию хуков хранят в репозитории.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем feature flags, если есть ветки?» — Ветка изолирует исходный код до слияния, флаг управляет поведением уже интегрированного и развёрнутого кода. Флаг сокращает срок жизни ветки, но добавляет две ветви поведения, конфигурацию и обязанность удалить флаг потом.</div>
     </div>
   </section>
 
-  <!-- ─────── 06. ОТМЕНА, ВОССТАНОВЛЕНИЕ, ПОИСК ─────── -->
-  <section class="section" id="useful">
+  <!-- ─────── 12. ПЕРЕПИСЫВАНИЕ И ПОИСК ─────── -->
+  <section class="section" id="g12">
     <div class="section-header">
-      <span class="section-num">06</span>
-      <span class="section-title">Отмена, восстановление, поиск</span>
-      <span class="section-badge">recovery</span>
+      <span class="section-num">12</span>
+      <span class="section-title">Переписывание истории и поиск</span>
+      <span class="section-badge">reference</span>
     </div>
     <div class="section-body">
-        <p>Сначала определяют, <strong>что именно</strong> нужно отменить: unstaged-файл, содержимое index, local commit, уже опубликованный commit или untracked-файл. Команды с похожими названиями меняют разные области.</p>
-        <table>
-          <thead><tr><th>Команда</th><th>Что меняет</th><th>Риск</th></tr></thead>
-          <tbody>
-            <tr><td><code>restore file.py</code></td><td>working tree ← index</td><td>удаляет unstaged-правки файла</td></tr>
-            <tr><td><code>restore --staged file.py</code></td><td>index ← HEAD</td><td>unstage без удаления working-tree правок</td></tr>
-            <tr><td><code>reset [mode] &lt;commit&gt;</code></td><td>двигает current branch/HEAD; по mode меняет index и working tree</td><td>переписывает local history; <code>--hard</code> удаляет правки</td></tr>
-            <tr><td><code>revert &lt;commit&gt;</code></td><td>создаёт новый обратный commit</td><td>подходит для shared history, но возможен conflict</td></tr>
-            <tr><td><code>clean -fd</code></td><td>удаляет untracked files/directories</td><td>сначала preview через <code>git clean -nd</code></td></tr>
-          </tbody>
-        </table>
+      <p><strong>Интерактивный rebase</strong> <code>git rebase -i origin/main</code> открывает список коммитов, в котором каждый помечают действием: <code>reword</code> — поменять сообщение, <code>squash</code> и <code>fixup</code> — склеить с предыдущим, <code>drop</code> — выбросить, строки можно переставить. Все затронутые коммиты пересоздаются с новыми идентификаторами.</p>
+      <p><strong>Squash merge</strong> берёт итоговый diff ветки и кладёт в target одним коммитом: в основной ветке не остаётся истории отдельных коммитов ветки. Обычно это делает платформа при слиянии PR.</p>
+      <div class="code-block">git rebase -i origin/main     <span class="cm"># переупорядочить, склеить, переименовать</span>
+git cherry-pick &lt;sha&gt;         <span class="cm"># перенести один коммит в текущую ветку</span>
+git revert -m 1 &lt;merge-sha&gt;   <span class="cm"># откат коммита слияния: 1 — основная сторона</span>
+git push --force-with-lease   <span class="cm"># отправить переписанную ветку</span></div>
+      <p><strong>Cherry-pick</strong> применяет изменение выбранного коммита поверх текущей ветки и создаёт новый коммит с новым идентификатором. Это удобно для backport и hotfix, но массовый перенос между ветками рождает расходящиеся истории и будущие конфликты.</p>
+      <p><strong>Откат коммита слияния</strong> требует указать, какую сторону считать основной: <code>-m 1</code>. Выбор нельзя делать наугад — от него зависит, какие изменения окажутся отменёнными.</p>
 
-        <p><strong>Reset modes:</strong></p>
-        <ul>
-          <li><code>--soft</code> — двигает branch/HEAD, оставляет index и working tree</li>
-          <li><code>--mixed</code> (default) — двигает branch/HEAD и сбрасывает index, оставляет working tree</li>
-          <li><code>--hard</code> — приводит branch, index и tracked working-tree files к указанному commit; незакоммиченные правки могут быть невосстановимы</li>
-        </ul>
-        <div class="hl red"><span class="hl-label">Главная граница</span>Reflog помогает найти ранее существовавший commit, но не обязан спасать содержимое, которое никогда не было commit или stash. Перед destructive-командой проверяют <code>status</code>, делают backup branch/stash и используют dry-run, если он есть.</div>
-
-        <p><strong>Stash временно сохраняет незавершённое состояние:</strong></p>
-        <div class="code-block">git stash push -u -m <span class="st">"wip login debug"</span> <span class="cm"># -u включает untracked</span>
-git stash list
-git stash show -p stash@{0}
-git stash apply stash@{0}             <span class="cm"># применить, запись оставить</span>
-git stash pop                         <span class="cm"># применить и удалить при успехе</span></div>
-        <p>Без <code>-u</code> untracked-файлы обычно не входят в stash. При conflict не считают состояние потерянным: проверяют stash list, разрешают conflict и удаляют запись осознанно.</p>
-
-        <p><strong>Cherry-pick</strong> применяет изменение выбранного commit поверх current branch и создаёт новый commit с новым ID. Это удобно для backport/hotfix, но массовый cherry-pick между branches создаёт расходящуюся историю и будущие конфликты.</p>
-        <p><strong>Revert merge commit</strong> требует выбрать mainline parent: <code>git revert -m 1 &lt;merge-sha&gt;</code>. Опция говорит, какую сторону считать основной; её нельзя выбирать наугад.</p>
-
-        <div class="hl"><span class="hl-label">Reflog и восстановление</span>Reflog локально записывает обновления HEAD и других refs после rebase, reset и перемещения branches. Ищут прежний SHA через <code>git reflog</code> и сначала создают безопасную ссылку: <code>git switch -c rescue &lt;sha&gt;</code>. Reflog не синхронизируется с remote и его записи со временем expire, поэтому это страховка, а не backup.</div>
-
-        <p><strong>Как найти commit, внёсший регрессию:</strong></p>
-        <div class="code-block">git bisect start
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">Поиск по истории</strong></p>
+      <table>
+        <thead><tr><th>Задача</th><th>Команда</th></tr></thead>
+        <tbody>
+          <tr><td>Увидеть граф всех веток</td><td><code>git log --graph --oneline --decorate --all</code></td></tr>
+          <tr><td>Найти коммит по строке кода</td><td><code>git log -S "needle" -- path</code></td></tr>
+          <tr><td>Найти коммиты, меняющие шаблон</td><td><code>git log -G "pattern" -- path</code></td></tr>
+          <tr><td>История конкретных строк</td><td><code>git blame -L 20,40 file.py</code>, затем <code>git show</code></td></tr>
+          <tr><td>Что принесла ветка относительно базы</td><td><code>git diff main...feature</code></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Бинарный поиск регрессии.</strong> <code>bisect</code> делит историю пополам между известными «хорошим» и «плохим» коммитами:</p>
+      <div class="code-block">git bisect start
 git bisect bad HEAD
 git bisect good v2.3.0
-git bisect run pytest tests/test_login.py  <span class="cm"># 0 = good, 1..127 кроме 125 = bad, 125 = skip</span>
+git bisect run pytest tests/test_login.py   <span class="cm"># 0 — good, 1..127 кроме 125 — bad</span>
 git bisect reset</div>
-        <p><code>bisect</code> делает binary search между известными good и bad revisions. Автоматический тест должен быть детерминированным и корректно возвращать exit code; иначе найденный «виновник» ненадёжен.</p>
+      <p>Автоматический тест должен быть детерминированным и возвращать корректный код выхода, иначе найденный «виновник» ненадёжен. Автор строки в <code>blame</code> — тоже не обязательно автор дефекта: строку мог задеть рефакторинг или форматирование.</p>
+      <div class="hl orange"><span class="hl-label">Две и три точки</span>У <code>git diff</code> запись <code>A..B</code> сравнивает конечные состояния A и B, а <code>A...B</code> — общую базу с B, то есть «что принесла ветка B». У <code>git log</code> семантика диапазонов другая, поэтому правило нельзя переносить механически.</div>
+    </div>
+  </section>
 
-        <table>
-          <thead><tr><th>Задача</th><th>Команда</th></tr></thead>
-          <tbody>
-            <tr><td>Увидеть graph</td><td><code>git log --graph --oneline --decorate --all</code></td></tr>
-            <tr><td>Найти commit по строке</td><td><code>git log -S "needle" -- path</code></td></tr>
-            <tr><td>Найти commits, меняющие regex</td><td><code>git log -G "pattern" -- path</code></td></tr>
-            <tr><td>История конкретных строк</td><td><code>git blame -L 20,40 file.py</code>, затем <code>git show</code>; автор строки не обязательно автор дефекта</td></tr>
-            <tr><td>Изменения feature от общей базы</td><td><code>git diff main...feature</code></td></tr>
-          </tbody>
-        </table>
-        <div class="hl orange"><span class="hl-label">Две и три точки</span>Для <code>git diff A..B</code> две точки фактически сравнивают endpoints A и B. <code>git diff A...B</code> сравнивает merge base с B — обычно это «что принесла branch B». У <code>git log</code> range notation имеет другую семантику, поэтому правило нельзя переносить механически.</div>
+  <!-- ─────── 13. СЛУЖЕБНОЕ ─────── -->
+  <section class="section" id="g13">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <span class="section-title">Тэги, worktree, submodules, секреты</span>
+      <span class="section-badge">reference</span>
+    </div>
+    <div class="section-body">
+      <p><strong>Тэги фиксируют версии.</strong> Lightweight-тэг — просто ссылка. Annotated-тэг хранит автора, дату, сообщение и может быть подписан, поэтому подходит для релиза:</p>
+      <div class="code-block">git tag -a v2.4.0 -m <span class="st">"release 2.4.0"</span>
+git push origin v2.4.0        <span class="cm"># тэги отправляются отдельно от коммитов</span>
+git show v2.4.0</div>
+      <p>Опубликованный тэг не передвигают молча: имя версии должно продолжать указывать на тот же объект. Исправление выпускают новым тэгом.</p>
 
-        <div class="hl"><span class="hl-label">Submodules</span>Superproject хранит не содержимое другого repository, а ссылку на точный commit. После clone зависимости получают через <code>git submodule update --init --recursive</code> или clone с <code>--recurse-submodules</code>. Пустой каталог часто означает, что submodule не инициализирован; обновление submodule требует также commit нового указателя в superproject.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«В repository уже попал secret. Достаточно удалить файл?» — Нет: значение остаётся в старых commits и clones. Сначала немедленно revoke/rotate secret, затем при необходимости переписывают историю согласованным инструментом вроде <code>git filter-repo</code>, обновляют remote и координируют очистку clones. Переписывание истории не заменяет ротацию.</div>
+      <div class="hl"><span class="hl-label">Несколько задач одновременно</span><code>git worktree add ../hotfix -b hotfix origin/main</code> создаёт второй рабочий каталог того же репозитория. Можно держать feature и hotfix в разных папках без stash и постоянных переключений; одну ветку обычно нельзя открыть в двух worktree сразу.</div>
+
+      <p><strong>Submodules.</strong> Родительский репозиторий хранит не содержимое другого репозитория, а ссылку на конкретный коммит. После клонирования зависимости получают через <code>git submodule update --init --recursive</code> или клонируют с <code>--recurse-submodules</code>. Пустой каталог обычно означает неинициализированный submodule; обновление зависимости требует ещё и коммита новой ссылки в родительском репозитории.</p>
+
+      <p><strong>Повторяющиеся конфликты.</strong> Механизм <code>rerere</code> (<code>git config rerere.enabled true</code>) запоминает выбранное разрешение и применяет его снова при повторном слиянии или длинном rebase. Результат всё равно просматривают и прогоняют тестами.</p>
+
+      <div class="hl red"><span class="hl-label">Секрет попал в репозиторий</span>Удаление файла новым коммитом не убирает значение из истории: оно остаётся в старых коммитах, у всех, кто клонировал репозиторий, и в кэшах хостинга. Порядок действий: немедленно отозвать и перевыпустить секрет, затем при необходимости переписать историю согласованным инструментом вроде <code>git filter-repo</code>, обновить удалённый репозиторий и скоординировать обновление клонов. Переписывание истории не заменяет ротацию.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«После ручного разрешения конфликта git разрешил продолжить — значит, всё правильно?» — Нет. Git знает только, что в индексе не осталось неразрешённых путей. Смысл результата он не проверяет: нужно прочитать итоговый diff, собрать проект и прогнать релевантные тесты до <code>--continue</code> или коммита.</div>
     </div>
   </section>
 
@@ -782,14 +1661,2088 @@ git bisect reset</div>
 </button>
 
 <script>
-  const scrollBtn = document.querySelector('.scroll-top');
-  if (scrollBtn) {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) scrollBtn.classList.add('visible');
-      else scrollBtn.classList.remove('visible');
-    });
-    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+/* ══════════════════════════════════════════════════════════════
+   ЭМУЛЯТОР GIT: модель репозитория, diff, трёхстороннее слияние
+   Хеши условные, но устойчивые: одинаковое содержимое даёт
+   одинаковый идентификатор, как в настоящем git.
+   ══════════════════════════════════════════════════════════════ */
+
+const AUTHOR = { name: 'QA Engineer', email: 'qa@shop.test' };
+const DATE_LINE = 'Mon Mar 16 10:00:00 2026 +0000';
+const ORIGIN_URL = 'git@git.shop.test:qa/shop-tests.git';
+
+/* ── хеш: 40 hex из содержимого ── */
+function sha1ish(str) {
+  let h1 = 0x67452301, h2 = 0xefcdab89, h3 = 0x98badcfe, h4 = 0x10325476, h5 = 0xc3d2e1f0;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    h1 = (h1 * 31 + c) >>> 0;
+    h2 = (h2 ^ (h1 + c * 7)) >>> 0;
+    h3 = (h3 * 37 + (c << 3) + i) >>> 0;
+    h4 = (h4 ^ ((h3 << 5) | (h3 >>> 27))) >>> 0;
+    h5 = (h5 * 41 + (h2 ^ c)) >>> 0;
   }
+  return [h1, h2, h3, h4, h5].map((x) => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+const short = (sha) => sha.slice(0, 7);
+const treeText = (tree) => Object.keys(tree).sort().map((p) => p + '\0' + tree[p]).join('\n');
+const blobId = (content) => sha1ish('blob ' + content.length + '\0' + content);
+
+/* ── строки ── */
+const splitLines = (text) => (text === '' ? [] : text.replace(/\n$/, '').split('\n'));
+const joinLines = (ls) => (ls.length ? ls.join('\n') + '\n' : '');
+
+/* ── LCS-диф между массивами строк ── */
+function lcsOps(a, b) {
+  const n = a.length, m = b.length;
+  const L = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    }
+  }
+  const ops = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { ops.push(['=', a[i]]); i++; j++; }
+    else if (L[i + 1][j] >= L[i][j + 1]) { ops.push(['-', a[i]]); i++; }
+    else { ops.push(['+', b[j]]); j++; }
+  }
+  while (i < n) { ops.push(['-', a[i]]); i++; }
+  while (j < m) { ops.push(['+', b[j]]); j++; }
+  return ops;
+}
+
+/* ── unified diff одного файла в формате git ── */
+function filePatch(path, before, after, opts) {
+  if (before === after) return '';
+  const o = opts || {};
+  const a = splitLines(before), b = splitLines(after);
+  const ops = lcsOps(a, b);
+  // собрать ханки с тремя строками контекста
+  const hunks = [];
+  let cur = null, ai = 0, bi = 0, ctx = [];
+  const flush = () => { if (cur) { hunks.push(cur); cur = null; } };
+  for (let k = 0; k < ops.length; k++) {
+    const [kind, line] = ops[k];
+    if (kind === '=') {
+      if (cur) {
+        cur.pending.push(['=', line]);
+        if (cur.pending.length > 6) { // хватит контекста — закрыть ханк
+          cur.lines = cur.lines.concat(cur.pending.slice(0, 3));
+          cur.pending = [];
+          flush();
+        }
+      }
+      ctx.push(line);
+      if (ctx.length > 3) ctx.shift();
+      ai++; bi++;
+    } else {
+      if (!cur) {
+        const lead = ctx.slice();
+        cur = { aStart: ai - lead.length + 1, bStart: bi - lead.length + 1, lines: lead.map((l) => ['=', l]), pending: [] };
+      } else if (cur.pending.length) {
+        cur.lines = cur.lines.concat(cur.pending);
+        cur.pending = [];
+      }
+      cur.lines.push([kind, line]);
+      if (kind === '-') ai++; else bi++;
+      ctx = [];
+    }
+  }
+  if (cur) { cur.lines = cur.lines.concat(cur.pending.slice(0, 3)); flush(); }
+  const head = 'diff --git a/' + path + ' b/' + path + '\n'
+    + (o.newFile ? 'new file mode 100644\nindex 0000000..' + short(blobId(after)) + '\n--- /dev/null\n+++ b/' + path + '\n'
+      : o.deleted ? 'deleted file mode 100644\nindex ' + short(blobId(before)) + '..0000000\n--- a/' + path + '\n+++ /dev/null\n'
+        : 'index ' + short(blobId(before)) + '..' + short(blobId(after)) + ' 100644\n--- a/' + path + '\n+++ b/' + path + '\n');
+  const body = hunks.map((h) => {
+    const aCount = h.lines.filter((l) => l[0] !== '+').length;
+    const bCount = h.lines.filter((l) => l[0] !== '-').length;
+    const range = (start, count) => (count === 1 ? String(start) : start + ',' + count);
+    return '@@ -' + range(aCount ? h.aStart : 0, aCount) + ' +' + range(bCount ? h.bStart : 0, bCount) + ' @@\n'
+      + h.lines.map(([k, l]) => (k === '=' ? ' ' : k) + l).join('\n') + '\n';
+  }).join('');
+  return head + body;
+}
+
+/* ── статистика изменений для вывода commit/merge ── */
+function diffStat(before, after) {
+  const paths = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort();
+  const rows = [];
+  let ins = 0, del = 0, created = [], deleted = [];
+  paths.forEach((p) => {
+    const a = before[p], b = after[p];
+    if (a === b) return;
+    let i = 0, d = 0;
+    lcsOps(splitLines(a === undefined ? '' : a), splitLines(b === undefined ? '' : b)).forEach(([k]) => {
+      if (k === '+') i++; else if (k === '-') d++;
+    });
+    ins += i; del += d;
+    rows.push({ path: p, ins: i, del: d });
+    if (a === undefined) created.push(p);
+    if (b === undefined) deleted.push(p);
+  });
+  return { rows: rows, ins: ins, del: del, created: created, deleted: deleted };
+}
+
+function statText(stat) {
+  if (!stat.rows.length) return '';
+  const width = Math.max(...stat.rows.map((r) => r.path.length));
+  const lines = stat.rows.map((r) => ' ' + r.path.padEnd(width) + ' | ' + (r.ins + r.del) + ' '
+    + '+'.repeat(r.ins) + '-'.repeat(r.del));
+  const files = stat.rows.length + (stat.rows.length === 1 ? ' file changed' : ' files changed');
+  const parts = [files];
+  if (stat.ins) parts.push(stat.ins + (stat.ins === 1 ? ' insertion(+)' : ' insertions(+)'));
+  if (stat.del) parts.push(stat.del + (stat.del === 1 ? ' deletion(-)' : ' deletions(-)'));
+  return lines.join('\n') + '\n ' + parts.join(', ') + '\n'
+    + stat.created.map((p) => ' create mode 100644 ' + p + '\n').join('')
+    + stat.deleted.map((p) => ' delete mode 100644 ' + p + '\n').join('');
+}
+
+/* ── краткая статистика для commit: без списка файлов ── */
+function shortStat(stat) {
+  const parts = [stat.rows.length + (stat.rows.length === 1 ? ' file changed' : ' files changed')];
+  if (stat.ins) parts.push(stat.ins + (stat.ins === 1 ? ' insertion(+)' : ' insertions(+)'));
+  if (stat.del) parts.push(stat.del + (stat.del === 1 ? ' deletion(-)' : ' deletions(-)'));
+  return ' ' + parts.join(', ') + '\n'
+    + stat.created.map((p) => ' create mode 100644 ' + p + '\n').join('')
+    + stat.deleted.map((p) => ' delete mode 100644 ' + p + '\n').join('');
+}
+
+/* ── трёхстороннее слияние содержимого файла ── */
+function mergeFile(base, ours, theirs, oursLabel, theirsLabel) {
+  if (ours === theirs) return { text: ours, conflict: false };
+  if (base === ours) return { text: theirs, conflict: false };
+  if (base === theirs) return { text: ours, conflict: false };
+  const B = splitLines(base === undefined ? '' : base);
+  const O = splitLines(ours === undefined ? '' : ours);
+  const T = splitLines(theirs === undefined ? '' : theirs);
+  // разметить каждую строку базы: совпала / изменена с каждой стороны
+  const align = (side) => {
+    const ops = lcsOps(B, side);
+    const map = [];            // для каждой строки базы: массив строк стороны, на которые она заменена
+    let pendingAdds = [];
+    ops.forEach(([k, l]) => {
+      if (k === '=') { map.push({ same: true, lines: pendingAdds.concat([l]) }); pendingAdds = []; }
+      else if (k === '-') { map.push({ same: false, lines: pendingAdds }); pendingAdds = []; }
+      else pendingAdds.push(l);
+    });
+    return { map: map, tail: pendingAdds };
+  };
+  const a = align(O), b = align(T);
+  const out = [];
+  let conflict = false;
+  let i = 0;
+  while (i <= B.length) {
+    const oa = i < B.length ? a.map[i] : { same: true, lines: a.tail };
+    const ob = i < B.length ? b.map[i] : { same: true, lines: b.tail };
+    const oLines = i < B.length ? oa.lines : a.tail;
+    const tLines = i < B.length ? ob.lines : b.tail;
+    const sameO = JSON.stringify(oLines) === JSON.stringify(i < B.length ? [B[i]] : []);
+    const sameT = JSON.stringify(tLines) === JSON.stringify(i < B.length ? [B[i]] : []);
+    if (JSON.stringify(oLines) === JSON.stringify(tLines)) out.push(...oLines);
+    else if (sameO) out.push(...tLines);
+    else if (sameT) out.push(...oLines);
+    else {
+      conflict = true;
+      out.push('<<<<<<< ' + oursLabel, ...oLines, '=======', ...tLines, '>>>>>>> ' + theirsLabel);
+    }
+    i++;
+  }
+  return { text: joinLines(out), conflict: conflict };
+}
+
+const E = { sha1ish, short, treeText, blobId, splitLines, joinLines, lcsOps, filePatch, diffStat, statText, shortStat, mergeFile, AUTHOR, DATE_LINE, ORIGIN_URL };
+
+/* ══════════════════════════════════════════════════════════════
+   РЕПОЗИТОРИЙ И КОМАНДЫ
+   ══════════════════════════════════════════════════════════════ */
+
+const HOME = '/home/qa';
+const WORKDIR = HOME + '/shop-tests';
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+function newRepo() {
+  return {
+    inited: false,
+    files: {},          // рабочий каталог
+    index: {},          // индекс
+    objects: {},        // sha → { tree, parents, msg, ts, merge }
+    branches: {},       // имя → sha
+    tracking: {},       // origin/main → sha
+    upstream: {},       // main → origin/main
+    head: { branch: 'main' },
+    origin: null,       // { branches, objects }
+    state: null,        // { kind: 'merge' | 'rebase', ... }
+    stash: [],
+    reflog: [],
+    ts: 1000,
+    out: []
+  };
+}
+
+/* ── объекты и ссылки ── */
+function commitObj(repo, tree, parents, msg) {
+  repo.ts += 60;
+  const sha = E.sha1ish(E.treeText(tree) + '|' + parents.join(' ') + '|' + msg + '|' + repo.ts);
+  repo.objects[sha] = { tree: clone(tree), parents: parents.slice(), msg: msg, ts: repo.ts };
+  return sha;
+}
+const headSha = (repo) => (repo.head.branch ? repo.branches[repo.head.branch] : repo.head.detached) || null;
+const headTree = (repo) => { const s = headSha(repo); return s ? repo.objects[s].tree : {}; };
+const curBranch = (repo) => repo.head.branch || null;
+
+function ancestors(repo, sha, store) {
+  const objs = store || repo.objects;
+  const seen = new Set();
+  const walk = [sha];
+  while (walk.length) {
+    const s = walk.pop();
+    if (!s || seen.has(s) || !objs[s]) continue;
+    seen.add(s);
+    objs[s].parents.forEach((p) => walk.push(p));
+  }
+  return seen;
+}
+const isAncestor = (repo, a, b) => !!a && ancestors(repo, b).has(a);
+
+function mergeBase(repo, a, b) {
+  const A = ancestors(repo, a);
+  const cands = [...ancestors(repo, b)].filter((s) => A.has(s));
+  if (!cands.length) return null;
+  return cands.sort((x, y) => repo.objects[y].ts - repo.objects[x].ts)[0];
+}
+
+function commitList(repo, sha, store) {
+  const objs = store || repo.objects;
+  const seen = new Set(), list = [];
+  const walk = [sha];
+  while (walk.length) {
+    const s = walk.pop();
+    if (!s || seen.has(s) || !objs[s]) continue;
+    seen.add(s);
+    list.push(s);
+    objs[s].parents.forEach((p) => walk.push(p));
+  }
+  return list.sort((x, y) => objs[y].ts - objs[x].ts);
+}
+
+function resolveRef(repo, ref) {
+  if (!ref) return headSha(repo);
+  const rl = ref.match(/^HEAD@\{(\d+)\}$/);
+  if (rl) { const e = repo.reflog[+rl[1]]; return e ? e.sha : null; }
+  let m = ref.match(/^(.*?)([~^])(\d*)$/);
+  if (m) {
+    const base = resolveRef(repo, m[1] || 'HEAD');
+    if (!base) return null;
+    const n = m[3] === '' ? 1 : parseInt(m[3], 10);
+    let cur = base;
+    for (let i = 0; i < n; i++) {
+      const o = repo.objects[cur];
+      if (!o || !o.parents.length) return null;
+      cur = m[2] === '^' && m[3] === '2' ? o.parents[1] : o.parents[0];
+      if (m[2] === '^') break;
+    }
+    return cur;
+  }
+  if (ref === 'HEAD') return headSha(repo);
+  if (repo.branches[ref] !== undefined) return repo.branches[ref];
+  if (repo.tracking[ref] !== undefined) return repo.tracking[ref];
+  if (repo.objects[ref]) return ref;
+  const hit = Object.keys(repo.objects).find((s) => s.startsWith(ref) && ref.length >= 4);
+  return hit || null;
+}
+
+function addReflog(repo, action, sha) {
+  repo.reflog.unshift({ sha: sha, action: action });
+}
+
+function setBranch(repo, sha, action) {
+  if (repo.head.branch) repo.branches[repo.head.branch] = sha;
+  else repo.head.detached = sha;
+  addReflog(repo, action, sha);
+}
+
+/* ── состояние файлов ── */
+function statusData(repo) {
+  const head = headTree(repo);
+  const paths = [...new Set([...Object.keys(head), ...Object.keys(repo.index), ...Object.keys(repo.files)])].sort();
+  const staged = [], unstaged = [], untracked = [], unmerged = [];
+  const conflicts = repo.state && repo.state.conflicts ? repo.state.conflicts : [];
+  paths.forEach((p) => {
+    if (conflicts.includes(p)) { unmerged.push({ path: p, kind: 'both modified' }); return; }
+    const h = head[p], i = repo.index[p], w = repo.files[p];
+    if (i !== undefined && h === undefined) staged.push({ path: p, kind: 'new file' });
+    else if (i === undefined && h !== undefined) staged.push({ path: p, kind: 'deleted' });
+    else if (i !== undefined && h !== undefined && i !== h) staged.push({ path: p, kind: 'modified' });
+    if (w !== undefined && i !== undefined && w !== i) unstaged.push({ path: p, kind: 'modified' });
+    else if (w === undefined && i !== undefined) unstaged.push({ path: p, kind: 'deleted' });
+    else if (w !== undefined && i === undefined) untracked.push(p);
+  });
+  return { staged: staged, unstaged: unstaged, untracked: untracked, unmerged: unmerged };
+}
+
+function aheadBehind(repo, branch) {
+  const up = repo.upstream[branch];
+  if (!up || repo.tracking[up] === undefined) return null;
+  const local = repo.branches[branch], remote = repo.tracking[up];
+  const L = ancestors(repo, local), R = ancestors(repo, remote);
+  const ahead = [...L].filter((s) => !R.has(s)).length;
+  const behind = [...R].filter((s) => !L.has(s)).length;
+  return { up: up, ahead: ahead, behind: behind };
+}
+
+const R = {
+  HOME, WORKDIR, clone, newRepo, commitObj, headSha, headTree, curBranch, ancestors, isAncestor,
+  mergeBase, commitList, resolveRef, addReflog, setBranch, statusData, aheadBehind, E
+};
+
+/* ══════════════════════════════════════════════════════════════
+   КОМАНДЫ GIT И ОБОЛОЧКИ
+   ══════════════════════════════════════════════════════════════ */
+
+const ok = (out) => ({ out: out || '', err: '', code: 0 });
+const fail = (err, code) => ({ out: '', err: err, code: code === undefined ? 1 : code });
+const notRepo = () => fail('fatal: not a git repository (or any of the parent directories): .git\n', 128);
+
+/* ── разбор строки: кавычки и перенаправление ── */
+function tokenize(line) {
+  const toks = [];
+  let cur = '', quoted = false, has = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"' || c === "'") {
+      const j = line.indexOf(c, i + 1);
+      if (j < 0) throw new Error('незакрытая кавычка');
+      cur += line.slice(i + 1, j); has = true; quoted = true; i = j;
+    } else if (c === ' ' || c === '\t') {
+      if (has) { toks.push({ v: cur, q: quoted }); cur = ''; has = false; quoted = false; }
+    } else if ((c === '>' ) && !has) {
+      const dbl = line[i + 1] === '>';
+      toks.push({ v: dbl ? '>>' : '>', op: true }); if (dbl) i++;
+    } else if (c === '>' && has) {
+      toks.push({ v: cur, q: quoted }); cur = ''; has = false; quoted = false;
+      const dbl = line[i + 1] === '>';
+      toks.push({ v: dbl ? '>>' : '>', op: true }); if (dbl) i++;
+    } else { cur += c; has = true; }
+  }
+  if (has) toks.push({ v: cur, q: quoted });
+  return toks;
+}
+
+/* ── .gitignore ── */
+function ignored(repo, path) {
+  const spec = repo.files['.gitignore'];
+  if (!spec) return false;
+  return splitLines(spec).some((raw) => {
+    const pat = raw.trim();
+    if (!pat || pat.startsWith('#')) return false;
+    if (pat.endsWith('/')) return path.startsWith(pat) || path.startsWith(pat.slice(0, -1) + '/');
+    const re = new RegExp('^' + pat.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+    return re.test(path) || re.test(path.split('/').pop());
+  });
+}
+
+/* ── expand путей: файл, каталог, точка ── */
+function expandPaths(repo, args) {
+  const all = [...new Set([...Object.keys(repo.files), ...Object.keys(repo.index)])];
+  const out = [];
+  args.forEach((a) => {
+    const p = a.replace(/^\.\//, '');
+    if (p === '.' || p === '-A' || p === '--all' || p === '*') { out.push(...all); return; }
+    all.forEach((f) => { if (f === p || f.startsWith(p.replace(/\/$/, '') + '/')) out.push(f); });
+  });
+  return [...new Set(out)];
+}
+
+/* каталог целиком неотслеживаемый → git печатает его одной строкой «dir/» */
+function collapseUntracked(repo, paths) {
+  const tracked = new Set(Object.keys(repo.index));
+  const out = [], dirsDone = new Set();
+  paths.forEach((p) => {
+    if (!p.includes('/')) { out.push(p); return; }
+    const top = p.split('/')[0];
+    const anyTracked = [...tracked].some((t) => t.startsWith(top + '/'));
+    if (anyTracked) { out.push(p); return; }
+    if (!dirsDone.has(top)) { dirsDone.add(top); out.push(top + '/'); }
+  });
+  return out;
+}
+
+/* ══════════════ GIT ══════════════ */
+const GIT = {};
+
+GIT.init = function (repo) {
+  if (repo.inited) return ok('Reinitialized existing Git repository in ' + WORKDIR + '/.git/\n');
+  repo.inited = true;
+  repo.branches = {};
+  repo.head = { branch: 'main' };
+  return ok('Initialized empty Git repository in ' + WORKDIR + '/.git/\n');
+};
+
+GIT.status = function (repo, args) {
+  const st = statusData(repo);
+  const shortMode = args.includes('-s') || args.includes('--short');
+  if (shortMode) {
+    const rows = [];
+    st.unmerged.forEach((u) => rows.push({ p: u.path, code: 'UU' }));
+    const stagedMap = {}; st.staged.forEach((s) => { stagedMap[s.path] = s.kind === 'new file' ? 'A' : s.kind === 'deleted' ? 'D' : 'M'; });
+    const unstagedMap = {}; st.unstaged.forEach((s) => { unstagedMap[s.path] = s.kind === 'deleted' ? 'D' : 'M'; });
+    [...new Set([...Object.keys(stagedMap), ...Object.keys(unstagedMap)])].forEach((p) => {
+      rows.push({ p: p, code: (stagedMap[p] || ' ') + (unstagedMap[p] || ' ') });
+    });
+    rows.sort((a, b) => (a.p < b.p ? -1 : 1));
+    const untr = collapseUntracked(repo, st.untracked.filter((p) => !ignored(repo, p))).sort();
+    return ok(rows.map((r) => r.code + ' ' + r.p + '\n').join('') + untr.map((p) => '?? ' + p + '\n').join(''));
+  }
+  let out = '';
+  const br = curBranch(repo);
+  out += br ? 'On branch ' + br + '\n' : 'HEAD detached at ' + short(headSha(repo)) + '\n';
+  const noCommits = !headSha(repo);
+  if (noCommits) out += '\nNo commits yet\n\n';
+  const ab = br && aheadBehind(repo, br);
+  if (ab) {
+    if (ab.ahead && ab.behind) {
+      out += 'Your branch and \'' + ab.up + '\' have diverged,\nand have ' + ab.ahead + ' and ' + ab.behind
+        + ' different commits each, respectively.\n  (use "git pull" if you want to integrate the remote branch with yours)\n';
+    } else if (ab.ahead) {
+      out += 'Your branch is ahead of \'' + ab.up + '\' by ' + ab.ahead + ' commit' + (ab.ahead > 1 ? 's' : '') + '.\n'
+        + '  (use "git push" to publish your local commits)\n';
+    } else if (ab.behind) {
+      out += 'Your branch is behind \'' + ab.up + '\' by ' + ab.behind + ' commit' + (ab.behind > 1 ? 's' : '')
+        + ', and can be fast-forwarded.\n  (use "git pull" to update your local branch)\n';
+    } else {
+      out += 'Your branch is up to date with \'' + ab.up + '\'.\n';
+    }
+    out += '\n';
+  }
+  // каждый блок заканчивается пустой строкой
+  if (repo.state && repo.state.kind === 'merge') {
+    out += 'You have unmerged paths.\n  (fix conflicts and run "git commit")\n  (use "git merge --abort" to abort the merge)\n\n';
+  } else if (repo.state && repo.state.kind === 'rebase') {
+    out += 'You are currently rebasing branch \'' + repo.state.branch + '\' on \'' + short(repo.state.onto) + '\'.\n'
+      + '  (fix conflicts and then run "git rebase --continue")\n  (use "git rebase --abort" to check out the original branch)\n\n';
+  }
+  const pad = (s) => (s + ':').padEnd(12);
+  if (st.staged.length) {
+    out += 'Changes to be committed:\n  (use "git ' + (noCommits ? 'rm --cached <file>..." to unstage' : 'restore --staged <file>..." to unstage') + ')\n';
+    st.staged.forEach((s) => { out += '\t' + pad(s.kind) + s.path + '\n'; });
+    out += '\n';
+  }
+  if (st.unmerged.length) {
+    out += 'Unmerged paths:\n  (use "git add <file>..." to mark resolution)\n';
+    st.unmerged.forEach((s) => { out += '\t' + s.kind + ':   ' + s.path + '\n'; });
+    out += '\n';
+  }
+  if (st.unstaged.length) {
+    const hasDel = st.unstaged.some((s) => s.kind === 'deleted');
+    out += 'Changes not staged for commit:\n  (use "git add' + (hasDel ? '/rm' : '') + ' <file>..." to update what will be committed)\n'
+      + '  (use "git restore <file>..." to discard changes in working directory)\n';
+    st.unstaged.forEach((s) => { out += '\t' + pad(s.kind) + s.path + '\n'; });
+    out += '\n';
+  }
+  const untracked = collapseUntracked(repo, st.untracked.filter((p) => !ignored(repo, p)));
+  if (untracked.length) {
+    out += 'Untracked files:\n  (use "git add <file>..." to include in what will be committed)\n';
+    untracked.forEach((p) => { out += '\t' + p + '\n'; });
+    out += '\n';
+  }
+  if (!st.staged.length && !st.unstaged.length && !st.unmerged.length && !untracked.length) {
+    out += noCommits ? 'nothing to commit (create/copy files and use "git add" to track)\n' : 'nothing to commit, working tree clean\n';
+  } else if (st.unstaged.length || st.unmerged.length) {
+    out += 'no changes added to commit (use "git add" and/or "git commit -a")\n';
+  } else if (!st.staged.length && untracked.length) {
+    out += 'nothing added to commit but untracked files present (use "git add" to track)\n';
+  }
+  return ok(out);
+};
+
+GIT.add = function (repo, args) {
+  const paths = expandPaths(repo, args.filter((a) => !a.startsWith('-')));
+  if (!paths.length && !args.some((a) => a === '.' || a === '-A')) {
+    return fail("fatal: pathspec '" + (args.find((a) => !a.startsWith('-')) || '') + "' did not match any files\n", 128);
+  }
+  paths.forEach((p) => {
+    if (repo.files[p] === undefined) delete repo.index[p];
+    else if (!ignored(repo, p) || repo.index[p] !== undefined) repo.index[p] = repo.files[p];
+    if (repo.state && repo.state.conflicts) repo.state.conflicts = repo.state.conflicts.filter((c) => c !== p);
+  });
+  return ok('');
+};
+
+function doCommit(repo, msg, extraParent, quiet) {
+  const parents = [];
+  const h = headSha(repo);
+  if (h) parents.push(h);
+  if (extraParent) parents.push(extraParent);
+  const before = headTree(repo);
+  const tree = clone(repo.index);
+  const sha = commitObj(repo, tree, parents, msg);
+  const root = !h;
+  setBranch(repo, sha, 'commit' + (root ? ' (initial)' : extraParent ? ' (merge)' : '') + ': ' + msg);
+  repo.state = null;
+  const stat = diffStat(before, tree);
+  const label = '[' + (curBranch(repo) || 'detached HEAD') + (root ? ' (root-commit)' : '') + ' ' + short(sha) + '] ' + msg + '\n';
+  return ok(quiet ? '' : label + (extraParent ? '' : shortStat(stat)));
+}
+
+GIT.commit = function (repo, args) {
+  let msg = null, all = false, amend = false, noEdit = false;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '-m') msg = args[++i];
+    else if (a.startsWith('-m')) msg = a.slice(2);
+    else if (a === '-am' || a === '-ma') { all = true; msg = args[++i]; }
+    else if (a === '-a' || a === '--all') all = true;
+    else if (a === '--amend') amend = true;
+    else if (a === '--no-edit') noEdit = true;
+  }
+  if (all) {
+    Object.keys(repo.index).forEach((p) => { if (repo.files[p] === undefined) delete repo.index[p]; else repo.index[p] = repo.files[p]; });
+    Object.keys(repo.files).forEach((p) => { if (repo.index[p] !== undefined) repo.index[p] = repo.files[p]; });
+  }
+  if (repo.state && repo.state.kind === 'merge') {
+    if (repo.state.conflicts.length) return fail('error: Committing is not possible because you have unmerged files.\nhint: Fix them up in the work tree, and then use \'git add/rm <file>\'\nfatal: Exiting because of an unresolved conflict.\n', 1);
+    const m = msg || repo.state.msg;
+    return doCommit(repo, m, repo.state.other, false);
+  }
+  const st = statusData(repo);
+  if (amend) {
+    const h = headSha(repo);
+    if (!h) return fail('fatal: You have nothing to amend.\n', 128);
+    const old = repo.objects[h];
+    const parents = old.parents;
+    const before = parents.length ? repo.objects[parents[0]].tree : {};
+    const tree = clone(repo.index);
+    const sha = commitObj(repo, tree, parents, msg || old.msg);
+    setBranch(repo, sha, 'commit (amend): ' + (msg || old.msg));
+    return ok('[' + (curBranch(repo) || 'HEAD detached') + ' ' + short(sha) + '] ' + (msg || old.msg) + '\n' + shortStat(diffStat(before, tree)));
+  }
+  if (!st.staged.length) {
+    const nothing = 'On branch ' + curBranch(repo) + '\nnothing to commit, working tree clean\n';
+    return st.unstaged.length
+      ? fail('On branch ' + curBranch(repo) + '\nChanges not staged for commit:\n\tmodified:   ' + st.unstaged[0].path
+        + '\n\nno changes added to commit (use "git add" and/or "git commit -a")\n', 1)
+      : fail(nothing, 1);
+  }
+  if (!msg) return fail('error: нужен текст сообщения: git commit -m "текст"\n', 1);
+  return doCommit(repo, msg, null, false);
+};
+
+GIT.log = function (repo, args) {
+  const h = headSha(repo);
+  const all = args.includes('--all');
+  const oneline = args.includes('--oneline');
+  const graph = args.includes('--graph');
+  let limit = Infinity;
+  const taken = new Set();                           // число после -n — не ревизия
+  args.forEach((a, i) => {
+    if (a === '-n') { limit = parseInt(args[i + 1], 10); taken.add(i + 1); }
+    else if (/^-\d+$/.test(a)) limit = parseInt(a.slice(1), 10);
+  });
+  const refArg = args.find((a, i) => !a.startsWith('-') && !taken.has(i));
+  const start = refArg ? resolveRef(repo, refArg) : h;
+  if (!start && !all) return fail("fatal: your current branch 'main' does not have any commits yet\n", 128);
+  let shas;
+  if (all) {
+    const set = new Set();
+    Object.values(repo.branches).concat(Object.values(repo.tracking)).forEach((s) => commitList(repo, s).forEach((x) => set.add(x)));
+    shas = [...set].sort((x, y) => repo.objects[y].ts - repo.objects[x].ts);
+  } else shas = commitList(repo, start);
+  shas = shas.slice(0, limit);
+  const decorate = (sha) => {
+    const names = [];
+    Object.keys(repo.branches).forEach((b) => { if (repo.branches[b] === sha) names.push(curBranch(repo) === b ? 'HEAD -> ' + b : b); });
+    Object.keys(repo.tracking).forEach((t) => { if (repo.tracking[t] === sha) names.push(t); });
+    if (!curBranch(repo) && headSha(repo) === sha) names.unshift('HEAD');
+    return names.length ? ' (' + names.join(', ') + ')' : '';
+  };
+  if (oneline) {
+    const lines = shas.map((s) => short(s) + decorate(s) + ' ' + repo.objects[s].msg);
+    return ok(graph ? drawGraph(repo, shas, lines) : lines.map((l) => l + '\n').join(''));
+  }
+  let out = '';
+  shas.forEach((s) => {
+    const o = repo.objects[s];
+    out += 'commit ' + s + decorate(s) + '\n';
+    if (o.parents.length > 1) out += 'Merge: ' + o.parents.map(short).join(' ') + '\n';
+    out += 'Author: ' + AUTHOR.name + ' <' + AUTHOR.email + '>\nDate:   ' + DATE_LINE + '\n\n    ' + o.msg + '\n\n';
+  });
+  return ok(out.replace(/\n$/, ''));
+};
+
+/* упрощённый график: колонка на ветку, слияния показываются развилкой */
+function drawGraph(repo, shas, lines) {
+  const out = [];
+  shas.forEach((s, i) => {
+    const o = repo.objects[s];
+    const isMerge = o.parents.length > 1;
+    out.push((isMerge ? '*   ' : '* ') + lines[i]);
+    if (isMerge) out.push('|\\  ');
+    const next = shas[i + 1];
+    if (next && !isMerge && o.parents.length && !o.parents.includes(next) && repo.objects[next]) out.push('|/  ');
+  });
+  return out.map((l) => l + '\n').join('');
+}
+
+GIT.show = function (repo, args) {
+  const ref = args.find((a) => !a.startsWith('-')) || 'HEAD';
+  const sha = resolveRef(repo, ref);
+  if (!sha) return fail("fatal: ambiguous argument '" + ref + "': unknown revision\n", 128);
+  const o = repo.objects[sha];
+  const before = o.parents.length ? repo.objects[o.parents[0]].tree : {};
+  let out = 'commit ' + sha + '\n';
+  if (o.parents.length > 1) out += 'Merge: ' + o.parents.map(short).join(' ') + '\n';
+  out += 'Author: ' + AUTHOR.name + ' <' + AUTHOR.email + '>\nDate:   ' + DATE_LINE + '\n\n    ' + o.msg + '\n\n';
+  out += treeDiff(before, o.tree);
+  return ok(out);
+};
+
+function treeDiff(before, after, only) {
+  const paths = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort();
+  let out = '';
+  paths.forEach((p) => {
+    if (only && only.length && !only.includes(p)) return;
+    const a = before[p], b = after[p];
+    if (a === b) return;
+    out += filePatch(p, a === undefined ? '' : a, b === undefined ? '' : b, { newFile: a === undefined, deleted: b === undefined });
+  });
+  return out;
+}
+
+GIT.diff = function (repo, args) {
+  const staged = args.includes('--staged') || args.includes('--cached');
+  const nameOnly = args.includes('--name-only');
+  const filterU = args.some((a) => a === '--diff-filter=U');
+  const plain = args.filter((a) => !a.startsWith('-') && a !== '--');
+  const known = (p) => repo.files[p] !== undefined || repo.index[p] !== undefined || headTree(repo)[p] !== undefined;
+  const paths = plain.filter(known);
+  const refs = plain.filter((a) => !known(a));
+  if (filterU) {
+    const c = repo.state && repo.state.conflicts ? repo.state.conflicts : [];
+    return ok(c.filter((p) => !paths.length || paths.includes(p)).map((p) => p + '\n').join(''));
+  }
+  let before, after;
+  // в сравнение с рабочим каталогом попадают только отслеживаемые файлы
+  const tracked = () => {
+    const out = {};
+    Object.keys(repo.files).forEach((p) => { if (repo.index[p] !== undefined) out[p] = repo.files[p]; });
+    return out;
+  };
+  if (refs.length === 2) { before = repo.objects[resolveRef(repo, refs[0])].tree; after = repo.objects[resolveRef(repo, refs[1])].tree; }
+  else if (refs.length === 1) { before = repo.objects[resolveRef(repo, refs[0])].tree; after = tracked(); }
+  else if (staged) { before = headTree(repo); after = repo.index; }
+  else { before = repo.index; after = tracked(); }
+  if (nameOnly) {
+    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort()
+      .filter((p) => before[p] !== after[p] && (!paths.length || paths.includes(p)));
+    return ok(changed.map((p) => p + '\n').join(''));
+  }
+  return ok(treeDiff(before, after, paths));
+};
+
+GIT.branch = function (repo, args) {
+  const del = args.find((a) => a === '-d' || a === '-D');
+  const names = args.filter((a) => !a.startsWith('-'));
+  if (del) {
+    const name = names[0];
+    if (repo.branches[name] === undefined) return fail("error: branch '" + name + "' not found.\n", 1);
+    if (name === curBranch(repo)) return fail("error: Cannot delete branch '" + name + "' checked out at '" + WORKDIR + "'\n", 1);
+    const merged = isAncestor(repo, repo.branches[name], headSha(repo));
+    if (!merged && del === '-d') {
+      return fail("error: The branch '" + name + "' is not fully merged.\nIf you are sure you want to delete it, run 'git branch -D " + name + "'.\n", 1);
+    }
+    const sha = repo.branches[name];
+    delete repo.branches[name];
+    return ok('Deleted branch ' + name + ' (was ' + short(sha) + ').\n');
+  }
+  if (names.length) {
+    if (repo.branches[names[0]] !== undefined) return fail("fatal: a branch named '" + names[0] + "' already exists\n", 128);
+    repo.branches[names[0]] = resolveRef(repo, names[1]) || headSha(repo);
+    return ok('');
+  }
+  const verbose = args.includes('-v');
+  const all = args.includes('-a');
+  let out = Object.keys(repo.branches).sort().map((b) => {
+    const mark = b === curBranch(repo) ? '* ' : '  ';
+    if (!verbose) return mark + b;
+    const sha = repo.branches[b];
+    return mark + b.padEnd(Math.max(...Object.keys(repo.branches).map((x) => x.length))) + ' ' + short(sha) + ' ' + repo.objects[sha].msg;
+  }).join('\n');
+  if (all) {
+    const rem = Object.keys(repo.tracking).sort().map((t) => '  remotes/' + t).join('\n');
+    if (rem) out += (out ? '\n' : '') + rem;
+  }
+  return ok(out ? out + '\n' : '');
+};
+
+function checkoutTree(repo, sha) {
+  const tree = sha ? repo.objects[sha].tree : {};
+  const untracked = Object.keys(repo.files).filter((p) => repo.index[p] === undefined);
+  const keep = {};
+  untracked.forEach((p) => { keep[p] = repo.files[p]; });
+  repo.files = Object.assign(clone(tree), keep);
+  repo.index = clone(tree);
+}
+
+function switchBranch(repo, name, opts) {
+  const o = opts || {};
+  if (o.create) {
+    if (repo.branches[name] !== undefined) return fail("fatal: a branch named '" + name + "' already exists\n", 128);
+    repo.branches[name] = o.start ? resolveRef(repo, o.start) : headSha(repo);
+    const fromName = curBranch(repo) || short(headSha(repo));
+    repo.head = { branch: name };
+    if (o.start) checkoutTree(repo, repo.branches[name]);
+    addReflog(repo, 'checkout: moving from ' + fromName + ' to ' + name, repo.branches[name]);
+    return ok("Switched to a new branch '" + name + "'\n");
+  }
+  if (repo.branches[name] === undefined) {
+    const sha = resolveRef(repo, name);
+    if (!sha) return fail("fatal: invalid reference: " + name + '\n', 128);
+    const from = curBranch(repo) || short(headSha(repo));
+    const wasDetached = !curBranch(repo);
+    repo.head = { detached: sha };
+    checkoutTree(repo, sha);
+    addReflog(repo, 'checkout: moving from ' + from + ' to ' + short(sha), sha);
+    return ok((wasDetached ? 'Previous HEAD position was ' + from + ' ' + repo.objects[resolveRef(repo, from)].msg + '\n' : '')
+      + 'HEAD is now at ' + short(sha) + ' ' + repo.objects[sha].msg + '\n');
+  }
+  const detachedBefore = !curBranch(repo) ? headSha(repo) : null;
+  const from = curBranch(repo) || short(headSha(repo));
+  repo.head = { branch: name };
+  checkoutTree(repo, repo.branches[name]);
+  addReflog(repo, 'checkout: moving from ' + from + ' to ' + name, repo.branches[name]);
+  const ab = aheadBehind(repo, name);
+  let out = (detachedBefore ? 'Previous HEAD position was ' + short(detachedBefore) + ' ' + repo.objects[detachedBefore].msg + '\n' : '')
+    + "Switched to branch '" + name + "'\n";
+  if (ab && ab.ahead && !ab.behind) out += "Your branch is ahead of '" + ab.up + "' by " + ab.ahead + ' commit' + (ab.ahead > 1 ? 's' : '') + '.\n  (use "git push" to publish your local commits)\n';
+  return ok(out);
+}
+
+GIT.switch = function (repo, args) {
+  const create = args.includes('-c') || args.includes('-C');
+  const detach = args.includes('--detach');
+  const names = args.filter((a) => !a.startsWith('-'));
+  if (detach) return switchBranch(repo, names[0]);
+  if (create) return switchBranch(repo, names[0], { create: true, start: names[1] });
+  if (!names.length) return fail('fatal: missing branch or commit argument\n', 128);
+  return switchBranch(repo, names[0]);
+};
+
+GIT.checkout = function (repo, args) {
+  const create = args.includes('-b');
+  const names = args.filter((a) => !a.startsWith('-'));
+  const dashdash = args.indexOf('--');
+  if (dashdash >= 0) {
+    const paths = args.slice(dashdash + 1);
+    paths.forEach((p) => { if (repo.index[p] !== undefined) repo.files[p] = repo.index[p]; });
+    return ok('');
+  }
+  if (create) return switchBranch(repo, names[0], { create: true, start: names[1] });
+  return switchBranch(repo, names[0]);
+};
+
+GIT.restore = function (repo, args) {
+  const staged = args.includes('--staged');
+  const paths = expandPaths(repo, args.filter((a) => !a.startsWith('-')));
+  const head = headTree(repo);
+  paths.forEach((p) => {
+    if (staged) { if (head[p] === undefined) delete repo.index[p]; else repo.index[p] = head[p]; }
+    else if (repo.index[p] !== undefined) repo.files[p] = repo.index[p];
+  });
+  return ok('');
+};
+
+GIT.rm = function (repo, args) {
+  const cached = args.includes('--cached');
+  const paths = expandPaths(repo, args.filter((a) => !a.startsWith('-')));
+  paths.forEach((p) => { delete repo.index[p]; if (!cached) delete repo.files[p]; });
+  return ok(paths.map((p) => "rm '" + p + "'\n").join(''));
+};
+
+GIT.merge = function (repo, args, msgOverride) {
+  if (args.includes('--abort')) {
+    if (!repo.state || repo.state.kind !== 'merge') return fail('fatal: There is no merge to abort (MERGE_HEAD missing).\n', 128);
+    repo.files = clone(repo.state.savedFiles);
+    repo.index = clone(repo.state.savedIndex);
+    repo.state = null;
+    return ok('');
+  }
+  if (args.includes('--continue')) {
+    if (!repo.state || repo.state.kind !== 'merge') return fail('fatal: There is no merge in progress (MERGE_HEAD missing).\n', 128);
+    if (repo.state.conflicts.length) return fail('error: Committing is not possible because you have unmerged files.\n', 1);
+    return doCommit(repo, repo.state.msg, repo.state.other, false);
+  }
+  const noFF = args.includes('--no-ff'), ffOnly = args.includes('--ff-only');
+  const name = args.filter((a) => !a.startsWith('-'))[0];
+  const other = resolveRef(repo, name);
+  if (!other) return fail('merge: ' + name + ' - not something we can merge\n', 1);
+  const cur = headSha(repo);
+  if (isAncestor(repo, other, cur)) return ok('Already up to date.\n');
+  if (isAncestor(repo, cur, other) && !noFF) {
+    const before = headTree(repo);
+    setBranch(repo, other, 'merge ' + name + ': Fast-forward');
+    checkoutTree(repo, other);
+    return ok('Updating ' + short(cur) + '..' + short(other) + '\nFast-forward\n' + statText(diffStat(before, repo.objects[other].tree)));
+  }
+  if (ffOnly) return fail('fatal: Not possible to fast-forward, aborting.\n', 128);
+  const base = mergeBase(repo, cur, other);
+  const baseTree = base ? repo.objects[base].tree : {};
+  const ours = headTree(repo), theirs = repo.objects[other].tree;
+  const paths = [...new Set([...Object.keys(baseTree), ...Object.keys(ours), ...Object.keys(theirs)])].sort();
+  const result = {}, conflicts = [];
+  let autoMerging = '';
+  paths.forEach((p) => {
+    const b = baseTree[p], o = ours[p], t = theirs[p];
+    if (o === t) { if (o !== undefined) result[p] = o; return; }
+    if (b === o) { if (t !== undefined) result[p] = t; return; }
+    if (b === t) { if (o !== undefined) result[p] = o; return; }
+    autoMerging += 'Auto-merging ' + p + '\n';
+    const m = mergeFile(b, o, t, 'HEAD', name);
+    result[p] = m.text;
+    if (m.conflict) conflicts.push(p);
+  });
+  const savedFiles = clone(repo.files), savedIndex = clone(repo.index);
+  Object.keys(result).forEach((p) => { repo.files[p] = result[p]; });
+  Object.keys(ours).forEach((p) => { if (result[p] === undefined) { delete repo.files[p]; delete repo.index[p]; } });
+  Object.keys(result).forEach((p) => { if (!conflicts.includes(p)) repo.index[p] = result[p]; });
+  const msg = msgOverride || ("Merge branch '" + name + "'");
+  if (conflicts.length) {
+    repo.state = { kind: 'merge', other: other, msg: msg, conflicts: conflicts, savedFiles: savedFiles, savedIndex: savedIndex };
+    return { out: autoMerging, err: conflicts.map((p) => 'CONFLICT (content): Merge conflict in ' + p + '\n').join('')
+      + 'Automatic merge failed; fix conflicts and then commit the result.\n', code: 1 };
+  }
+  const before = ours;
+  const sha = commitObj(repo, result, [cur, other], msg);
+  setBranch(repo, sha, 'merge ' + name + ': Merge made by the \'ort\' strategy.');
+  return ok(autoMerging + "Merge made by the 'ort' strategy.\n" + statText(diffStat(before, result)));
+};
+
+function applyCommit(repo, sha, ontoTree, label) {
+  const o = repo.objects[sha];
+  const baseTree = o.parents.length ? repo.objects[o.parents[0]].tree : {};
+  const paths = [...new Set([...Object.keys(baseTree), ...Object.keys(ontoTree), ...Object.keys(o.tree)])].sort();
+  const result = {}, conflicts = [];
+  paths.forEach((p) => {
+    const b = baseTree[p], ours = ontoTree[p], theirs = o.tree[p];
+    if (ours === theirs) { if (ours !== undefined) result[p] = ours; return; }
+    if (b === ours) { if (theirs !== undefined) result[p] = theirs; return; }
+    if (b === theirs) { if (ours !== undefined) result[p] = ours; return; }
+    const m = mergeFile(b, ours, theirs, label.ours, label.theirs);
+    result[p] = m.text;
+    if (m.conflict) conflicts.push(p);
+  });
+  return { tree: result, conflicts: conflicts };
+}
+
+GIT.rebase = function (repo, args) {
+  if (args.includes('--abort')) {
+    if (!repo.state || repo.state.kind !== 'rebase') return fail('fatal: No rebase in progress?\n', 128);
+    const s = repo.state;
+    repo.branches[s.branch] = s.origHead;
+    repo.head = { branch: s.branch };
+    repo.files = clone(s.savedFiles);
+    repo.index = clone(s.savedIndex);
+    repo.state = null;
+    return ok('');
+  }
+  const cont = args.includes('--continue');
+  if (cont && (!repo.state || repo.state.kind !== 'rebase')) return fail('fatal: No rebase in progress?\n', 128);
+  let state;
+  if (cont) {
+    state = repo.state;
+    if (state.conflicts.length) return fail('error: you have unstaged changes.\nfatal: could not continue rebase\n', 1);
+    const cur = state.current;
+    const sha = commitObj(repo, clone(repo.index), [state.head], repo.objects[cur].msg);
+    state.head = sha;
+    state.current = null;
+  } else {
+    const name = args.filter((a) => !a.startsWith('-'))[0];
+    const onto = resolveRef(repo, name);
+    if (!onto) return fail('fatal: invalid upstream \'' + name + "'\n", 128);
+    const branch = curBranch(repo);
+    const cur = headSha(repo);
+    if (isAncestor(repo, cur, onto)) {
+      setBranch(repo, onto, 'rebase finished: refs/heads/' + branch + ' onto ' + short(onto));
+      checkoutTree(repo, onto);
+      return ok('Successfully rebased and updated refs/heads/' + branch + '.\n');
+    }
+    if (isAncestor(repo, onto, cur)) return ok('Current branch ' + branch + ' is up to date.\n');
+    const base = mergeBase(repo, cur, onto);
+    const todo = commitList(repo, cur).filter((s) => !ancestors(repo, base).has(s) && !ancestors(repo, onto).has(s))
+      .sort((a, b) => repo.objects[a].ts - repo.objects[b].ts);
+    state = { kind: 'rebase', branch: branch, onto: onto, head: onto, todo: todo, origHead: cur, conflicts: [], current: null,
+      savedFiles: clone(repo.files), savedIndex: clone(repo.index) };
+    repo.state = state;
+  }
+  while (state.todo.length) {
+    const sha = state.todo.shift();
+    const res = applyCommit(repo, sha, repo.objects[state.head].tree, { ours: short(state.onto) + ' (' + repo.objects[state.onto].msg + ')', theirs: repo.objects[sha].msg });
+    if (res.conflicts.length) {
+      state.current = sha;
+      state.conflicts = res.conflicts;
+      repo.files = clone(res.tree);
+      repo.index = clone(res.tree);
+      res.conflicts.forEach((p) => { delete repo.index[p]; });
+      repo.head = { detached: state.head };
+      return { out: '', err: res.conflicts.map((p) => 'CONFLICT (content): Merge conflict in ' + p + '\n').join('')
+        + 'error: could not apply ' + short(sha) + '... ' + repo.objects[sha].msg + '\n'
+        + 'hint: Resolve all conflicts manually, mark them as resolved with\nhint: "git add/rm <conflicted_files>", then run "git rebase --continue".\n'
+        + 'hint: You can instead skip this commit: run "git rebase --skip".\n'
+        + 'hint: To abort and get back to the state before "git rebase", run "git rebase --abort".\n', code: 1 };
+    }
+    const newSha = commitObj(repo, res.tree, [state.head], repo.objects[sha].msg);
+    state.head = newSha;
+  }
+  repo.branches[state.branch] = state.head;
+  repo.head = { branch: state.branch };
+  checkoutTree(repo, state.head);
+  addReflog(repo, 'rebase (finish): returning to refs/heads/' + state.branch, state.head);
+  repo.state = null;
+  return ok('Successfully rebased and updated refs/heads/' + state.branch + '.\n');
+};
+
+GIT.reset = function (repo, args) {
+  const mode = args.find((a) => ['--soft', '--mixed', '--hard'].includes(a)) || '--mixed';
+  const refArg = args.filter((a) => !a.startsWith('-'));
+  const paths = refArg.filter((a) => repo.index[a] !== undefined || repo.files[a] !== undefined);
+  if (paths.length && !args.some((a) => a.startsWith('--'))) {
+    const head = headTree(repo);
+    paths.forEach((p) => { if (head[p] === undefined) delete repo.index[p]; else repo.index[p] = head[p]; });
+    return ok('');
+  }
+  const target = resolveRef(repo, refArg[0] || 'HEAD');
+  if (!target) return fail("fatal: ambiguous argument '" + refArg[0] + "': unknown revision\n", 128);
+  if (repo.state && repo.state.kind === 'merge') repo.state = null;   // reset снимает незавершённое слияние
+  setBranch(repo, target, 'reset: moving to ' + (refArg[0] || 'HEAD'));
+  const tree = repo.objects[target].tree;
+  if (mode === '--mixed') {
+    repo.index = clone(tree);
+    const changed = Object.keys(repo.files).filter((p) => repo.index[p] !== undefined && repo.files[p] !== repo.index[p])
+      .concat(Object.keys(repo.index).filter((p) => repo.files[p] === undefined)).sort();
+    return ok(changed.length ? 'Unstaged changes after reset:\n' + changed.map((p) => 'M\t' + p + '\n').join('') : '');
+  }
+  if (mode !== '--soft') repo.index = clone(tree);
+  if (mode === '--hard') {
+    const untracked = {};
+    Object.keys(repo.files).forEach((p) => { if (repo.index[p] === undefined && !Object.keys(tree).includes(p)) untracked[p] = repo.files[p]; });
+    repo.files = Object.assign(clone(tree), untracked);
+    return ok('HEAD is now at ' + short(target) + ' ' + repo.objects[target].msg + '\n');
+  }
+  return ok('');
+};
+
+GIT.revert = function (repo, args) {
+  const ref = args.filter((a) => !a.startsWith('-'))[0] || 'HEAD';
+  const sha = resolveRef(repo, ref);
+  if (!sha) return fail("fatal: bad revision '" + ref + "'\n", 128);
+  const o = repo.objects[sha];
+  const parentTree = o.parents.length ? repo.objects[o.parents[0]].tree : {};
+  const cur = headTree(repo);
+  const paths = [...new Set([...Object.keys(o.tree), ...Object.keys(parentTree), ...Object.keys(cur)])].sort();
+  const result = {}, conflicts = [];
+  paths.forEach((p) => {
+    const b = o.tree[p], ours = cur[p], theirs = parentTree[p];
+    if (ours === theirs) { if (ours !== undefined) result[p] = ours; return; }
+    if (b === ours) { if (theirs !== undefined) result[p] = theirs; return; }
+    if (b === theirs) { if (ours !== undefined) result[p] = ours; return; }
+    const m = mergeFile(b, ours, theirs, 'HEAD', 'parent of ' + short(sha));
+    result[p] = m.text;
+    if (m.conflict) conflicts.push(p);
+  });
+  if (conflicts.length) {
+    repo.files = clone(result);
+    return fail('error: could not revert ' + short(sha) + '... ' + o.msg + '\n', 1);
+  }
+  const msg = 'Revert "' + o.msg + '"';
+  const before = cur;
+  repo.index = clone(result);
+  repo.files = Object.assign(clone(result), Object.fromEntries(Object.entries(repo.files).filter(([p]) => repo.index[p] === undefined && cur[p] === undefined)));
+  const newSha = commitObj(repo, result, [headSha(repo)], msg);
+  setBranch(repo, newSha, 'revert: ' + msg);
+  return ok('[' + curBranch(repo) + ' ' + short(newSha) + '] ' + msg + '\n' + shortStat(diffStat(before, result)));
+};
+
+GIT.stash = function (repo, args) {
+  const sub = args.find((a) => !a.startsWith('-')) || 'push';
+  const includeUntracked = args.includes('-u') || args.includes('--include-untracked');
+  const mIdx = args.indexOf('-m');
+  const msg = mIdx >= 0 ? args[mIdx + 1] : null;
+  const branch = curBranch(repo) || 'HEAD';
+  if (sub === 'push' || sub === 'save') {
+    const head = headTree(repo);
+    const dirty = Object.keys(repo.files).some((p) => repo.files[p] !== head[p]) || Object.keys(head).some((p) => repo.files[p] === undefined);
+    if (!dirty) return ok('No local changes to save\n');
+    const entry = { msg: msg || 'WIP on ' + branch, branch: branch,
+      files: clone(repo.files), index: clone(repo.index), untracked: includeUntracked };
+    if (!includeUntracked) {
+      Object.keys(entry.files).forEach((p) => { if (repo.index[p] === undefined && head[p] === undefined) delete entry.files[p]; });
+    }
+    repo.stash.unshift(entry);
+    const keepUntracked = {};
+    if (!includeUntracked) Object.keys(repo.files).forEach((p) => { if (repo.index[p] === undefined && head[p] === undefined) keepUntracked[p] = repo.files[p]; });
+    repo.files = Object.assign(clone(head), keepUntracked);
+    repo.index = clone(head);
+    return ok('Saved working directory and index state ' + (msg ? 'On ' + branch + ': ' + msg : 'WIP on ' + branch) + '\n');
+  }
+  if (sub === 'list') {
+    return ok(repo.stash.map((s, i) => 'stash@{' + i + '}: ' + (s.msg.startsWith('WIP') ? s.msg : 'On ' + s.branch + ': ' + s.msg) + '\n').join(''));
+  }
+  if (sub === 'pop' || sub === 'apply') {
+    if (!repo.stash.length) return fail('No stash entries found.\n', 1);
+    const idxArg = args.find((a) => /^stash@\{\d+\}$/.test(a));
+    const n = idxArg ? parseInt(idxArg.match(/\d+/)[0], 10) : 0;
+    const entry = repo.stash[n];
+    if (!entry) return fail('fatal: log for \'stash\' only has ' + repo.stash.length + ' entries\n', 128);
+    Object.keys(entry.files).forEach((p) => { repo.files[p] = entry.files[p]; });
+    const status = GIT.status(repo, []);
+    let out = status.out;
+    if (sub === 'pop') {
+      repo.stash.splice(n, 1);
+      out += 'Dropped refs/stash@{' + n + '} (' + E.sha1ish(entry.msg + n) + ')\n';
+    }
+    return ok(out);
+  }
+  if (sub === 'drop') {
+    if (!repo.stash.length) return fail('No stash entries found.\n', 1);
+    const e = repo.stash.shift();
+    return ok('Dropped refs/stash@{0} (' + E.sha1ish(e.msg) + ')\n');
+  }
+  if (sub === 'show') {
+    if (!repo.stash.length) return fail('No stash entries found.\n', 1);
+    const e = repo.stash[0];
+    return ok(treeDiff(headTree(repo), e.files));
+  }
+  return fail("error: unknown subcommand: " + sub + '\n', 1);
+};
+
+GIT.remote = function (repo, args) {
+  if (args[0] === 'add') {
+    repo.origin = repo.origin || { branches: {}, objects: {} };
+    return ok('');
+  }
+  if (!repo.origin) return ok('');
+  if (args.includes('-v')) return ok('origin\t' + ORIGIN_URL + ' (fetch)\norigin\t' + ORIGIN_URL + ' (push)\n');
+  return ok('origin\n');
+};
+
+function fetchInto(repo) {
+  const rows = [];
+  Object.keys(repo.origin.branches).forEach((b) => {
+    const remoteSha = repo.origin.branches[b];
+    const trackName = 'origin/' + b;
+    const old = repo.tracking[trackName];
+    commitList(repo, remoteSha, repo.origin.objects).forEach((s) => { if (!repo.objects[s]) repo.objects[s] = clone(repo.origin.objects[s]); });
+    if (old !== remoteSha) {
+      rows.push({ b: b, sum: old ? short(old) + '..' + short(remoteSha) : '[new branch]', fresh: !old });
+      repo.tracking[trackName] = remoteSha;
+    }
+  });
+  const w = Math.max(10, ...rows.map((r) => r.b.length));
+  return rows.map((r) => ' ' + (r.fresh ? '*' : ' ') + ' ' + r.sum.padEnd(17) + ' ' + r.b.padEnd(w) + ' -> origin/' + r.b);
+}
+
+GIT.fetch = function (repo) {
+  if (!repo.origin) return fail("fatal: 'origin' does not appear to be a git repository\n", 128);
+  const lines = fetchInto(repo);
+  if (!lines.length) return ok('');
+  return ok('From ' + ORIGIN_URL.replace(/\.git$/, '') + '\n' + lines.join('\n') + '\n');
+};
+
+GIT.pull = function (repo, args) {
+  if (!repo.origin) return fail("fatal: 'origin' does not appear to be a git repository\n", 128);
+  const fetched = fetchInto(repo);
+  const branch = curBranch(repo);
+  const up = repo.upstream[branch] || 'origin/' + branch;
+  const remote = repo.tracking[up];
+  if (remote === undefined) return fail("fatal: couldn't find remote ref " + branch + '\n', 128);
+  const head = 'From ' + ORIGIN_URL.replace(/\.git$/, '') + '\n' + (fetched.length ? fetched.join('\n') + '\n' : '');
+  const rebaseMode = args.includes('--rebase') || args.includes('-r');
+  const cur = headSha(repo);
+  if (isAncestor(repo, remote, cur)) return ok((fetched.length ? head : '') + 'Already up to date.\n');
+  if (isAncestor(repo, cur, remote)) {           // перемотка: rebase и merge дают один результат
+    const ff = GIT.merge(repo, [up]);
+    return { out: (fetched.length ? head : '') + ff.out, err: ff.err, code: ff.code };
+  }
+  const mergeMsg = "Merge branch '" + up.split('/').pop() + "' of " + ORIGIN_URL.replace(/\.git$/, '');
+  const sub = rebaseMode ? GIT.rebase(repo, [up]) : GIT.merge(repo, [up], mergeMsg);
+  return { out: (fetched.length ? head : '') + sub.out, err: sub.err, code: sub.code };
+};
+
+GIT.push = function (repo, args) {
+  if (!repo.origin) return fail("fatal: 'origin' does not appear to be a git repository\n", 128);
+  const setUp = args.includes('-u') || args.includes('--set-upstream');
+  const force = args.includes('--force-with-lease') || args.includes('-f') || args.includes('--force');
+  const rest = args.filter((a) => !a.startsWith('-'));
+  const branch = rest[1] || curBranch(repo);
+  const local = repo.branches[branch];
+  const remoteSha = repo.origin.branches[branch];
+  if (remoteSha && !isAncestor(repo, remoteSha, local) && !force) {
+    return fail('To ' + ORIGIN_URL + '\n ! [rejected]        ' + branch + ' -> ' + branch + ' (fetch first)\n'
+      + "error: failed to push some refs to '" + ORIGIN_URL + "'\n"
+      + 'hint: Updates were rejected because the remote contains work that you do\nhint: not have locally.\n', 1);
+  }
+  if (force && remoteSha && repo.tracking['origin/' + branch] !== remoteSha) {
+    return fail('To ' + ORIGIN_URL + '\n ! [rejected]        ' + branch + ' -> ' + branch + ' (stale info)\n'
+      + "error: failed to push some refs to '" + ORIGIN_URL + "'\n", 1);
+  }
+  commitList(repo, local).forEach((s) => { if (!repo.origin.objects[s]) repo.origin.objects[s] = clone(repo.objects[s]); });
+  repo.origin.branches[branch] = local;
+  repo.tracking['origin/' + branch] = local;
+  let out = '';
+  if (setUp) { repo.upstream[branch] = 'origin/' + branch; out += "branch '" + branch + "' set up to track 'origin/" + branch + "'.\n"; }
+  out += 'To ' + ORIGIN_URL + '\n';
+  out += remoteSha ? '   ' + short(remoteSha) + '..' + short(local) + '  ' + branch + ' -> ' + branch + '\n'
+    : ' * [new branch]      ' + branch + ' -> ' + branch + '\n';
+  return ok(out);
+};
+
+GIT.reflog = function (repo, args) {
+  let n = 0;
+  (args || []).forEach((a, i) => {
+    if (a === '-n' && args[i + 1]) n = parseInt(args[i + 1], 10);
+    const m = /^-(\d+)$/.exec(a);
+    if (m) n = parseInt(m[1], 10);
+  });
+  const rows = repo.reflog.map((r, i) => short(r.sha) + ' HEAD@{' + i + '}: ' + r.action + '\n');
+  return ok((n > 0 ? rows.slice(0, n) : rows).join(''));
+};
+
+GIT.tag = function (repo, args) {
+  const names = args.filter((a) => !a.startsWith('-'));
+  if (args.includes('-d')) { delete repo.tags[names[0]]; return ok("Deleted tag '" + names[0] + "'\n"); }
+  repo.tags = repo.tags || {};
+  if (!names.length) return ok(Object.keys(repo.tags).sort().map((t) => t + '\n').join(''));
+  const mIdx = args.indexOf('-m');
+  repo.tags[names[0]] = headSha(repo);
+  return ok('');
+};
+
+GIT.config = function () { return ok(''); };
+
+/* ══════════════ ОБОЛОЧКА ══════════════ */
+const SHELL = {};
+
+SHELL.ls = function (repo, args) {
+  const all = args.includes('-a');
+  const names = new Set();
+  Object.keys(repo.files).forEach((p) => {
+    if (!all && p.startsWith('.')) return;
+    names.add(p.includes('/') ? p.split('/')[0] : p);
+  });
+  const list = [...names].sort();
+  if (all) list.unshift('.', '..');
+  return ok(list.length ? list.join('  ') + '\n' : '');
+};
+
+SHELL.cat = function (repo, args) {
+  let out = '', err = '', code = 0;
+  args.filter((a) => !a.startsWith('-')).forEach((p) => {
+    if (repo.files[p] === undefined) { err += 'cat: ' + p + ': No such file or directory\n'; code = 1; }
+    else out += repo.files[p];
+  });
+  return { out: out, err: err, code: code };
+};
+
+SHELL.printf = function (repo, args) {
+  const fmt = args[0] === undefined ? '' : args[0];
+  const rest = args.slice(1);
+  let i = 0;
+  const text = fmt.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/%s/g, () => (rest[i++] || ''));
+  return ok(text);
+};
+
+SHELL.echo = function (repo, args) {
+  let a = args.slice(), nl = true;
+  if (a[0] === '-n') { nl = false; a.shift(); }
+  if (a[0] === '-e') { a.shift(); return ok(a.join(' ').replace(/\\n/g, '\n').replace(/\\t/g, '\t') + (nl ? '\n' : '')); }
+  return ok(a.join(' ') + (nl ? '\n' : ''));
+};
+
+SHELL.touch = function (repo, args) {
+  args.filter((a) => !a.startsWith('-')).forEach((p) => { if (repo.files[p] === undefined) repo.files[p] = ''; });
+  return ok('');
+};
+
+SHELL.rm = function (repo, args) {
+  const paths = expandPaths(repo, args.filter((a) => !a.startsWith('-')));
+  let err = '';
+  args.filter((a) => !a.startsWith('-')).forEach((p) => { if (repo.files[p] === undefined && !paths.length) err += "rm: cannot remove '" + p + "': No such file or directory\n"; });
+  paths.forEach((p) => { delete repo.files[p]; });
+  return { out: '', err: err, code: err ? 1 : 0 };
+};
+
+SHELL.mkdir = function () { return ok(''); };
+SHELL.pwd = function () { return ok(WORKDIR + '\n'); };
+
+SHELL.sed = function (repo, args) {
+  const inPlace = args.includes('-i');
+  const script = args.find((a) => /^s.(.*).(.*).[gi]*$/.test(a) && !a.startsWith('-'));
+  const files = args.filter((a) => !a.startsWith('-') && a !== script);
+  if (!script) return fail('sed: в тренажёре поддержана только замена вида s/старое/новое/\n', 1);
+  const d = script[1];
+  const parts = script.slice(2).split(d);
+  const re = new RegExp(parts[0], script.endsWith('g') ? 'g' : '');
+  let out = '';
+  files.forEach((f) => {
+    if (repo.files[f] === undefined) return;
+    const res = repo.files[f].split('\n').map((l) => l.replace(re, parts[1])).join('\n');
+    if (inPlace) repo.files[f] = res; else out += res;
+  });
+  return ok(out);
+};
+
+/* ── выполнение строки ── */
+function runLine(repo, line) {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith('#')) return { out: '', err: '', code: 0 };
+  let toks;
+  try { toks = tokenize(trimmed); } catch (e) { return fail('bash: ' + e.message + '\n', 2); }
+  let redirect = null;
+  const argv = [];
+  for (let i = 0; i < toks.length; i++) {
+    if (toks[i].op) { redirect = { append: toks[i].v === '>>', path: toks[i + 1] && toks[i + 1].v }; i++; }
+    else argv.push(toks[i].v);
+  }
+  if (!argv.length) return { out: '', err: '', code: 0 };
+  let res;
+  if (argv[0] === 'git') {
+    if (!repo.inited && argv[1] !== 'init') res = notRepo();
+    else {
+      const sub = argv[1];
+      const fn = GIT[sub];
+      res = fn ? fn(repo, argv.slice(2))
+        : fail("git: '" + sub + "' is not a git command. See 'git --help'.\n", 1);
+    }
+  } else {
+    const fn = SHELL[argv[0]];
+    res = fn ? fn(repo, argv.slice(1)) : fail(argv[0] + ': command not found\n', 127);
+  }
+  if (redirect && redirect.path) {
+    repo.files[redirect.path] = (redirect.append && repo.files[redirect.path] ? repo.files[redirect.path] : '') + res.out;
+    res = { out: '', err: res.err, code: res.code };
+  }
+  return res;
+}
+
+function runScript(repo, code) {
+  const transcript = [];
+  let stdout = '', stderr = '';
+  code.split('\n').forEach((raw) => {
+    const line = raw.replace(/\s+$/, '');
+    if (!line.trim()) return;
+    const res = runLine(repo, line);
+    stdout += res.out;
+    stderr += res.err;
+    transcript.push({ line: line, out: res.out, err: res.err, code: res.code, branch: curBranch(repo) || 'HEAD detached' });
+  });
+  return { transcript: transcript, stdout: stdout, stderr: stderr };
+}
+
+const C = { GIT, SHELL, runLine, runScript, tokenize, treeDiff };
+
+/* ══════════════════════════════════════════════════════════════
+   ПРОВЕРКА ЗАДАЧ: сравнение состояния репозитория с эталоном
+   ══════════════════════════════════════════════════════════════ */
+
+/* стартовое состояние: файлы и история, одинаковые для всех задач главы */
+const SEED_FILES = {
+  'README.md': '# shop-tests\n\nАвтотесты магазина: API и UI.\n',
+  'conftest.py': 'import pytest\n\n\n@pytest.fixture\ndef api():\n    return ApiClient(BASE_URL)\n',
+  'tests/test_login.py': 'def test_login_ok(api):\n    assert api.login("qa", "secret").status_code == 200\n',
+  'tests/test_cart.py': 'def test_cart_add(api):\n    assert api.cart_add(42).status_code == 201\n',
+  'config.py': 'BASE_URL = "https://staging.shop.test"\nTIMEOUT = 30\nRETRIES = 2\n',
+  '.gitignore': '.env\n__pycache__/\n*.log\n',
+  '.env': 'API_TOKEN=test_4f9a\n'
+};
+
+const SEED_COMMITS = [
+  { msg: 'add readme and fixtures', files: ['README.md', 'conftest.py', '.gitignore'] },
+  { msg: 'add login test', files: ['tests/test_login.py'] },
+  { msg: 'add cart test and config', files: ['tests/test_cart.py', 'config.py'] }
+];
+
+/* коммит на стороне origin: как будто его отправил другой человек */
+function originCommit(repo, files, msg) {
+  const parent = repo.origin.branches.main;
+  const tree = clone(repo.origin.objects[parent].tree);
+  Object.keys(files).forEach((p) => { tree[p] = files[p]; });
+  repo.ts += 60;
+  const sha = E.sha1ish(E.treeText(tree) + '|' + parent + '|' + msg + '|' + repo.ts);
+  repo.origin.objects[sha] = { tree: tree, parents: [parent], msg: msg, ts: repo.ts };
+  repo.origin.branches.main = sha;
+  return sha;
+}
+
+function buildRepo(kind) {
+  const repo = R.newRepo();
+  if (kind === 'fresh') {          // каталог с файлами, git ещё не инициализирован и .gitignore не написан
+    repo.files = clone(SEED_FILES);
+    delete repo.files['.gitignore'];
+    return repo;
+  }
+  repo.inited = true;
+  repo.origin = { branches: {}, objects: {} };
+  const tree = {};
+  SEED_COMMITS.forEach((c, i) => {
+    c.files.forEach((f) => { tree[f] = SEED_FILES[f]; });
+    const sha = R.commitObj(repo, tree, repo.branches.main ? [repo.branches.main] : [], c.msg);
+    repo.branches.main = sha;
+    R.addReflog(repo, (i ? 'commit: ' : 'commit (initial): ') + c.msg, sha);
+  });
+  repo.head = { branch: 'main' };
+  repo.index = clone(tree);
+  repo.files = Object.assign(clone(tree), { '.env': SEED_FILES['.env'] });
+  // origin знает ту же историю
+  R.commitList(repo, repo.branches.main).forEach((s) => { repo.origin.objects[s] = clone(repo.objects[s]); });
+  repo.origin.branches.main = repo.branches.main;
+  repo.tracking['origin/main'] = repo.branches.main;
+  repo.upstream.main = 'origin/main';
+  return repo;
+}
+
+/* структурный хеш коммита: не зависит от порядка выполнения команд */
+function structHash(repo, sha, cache) {
+  if (!sha || !repo.objects[sha]) return '∅';
+  cache = cache || {};
+  if (cache[sha]) return cache[sha];
+  const o = repo.objects[sha];
+  const parents = o.parents.map((p) => structHash(repo, p, cache)).sort();
+  const h = E.sha1ish(o.msg + ' ' + E.treeText(o.tree) + ' ' + parents.join(','));
+  cache[sha] = h;
+  return h;
+}
+
+function snapshot(repo) {
+  const cache = {};
+  const branches = {};
+  Object.keys(repo.branches).sort().forEach((b) => { branches[b] = structHash(repo, repo.branches[b], cache); });
+  const tracking = {};
+  Object.keys(repo.tracking).sort().forEach((t) => { tracking[t] = structHash(repo, repo.tracking[t], cache); });
+  const originBranches = {};
+  if (repo.origin) Object.keys(repo.origin.branches).sort().forEach((b) => {
+    originBranches[b] = structHash({ objects: repo.origin.objects }, repo.origin.branches[b], {});
+  });
+  return {
+    branches: branches,
+    head: repo.head.branch ? 'branch:' + repo.head.branch : 'detached:' + structHash(repo, repo.head.detached, cache),
+    tracking: tracking,
+    upstream: clone(repo.upstream),
+    origin: originBranches,
+    work: clone(repo.files),
+    index: clone(repo.index),
+    stash: repo.stash.map((s) => s.msg),
+    conflicts: repo.state && repo.state.conflicts ? repo.state.conflicts.slice() : []
+  };
+}
+
+/* человекочитаемая картина истории — для объяснения, что не сошлось */
+function describe(repo) {
+  const lines = [];
+  Object.keys(repo.branches).sort().forEach((b) => {
+    const chain = R.commitList(repo, repo.branches[b]).map((s) => repo.objects[s].msg);
+    lines.push((repo.head.branch === b ? '* ' : '  ') + b + ': ' + (chain.join(' ← ') || 'нет коммитов'));
+  });
+  if (!repo.head.branch) lines.push('* HEAD отделён: ' + (repo.objects[repo.head.detached] || {}).msg);
+  return lines.join('\n');
+}
+
+const normOut = (s) => s.replace(/\b[0-9a-f]{7,40}\b/g, '…')
+  .split('\n').map((l) => l.replace(/\s+$/, '')).join('\n').replace(/\n+$/, '');
+
+/* репозиторий в том состоянии, с которого начинается задача */
+function prepareRepo(task) {
+  const repo = buildRepo(task.base || 'repo');
+  if (task.seed) task.seed(repo, { originCommit: originCommit });
+  [task.setup, task.prep].filter(Boolean).forEach((script) => C.runScript(repo, script));
+  return repo;
+}
+
+function evaluateTask(task, code) {
+  const user = prepareRepo(task), ref = prepareRepo(task);
+  const got = C.runScript(user, code);
+  const exp = C.runScript(ref, task.solution);
+  const a = snapshot(user), b = snapshot(ref);
+  const results = [];
+  const add = (ok, label, msg, extra) => results.push(Object.assign({ ok: ok, label: label, msg: ok ? '' : msg }, extra || {}));
+  // порядок ключей в объектах зависит от порядка команд, поэтому сравниваем канонично
+  const canon = (v) => (v && typeof v === 'object' && !Array.isArray(v)
+    ? Object.keys(v).sort().map((k) => k + ' ' + canon(v[k])).join('') : JSON.stringify(v));
+  const same = (x, y) => canon(x) === canon(y);
+
+  (task.check || ['graph']).forEach((c) => {
+    if (c === 'out') {
+      const ok = normOut(got.stdout) === normOut(exp.stdout);
+      add(ok, 'Вывод совпадает с эталоном', !got.stdout ? 'Команда ничего не вывела.' : 'Вывод отличается от эталонного.',
+        { expected: exp.stdout, got: got.stdout });
+    } else if (c === 'graph') {
+      const ok = same(a.branches, b.branches) && a.head === b.head;
+      add(ok, 'История и ветки совпадают с эталоном',
+        'Не сходится состояние веток или текущая ветка.', { expected: describe(ref), got: describe(user) });
+    } else if (c === 'work') {
+      const ok = same(a.work, b.work);
+      const diff = Object.keys(Object.assign({}, a.work, b.work)).filter((p) => a.work[p] !== b.work[p]);
+      add(ok, 'Файлы в рабочем каталоге совпадают', 'Отличаются файлы: ' + diff.join(', '));
+    } else if (c === 'index') {
+      const ok = same(a.index, b.index);
+      const diff = Object.keys(Object.assign({}, a.index, b.index)).filter((p) => a.index[p] !== b.index[p]);
+      add(ok, 'Содержимое индекса совпадает', 'В индексе отличаются: ' + diff.join(', '));
+    } else if (c === 'remote') {
+      add(same(a.origin, b.origin) && same(a.tracking, b.tracking) && same(a.upstream, b.upstream),
+        'Состояние origin совпадает', 'Ветки на origin или отслеживание отличаются от эталона.');
+    } else if (c === 'stash') {
+      add(same(a.stash, b.stash), 'Список stash совпадает', 'Записи stash отличаются: ' + a.stash.join(', '));
+    } else if (c === 'clean') {
+      const st = C.GIT.status(user, ['--short']).out;
+      add(st.trim() === '', 'Рабочий каталог чистый', 'Осталось незакоммиченное:\n' + st);
+    } else if (c.file) {
+      const ok = a.work[c.file] === b.work[c.file];
+      add(ok, 'Файл ' + c.file, a.work[c.file] === undefined ? 'Файла нет.' : 'Содержимое отличается от эталонного.',
+        { expected: b.work[c.file], got: a.work[c.file] });
+    }
+  });
+  [task.uses, task.uses2].filter(Boolean).forEach(([re, why]) => add(re.test(code), why, why));
+  return { results: results, transcript: got.transcript };
+}
+
+const K = { buildRepo, prepareRepo, snapshot, describe, evaluateTask, originCommit, SEED_FILES, normOut };
+
+/* ══════════════════════════════════════════════════════════════
+   ЗАДАЧИ
+   Решение и эталон выполняются на двух свежих копиях репозитория,
+   затем сравнивается то, что перечислено в check:
+     'graph'   — ветки, их история и текущая позиция HEAD
+     'work'    — файлы в рабочем каталоге
+     'index'   — содержимое индекса
+     'out'     — вывод на экран (идентификаторы коммитов не сверяются)
+     'remote'  — ветки на origin и отслеживание
+     'stash'   — список отложенных изменений
+     'clean'   — рабочий каталог без незакоммиченных изменений
+     { file }  — содержимое конкретного файла
+   base   — стартовое состояние: 'repo' (история есть) или 'fresh' (только файлы)
+   prep   — команды, выполненные до начала задачи; показаны в блоке «Уже выполнено»
+   seed   — то же, но кодом и без показа: состояние, которое нужно выяснить самому
+   uses   — [регулярка, пояснение]: конструкция, ради которой задача
+   ══════════════════════════════════════════════════════════════ */
+
+const CONFIG_HEAD = 'BASE_URL = "https://staging.shop.test"';
+const SEARCH_TEST = 'def test_search(api):\\n    assert api.search("shoes").status_code == 200\\n';
+
+const TASKS = {
+  /* ─── 01 ─── */
+  'g01-1': {
+    title: 'Только тесты в первом коммите',
+    base: 'fresh',
+    statement: '<p>В каталоге уже лежат файлы проекта, но репозитория ещё нет. Создай его и зафиксируй первым коммитом <em>только</em> каталог <code>tests</code>. Остальные файлы должны остаться неотслеживаемыми. Сообщение коммита: <code>add tests</code>.</p>',
+    hint: '<code>git add</code> принимает не только файл, но и каталог целиком. <code>git add .</code> здесь не подойдёт — добавит всё.',
+    solution: 'git init\ngit add tests\ngit commit -m "add tests"',
+    check: ['graph', 'index', 'work']
+  },
+  'g01-2': {
+    title: 'Всё, кроме секретов',
+    base: 'fresh',
+    prep: 'git init\ngit add tests\ngit commit -m "add tests"',
+    statement: '<p>Добавь вторым коммитом <code>README.md</code>, <code>conftest.py</code> и <code>config.py</code>. Файл <code>.env</code> с токеном в историю попасть не должен, а <code>.gitignore</code> в этой задаче не создавай. Сообщение: <code>add config and fixtures</code>.</p>',
+    hint: 'Перечисли нужные файлы в <code>git add</code> через пробел. Проверь результат по <code>git status --short</code>: <code>.env</code> должен остаться с пометкой <code>??</code>.',
+    solution: 'git add README.md conftest.py config.py\ngit commit -m "add config and fixtures"',
+    check: ['graph', 'index', 'work']
+  },
+  'g01-3': {
+    title: 'Секрет в списке исключений',
+    base: 'fresh',
+    prep: 'git init\ngit add tests\ngit commit -m "add tests"\ngit add README.md conftest.py config.py\ngit commit -m "add config and fixtures"',
+    statement: '<p>Сделай так, чтобы git перестал предлагать <code>.env</code> к добавлению, и закрепи это правило в истории коммитом <code>ignore env</code>. После этого <code>git status --short</code> не должен печатать ни одной строки.</p>',
+    hint: 'Правила лежат в файле <code>.gitignore</code>: <code>printf \'.env\\n\' &gt; .gitignore</code>. Сам файл правил тоже нужно закоммитить.',
+    solution: 'printf \'.env\\n\' > .gitignore\ngit add .gitignore\ngit commit -m "ignore env"',
+    check: ['graph', 'clean', 'work']
+  },
+
+  /* ─── 02 ─── */
+  'g02-1': {
+    title: 'Показать неподготовленную правку',
+    statement: '<p>Увеличь в <code>config.py</code> значение <code>TIMEOUT</code> с 30 до 45 и покажи патч изменений, которые ещё не подготовлены к коммиту.</p>',
+    hint: 'Поменять строку в файле можно через <code>sed -i \'s/старое/новое/\' файл</code>. Патч неподготовленных правок печатает <code>git diff</code> без аргументов.',
+    solution: 'sed -i \'s/TIMEOUT = 30/TIMEOUT = 45/\' config.py\ngit diff',
+    check: ['out', 'work']
+  },
+  'g02-2': {
+    title: 'Разделить две правки',
+    prep: 'sed -i \'s/TIMEOUT = 30/TIMEOUT = 45/\' config.py\nsed -i \'s/status_code == 200/status_code == 201/\' tests/test_login.py',
+    statement: '<p>В рабочем каталоге две независимые правки: в <code>config.py</code> и в <code>tests/test_login.py</code>. Подготовь к коммиту только правку конфига и покажи патчем, что именно уйдёт в коммит.</p>',
+    hint: 'Индекс собирается по файлам. Содержимое индекса против последнего коммита показывает <code>git diff --staged</code>.',
+    solution: 'git add config.py\ngit diff --staged',
+    check: ['out', 'index', 'work']
+  },
+  'g02-3': {
+    title: 'Вернуть файл к версии коммита',
+    prep: 'sed -i \'s/RETRIES = 2/RETRIES = 7/\' config.py',
+    statement: '<p>Правка в <code>config.py</code> оказалась ошибочной и нигде не нужна. Верни файл к версии из последнего коммита, ничего не коммитя. В конце рабочий каталог должен быть чистым.</p>',
+    hint: 'Файл из индекса восстанавливает <code>git restore</code>. Это необратимо: незакоммиченная правка пропадёт.',
+    solution: 'git restore config.py',
+    check: ['work', 'clean', 'graph']
+  },
+  'g02-4': {
+    title: 'Убрать из индекса, сохранив правку',
+    prep: 'sed -i \'s/TIMEOUT = 30/TIMEOUT = 45/\' config.py\ngit add config.py',
+    statement: '<p>Правка <code>config.py</code> уже лежит в индексе, но коммитить её рано. Убери файл из индекса так, чтобы сама правка осталась в рабочем каталоге.</p>',
+    hint: 'У <code>git restore</code> есть флаг, который работает с индексом, а не с файлом на диске.',
+    solution: 'git restore --staged config.py',
+    check: ['index', 'work']
+  },
+
+  /* ─── 03 ─── */
+  'g03-1': {
+    title: 'Что добавил коммит с тестом логина',
+    statement: '<p>Выведи полностью коммит, которым появился <code>tests/test_login.py</code>: метаданные и патч. Идентификатор не подглядывай — обратись к нему относительной ссылкой от <code>HEAD</code>.</p>',
+    hint: 'История: последний коммит — про корзину и конфиг, до него — про логин. <code>HEAD~1</code> — на один коммит назад.',
+    solution: 'git show HEAD~1',
+    check: ['out']
+  },
+  'g03-2': {
+    title: 'Все правки поверх старого коммита',
+    prep: 'sed -i \'s/TIMEOUT = 30/TIMEOUT = 45/\' config.py',
+    statement: '<p>Покажи одним патчем, чем текущее состояние файлов отличается от самого первого коммита в истории.</p>',
+    hint: '<code>git diff</code> принимает ссылку на коммит: сравнение пойдёт с рабочим каталогом. Первый коммит — два шага назад от <code>HEAD</code>.',
+    solution: 'git diff HEAD~2',
+    check: ['out']
+  },
+  'g03-3': {
+    title: 'История ветки до определённого коммита',
+    statement: '<p>Выведи в полном формате историю, которая заканчивается коммитом с тестом логина: сам коммит и всё, что было до него. Более поздние коммиты попасть в вывод не должны.</p>',
+    hint: '<code>git log</code> принимает ссылку: он покажет указанный коммит и его предков.',
+    solution: 'git log HEAD~1',
+    check: ['out']
+  },
+
+  /* ─── 04 ─── */
+  'g04-1': {
+    title: 'Правка в отдельной ветке',
+    statement: '<p>Создай ветку <code>fix-timeout</code>, увеличь в ней <code>TIMEOUT</code> до 60 и зафиксируй коммитом <code>raise timeout to 60</code>. В <code>main</code> ничего измениться не должно.</p>',
+    hint: 'Создать ветку и перейти в неё за один раз: <code>git switch -c имя</code>. Коммитить правку отслеживаемого файла можно через <code>git commit -am</code>.',
+    solution: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"',
+    check: ['graph', 'work']
+  },
+  'g04-2': {
+    title: 'Проверить, что main не тронут',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"',
+    statement: '<p>Вернись в <code>main</code> и выведи содержимое <code>config.py</code> — убедись, что правка осталась только в ветке.</p>',
+    hint: 'Переключение: <code>git switch main</code>. Содержимое файла печатает <code>cat</code>.',
+    solution: 'git switch main\ncat config.py',
+    check: ['out', 'graph', 'work']
+  },
+  'g04-3': {
+    title: 'Удалить невлитую ветку',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main',
+    statement: '<p>От правки таймаута решили отказаться: ветка <code>fix-timeout</code> больше не нужна, её коммит никуда не влит и восстанавливать его не планируют. Удали ветку.</p>',
+    hint: 'Обычное удаление откажется выбрасывать невлитые коммиты и подскажет, каким флагом удалить принудительно.',
+    solution: 'git branch -D fix-timeout',
+    check: ['graph']
+  },
+
+  /* ─── 05 ─── */
+  'g05-1': {
+    title: 'Влить ветку и прибраться',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main',
+    statement: '<p>Влей <code>fix-timeout</code> в <code>main</code> и удали ветку — она больше не нужна. Удаление должно пройти без принудительного флага.</p>',
+    hint: 'Слияние без расхождения историй — перемотка. После него ветка считается влитой, и <code>git branch -d</code> сработает.',
+    solution: 'git merge fix-timeout\ngit branch -d fix-timeout',
+    check: ['graph', 'work']
+  },
+  'g05-2': {
+    title: 'Сохранить след о ветке',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main',
+    statement: '<p>Влей <code>fix-timeout</code> в <code>main</code> так, чтобы в истории остался отдельный коммит слияния, хотя возможна перемотка. Ветку не удаляй.</p>',
+    hint: 'У <code>git merge</code> есть флаг, запрещающий перемотку.',
+    solution: 'git merge --no-ff fix-timeout',
+    check: ['graph', 'work']
+  },
+  'g05-3': {
+    title: 'Только перемотка',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main\nsed -i \'s/RETRIES = 2/RETRIES = 4/\' config.py\ngit commit -am "raise retries to 4"',
+    statement: '<p>Ветки разошлись: коммиты появились и в <code>main</code>, и в <code>fix-timeout</code>. Попробуй влить ветку так, чтобы git согласился только на перемотку и отказался создавать коммит слияния. Историю задача менять не должна.</p>',
+    hint: 'Нужный флаг — противоположность <code>--no-ff</code>.',
+    solution: 'git merge --ff-only fix-timeout',
+    check: ['graph', 'work']
+  },
+
+  /* ─── 06 ─── */
+  'g06-1': {
+    title: 'Какие файлы не сошлись',
+    prep: 'git switch -c feature-retries\nsed -i \'s/RETRIES = 2/RETRIES = 5/\' config.py\ngit commit -am "raise retries to 5"\ngit switch main\nsed -i \'s/RETRIES = 2/RETRIES = 3/\' config.py\ngit commit -am "raise retries to 3"',
+    statement: '<p>Влей <code>feature-retries</code> в <code>main</code> и выведи только имена файлов, которые git не смог объединить сам.</p>',
+    hint: 'После неудачного слияния список неразрешённых путей даёт <code>git diff</code> с фильтром <code>--diff-filter=U</code> и флагом <code>--name-only</code>.',
+    solution: 'git merge feature-retries\ngit diff --name-only --diff-filter=U',
+    check: ['out']
+  },
+  'g06-2': {
+    title: 'Разрешить в пользу ветки',
+    prep: 'git switch -c feature-retries\nsed -i \'s/RETRIES = 2/RETRIES = 5/\' config.py\ngit commit -am "raise retries to 5"\ngit switch main\nsed -i \'s/RETRIES = 2/RETRIES = 3/\' config.py\ngit commit -am "raise retries to 3"\ngit merge feature-retries',
+    statement: '<p>Слияние остановилось на конфликте в <code>config.py</code>: в <code>main</code> стоит <code>RETRIES = 3</code>, в ветке — <code>RETRIES = 5</code>. Оставь версию ветки, убери маркеры и заверши слияние сообщением по умолчанию.</p>',
+    hint: 'Файл короткий — проще переписать его целиком через <code>printf ... &gt; config.py</code>. Затем <code>git add</code> помечает конфликт разрешённым, а <code>git commit --no-edit</code> завершает слияние.',
+    solution: 'printf \'' + CONFIG_HEAD + '\\nTIMEOUT = 30\\nRETRIES = 5\\n\' > config.py\ngit add config.py\ngit commit --no-edit',
+    check: ['graph', 'work', 'clean']
+  },
+  'g06-3': {
+    title: 'Отменить слияние',
+    prep: 'git switch -c feature-retries\nsed -i \'s/RETRIES = 2/RETRIES = 5/\' config.py\ngit commit -am "raise retries to 5"\ngit switch main\nsed -i \'s/RETRIES = 2/RETRIES = 3/\' config.py\ngit commit -am "raise retries to 3"\ngit merge feature-retries',
+    statement: '<p>Решение по конфликту отложили. Верни репозиторий в состояние до слияния: без маркеров в файлах, без коммита слияния и с чистым рабочим каталогом.</p>',
+    hint: 'У <code>git merge</code> есть флаг для отмены незавершённого слияния.',
+    solution: 'git merge --abort',
+    check: ['graph', 'work', 'clean']
+  },
+
+  /* ─── 07 ─── */
+  'g07-1': {
+    title: 'Опечатка в сообщении',
+    prep: 'printf \'' + SEARCH_TEST + '\' > tests/test_search.py\ngit add tests/test_search.py\ngit commit -m "add serach test"',
+    statement: '<p>В сообщении последнего коммита опечатка: <code>add serach test</code>. Исправь её на <code>add search test</code>, не добавляя новый коммит поверх.</p>',
+    hint: 'Последний коммит заменяется командой <code>git commit --amend</code> с новым сообщением.',
+    solution: 'git commit --amend -m "add search test"',
+    check: ['graph', 'clean']
+  },
+  'g07-2': {
+    title: 'Забытый файл в коммите',
+    prep: 'printf \'' + SEARCH_TEST + '\' > tests/test_search.py\ngit add tests/test_search.py\ngit commit -m "add search test"\nprintf \'\\n\\n@pytest.fixture\\ndef search_api(api):\\n    return api\\n\' >> conftest.py',
+    statement: '<p>К последнему коммиту забыли фикстуру: правка <code>conftest.py</code> осталась незакоммиченной. Добавь её в тот же коммит, не меняя сообщение и не создавая новый.</p>',
+    hint: 'Сначала положи правку в индекс, потом замени последний коммит. Без <code>-m</code> сообщение остаётся прежним.',
+    solution: 'git add conftest.py\ngit commit --amend',
+    check: ['graph', 'clean']
+  },
+  'g07-3': {
+    title: 'Пересобрать последний коммит',
+    prep: 'sed -i \'s/TIMEOUT = 30/TIMEOUT = 45/\' config.py\nsed -i \'s/status_code == 200/status_code == 201/\' tests/test_login.py\ngit commit -am "fix timeout and login test"',
+    statement: '<p>Последний коммит смешал две несвязанные правки. Убери коммит из истории так, чтобы его изменения остались подготовленными в индексе и их можно было разложить по двум коммитам. Сами коммиты пересобирать не нужно.</p>',
+    hint: 'Из трёх режимов <code>git reset</code> нужен тот, который двигает только ветку и не трогает ни индекс, ни файлы.',
+    solution: 'git reset --soft HEAD~1',
+    check: ['graph', 'index', 'work']
+  },
+  'g07-4': {
+    title: 'Отменить опубликованный коммит',
+    statement: '<p>Последний коммит уже на origin, поэтому историю переписывать нельзя. Отмени его изменения новым коммитом с сообщением по умолчанию.</p>',
+    hint: '<code>git revert</code> создаёт обратный коммит. Флаг <code>--no-edit</code> берёт стандартное сообщение вида <code>Revert "…"</code>.',
+    solution: 'git revert --no-edit HEAD',
+    check: ['graph', 'work']
+  },
+  'g07-5': {
+    title: 'Вернуть потерянный коммит',
+    prep: 'printf \'' + SEARCH_TEST + '\' > tests/test_search.py\ngit add tests/test_search.py\ngit commit -m "add search test"\ngit reset --hard HEAD~1',
+    statement: '<p>После <code>git reset --hard</code> коммит <code>add search test</code> пропал из истории ветки, но он никуда не делся. Найди его в журнале перемещений HEAD и верни ветку на него вместе с файлами.</p>',
+    hint: 'Журнал печатает <code>git reflog</code>. На запись из него можно сослаться прямо в команде: <code>HEAD@{1}</code> — это позиция HEAD до последнего перемещения.',
+    solution: 'git reflog\ngit reset --hard HEAD@{1}',
+    check: ['graph', 'work']
+  },
+
+  /* ─── 08 ─── */
+  'g08-1': {
+    title: 'Перенести ветку на свежий main',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main\nprintf \'' + SEARCH_TEST + '\' > tests/test_search.py\ngit add tests/test_search.py\ngit commit -m "add search test"',
+    statement: '<p>Пока вы правили таймаут, в <code>main</code> появился новый коммит. Перенеси коммит ветки <code>fix-timeout</code> на свежий <code>main</code>, чтобы история стала линейной. Ветку <code>main</code> двигать не нужно.</p>',
+    hint: 'Переносят <em>текущую</em> ветку, поэтому сначала переключитесь в неё, а потом укажите новую базу: <code>git rebase main</code>.',
+    solution: 'git switch fix-timeout\ngit rebase main',
+    check: ['graph', 'work']
+  },
+  'g08-2': {
+    title: 'Конфликт при переносе',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 20/\' config.py\ngit commit -am "lower timeout to 20"\ngit switch fix-timeout\ngit rebase main',
+    statement: '<p>Перенос остановился на конфликте в <code>config.py</code>: обе ветки правили строку <code>TIMEOUT</code>. Оставь значение из переносимого коммита — <code>TIMEOUT = 60</code> — и заверши перенос.</p>',
+    hint: 'Перепиши файл целиком через <code>printf</code>, пометь разрешение через <code>git add</code> и продолжи операцию флагом <code>--continue</code>.',
+    solution: 'printf \'' + CONFIG_HEAD + '\\nTIMEOUT = 60\\nRETRIES = 2\\n\' > config.py\ngit add config.py\ngit rebase --continue',
+    check: ['graph', 'work', 'clean']
+  },
+  'g08-3': {
+    title: 'Отменить перенос',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit switch main\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 20/\' config.py\ngit commit -am "lower timeout to 20"\ngit switch fix-timeout\ngit rebase main',
+    statement: '<p>Конфликт оказался сложнее, чем ожидалось. Прерви перенос и верни ветку <code>fix-timeout</code> в то состояние, в котором она была до <code>git rebase</code>.</p>',
+    hint: 'У <code>git rebase</code> тот же набор флагов продолжения и отмены, что у слияния.',
+    solution: 'git rebase --abort',
+    check: ['graph', 'work', 'clean']
+  },
+
+  /* ─── 09 ─── */
+  'g09-1': {
+    title: 'Отложить незавершённое',
+    prep: 'sed -i \'s/RETRIES = 2/RETRIES = 6/\' config.py\nprintf \'' + SEARCH_TEST + '\' > tests/test_search.py',
+    statement: '<p>В работе две вещи: правка <code>config.py</code> и новый файл <code>tests/test_search.py</code>. Нужно срочно посмотреть чистый <code>main</code>. Отложи всё незакоммиченное <em>вместе с новым файлом</em> под пометкой <code>wip retries</code> и убедись, что рабочий каталог чист.</p>',
+    hint: 'Новые файлы попадают в stash только с флагом <code>-u</code>, пометка задаётся через <code>-m</code>.',
+    solution: 'git stash push -u -m "wip retries"\ngit status --short',
+    check: ['stash', 'clean', 'work']
+  },
+  'g09-2': {
+    title: 'Вернуть отложенное',
+    prep: 'sed -i \'s/RETRIES = 2/RETRIES = 6/\' config.py\nprintf \'' + SEARCH_TEST + '\' > tests/test_search.py\ngit stash push -u -m "wip retries"',
+    statement: '<p>Срочная задача закрыта. Верни отложенные правки в рабочий каталог и убери запись из списка отложенного — она больше не нужна.</p>',
+    hint: 'Одна команда и применяет запись, и удаляет её из списка. Проверить можно через <code>git stash list</code>.',
+    solution: 'git stash pop',
+    check: ['work', 'stash']
+  },
+
+  /* ─── 10 ─── */
+  'g10-1': {
+    title: 'Опубликовать ветку',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"',
+    statement: '<p>Опубликуй ветку <code>fix-timeout</code> на origin и настрой отслеживание, чтобы дальше в этой ветке хватало <code>git push</code> без имён.</p>',
+    hint: 'Отслеживание задаётся флагом <code>-u</code> при первой отправке.',
+    solution: 'git push -u origin fix-timeout',
+    check: ['remote', 'graph']
+  },
+  'g10-2': {
+    title: 'Что появилось на сервере',
+    seed: (repo, h) => { h.originCommit(repo, { 'tests/test_search.py': 'def test_search(api):\n    assert api.search("shoes").status_code == 200\n' }, 'add search test'); },
+    prepNote: 'Коллега отправил в origin/main коммит, которого у вас ещё нет.',
+    statement: '<p>Коллега что-то отправил в <code>main</code>. Узнай, что именно, не меняя свою ветку и файлы: получи изменения с сервера и выведи состояние ветки относительно него.</p>',
+    hint: 'Скачать без слияния — <code>git fetch</code>. Насколько ветка отстала, покажет <code>git status</code>.',
+    solution: 'git fetch origin\ngit status',
+    check: ['out', 'graph', 'work']
+  },
+  'g10-3': {
+    title: 'Свой коммит поверх чужих',
+    seed: (repo, h) => { h.originCommit(repo, { 'tests/test_search.py': 'def test_search(api):\n    assert api.search("shoes").status_code == 200\n' }, 'add search test'); },
+    prepNote: 'Коллега отправил в origin/main свой коммит.',
+    prep: 'sed -i \'s/RETRIES = 2/RETRIES = 4/\' config.py\ngit commit -am "raise retries to 4"',
+    statement: '<p>На сервере появился чужой коммит, а у вас есть свой, ещё не отправленный. Получи чужие изменения и положи свой коммит поверх них — без коммита слияния.</p>',
+    hint: 'Скачивание и интеграцию делает одна команда; нужный способ интеграции задаётся флагом <code>--rebase</code>.',
+    solution: 'git pull --rebase',
+    check: ['graph', 'work', 'remote']
+  },
+  'g10-4': {
+    title: 'Отправить переписанную ветку',
+    prep: 'git switch -c fix-timeout\nsed -i \'s/TIMEOUT = 30/TIMEOUT = 60/\' config.py\ngit commit -am "raise timeout to 60"\ngit push -u origin fix-timeout\ngit commit --amend -m "raise timeout to 60 seconds"',
+    statement: '<p>Ветка уже опубликована, но после правки сообщения её последний коммит заменён новым — обычный <code>git push</code> теперь отклоняется. Отправь ветку, перезаписав её на сервере, но безопасным способом: команда должна отказаться, если на сервере появились чужие коммиты.</p>',
+    hint: 'Безопасная перезапись — <code>--force-with-lease</code>: она сверяет, что ветка на сервере осталась такой, какой вы её видели.',
+    solution: 'git push --force-with-lease origin fix-timeout',
+    check: ['remote', 'graph'],
+    uses: [/--force-with-lease/, 'Нужна безопасная перезапись: --force-with-lease']
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   ИНТЕРФЕЙС: задачи, редактор, дополнение, прогресс, песочница
+   ══════════════════════════════════════════════════════════════ */
+const LS_CODE = 'qa-git:v1:code:';
+const LS_SOLVED = 'qa-git:v1:solved';
+
+function loadSolved() {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_SOLVED) || '[]')); } catch (e) { return new Set(); }
+}
+function saveSolved(set) { try { localStorage.setItem(LS_SOLVED, JSON.stringify([...set])); } catch (e) {} }
+function loadCode(id) { try { return localStorage.getItem(LS_CODE + id); } catch (e) { return null; } }
+function saveCode(id, code) { try { localStorage.setItem(LS_CODE + id, code); } catch (e) {} }
+const solved = loadSolved();
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ── подсветка: команда, подкоманда, флаги, строки ── */
+function highlightGit(src) {
+  const token = /(#.*$)|('[^']*'?|"(?:\\.|[^"\\])*"?)|(&gt;&gt;|&gt;|\|\||&amp;&amp;|[|;])|(\s+)|([^\s|;'"]+)/g;
+  return src.split('\n').map((line) => {
+    let out = '', idx = 0, m;
+    const html = esc(line);
+    token.lastIndex = 0;
+    while ((m = token.exec(html)) !== null) {
+      if (m[1] !== undefined) { out += '<span class="cm">' + m[1] + '</span>'; break; }
+      if (m[2] !== undefined) { out += '<span class="st">' + m[2] + '</span>'; idx++; continue; }
+      if (m[3] !== undefined) { out += '<span class="op">' + m[3] + '</span>'; idx = 0; continue; }
+      if (m[4] !== undefined) { out += m[4]; continue; }
+      const w = m[5];
+      if (idx === 0) out += '<span class="fn">' + w + '</span>';
+      else if (idx === 1 && !w.startsWith('-')) out += '<span class="kw">' + w + '</span>';
+      else if (w.startsWith('-')) out += '<span class="kw">' + w + '</span>';
+      else out += w;
+      idx++;
+    }
+    return out;
+  }).join('\n') + '\n';
+}
+
+/* ── вывод терминала ── */
+const promptHtml = (branch) => '<span class="pr">qa@shop-tests:<b>~/shop-tests</b>'
+  + (branch ? ' <i>(' + esc(branch) + ')</i>' : '') + '$</span> ';
+
+function renderTranscript(transcript) {
+  return '<div class="term-out"><span class="oh">ТЕРМИНАЛ</span>' + transcript.map((t) =>
+    '<div class="term-line">' + promptHtml(t.branch) + highlightGit(t.line).replace(/\n$/, '') + '</div>'
+    + (t.out ? '<div>' + esc(t.out.replace(/\n$/, '')) + '</div>' : '')
+    + (t.err ? '<div><span class="term-err">' + esc(t.err.replace(/\n$/, '')) + '</span></div>' : '')
+  ).join('') + '</div>';
+}
+
+/* ── дополнение по Tab: команды главы, пути и ветки ── */
+const CHAPTER_VOCAB = {
+  g01: ['git init', 'git status', 'git add', 'git commit', 'git log'],
+  g02: ['git diff', 'git restore', 'git rm'],
+  g03: ['git show'],
+  g04: ['git branch', 'git switch', 'git checkout'],
+  g05: ['git merge'],
+  g06: [],
+  g07: ['git reset', 'git revert', 'git reflog'],
+  g08: ['git rebase'],
+  g09: ['git stash'],
+  g10: ['git remote', 'git fetch', 'git pull', 'git push']
+};
+const SHELL_VOCAB = ['cat', 'ls', 'printf', 'sed', 'echo', 'touch', 'rm', 'pwd'];
+const CHAPTER_ORDER = Object.keys(CHAPTER_VOCAB);
+function vocabUpTo(chapter) {
+  const upto = CHAPTER_ORDER.slice(0, CHAPTER_ORDER.indexOf(chapter) + 1);
+  return SHELL_VOCAB.concat(...upto.map((c) => CHAPTER_VOCAB[c]));
+}
+
+function gitCompletions(value, pos, ctx) {
+  const left = value.slice(0, pos);
+  const word = left.match(/[^\s|;'"]*$/)[0];
+  const start = pos - word.length;
+  const before = left.slice(0, start);
+  if (!word || word.startsWith('-')) return null;
+  const lineStart = /(?:^|[\n;|])\s*$/.test(before);
+  const afterGit = /(?:^|[\n;|])\s*git\s+$/.test(before);
+  let words;
+  if (lineStart) {
+    words = [...new Set(ctx.vocab().map((v) => v.split(' ')[0]))].filter((w) => w.startsWith(word) && w !== word);
+  } else if (afterGit) {
+    words = ctx.vocab().filter((v) => v.startsWith('git ')).map((v) => v.split(' ')[1])
+      .filter((w) => w.startsWith(word) && w !== word);
+  } else {
+    const repo = ctx.repo();
+    const paths = Object.keys(repo.files);
+    const branches = Object.keys(repo.branches).concat(Object.keys(repo.tracking));
+    words = [...new Set(paths.concat(branches))].filter((w) => w.startsWith(word) && w !== word);
+  }
+  return { start: start, prefix: word, words: [...new Set(words)].sort((a, b) => a.length - b.length || a.localeCompare(b)) };
+}
+
+let cycle = null;
+const HINT_MAX = 8;
+
+function renderHint(hint, words, index, picked) {
+  const shown = words.slice(0, HINT_MAX).map((w, i) => (i === index ? '<b>' + esc(w) + '</b>' : esc(w))).join(' · ');
+  const note = words.length > 1 ? (picked ? 'Tab — следующий' : 'Tab — вставить, ещё раз — следующий') : 'Tab — вставить';
+  hint.hidden = false;
+  hint.innerHTML = shown + (words.length > HINT_MAX ? ' …' : '') + '<i>    ' + note + '</i>';
+}
+
+function refreshHint(ta, ctx, hint) {
+  const pos = ta.selectionStart;
+  if (pos !== ta.selectionEnd || /[^\s|;'"]/.test(ta.value.charAt(pos))) { hint.hidden = true; return; }
+  const c = gitCompletions(ta.value, pos, ctx);
+  if (c && c.prefix && c.words.length) renderHint(hint, c.words, -1, false); else hint.hidden = true;
+}
+
+function tryComplete(ta, ctx, hint) {
+  const pos = ta.selectionStart;
+  if (pos !== ta.selectionEnd) return;
+  const cycling = cycle && cycle.ta === ta && cycle.end === pos;
+  const c = cycling ? cycle : gitCompletions(ta.value, pos, ctx);
+  if (!c || !c.words.length) return;
+  const index = cycling ? (cycle.index + 1) % c.words.length : 0;
+  const word = c.words[index];
+  ta.value = ta.value.slice(0, c.start) + word + ta.value.slice(pos);
+  const end = c.start + word.length;
+  ta.selectionStart = ta.selectionEnd = end;
+  cycle = c.words.length > 1 ? { ta: ta, start: c.start, end: end, words: c.words, index: index } : null;
+  ta.dispatchEvent(new Event('input'));
+  if (c.words.length > 1) renderHint(hint, c.words, index, true); else hint.hidden = true;
+}
+
+function autoSize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(64, ta.scrollHeight + 4) + 'px';
+}
+
+/* ── задачи ── */
+const allTasks = [];
+const prepRepos = {};
+function taskRepo(task) {
+  if (!prepRepos[task.id]) prepRepos[task.id] = prepareRepo(task);
+  return prepRepos[task.id];
+}
+
+function refreshTask(id) {
+  const el = document.querySelector('.task[data-task="' + id + '"]');
+  const isSolved = solved.has(id);
+  el.classList.toggle('solved', isSolved);
+  el.querySelector('.task-status').textContent = isSolved ? '✓ решено' : 'не решено';
+}
+function markSolved(id, value) {
+  if (value) solved.add(id); else solved.delete(id);
+  saveSolved(solved);
+  refreshTask(id);
+  refreshProgress();
+}
+function refreshProgress() {
+  const done = allTasks.filter((t) => solved.has(t.id)).length;
+  document.getElementById('p-done').textContent = done;
+  document.getElementById('p-total').textContent = allTasks.length;
+  document.getElementById('p-fill').style.width = allTasks.length ? (done / allTasks.length * 100) + '%' : '0%';
+  CHAPTER_ORDER.forEach((ch) => {
+    const list = allTasks.filter((t) => t.chapter === ch);
+    const n = list.filter((t) => solved.has(t.id)).length;
+    const badge = document.querySelector('[data-chapter-badge="' + ch + '"]');
+    if (badge) {
+      badge.textContent = n + ' / ' + list.length;
+      badge.className = 'section-badge' + (n === 0 ? ' zero' : n < list.length ? ' partial' : '');
+    }
+    const toc = document.querySelector('[data-toc-done="' + ch + '"]');
+    if (toc) { toc.textContent = n + '/' + list.length; toc.className = 'done' + (n === list.length ? ' full' : ''); }
+  });
+}
+
+function caseHtml(c) {
+  const expected = !c.ok && c.expected !== undefined && c.expected !== null
+    ? '<div class="case-out"><span class="oh">ОЖИДАЛОСЬ</span>' + (esc(String(c.expected).replace(/\n$/, '').slice(0, 3000)) || '(пусто)') + '</div>' : '';
+  return '<div class="case ' + (c.ok ? 'pass' : 'fail') + '"><div class="case-head"><span class="case-mark">' + (c.ok ? '✓' : '✗')
+    + '</span><span class="case-label">' + esc(c.label) + '</span></div>'
+    + (c.msg ? '<div class="case-msg">' + esc(c.msg) + '</div>' : '') + expected + '</div>';
+}
+
+document.querySelectorAll('.task[data-task]').forEach((el) => {
+  const id = el.dataset.task;
+  const task = TASKS[id];
+  if (!task) return;
+  task.id = id;
+  task.chapter = id.split('-')[0];
+  allTasks.push(task);
+  const num = id.replace(/^g(\d+)-(\d+)$/, '$1.$2');
+  const already = task.prep
+    ? '<div class="hl" style="margin:0 0 12px;"><span class="hl-label">Уже выполнено</span><div class="code-block" style="margin-top:6px;">'
+      + highlightGit(task.prep).replace(/\n$/, '') + '</div></div>'
+    : task.prepNote
+      ? '<div class="hl" style="margin:0 0 12px;"><span class="hl-label">Уже произошло</span>' + task.prepNote + '</div>' : '';
+  el.innerHTML = '<div class="task-head"><span class="task-num">ЗАДАЧА ' + num + '</span><span class="task-title">' + task.title
+    + '</span><span class="task-status">не решено</span></div><div class="task-body"><div class="task-statement">' + task.statement + '</div>'
+    + already
+    + '<details class="hint"><summary>Подсказка</summary><div class="inner">' + task.hint + '</div></details>'
+    + '<div class="editor-wrap"><div class="editor-bar"><span class="dot"></span> git · qa@shop-tests:~/shop-tests</div>'
+    + '<div class="editor-stack"><pre class="editor-hl" aria-hidden="true"></pre><textarea class="editor" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Команды для задачи ' + num + '"></textarea></div>'
+    + '<div class="cmp-hint" hidden></div></div><div class="task-actions"><button class="btn btn-run">▶ Выполнить и проверить</button>'
+    + '<button class="btn btn-ghost btn-reset">Очистить</button><button class="btn btn-ghost btn-toggle-solution">Показать решение</button>'
+    + '<span class="run-note">Ctrl + Enter · Tab — дополнить</span></div><div class="results"></div>'
+    + '<details class="solution" hidden><summary>Эталонное решение</summary><div class="inner"><div class="code-block">'
+    + highlightGit(task.solution).replace(/\n$/, '') + '</div></div></details></div>';
+
+  const editor = el.querySelector('.editor'), hl = el.querySelector('.editor-hl'), hint = el.querySelector('.cmp-hint');
+  const results = el.querySelector('.results'), solBtn = el.querySelector('.btn-toggle-solution'), solution = el.querySelector('.solution');
+  const ctx = { vocab: () => vocabUpTo(task.chapter), repo: () => taskRepo(task) };
+  const sync = () => { hl.innerHTML = highlightGit(editor.value); autoSize(editor); };
+  const saved = loadCode(id);
+  editor.value = saved !== null ? saved : (task.starter || '');
+  sync();
+
+  const run = () => {
+    const code = editor.value;
+    if (!code.trim()) { results.innerHTML = '<div class="verdict warn">Редактор пуст — напиши команду.</div>'; return; }
+    let r;
+    try { r = evaluateTask(task, code); } catch (err) {
+      console.error(err);
+      results.innerHTML = '<div class="verdict bad">Эмулятор не справился с этой строкой (' + esc(err.message) + '). Попробуй записать команду иначе.</div>';
+      return;
+    }
+    const passed = r.results.filter((x) => x.ok).length, allOk = passed === r.results.length;
+    const firstBad = r.results.find((x) => !x.ok);
+    results.innerHTML = renderTranscript(r.transcript)
+      + '<div class="verdict ' + (allOk ? 'ok' : 'bad') + '">' + (allOk
+        ? 'Задача решена — пройдены все проверки (' + r.results.length + ')'
+        : 'Пройдено ' + passed + ' из ' + r.results.length + ' · первая непройденная:') + '</div>'
+      + (allOk ? '' : caseHtml(firstBad))
+      + (r.results.length > 1 ? '<details class="all-cases"><summary>Все проверки (' + r.results.length + ')</summary><div class="inner">'
+        + r.results.map(caseHtml).join('') + '</div></details>' : '');
+    if (allOk) markSolved(id, true); else if (solved.has(id)) markSolved(id, false);
+  };
+
+  editor.addEventListener('input', () => { saveCode(id, editor.value); sync(); refreshHint(editor, ctx, hint); });
+  editor.addEventListener('click', () => refreshHint(editor, ctx, hint));
+  editor.addEventListener('blur', () => { cycle = null; hint.hidden = true; });
+  editor.addEventListener('scroll', () => { hl.scrollTop = editor.scrollTop; hl.scrollLeft = editor.scrollLeft; });
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { cycle = null; hint.hidden = true; return; }
+    if (e.key !== 'Tab') { cycle = null; hint.hidden = true; }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); return; }
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); tryComplete(editor, ctx, hint); }
+  });
+  el.querySelector('.btn-run').addEventListener('click', run);
+  el.querySelector('.btn-reset').addEventListener('click', () => {
+    editor.value = task.starter || '';
+    saveCode(id, editor.value);
+    sync();
+    results.innerHTML = '';
+  });
+  solBtn.addEventListener('click', () => {
+    solution.hidden = !solution.hidden;
+    solution.open = !solution.hidden;
+    solBtn.textContent = solution.hidden ? 'Показать решение' : 'Скрыть решение';
+  });
+  refreshTask(id);
+});
+refreshProgress();
+
+document.getElementById('reset-progress').addEventListener('click', () => {
+  if (!confirm('Сбросить отметки о решённых задачах? Написанные команды останутся на месте.')) return;
+  solved.clear();
+  saveSolved(solved);
+  allTasks.forEach((t) => refreshTask(t.id));
+  refreshProgress();
+});
+
+/* ── песочница: живой терминал на копии репозитория ── */
+(function sandbox() {
+  const screen = document.getElementById('sb-screen');
+  const input = document.getElementById('sb-input');
+  const promptEl = document.getElementById('sb-prompt');
+  const hint = document.getElementById('sb-hint');
+  let repo, history = [], histIdx = null;
+  const ctx = { vocab: () => SHELL_VOCAB.concat(...CHAPTER_ORDER.map((c) => CHAPTER_VOCAB[c])), repo: () => repo };
+  const welcome = () => {
+    screen.innerHTML = '<span class="term-note"># Копия репозитория shop-tests. Начни с git status, git log --oneline или git branch</span>\n';
+  };
+  const setPrompt = () => { promptEl.innerHTML = promptHtml(curBranch(repo) || 'HEAD detached').replace(/ $/, ''); };
+  const reset = () => { repo = buildRepo('repo'); history = []; histIdx = null; welcome(); setPrompt(); };
+  const append = (html) => { screen.insertAdjacentHTML('beforeend', html); screen.scrollTop = screen.scrollHeight; };
+  reset();
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { cycle = null; hint.hidden = true; return; }
+    if (e.key !== 'Tab') { cycle = null; hint.hidden = true; }
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); tryComplete(input, ctx, hint); return; }
+    if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); screen.innerHTML = ''; return; }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!history.length) return;
+      if (histIdx === null) histIdx = history.length;
+      histIdx = Math.min(history.length, Math.max(0, histIdx + (e.key === 'ArrowUp' ? -1 : 1)));
+      input.value = histIdx === history.length ? '' : history[histIdx];
+      return;
+    }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const line = input.value;
+    input.value = '';
+    histIdx = null;
+    const branch = curBranch(repo) || 'HEAD detached';
+    let res = { out: '', err: '' };
+    if (line.trim()) {
+      history.push(line);
+      try { res = runLine(repo, line); } catch (err) {
+        console.error(err);
+        res = { out: '', err: 'эмулятор не справился с этой строкой: ' + err.message + '\n' };
+      }
+    }
+    append('<div class="term-line">' + promptHtml(branch) + highlightGit(line).replace(/\n$/, '') + '</div>'
+      + (res.out ? '<div>' + esc(res.out.replace(/\n$/, '')) + '</div>' : '')
+      + (res.err ? '<div><span class="term-err">' + esc(res.err.replace(/\n$/, '')) + '</span></div>' : ''));
+    setPrompt();
+  });
+  input.addEventListener('input', () => refreshHint(input, ctx, hint));
+  input.addEventListener('blur', () => { cycle = null; hint.hidden = true; });
+  screen.addEventListener('click', () => { if (!getSelection().toString()) input.focus(); });
+  document.getElementById('sb-reset').addEventListener('click', () => { reset(); input.focus(); });
+})();
+
+/* ── кнопка наверх ── */
+const scrollBtn = document.querySelector('.scroll-top');
+if (scrollBtn) {
+  window.addEventListener('scroll', () => scrollBtn.classList.toggle('visible', window.scrollY > 300));
+  scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
 </script>
 
 </body>
