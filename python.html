@@ -552,7 +552,9 @@
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
-        <p>На собесе для QA-автоматизатора кодинг обычно middle-уровня: разобрать строку, посчитать что-то в списке, объединить данные. Четыре базовые структуры:</p>
+        <p><strong>Python</strong> — высокоуровневый язык общего назначения с динамической типизацией и автоматическим управлением памятью. Исходный код обычно компилируется в байткод и выполняется виртуальной машиной интерпретатора. В QA его используют для автотестов, генерации данных, API-клиентов, служебных скриптов и работы с CI/CD.</p>
+        <p><strong>Основные встроенные типы:</strong> числа <code>int</code>, <code>float</code>, <code>complex</code>; логический <code>bool</code>; отсутствие значения <code>None</code>; текст и байты <code>str</code>, <code>bytes</code>, <code>bytearray</code>; коллекции <code>list</code>, <code>tuple</code>, <code>range</code>, <code>dict</code>, <code>set</code>, <code>frozenset</code>.</p>
+        <p>На собесе для QA-автоматизатора часто нужно разобрать строку, посчитать что-то в списке или объединить данные. Четыре базовые структуры:</p>
         <table>
           <thead><tr><th>Структура</th><th>Что это</th><th>Когда</th></tr></thead>
           <tbody>
@@ -562,6 +564,8 @@
             <tr><td><code>tuple</code></td><td>неизменяемый список</td><td>фиксированный набор (координаты, запись)</td></tr>
           </tbody>
         </table>
+        <p><strong><code>list</code> vs <code>tuple</code>.</strong> Оба сохраняют порядок и допускают дубликаты, но список изменяемый, а кортеж — нет. Кортеж с хешируемыми элементами можно использовать как ключ <code>dict</code> или элемент <code>set</code>; список нельзя. Выбор показывает намерение: изменяемая коллекция — <code>list</code>, фиксированная запись — <code>tuple</code>.</p>
+        <p><strong>Hashable-объект</strong> имеет хеш, который не меняется за время его жизни, и согласованное сравнение: если <code>a == b</code>, их хеши обязаны совпадать. Только такие объекты могут быть ключами <code>dict</code> и элементами <code>set</code>. Обычно хешируемы числа, строки, <code>frozenset</code> и кортежи из хешируемых элементов; изменяемые <code>list</code>, <code>dict</code> и <code>set</code> — нет.</p>
       </div>
 
       <hr class="lvl-divider">
@@ -614,7 +618,7 @@
 
       <div class="lvl lvl-1">
         <span class="lvl-tag">L1 · Основы</span>
-        <p>Три базовых вопроса по самому языку:</p>
+        <p>Базовые вопросы по самому языку:</p>
         <ul>
           <li><strong>Изменяемые vs неизменяемые типы.</strong> Mutable: <code>list</code>, <code>dict</code>, <code>set</code>. Immutable: <code>int</code>, <code>str</code>, <code>tuple</code>, <code>frozenset</code>. Неизменяемые нельзя поменять на месте — создаётся новый объект</li>
           <li><strong><code>is</code> vs <code>==</code>.</strong> <code>==</code> сравнивает <em>значения</em> (равны ли). <code>is</code> сравнивает <em>идентичность</em> (тот же объект в памяти)</li>
@@ -623,6 +627,28 @@
         <div class="code-block">a = [<span class="val">1</span>, <span class="val">2</span>]; b = [<span class="val">1</span>, <span class="val">2</span>]
 a == b   <span class="cm"># True — значения равны</span>
 a <span class="kw">is</span> b   <span class="cm"># False — разные объекты в памяти</span></div>
+
+        <p><strong>Функции.</strong> Объявляются через <code>def</code>, вызываются круглыми скобками и возвращают результат через <code>return</code>. Без явного <code>return</code> результатом будет <code>None</code>. Функция — обычный объект: её можно сохранить в переменную, передать аргументом или вернуть из другой функции.</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">add</span>(a, b=<span class="val">0</span>):
+    <span class="kw">return</span> a + b
+
+result = <span class="fn">add</span>(<span class="val">2</span>, b=<span class="val">3</span>)   <span class="cm"># 5</span></div>
+
+        <p><strong>Как передаются аргументы.</strong> Точная модель — <em>call by sharing</em>: параметр становится локальным именем, которое указывает на переданный объект. Изменение мутабельного объекта видно снаружи, а переприсваивание параметра меняет только локальную ссылку.</p>
+        <div class="code-block"><span class="kw">def</span> <span class="fn">change</span>(number, items):
+    number += <span class="val">1</span>       <span class="cm"># новое локальное число; снаружи не изменится</span>
+    items.<span class="fn">append</span>(<span class="val">4</span>)  <span class="cm"># тот же список; изменение видно снаружи</span></div>
+
+        <p><strong>Условия и циклы.</strong> В цепочке <code>if</code> / <code>elif</code> / <code>else</code> выполняется первая истинная ветка. <code>for</code> перебирает элементы итерируемого объекта; <code>while</code> повторяет блок, пока истинно условие, поэтому подходит, когда число итераций заранее неизвестно.</p>
+        <div class="code-block"><span class="kw">if</span> status == <span class="val">200</span>:
+    result = <span class="st">"ok"</span>
+<span class="kw">elif</span> status == <span class="val">404</span>:
+    result = <span class="st">"not found"</span>
+<span class="kw">else</span>:
+    result = <span class="st">"error"</span>
+
+<span class="kw">for</span> item <span class="kw">in</span> items: ...   <span class="cm"># перебор коллекции</span>
+<span class="kw">while</span> task_pending: ...       <span class="cm"># повторение по условию</span></div>
       </div>
 
       <hr class="lvl-divider">
@@ -644,6 +670,20 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
 
         <p><strong><code>*args</code> и <code>**kwargs</code></strong> — переменное число аргументов: <code>*args</code> собирает позиционные в tuple, <code>**kwargs</code> — именованные в dict. Распаковка работает и наоборот: <code>func(*list, **dict)</code>.</p>
 
+        <p><strong>Файлы, пути и модуль <code>os</code>.</strong> Файл лучше открывать через <code>with</code>: он закроется и при успешном выполнении, и при исключении. Режимы: <code>r</code> — чтение, <code>w</code> — запись с перезаписью, <code>a</code> — добавление, <code>b</code> — бинарные данные. Для текста явно указывай <code>encoding="utf-8"</code>.</p>
+        <div class="code-block"><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> os
+
+path = <span class="fn">Path</span>(<span class="st">"report.txt"</span>)
+<span class="kw">with</span> path.<span class="fn">open</span>(<span class="st">"r"</span>, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> file:
+    text = file.<span class="fn">read</span>()
+
+<span class="kw">with</span> path.<span class="fn">open</span>(<span class="st">"w"</span>, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> file:
+    file.<span class="fn">write</span>(<span class="st">"passed\n"</span>)
+
+base_url = os.environ.<span class="fn">get</span>(<span class="st">"BASE_URL"</span>)</div>
+        <p><code>os</code> даёт доступ к переменным окружения, каталогам и функциям ОС. В новом коде пути обычно удобнее собирать через <code>pathlib</code>, а внешние команды запускать через <code>subprocess</code>. JSON и CSV следует читать профильными парсерами, а не разбирать строками вручную.</p>
+
         <p><strong>Полезное:</strong> f-strings (<code>f"{name}: {x}"</code>), <code>enumerate</code> (индекс + элемент), <code>zip</code> (пара списков), распаковка (<code>a, *rest = nums</code>).</p>
       </div>
 
@@ -651,7 +691,7 @@ nums[-<span class="val">1</span>]    <span class="cm"># последний</span
 
       <div class="lvl lvl-3">
         <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Генераторы (<code>yield</code>)</strong> — ленивые: отдают значения по одному, не держат всё в памяти. Незаменимы для больших данных/логов:</p>
+        <p><strong>Генераторы (<code>yield</code>)</strong> — ленивые: вызов функции с <code>yield</code> только создаёт генератор, а тело начинает выполняться при первом <code>next()</code>. Каждый <code>yield</code> отдаёт значение и сохраняет состояние до следующего запроса. После завершения функции генератор выбрасывает <code>StopIteration</code>. Такой подход не держит все данные в памяти и удобен для больших файлов и потоков данных:</p>
         <div class="code-block"><span class="kw">def</span> <span class="fn">read_large_file</span>(path):
     <span class="kw">with</span> <span class="fn">open</span>(path) <span class="kw">as</span> f:
         <span class="kw">for</span> line <span class="kw">in</span> f:
@@ -684,6 +724,7 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
         n += <span class="val">1</span>
         <span class="kw">return</span> n
     <span class="kw">return</span> inc</div>
+        <p><strong>LEGB и late binding.</strong> Имя ищется последовательно в Local, Enclosing, Global и Builtins. Замыкание хранит ссылку на переменную из внешней области, а не снимок её значения. Поэтому созданные в цикле функции <code>lambda: i</code> после цикла вернут одно последнее значение. Зафиксировать значение на каждой итерации можно аргументом по умолчанию: <code>lambda i=i: i</code>.</p>
 
         <p><strong>Декораторы</strong> — функция, оборачивающая другую функцию: добавляет поведение, не меняя её код. Ты их уже используешь (<code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code>), но на собесе часто просят <em>написать свой</em> — обычно retry или замер времени:</p>
         <div class="code-block"><span class="kw">import</span> functools, time
@@ -881,14 +922,14 @@ i = <span class="val">0</span>
         <span class="lvl-tag">L1 · Основы</span>
         <p>ООП нужно QA-автоматизатору на практике: фреймворк строится на классах (Page Object, client-слой, базовые классы тестов). Базовое:</p>
         <div class="code-block"><span class="kw">class</span> <span class="fn">ApiClient</span>:
-    <span class="kw">def</span> <span class="fn">__init__</span>(self, base_url):   <span class="cm"># конструктор</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, base_url):   <span class="cm"># инициализатор</span>
         self.base_url = base_url      <span class="cm"># атрибут</span>
 
     <span class="kw">def</span> <span class="fn">get</span>(self, path):           <span class="cm"># метод</span>
         <span class="kw">return</span> requests.get(self.base_url + path)
 
 client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># объект (экземпляр)</span></div>
-        <p><code>self</code> — ссылка на сам объект, через неё методы обращаются к атрибутам. <code>__init__</code> — конструктор, вызывается при создании.</p>
+        <p><strong>Класс</strong> описывает структуру и поведение, а <strong>объект</strong> — конкретный экземпляр класса со своим состоянием. <code>self</code> — ссылка на этот экземпляр. Технически объект создаёт <code>__new__</code>, а <code>__init__</code> инициализирует уже созданный объект; на собеседовании <code>__init__</code> часто упрощённо называют конструктором.</p>
       </div>
 
       <hr class="lvl-divider">
@@ -901,7 +942,7 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
 
 <span class="kw">class</span> <span class="fn">OrderTest</span>(BaseTest):       <span class="cm"># наследует BaseTest</span>
     <span class="kw">def</span> <span class="fn">setup</span>(self):
-        <span class="fn">super</span>().setup()           <span class="cm"># вызвать родительский</span>
+        <span class="fn">super</span>().setup()           <span class="cm"># следующий метод по MRO</span>
         <span class="cm"># + своя логика</span></div>
 
         <p><strong>Четыре принципа ООП</strong> — просят назвать почти всегда, и лучше сразу с питоновской спецификой:</p>
@@ -920,12 +961,13 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
 
         <p><strong>Три типа методов:</strong></p>
         <ul>
-          <li><code>@staticmethod</code> — не зависит от объекта (утилита внутри класса)</li>
-          <li><code>@classmethod</code> — работает с классом, а не экземпляром (<code>cls</code>)</li>
-          <li><code>@property</code> — метод, который вызывается как атрибут (<code>obj.full_name</code> без скобок)</li>
+          <li><strong>Обычный метод</strong> автоматически получает экземпляр в <code>self</code> и работает с его состоянием</li>
+          <li><code>@staticmethod</code> ничего не получает автоматически: это независимая утилита, логически относящаяся к классу</li>
+          <li><code>@classmethod</code> получает класс в <code>cls</code>; его часто используют для альтернативных конструкторов и логики, которая должна учитывать класс-наследник</li>
+          <li><code>@property</code> позволяет вызывать метод как атрибут: <code>obj.full_name</code> без скобок</li>
         </ul>
 
-        <p><strong>Magic / dunder методы</strong> — управляют поведением объекта: <code>__init__</code> (создание), <code>__str__</code> (печать), <code>__repr__</code> (отладка), <code>__eq__</code> (<code>==</code>), <code>__len__</code> (<code>len()</code>).</p>
+        <p><strong>Magic / dunder методы</strong> подключают объект к протоколам Python: <code>__init__</code> инициализирует экземпляр, <code>__str__</code> даёт понятное пользователю представление, <code>__repr__</code> — техническое представление для разработчика, <code>__eq__</code> определяет <code>==</code>, а <code>__len__</code> — поведение <code>len()</code>.</p>
       </div>
 
       <hr class="lvl-divider">
@@ -940,15 +982,19 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
           <li><strong>Контекстные менеджеры</strong> — свой <code>with</code> для setup/teardown ресурса</li>
         </ul>
 
-        <p style="margin-top:14px;"><strong>Абстрактные классы</strong> — задают контракт, который обязаны реализовать наследники. Полезно для базового клиента или базовой страницы во фреймворке: забыл реализовать метод — упадёт при создании объекта, а не в середине теста.</p>
+        <p style="margin-top:14px;"><strong>Абстрактный класс vs интерфейс.</strong> Абстрактный класс задаёт контракт, но также может хранить состояние и готовую реализацию. Отдельного ключевого слова для интерфейса в Python нет: обязательные методы и проверку при создании объекта дают <code>ABC</code> и <code>@abstractmethod</code>, а структурный контракт без обязательного наследования — <code>typing.Protocol</code> и статический анализатор типов.</p>
         <div class="code-block"><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">from</span> typing <span class="kw">import</span> Protocol
 
 <span class="kw">class</span> <span class="fn">BaseClient</span>(ABC):
     @abstractmethod
     <span class="kw">def</span> <span class="fn">auth</span>(self): ...        <span class="cm"># наследник ОБЯЗАН реализовать</span>
 
 <span class="kw">class</span> <span class="fn">ApiClient</span>(BaseClient):
-    <span class="kw">def</span> <span class="fn">auth</span>(self): ...        <span class="cm"># без этого — TypeError при ApiClient()</span></div>
+    <span class="kw">def</span> <span class="fn">auth</span>(self): ...        <span class="cm"># без этого — TypeError при ApiClient()</span>
+
+<span class="kw">class</span> <span class="fn">Client</span>(Protocol):
+    <span class="kw">def</span> <span class="fn">get</span>(self, path: str) -> dict: ...  <span class="cm"># достаточно совпасть по структуре</span></div>
 
         <p><strong>Композиция vs наследование</strong> — любимый архитектурный вопрос. Наследование = «является» (<code>AdminUser</code> является <code>User</code>), композиция = «имеет» (<code>OrderTest</code> <em>имеет</em> <code>ApiClient</code>). Проблема наследования — жёсткая связь: меняешь базовый класс, ломаются все наследники, а глубокие иерархии тест-классов быстро превращаются в клубок. Современный совет — <strong>предпочитать композицию</strong>: во фреймворке лучше передать клиент в тест фикстурой, чем наследовать тест от <code>BaseTestWithClient</code>.</p>
 
@@ -974,7 +1020,7 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
         <div class="hl orange"><span class="hl-label">Что реально нарушают в автотестах</span>Чаще всего <strong>SRP</strong>: Page Object, который и кликает, и ассертит, и ходит в базу; либо <code>utils.py</code> на тысячу строк, куда свалено всё. Второе место — <strong>LSP</strong>: наследник переопределил метод базового класса «немного по-другому», и общие тесты на нём падают. Сильный ответ на собесе — не пересказ пяти букв, а пример: «SRP у нас нарушался в Page Object с ассертами внутри — вынесли проверки в тесты, страницы стали переиспользуемыми».</div>
         <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить одним предложением.</div>
 
-        <p><strong>MRO (Method Resolution Order)</strong> — порядок, в котором Python ищет метод при множественном наследовании. Считается по алгоритму C3, посмотреть можно через <code>ClassName.__mro__</code>. Практический смысл: <code>super()</code> идёт <em>не к родителю</em>, а к следующему классу в MRO — поэтому в ромбовидном наследовании общий предок вызывается один раз, а не дважды. Для QA достаточно знать, что порядок детерминирован и проверяется через <code>__mro__</code>.</p>
+        <p><strong>Множественное наследование и MRO.</strong> В <code>class Service(CacheMixin, BaseService)</code> метод ищется в порядке MRO, рассчитанном алгоритмом C3; посмотреть порядок можно через <code>Service.__mro__</code>. <code>super()</code> вызывает не «родителя вообще», а следующий метод в этой цепочке. В ромбовидной иерархии это позволяет вызвать общего предка один раз, если все участники используют кооперативный <code>super()</code> и совместимые сигнатуры. Основные риски — конфликты имён, неожиданный порядок и класс, который оборвал цепочку вызовов.</p>
 
         <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
         <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
@@ -1185,6 +1231,7 @@ asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
           <li><code>asyncio.run()</code> — точка входа, запускает цикл событий</li>
         </ul>
         <div class="hl orange"><span class="hl-label">Главная ошибка в async</span>Одна <strong>блокирующая</strong> строка внутри корутины останавливает весь цикл событий, и вся асинхронность пропадает. Классика: <code>time.sleep(1)</code> вместо <code>await asyncio.sleep(1)</code> или <code>requests.get()</code> вместо <code>httpx.AsyncClient</code>. Правило: внутри <code>async def</code> все операции ввода-вывода должны быть <code>await</code>-совместимыми.</div>
+        <p><strong>Concurrency vs parallelism.</strong> Concurrency означает, что несколько задач продвигаются с перекрытием во времени, переключаясь в точках ожидания. Parallelism — физически одновременное исполнение на разных ядрах или процессорах. <code>asyncio</code> обычно даёт concurrency в одном потоке, а не CPU-параллелизм.</p>
       </div>
 
       <hr class="lvl-divider">
@@ -1203,6 +1250,19 @@ asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
 
 <span class="kw">with</span> <span class="fn">ThreadPoolExecutor</span>(max_workers=<span class="val">10</span>) <span class="kw">as</span> pool:
     results = <span class="fn">list</span>(pool.<span class="fn">map</span>(create_user, payloads))</div>
+
+        <p><strong>Race condition возможна и в одном event loop.</strong> Если две корутины проверили пустой кэш и обе дошли до <code>await</code>, они могут одновременно запустить одну дорогую загрузку. Решение — блокировка на ключ или хранение общей выполняющейся задачи; после захвата блокировки кэш проверяют повторно.</p>
+        <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+locks = <span class="fn">defaultdict</span>(asyncio.Lock)
+
+<span class="kw">async def</span> <span class="fn">load</span>(user_id):
+    <span class="kw">if</span> user_id <span class="kw">in</span> cache:
+        <span class="kw">return</span> cache[user_id]
+    <span class="kw">async with</span> locks[user_id]:
+        <span class="kw">if</span> user_id <span class="kw">not in</span> cache:       <span class="cm"># double check</span>
+            cache[user_id] = <span class="kw">await</span> <span class="fn">fetch_user</span>(user_id)
+        <span class="kw">return</span> cache[user_id]</div>
 
         <div class="hl modern"><span class="hl-label">Про «GIL убрали»</span>В Python 3.13 появился экспериментальный <em>free-threaded</em> режим (сборка без GIL, PEP 703), в 3.14 он продолжает стабилизироваться. Но это отдельная сборка, а не поведение по умолчанию, и экосистема C-расширений к ней ещё адаптируется. Корректный ответ на собесе: «в обычном CPython GIL на месте, есть экспериментальная сборка без него — но в проде на неё пока не опираются».</div>
 
@@ -1236,6 +1296,7 @@ asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
 <span class="kw">finally</span>:
     cleanup()                        <span class="cm"># выполнится всегда</span></div>
         <div class="hl green"><span class="hl-label">Принцип для тестов</span>В тестах лучше <strong>падать явно, чем глотать ошибку</strong>. Голый <code>except:</code> прячет баги — тест «прошёл», хотя внутри всё сломалось. Лови конкретное исключение, а если поймал — либо обработай осмысленно, либо пробрось через <code>raise</code>. Молчаливый <code>except: pass</code> в тестах — это замаскированный непройденный тест.</div>
+        <div class="hl orange"><span class="hl-label">Не возвращай из finally</span><code>finally</code> выполняется перед любым выходом: после успеха, обработанного исключения, <code>return</code> или нового исключения. Если внутри него написать свой <code>return</code>, он переопределит прежний результат и подавит летящее исключение. Голый <code>raise</code> внутри <code>except</code> повторно выбрасывает текущее исключение с исходным traceback; <code>raise SomeException()</code> создаёт новое.</div>
       </div>
 
       <hr class="lvl-divider">
@@ -1248,7 +1309,7 @@ asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
 
 <span class="kw">def</span> <span class="fn">find</span>(name: str) -> Optional[User]:   <span class="cm"># может вернуть User или None</span>
     ...</div>
-        <p>Современный Python (3.11+): пиши <code>list[str]</code>, <code>dict[str, int]</code> напрямую (не <code>List</code> из typing). <code>Optional[X]</code> = «X или None».</p>
+        <p>Современный Python (3.11+): пиши <code>list[str]</code>, <code>dict[str, int]</code> напрямую (не <code>List</code> из typing). <code>Optional[X]</code> и <code>X | None</code> означают «X или None». Сам интерпретатор обычно не проверяет аннотации при вызове: ошибки до запуска ищут mypy/pyright, а runtime-валидацию выполняют отдельно.</p>
 
         <p><strong>dataclass</strong> — удобно для тестовых DTO и моделей ответов API: класс данных без бойлерплейта:</p>
         <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass

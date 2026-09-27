@@ -5487,7 +5487,7 @@ _l0 = list(lines)`,
         <tr><td><code>ValueError</code></td><td>значение не того вида</td></tr>
       </tbody>
     </table>
-    <div class="hl orange"><span class="hl-label">Почему Exception, а не BaseException</span>От <code>BaseException</code> напрямую наследуются <code>SystemExit</code>, <code>KeyboardInterrupt</code> и <code>StopIteration</code> — они управляют выполнением, а не сообщают об ошибке. Поймав <code>BaseException</code>, ты проглотишь Ctrl+C и попытку программы завершиться. Именно поэтому «поймать всё» — это <code>except Exception</code>.</div>
+    <div class="hl orange"><span class="hl-label">Почему Exception, а не BaseException</span>Вне ветки <code>Exception</code> от <code>BaseException</code> наследуются <code>SystemExit</code>, <code>KeyboardInterrupt</code> и <code>GeneratorExit</code> — они управляют выполнением, а не сообщают об обычной ошибке. <code>StopIteration</code>, напротив, относится к <code>Exception</code> и служит штатным сигналом конца итерации. Поймав <code>BaseException</code>, ты проглотишь Ctrl+C и попытку программы завершиться. Именно поэтому «поймать всё» — это <code>except Exception</code>.</div>
 
     <h4>Несколько секций и общий обработчик</h4>
     <div class="code-block"><span class="kw">except</span> (TypeError, ValueError) <span class="kw">as</span> e:   <span class="cm"># оба типа одной секцией</span>

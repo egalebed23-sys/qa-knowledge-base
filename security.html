@@ -541,7 +541,7 @@ query = f<span class="st">"SELECT * FROM users WHERE name = '{user_input}'"</spa
 cursor.execute(<span class="st">"SELECT * FROM users WHERE name = %s"</span>, (user_input,))</div>
       <p>Защита — <strong>параметризованные запросы</strong> (prepared statements): ввод всегда трактуется как данные, не как часть SQL. ORM (SQLAlchemy, Django ORM) делают это по умолчанию.</p>
 
-      <p style="margin-top:12px;"><strong>XSS</strong> — три типа: <em>stored</em> (скрипт сохранён в БД, бьёт по всем, кто откроет страницу), <em>reflected</em> (скрипт в ссылке/параметре), <em>DOM-based</em> (через клиентский JS). Защита — <strong>экранирование вывода</strong> (любой пользовательский текст на странице обезвреживается) + Content Security Policy.</p>
+      <p style="margin-top:12px;"><strong>XSS</strong> — три типа: <em>stored</em> (скрипт сохранён в БД, бьёт по всем, кто откроет страницу), <em>reflected</em> (скрипт в ссылке/параметре), <em>DOM-based</em> (через клиентский JS). Основная защита: контекстное экранирование вывода и безопасные DOM API вроде <code>textContent</code>. Если HTML действительно разрешён, его пропускают через проверенный sanitizer. Content Security Policy добавляет второй рубеж, а <code>HttpOnly</code> ограничивает кражу cookie, но сам XSS не устраняет.</p>
 
 
       <p><strong>Как тестировать на инъекции</strong> (базово, для QA):</p>
@@ -586,6 +586,7 @@ cursor.execute(<span class="st">"SELECT * FROM users WHERE name = %s"</span>, (u
         <li>Секреты не в коде/гите — переменные окружения, secret manager</li>
         <li>Пароли в БД — только хеш (bcrypt/argon2), не открытым текстом</li>
       </ul>
+      <p><strong>CSRF</strong> использует то, что браузер автоматически прикладывает cookie к запросу: вредоносный сайт заставляет уже вошедшего пользователя выполнить действие на другом сайте. Защиту строят слоями: <code>SameSite=Lax</code> или <code>Strict</code>, непредсказуемый CSRF-токен с серверной проверкой для изменяющих запросов, проверка <code>Origin</code>/<code>Referer</code> и запрет изменения состояния через GET. CORS не является основной защитой от CSRF: простую HTML-форму можно отправить без чтения ответа. При Bearer-токене в <code>Authorization</code>, который код добавляет вручную, классический CSRF менее вероятен, зато критичнее становится XSS.</p>
 
 
       <div class="hl orange"><span class="hl-label">IDOR — главный практический навык</span>Большинство «security-багов», которые реально находит QA, — это broken access control, а не хитрые инъекции. Привычка: тестируя любой эндпоинт с id, спросить «а что вернётся, если подставить чужой id или id несуществующего объекта?». Дёшево проверить, часто находит уязвимость. Для систем с деньгами/персональными данными — критично.</div>

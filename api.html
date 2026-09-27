@@ -581,6 +581,8 @@
         </div>
       </div>
 
+      <p><strong>JSON</strong> (JavaScript Object Notation) — текстовый формат обмена данными, независимый от языка программирования. Он поддерживает объекты, массивы и значения типов string, number, boolean и <code>null</code>. Ключи и строки записываются в двойных кавычках; комментарии и завершающая запятая стандартом не допускаются. JSON популярен в веб-API, потому что компактнее XML, читается человеком и имеет готовые парсеры почти во всех языках.</p>
+
       <p><strong>Особенности протокола:</strong></p>
       <ul>
         <li><strong>Stateless</strong> — каждый запрос независим, сервер не «помнит» предыдущий. Контекст передаётся явно (cookie, токен)</li>
@@ -918,6 +920,8 @@
           <tr><td><code>If-Modified-Since</code></td><td>в запросе</td><td>Аналог If-None-Match, но по дате</td></tr>
         </tbody>
       </table>
+
+      <p><strong>CDN</strong> (Content Delivery Network) — распределённая сеть edge-серверов, которая отдаёт статические файлы и кэшируемые ответы из точки ближе к пользователю. Это снижает latency и нагрузку на origin-сервер, помогает переживать всплески трафика. QA проверяет cache headers и invalidation после релиза, корректность версий файлов, fallback при промахе кэша, разные регионы и то, что персональные ответы не стали публично кэшируемыми.</p>
 
       <p style="margin-top:14px;"><strong>Безопасностные заголовки</strong> (часто в нагрузке для QA):</p>
       <ul>
@@ -1513,6 +1517,8 @@ HTTP/1.1 101 Switching Protocols
           <tr><td><code>Max-Age</code> / <code>Expires</code></td><td>Сколько живёт. Без них — session cookie (умирает при закрытии браузера)</td></tr>
         </tbody>
       </table>
+
+      <p><strong>Виды cookies</strong> обычно называют по двум осям. По времени жизни это <strong>session cookie</strong> без <code>Expires</code>/<code>Max-Age</code> и <strong>persistent cookie</strong> с заданным сроком. По отношению к открытому сайту это <strong>first-party</strong> cookie его собственного домена и <strong>third-party</strong> cookie внешнего домена, например рекламного виджета. <code>HttpOnly</code>, <code>Secure</code> и <code>SameSite</code> точнее называть атрибутами безопасности, а не отдельными видами.</p>
 
       <p style="margin-top:14px;"><strong>localStorage и sessionStorage — JS API</strong> одинаковый и тривиальный: <code>setItem(k, v)</code>, <code>getItem(k)</code>, <code>removeItem(k)</code>, <code>clear()</code>. Что важно знать:</p>
       <ul>

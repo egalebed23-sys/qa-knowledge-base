@@ -591,7 +591,23 @@
 <span class="kw">def</span> <span class="fn">test_divide_by_zero</span>():
     <span class="kw">with</span> pytest.raises(ZeroDivisionError):
         result = <span class="val">1</span> / <span class="val">0</span></div>
+        <p><strong>Фреймворки, которые стоит уметь сравнить:</strong></p>
+        <table>
+          <thead><tr><th>Инструмент</th><th>Подход и применение</th></tr></thead>
+          <tbody>
+            <tr><td><strong>pytest</strong></td><td>лаконичные функции, обычный <code>assert</code>, фикстуры, параметризация и плагины; основной универсальный выбор для Python AQA</td></tr>
+            <tr><td><strong>unittest</strong></td><td>стандартная библиотека и xUnit-стиль: классы, <code>setUp</code>/<code>tearDown</code>, методы <code>assertEqual</code>; меньше внешних зависимостей, больше шаблонного кода</td></tr>
+            <tr><td><strong>Robot Framework</strong></td><td>keyword-driven acceptance-тесты с табличным синтаксисом; читаем для не-разработчиков, но сложнее поддерживать при большой программной логике</td></tr>
+            <tr><td><strong>Behave</strong></td><td>BDD-сценарии на Gherkin и Python step definitions; полезен, когда команда действительно совместно работает со спецификациями в формате Given/When/Then</td></tr>
+          </tbody>
+        </table>
         <div class="hl modern"><span class="hl-label">pytest vs unittest</span>unittest есть в стандартной библиотеке, но многословный (классы, <code>self.assertEqual</code>). pytest — внешний пакет, но удобнее: голый <code>assert</code>, фикстуры (мощнее setUp/tearDown), параметризация, огромная экосистема плагинов (xdist, allure, mock, cov). В современных проектах де-факто стандарт — pytest.</div>
+        <p><strong>Интеграционные тесты с pytest</strong> проверяют совместную работу реальных компонентов: например, API записывает заказ в БД, а тест читает его обратно. Фикстуры поднимают клиент, соединение и тестовые данные, а через <code>yield</code> гарантируют очистку. Такие тесты маркируют отдельно, запускают в воспроизводимом окружении и не подменяют моками те границы, взаимодействие с которыми проверяют.</p>
+        <div class="code-block"><span class="hdr">@pytest.mark.integration</span>
+<span class="kw">def</span> <span class="fn">test_order_is_saved</span>(api_client, db):
+    order = api_client.<span class="fn">create_order</span>()
+    stored = db.<span class="fn">get_order</span>(order.id)
+    <span class="kw">assert</span> stored.status == <span class="st">"created"</span></div>
         <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем pytest лучше unittest?» — Голый <code>assert</code> с понятным выводом вместо методов <code>assertEqual</code>; фикстуры гибче setUp/tearDown (scope, переиспользование, зависимости); параметризация одним декоратором; богатая экосистема плагинов. unittest хорош тем, что в стандартной библиотеке — не нужно ставить.</div>
       </div>
 
