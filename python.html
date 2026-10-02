@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -231,31 +205,6 @@
     color: #5de0b0;
   }
   .section-body { padding: 22px 26px; }
-
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
 
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
@@ -442,7 +391,6 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -482,7 +430,7 @@
   }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -529,11 +477,6 @@
 <main class="main">
   <div class="topbar">
     <div class="crumbs">QA Senior / <span>Python</span></div>
-    <div class="level-switch" role="tablist">
-      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
-      <button class="level-btn" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
-      <button class="level-btn active" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
-    </div>
   </div>
 
   <div class="header">
@@ -550,59 +493,48 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Python</strong> — высокоуровневый язык общего назначения с динамической типизацией и автоматическим управлением памятью. Исходный код обычно компилируется в байткод и выполняется виртуальной машиной интерпретатора. В QA его используют для автотестов, генерации данных, API-клиентов, служебных скриптов и работы с CI/CD.</p>
-        <p><strong>Основные встроенные типы:</strong> числа <code>int</code>, <code>float</code>, <code>complex</code>; логический <code>bool</code>; отсутствие значения <code>None</code>; текст и байты <code>str</code>, <code>bytes</code>, <code>bytearray</code>; коллекции <code>list</code>, <code>tuple</code>, <code>range</code>, <code>dict</code>, <code>set</code>, <code>frozenset</code>.</p>
-        <p>На собесе для QA-автоматизатора часто нужно разобрать строку, посчитать что-то в списке или объединить данные. Четыре базовые структуры:</p>
-        <table>
-          <thead><tr><th>Структура</th><th>Что это</th><th>Когда</th></tr></thead>
-          <tbody>
-            <tr><td><code>list</code></td><td>упорядоченный изменяемый список</td><td>последовательность, порядок важен</td></tr>
-            <tr><td><code>dict</code></td><td>пары ключ→значение</td><td>быстрый доступ по ключу, группировка</td></tr>
-            <tr><td><code>set</code></td><td>множество уникальных</td><td>уникальность, быстрая проверка наличия</td></tr>
-            <tr><td><code>tuple</code></td><td>неизменяемый список</td><td>фиксированный набор (координаты, запись)</td></tr>
-          </tbody>
-        </table>
-        <p><strong><code>list</code> vs <code>tuple</code>.</strong> Оба сохраняют порядок и допускают дубликаты, но список изменяемый, а кортеж — нет. Кортеж с хешируемыми элементами можно использовать как ключ <code>dict</code> или элемент <code>set</code>; список нельзя. Выбор показывает намерение: изменяемая коллекция — <code>list</code>, фиксированная запись — <code>tuple</code>.</p>
-        <p><strong>Hashable-объект</strong> имеет хеш, который не меняется за время его жизни, и согласованное сравнение: если <code>a == b</code>, их хеши обязаны совпадать. Только такие объекты могут быть ключами <code>dict</code> и элементами <code>set</code>. Обычно хешируемы числа, строки, <code>frozenset</code> и кортежи из хешируемых элементов; изменяемые <code>list</code>, <code>dict</code> и <code>set</code> — нет.</p>
-      </div>
+      <p><strong>Python</strong> — высокоуровневый язык общего назначения с динамической типизацией и автоматическим управлением памятью. Исходный код обычно компилируется в байткод и выполняется виртуальной машиной интерпретатора. В QA его используют для автотестов, генерации данных, API-клиентов, служебных скриптов и работы с CI/CD.</p>
+      <p><strong>Основные встроенные типы:</strong> числа <code>int</code>, <code>float</code>, <code>complex</code>; логический <code>bool</code>; отсутствие значения <code>None</code>; текст и байты <code>str</code>, <code>bytes</code>, <code>bytearray</code>; коллекции <code>list</code>, <code>tuple</code>, <code>range</code>, <code>dict</code>, <code>set</code>, <code>frozenset</code>.</p>
+      <p>На собесе для QA-автоматизатора часто нужно разобрать строку, посчитать что-то в списке или объединить данные. Четыре базовые структуры:</p>
+      <table>
+        <thead><tr><th>Структура</th><th>Что это</th><th>Когда</th></tr></thead>
+        <tbody>
+          <tr><td><code>list</code></td><td>упорядоченный изменяемый список</td><td>последовательность, порядок важен</td></tr>
+          <tr><td><code>dict</code></td><td>пары ключ→значение</td><td>быстрый доступ по ключу, группировка</td></tr>
+          <tr><td><code>set</code></td><td>множество уникальных</td><td>уникальность, быстрая проверка наличия</td></tr>
+          <tr><td><code>tuple</code></td><td>неизменяемый список</td><td>фиксированный набор (координаты, запись)</td></tr>
+        </tbody>
+      </table>
+      <p><strong><code>list</code> vs <code>tuple</code>.</strong> Оба сохраняют порядок и допускают дубликаты, но список изменяемый, а кортеж — нет. Кортеж с хешируемыми элементами можно использовать как ключ <code>dict</code> или элемент <code>set</code>; список нельзя. Выбор показывает намерение: изменяемая коллекция — <code>list</code>, фиксированная запись — <code>tuple</code>.</p>
+      <p><strong>Hashable-объект</strong> имеет хеш, который не меняется за время его жизни, и согласованное сравнение: если <code>a == b</code>, их хеши обязаны совпадать. Только такие объекты могут быть ключами <code>dict</code> и элементами <code>set</code>. Обычно хешируемы числа, строки, <code>frozenset</code> и кортежи из хешируемых элементов; изменяемые <code>list</code>, <code>dict</code> и <code>set</code> — нет.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Главное для задач — выбор структуры влияет на скорость.</strong> Проверка «есть ли элемент»:</p>
-        <div class="code-block"><span class="cm"># Медленно: поиск в списке — O(n), проходит весь список</span>
+      <p><strong>Главное для задач — выбор структуры влияет на скорость.</strong> Проверка «есть ли элемент»:</p>
+      <div class="code-block"><span class="cm"># Медленно: поиск в списке — O(n), проходит весь список</span>
 <span class="kw">if</span> x <span class="kw">in</span> my_list:   ...
 
 <span class="cm"># Быстро: поиск в set/dict — O(1), мгновенно</span>
 <span class="kw">if</span> x <span class="kw">in</span> my_set:    ...</div>
-        <div class="hl green"><span class="hl-label">Аналогия</span><code>set</code>/<code>dict</code> — как индекс в БД: ищет сразу по хешу, не перебирая всё. <code>list</code> — как таблица без индекса: чтобы найти элемент, надо пройти все строки. Когда нужно много раз проверять наличие — складывай в set, а не в list.</div>
-        <p><strong>Полезные коллекции из стандартной библиотеки:</strong></p>
-        <ul>
-          <li><code>collections.Counter</code> — подсчёт частот (<code>Counter(nums).most_common(3)</code>)</li>
-          <li><code>collections.defaultdict</code> — словарь с дефолтным значением (удобно для группировки)</li>
-          <li><code>set</code> операции — пересечение <code>a &amp; b</code>, разность <code>a - b</code>, объединение <code>a | b</code></li>
-        </ul>
-      </div>
+      <div class="hl green"><span class="hl-label">Аналогия</span><code>set</code>/<code>dict</code> — как индекс в БД: ищет сразу по хешу, не перебирая всё. <code>list</code> — как таблица без индекса: чтобы найти элемент, надо пройти все строки. Когда нужно много раз проверять наличие — складывай в set, а не в list.</div>
+      <p><strong>Полезные коллекции из стандартной библиотеки:</strong></p>
+      <ul>
+        <li><code>collections.Counter</code> — подсчёт частот (<code>Counter(nums).most_common(3)</code>)</li>
+        <li><code>collections.defaultdict</code> — словарь с дефолтным значением (удобно для группировки)</li>
+        <li><code>set</code> операции — пересечение <code>a &amp; b</code>, разность <code>a - b</code>, объединение <code>a | b</code></li>
+      </ul>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Сложность операций</strong> — что спрашивают:</p>
-        <table>
-          <thead><tr><th>Операция</th><th>list</th><th>dict / set</th></tr></thead>
-          <tbody>
-            <tr><td>доступ по ключу/индексу</td><td>O(1) по индексу</td><td>O(1) по ключу</td></tr>
-            <tr><td>поиск <code>x in</code></td><td>O(n)</td><td>O(1)</td></tr>
-            <tr><td>вставка в конец</td><td>O(1)</td><td>O(1)</td></tr>
-            <tr><td>вставка в начало</td><td>O(n) (сдвиг)</td><td>—</td></tr>
-          </tbody>
-        </table>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Для QA-автоматизатора алгоритмический хардкор (динамическое программирование, графы) почти не нужен — это для SWE/SDET в FAANG. Чаще проверяют: умеешь ли ты разобрать данные, выбрать подходящую структуру, написать читаемый код и оценить, не получится ли случайно O(n²) на больших данных. Идиоматичный Python (list comprehension, Counter, with) ценится выше «олимпиадных» решений.</div>
-      </div>
+      <p><strong>Сложность операций</strong> — что спрашивают:</p>
+      <table>
+        <thead><tr><th>Операция</th><th>list</th><th>dict / set</th></tr></thead>
+        <tbody>
+          <tr><td>доступ по ключу/индексу</td><td>O(1) по индексу</td><td>O(1) по ключу</td></tr>
+          <tr><td>поиск <code>x in</code></td><td>O(n)</td><td>O(1)</td></tr>
+          <tr><td>вставка в конец</td><td>O(1)</td><td>O(1)</td></tr>
+          <tr><td>вставка в начало</td><td>O(n) (сдвиг)</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>Для QA-автоматизатора алгоритмический хардкор (динамическое программирование, графы) почти не нужен — это для SWE/SDET в FAANG. Чаще проверяют: умеешь ли ты разобрать данные, выбрать подходящую структуру, написать читаемый код и оценить, не получится ли случайно O(n²) на больших данных. Идиоматичный Python (list comprehension, Counter, with) ценится выше «олимпиадных» решений.</div>
 
     </div>
   </section>
@@ -616,31 +548,29 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Базовые вопросы по самому языку:</p>
-        <ul>
-          <li><strong>Изменяемые vs неизменяемые типы.</strong> Mutable: <code>list</code>, <code>dict</code>, <code>set</code>. Immutable: <code>int</code>, <code>str</code>, <code>tuple</code>, <code>frozenset</code>. Неизменяемые нельзя поменять на месте — создаётся новый объект</li>
-          <li><strong><code>is</code> vs <code>==</code>.</strong> <code>==</code> сравнивает <em>значения</em> (равны ли). <code>is</code> сравнивает <em>идентичность</em> (тот же объект в памяти)</li>
-          <li><strong><code>None</code></strong> — единственный объект, проверять через <code>is None</code>, не <code>== None</code></li>
-        </ul>
-        <div class="code-block">a = [<span class="val">1</span>, <span class="val">2</span>]; b = [<span class="val">1</span>, <span class="val">2</span>]
+      <p>Базовые вопросы по самому языку:</p>
+      <ul>
+        <li><strong>Изменяемые vs неизменяемые типы.</strong> Mutable: <code>list</code>, <code>dict</code>, <code>set</code>. Immutable: <code>int</code>, <code>str</code>, <code>tuple</code>, <code>frozenset</code>. Неизменяемые нельзя поменять на месте — создаётся новый объект</li>
+        <li><strong><code>is</code> vs <code>==</code>.</strong> <code>==</code> сравнивает <em>значения</em> (равны ли). <code>is</code> сравнивает <em>идентичность</em> (тот же объект в памяти)</li>
+        <li><strong><code>None</code></strong> — единственный объект, проверять через <code>is None</code>, не <code>== None</code></li>
+      </ul>
+      <div class="code-block">a = [<span class="val">1</span>, <span class="val">2</span>]; b = [<span class="val">1</span>, <span class="val">2</span>]
 a == b   <span class="cm"># True — значения равны</span>
 a <span class="kw">is</span> b   <span class="cm"># False — разные объекты в памяти</span></div>
 
-        <p><strong>Функции.</strong> Объявляются через <code>def</code>, вызываются круглыми скобками и возвращают результат через <code>return</code>. Без явного <code>return</code> результатом будет <code>None</code>. Функция — обычный объект: её можно сохранить в переменную, передать аргументом или вернуть из другой функции.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">add</span>(a, b=<span class="val">0</span>):
+      <p><strong>Функции.</strong> Объявляются через <code>def</code>, вызываются круглыми скобками и возвращают результат через <code>return</code>. Без явного <code>return</code> результатом будет <code>None</code>. Функция — обычный объект: её можно сохранить в переменную, передать аргументом или вернуть из другой функции.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">add</span>(a, b=<span class="val">0</span>):
     <span class="kw">return</span> a + b
 
 result = <span class="fn">add</span>(<span class="val">2</span>, b=<span class="val">3</span>)   <span class="cm"># 5</span></div>
 
-        <p><strong>Как передаются аргументы.</strong> Точная модель — <em>call by sharing</em>: параметр становится локальным именем, которое указывает на переданный объект. Изменение мутабельного объекта видно снаружи, а переприсваивание параметра меняет только локальную ссылку.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">change</span>(number, items):
+      <p><strong>Как передаются аргументы.</strong> Точная модель — <em>call by sharing</em>: параметр становится локальным именем, которое указывает на переданный объект. Изменение мутабельного объекта видно снаружи, а переприсваивание параметра меняет только локальную ссылку.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">change</span>(number, items):
     number += <span class="val">1</span>       <span class="cm"># новое локальное число; снаружи не изменится</span>
     items.<span class="fn">append</span>(<span class="val">4</span>)  <span class="cm"># тот же список; изменение видно снаружи</span></div>
 
-        <p><strong>Условия и циклы.</strong> В цепочке <code>if</code> / <code>elif</code> / <code>else</code> выполняется первая истинная ветка. <code>for</code> перебирает элементы итерируемого объекта; <code>while</code> повторяет блок, пока истинно условие, поэтому подходит, когда число итераций заранее неизвестно.</p>
-        <div class="code-block"><span class="kw">if</span> status == <span class="val">200</span>:
+      <p><strong>Условия и циклы.</strong> В цепочке <code>if</code> / <code>elif</code> / <code>else</code> выполняется первая истинная ветка. <code>for</code> перебирает элементы итерируемого объекта; <code>while</code> повторяет блок, пока истинно условие, поэтому подходит, когда число итераций заранее неизвестно.</p>
+      <div class="code-block"><span class="kw">if</span> status == <span class="val">200</span>:
     result = <span class="st">"ok"</span>
 <span class="kw">elif</span> status == <span class="val">404</span>:
     result = <span class="st">"not found"</span>
@@ -649,29 +579,25 @@ result = <span class="fn">add</span>(<span class="val">2</span>, b=<span class="
 
 <span class="kw">for</span> item <span class="kw">in</span> items: ...   <span class="cm"># перебор коллекции</span>
 <span class="kw">while</span> task_pending: ...       <span class="cm"># повторение по условию</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Comprehensions</strong> — компактное создание коллекций, очень питоничны:</p>
-        <div class="code-block">[x*<span class="val">2</span> <span class="kw">for</span> x <span class="kw">in</span> nums]                  <span class="cm"># list</span>
+      <p><strong>Comprehensions</strong> — компактное создание коллекций, очень питоничны:</p>
+      <div class="code-block">[x*<span class="val">2</span> <span class="kw">for</span> x <span class="kw">in</span> nums]                  <span class="cm"># list</span>
 [x <span class="kw">for</span> x <span class="kw">in</span> nums <span class="kw">if</span> x > <span class="val">0</span>]            <span class="cm"># с фильтром</span>
 {k: v <span class="kw">for</span> k, v <span class="kw">in</span> pairs}            <span class="cm"># dict</span>
 {x <span class="kw">for</span> x <span class="kw">in</span> nums}                     <span class="cm"># set</span>
 (x <span class="kw">for</span> x <span class="kw">in</span> nums)                     <span class="cm"># generator (ленивый)</span></div>
 
-        <p><strong>Срезы (slicing):</strong></p>
-        <div class="code-block">nums[<span class="val">1</span>:<span class="val">3</span>]    <span class="cm"># элементы с 1 по 2</span>
+      <p><strong>Срезы (slicing):</strong></p>
+      <div class="code-block">nums[<span class="val">1</span>:<span class="val">3</span>]    <span class="cm"># элементы с 1 по 2</span>
 nums[::-<span class="val">1</span>]   <span class="cm"># разворот списка</span>
 nums[::<span class="val">2</span>]    <span class="cm"># каждый второй</span>
 nums[-<span class="val">1</span>]    <span class="cm"># последний</span></div>
 
-        <p><strong><code>*args</code> и <code>**kwargs</code></strong> — переменное число аргументов: <code>*args</code> собирает позиционные в tuple, <code>**kwargs</code> — именованные в dict. Распаковка работает и наоборот: <code>func(*list, **dict)</code>.</p>
+      <p><strong><code>*args</code> и <code>**kwargs</code></strong> — переменное число аргументов: <code>*args</code> собирает позиционные в tuple, <code>**kwargs</code> — именованные в dict. Распаковка работает и наоборот: <code>func(*list, **dict)</code>.</p>
 
-        <p><strong>Файлы, пути и модуль <code>os</code>.</strong> Файл лучше открывать через <code>with</code>: он закроется и при успешном выполнении, и при исключении. Режимы: <code>r</code> — чтение, <code>w</code> — запись с перезаписью, <code>a</code> — добавление, <code>b</code> — бинарные данные. Для текста явно указывай <code>encoding="utf-8"</code>.</p>
-        <div class="code-block"><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+      <p><strong>Файлы, пути и модуль <code>os</code>.</strong> Файл лучше открывать через <code>with</code>: он закроется и при успешном выполнении, и при исключении. Режимы: <code>r</code> — чтение, <code>w</code> — запись с перезаписью, <code>a</code> — добавление, <code>b</code> — бинарные данные. Для текста явно указывай <code>encoding="utf-8"</code>.</p>
+      <div class="code-block"><span class="kw">from</span> pathlib <span class="kw">import</span> Path
 <span class="kw">import</span> os
 
 path = <span class="fn">Path</span>(<span class="st">"report.txt"</span>)
@@ -682,35 +608,31 @@ path = <span class="fn">Path</span>(<span class="st">"report.txt"</span>)
     file.<span class="fn">write</span>(<span class="st">"passed\n"</span>)
 
 base_url = os.environ.<span class="fn">get</span>(<span class="st">"BASE_URL"</span>)</div>
-        <p><code>os</code> даёт доступ к переменным окружения, каталогам и функциям ОС. В новом коде пути обычно удобнее собирать через <code>pathlib</code>, а внешние команды запускать через <code>subprocess</code>. JSON и CSV следует читать профильными парсерами, а не разбирать строками вручную.</p>
+      <p><code>os</code> даёт доступ к переменным окружения, каталогам и функциям ОС. В новом коде пути обычно удобнее собирать через <code>pathlib</code>, а внешние команды запускать через <code>subprocess</code>. JSON и CSV следует читать профильными парсерами, а не разбирать строками вручную.</p>
 
-        <p><strong>Полезное:</strong> f-strings (<code>f"{name}: {x}"</code>), <code>enumerate</code> (индекс + элемент), <code>zip</code> (пара списков), распаковка (<code>a, *rest = nums</code>).</p>
-      </div>
+      <p><strong>Полезное:</strong> f-strings (<code>f"{name}: {x}"</code>), <code>enumerate</code> (индекс + элемент), <code>zip</code> (пара списков), распаковка (<code>a, *rest = nums</code>).</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Генераторы (<code>yield</code>)</strong> — ленивые: вызов функции с <code>yield</code> только создаёт генератор, а тело начинает выполняться при первом <code>next()</code>. Каждый <code>yield</code> отдаёт значение и сохраняет состояние до следующего запроса. После завершения функции генератор выбрасывает <code>StopIteration</code>. Такой подход не держит все данные в памяти и удобен для больших файлов и потоков данных:</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">read_large_file</span>(path):
+      <p><strong>Генераторы (<code>yield</code>)</strong> — ленивые: вызов функции с <code>yield</code> только создаёт генератор, а тело начинает выполняться при первом <code>next()</code>. Каждый <code>yield</code> отдаёт значение и сохраняет состояние до следующего запроса. После завершения функции генератор выбрасывает <code>StopIteration</code>. Такой подход не держит все данные в памяти и удобен для больших файлов и потоков данных:</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">read_large_file</span>(path):
     <span class="kw">with</span> <span class="fn">open</span>(path) <span class="kw">as</span> f:
-        <span class="kw">for</span> line <span class="kw">in</span> f:
-            <span class="kw">yield</span> line.strip()   <span class="cm"># по строке, не весь файл в память</span></div>
+      <span class="kw">for</span> line <span class="kw">in</span> f:
+          <span class="kw">yield</span> line.strip()   <span class="cm"># по строке, не весь файл в память</span></div>
 
-        <p><strong>Итератор vs генератор</strong> — спрашивают в паре. <strong>Итератор</strong> — любой объект с <code>__iter__()</code> и <code>__next__()</code>, который отдаёт элементы по одному и бросает <code>StopIteration</code>, когда кончились. <strong>Генератор</strong> — это <em>частный случай</em> итератора, который Python строит за тебя из функции с <code>yield</code> (или из выражения в круглых скобках). То есть каждый генератор — итератор, но не наоборот. И то и другое одноразовое: прошёл до конца — заново не перечитаешь, нужен новый.</p>
-        <div class="code-block"><span class="cm"># то же самое «руками» — так выглядит итератор изнутри</span>
+      <p><strong>Итератор vs генератор</strong> — спрашивают в паре. <strong>Итератор</strong> — любой объект с <code>__iter__()</code> и <code>__next__()</code>, который отдаёт элементы по одному и бросает <code>StopIteration</code>, когда кончились. <strong>Генератор</strong> — это <em>частный случай</em> итератора, который Python строит за тебя из функции с <code>yield</code> (или из выражения в круглых скобках). То есть каждый генератор — итератор, но не наоборот. И то и другое одноразовое: прошёл до конца — заново не перечитаешь, нужен новый.</p>
+      <div class="code-block"><span class="cm"># то же самое «руками» — так выглядит итератор изнутри</span>
 <span class="kw">class</span> <span class="fn">Countdown</span>:
     <span class="kw">def</span> <span class="fn">__init__</span>(self, n): self.n = n
     <span class="kw">def</span> <span class="fn">__iter__</span>(self): <span class="kw">return</span> self
     <span class="kw">def</span> <span class="fn">__next__</span>(self):
-        <span class="kw">if</span> self.n &lt;= <span class="val">0</span>: <span class="kw">raise</span> StopIteration
-        self.n -= <span class="val">1</span>
-        <span class="kw">return</span> self.n + <span class="val">1</span></div>
+      <span class="kw">if</span> self.n &lt;= <span class="val">0</span>: <span class="kw">raise</span> StopIteration
+      self.n -= <span class="val">1</span>
+      <span class="kw">return</span> self.n + <span class="val">1</span></div>
 
-        <p><strong>Замыкание (closure)</strong> — вложенная функция запоминает переменные внешней даже после того, как внешняя завершилась. На этом стоят декораторы и фабрики функций:</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">make_multiplier</span>(k):
+      <p><strong>Замыкание (closure)</strong> — вложенная функция запоминает переменные внешней даже после того, как внешняя завершилась. На этом стоят декораторы и фабрики функций:</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">make_multiplier</span>(k):
     <span class="kw">def</span> <span class="fn">inner</span>(x):
-        <span class="kw">return</span> x * k       <span class="cm"># k «замкнута» — жива после выхода из make_multiplier</span>
+      <span class="kw">return</span> x * k       <span class="cm"># k «замкнута» — жива после выхода из make_multiplier</span>
     <span class="kw">return</span> inner
 
 double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
@@ -720,42 +642,42 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 <span class="kw">def</span> <span class="fn">counter</span>():
     n = <span class="val">0</span>
     <span class="kw">def</span> <span class="fn">inc</span>():
-        <span class="kw">nonlocal</span> n     <span class="cm"># без nonlocal — UnboundLocalError</span>
-        n += <span class="val">1</span>
-        <span class="kw">return</span> n
+      <span class="kw">nonlocal</span> n     <span class="cm"># без nonlocal — UnboundLocalError</span>
+      n += <span class="val">1</span>
+      <span class="kw">return</span> n
     <span class="kw">return</span> inc</div>
-        <p><strong>LEGB и late binding.</strong> Имя ищется последовательно в Local, Enclosing, Global и Builtins. Замыкание хранит ссылку на переменную из внешней области, а не снимок её значения. Поэтому созданные в цикле функции <code>lambda: i</code> после цикла вернут одно последнее значение. Зафиксировать значение на каждой итерации можно аргументом по умолчанию: <code>lambda i=i: i</code>.</p>
+      <p><strong>LEGB и late binding.</strong> Имя ищется последовательно в Local, Enclosing, Global и Builtins. Замыкание хранит ссылку на переменную из внешней области, а не снимок её значения. Поэтому созданные в цикле функции <code>lambda: i</code> после цикла вернут одно последнее значение. Зафиксировать значение на каждой итерации можно аргументом по умолчанию: <code>lambda i=i: i</code>.</p>
 
-        <p><strong>Декораторы</strong> — функция, оборачивающая другую функцию: добавляет поведение, не меняя её код. Ты их уже используешь (<code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code>), но на собесе часто просят <em>написать свой</em> — обычно retry или замер времени:</p>
-        <div class="code-block"><span class="kw">import</span> functools, time
+      <p><strong>Декораторы</strong> — функция, оборачивающая другую функцию: добавляет поведение, не меняя её код. Ты их уже используешь (<code>@pytest.fixture</code>, <code>@pytest.mark.parametrize</code>), но на собесе часто просят <em>написать свой</em> — обычно retry или замер времени:</p>
+      <div class="code-block"><span class="kw">import</span> functools, time
 
 <span class="kw">def</span> <span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">1</span>):        <span class="cm"># декоратор С АРГУМЕНТАМИ = 3 уровня вложенности</span>
     <span class="kw">def</span> <span class="fn">decorator</span>(func):
-        @functools.wraps(func)          <span class="cm"># сохраняет __name__ и docstring оригинала</span>
-        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
-            <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(times):
-                <span class="kw">try</span>:
-                    <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
-                <span class="kw">except</span> Exception:
-                    <span class="kw">if</span> attempt == times - <span class="val">1</span>: <span class="kw">raise</span>
-                    time.<span class="fn">sleep</span>(delay)
-            <span class="kw">return</span> <span class="kw">None</span>
-        <span class="kw">return</span> wrapper
+      @functools.wraps(func)          <span class="cm"># сохраняет __name__ и docstring оригинала</span>
+      <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+          <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(times):
+              <span class="kw">try</span>:
+                  <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
+              <span class="kw">except</span> Exception:
+                  <span class="kw">if</span> attempt == times - <span class="val">1</span>: <span class="kw">raise</span>
+                  time.<span class="fn">sleep</span>(delay)
+          <span class="kw">return</span> <span class="kw">None</span>
+      <span class="kw">return</span> wrapper
     <span class="kw">return</span> decorator
 
 @<span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">2</span>)
 <span class="kw">def</span> <span class="fn">flaky_api_call</span>(): ...</div>
-        <div class="hl orange"><span class="hl-label">Про <code>functools.wraps</code></span>Без него обёрнутая функция «теряет лицо»: <code>func.__name__</code> станет <code>wrapper</code>, docstring пропадёт. Для pytest это критично — он опирается на имена функций, и без <code>wraps</code> ломается отображение тестов и часть плагинов. Если на собесе пишешь декоратор и добавляешь <code>@functools.wraps</code> — это сразу читается как опыт.</div>
+      <div class="hl orange"><span class="hl-label">Про <code>functools.wraps</code></span>Без него обёрнутая функция «теряет лицо»: <code>func.__name__</code> станет <code>wrapper</code>, docstring пропадёт. Для pytest это критично — он опирается на имена функций, и без <code>wraps</code> ломается отображение тестов и часть плагинов. Если на собесе пишешь декоратор и добавляешь <code>@functools.wraps</code> — это сразу читается как опыт.</div>
 
-        <p><strong>Контекстные менеджеры (<code>with</code>)</strong> — гарантируют очистку (закрыть файл, соединение, откатить транзакцию) даже если внутри выброшено исключение. Свой можно написать двумя способами:</p>
-        <div class="code-block"><span class="cm"># 1) класс с __enter__ / __exit__</span>
+      <p><strong>Контекстные менеджеры (<code>with</code>)</strong> — гарантируют очистку (закрыть файл, соединение, откатить транзакцию) даже если внутри выброшено исключение. Свой можно написать двумя способами:</p>
+      <div class="code-block"><span class="cm"># 1) класс с __enter__ / __exit__</span>
 <span class="kw">class</span> <span class="fn">Timer</span>:
     <span class="kw">def</span> <span class="fn">__enter__</span>(self):
-        self.start = time.<span class="fn">time</span>()
-        <span class="kw">return</span> self                <span class="cm"># то, что попадёт в «as ...»</span>
+      self.start = time.<span class="fn">time</span>()
+      <span class="kw">return</span> self                <span class="cm"># то, что попадёт в «as ...»</span>
     <span class="kw">def</span> <span class="fn">__exit__</span>(self, exc_type, exc, tb):
-        <span class="fn">print</span>(time.<span class="fn">time</span>() - self.start)
-        <span class="cm"># return True — ПОДАВИТЬ исключение; None/False — пробросить дальше</span>
+      <span class="fn">print</span>(time.<span class="fn">time</span>() - self.start)
+      <span class="cm"># return True — ПОДАВИТЬ исключение; None/False — пробросить дальше</span>
 
 <span class="cm"># 2) короче — через contextlib</span>
 <span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager
@@ -764,17 +686,16 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 <span class="kw">def</span> <span class="fn">temp_user</span>(api):
     user = api.<span class="fn">create_user</span>()
     <span class="kw">try</span>:
-        <span class="kw">yield</span> user             <span class="cm"># всё до yield = setup, после = teardown</span>
+      <span class="kw">yield</span> user             <span class="cm"># всё до yield = setup, после = teardown</span>
     <span class="kw">finally</span>:
-        api.<span class="fn">delete_user</span>(user.id)   <span class="cm"># finally — чтобы чистилось и при падении</span></div>
-        <p>Ровно на этой механике устроены фикстуры pytest с <code>yield</code>: до <code>yield</code> — подготовка, после — уборка.</p>
+      api.<span class="fn">delete_user</span>(user.id)   <span class="cm"># finally — чтобы чистилось и при падении</span></div>
+      <p>Ровно на этой механике устроены фикстуры pytest с <code>yield</code>: до <code>yield</code> — подготовка, после — уборка.</p>
 
-        <p><strong><code>lambda</code>, <code>map</code>, <code>filter</code></strong> — функциональный минимум. <code>lambda x: x*2</code> — безымянная функция в одно выражение. <code>map(f, seq)</code> применяет функцию к каждому элементу, <code>filter(f, seq)</code> отбирает по условию; оба возвращают <em>ленивый итератор</em>, поэтому обычно оборачивают в <code>list()</code>. В Python принято предпочитать comprehension: <code>[x*2 for x in nums]</code> читается лучше, чем <code>list(map(lambda x: x*2, nums))</code>. Где <code>lambda</code> реально уместна — как <code>key</code> в сортировке: <code>sorted(users, key=lambda u: u.age)</code>.</p>
+      <p><strong><code>lambda</code>, <code>map</code>, <code>filter</code></strong> — функциональный минимум. <code>lambda x: x*2</code> — безымянная функция в одно выражение. <code>map(f, seq)</code> применяет функцию к каждому элементу, <code>filter(f, seq)</code> отбирает по условию; оба возвращают <em>ленивый итератор</em>, поэтому обычно оборачивают в <code>list()</code>. В Python принято предпочитать comprehension: <code>[x*2 for x in nums]</code> читается лучше, чем <code>list(map(lambda x: x*2, nums))</code>. Где <code>lambda</code> реально уместна — как <code>key</code> в сортировке: <code>sorted(users, key=lambda u: u.age)</code>.</p>
 
-        <div class="hl orange"><span class="hl-label">copy vs deepcopy</span>Присваивание <code>b = a</code> для списка — это <em>та же ссылка</em>, не копия: меняешь <code>b</code> — меняется <code>a</code>. <code>copy.copy()</code> — поверхностная копия (вложенные объекты общие). <code>copy.deepcopy()</code> — полная копия всего дерева. Частый источник багов с мутабельными структурами.</div>
+      <div class="hl orange"><span class="hl-label">copy vs deepcopy</span>Присваивание <code>b = a</code> для списка — это <em>та же ссылка</em>, не копия: меняешь <code>b</code> — меняется <code>a</code>. <code>copy.copy()</code> — поверхностная копия (вложенные объекты общие). <code>copy.deepcopy()</code> — полная копия всего дерева. Частый источник багов с мутабельными структурами.</div>
 
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что выведет <code>a = [[]] * 3; a[0].append(1)</code>?» — <code>[[1], [1], [1]]</code>, а не <code>[[1], [], []]</code>. Потому что <code>* 3</code> создаёт три ссылки на <em>один и тот же</em> вложенный список, а не три разных. Классическая ловушка с мутабельностью. Правильно: <code>[[] for _ in range(3)]</code>.</div>
-      </div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что выведет <code>a = [[]] * 3; a[0].append(1)</code>?» — <code>[[1], [1], [1]]</code>, а не <code>[[1], [], []]</code>. Потому что <code>* 3</code> создаёт три ссылки на <em>один и тот же</em> вложенный список, а не три разных. Классическая ловушка с мутабельностью. Правильно: <code>[[] for _ in range(3)]</code>.</div>
 
     </div>
   </section>
@@ -918,72 +839,62 @@ i = <span class="val">0</span>
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>ООП нужно QA-автоматизатору на практике: фреймворк строится на классах (Page Object, client-слой, базовые классы тестов). Базовое:</p>
-        <div class="code-block"><span class="kw">class</span> <span class="fn">ApiClient</span>:
+      <p>ООП нужно QA-автоматизатору на практике: фреймворк строится на классах (Page Object, client-слой, базовые классы тестов). Базовое:</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">ApiClient</span>:
     <span class="kw">def</span> <span class="fn">__init__</span>(self, base_url):   <span class="cm"># инициализатор</span>
-        self.base_url = base_url      <span class="cm"># атрибут</span>
+      self.base_url = base_url      <span class="cm"># атрибут</span>
 
     <span class="kw">def</span> <span class="fn">get</span>(self, path):           <span class="cm"># метод</span>
-        <span class="kw">return</span> requests.get(self.base_url + path)
+      <span class="kw">return</span> requests.get(self.base_url + path)
 
 client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># объект (экземпляр)</span></div>
-        <p><strong>Класс</strong> описывает структуру и поведение, а <strong>объект</strong> — конкретный экземпляр класса со своим состоянием. <code>self</code> — ссылка на этот экземпляр. Технически объект создаёт <code>__new__</code>, а <code>__init__</code> инициализирует уже созданный объект; на собеседовании <code>__init__</code> часто упрощённо называют конструктором.</p>
-      </div>
+      <p><strong>Класс</strong> описывает структуру и поведение, а <strong>объект</strong> — конкретный экземпляр класса со своим состоянием. <code>self</code> — ссылка на этот экземпляр. Технически объект создаёт <code>__new__</code>, а <code>__init__</code> инициализирует уже созданный объект; на собеседовании <code>__init__</code> часто упрощённо называют конструктором.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Наследование</strong> — класс берёт поведение родителя и расширяет:</p>
-        <div class="code-block"><span class="kw">class</span> <span class="fn">BaseTest</span>:
+      <p><strong>Наследование</strong> — класс берёт поведение родителя и расширяет:</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">BaseTest</span>:
     <span class="kw">def</span> <span class="fn">setup</span>(self): ...
 
 <span class="kw">class</span> <span class="fn">OrderTest</span>(BaseTest):       <span class="cm"># наследует BaseTest</span>
     <span class="kw">def</span> <span class="fn">setup</span>(self):
-        <span class="fn">super</span>().setup()           <span class="cm"># следующий метод по MRO</span>
-        <span class="cm"># + своя логика</span></div>
+      <span class="fn">super</span>().setup()           <span class="cm"># следующий метод по MRO</span>
+      <span class="cm"># + своя логика</span></div>
 
-        <p><strong>Четыре принципа ООП</strong> — просят назвать почти всегда, и лучше сразу с питоновской спецификой:</p>
-        <table>
-          <thead><tr><th>Принцип</th><th>Суть</th><th>Как в Python</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Инкапсуляция</strong></td><td>спрятать внутреннее устройство за интерфейсом</td><td>соглашение <code>_protected</code> / <code>__private</code> — жёсткого запрета нет</td></tr>
-            <tr><td><strong>Наследование</strong></td><td>переиспользовать поведение родителя</td><td><code>class Child(Parent)</code>, <code>super()</code>. Множественное наследование разрешено</td></tr>
-            <tr><td><strong>Полиморфизм</strong></td><td>один интерфейс — разные реализации</td><td>duck typing: важен не тип, а наличие нужных методов</td></tr>
-            <tr><td><strong>Абстракция</strong></td><td>выделить общий контракт, скрыв детали</td><td><code>abc.ABC</code> + <code>@abstractmethod</code></td></tr>
-          </tbody>
-        </table>
-        <div class="hl orange"><span class="hl-label">Инкапсуляции в Python нет «по-настоящему»</span>Ключевых слов <code>private</code> / <code>public</code> не существует. Одно подчёркивание <code>_x</code> — <em>договорённость</em> «не трогай снаружи», ничего не запрещает. Два подчёркивания <code>__x</code> включают <strong>name mangling</strong>: атрибут переименовывается в <code>_ClassName__x</code>, поэтому «снаружи не видно» — но достать всё равно можно. Это делалось не ради защиты, а чтобы имена не сталкивались при наследовании. Правильная формулировка на собесе: «в Python инкапсуляция — соглашение, а не ограничение языка».</div>
+      <p><strong>Четыре принципа ООП</strong> — просят назвать почти всегда, и лучше сразу с питоновской спецификой:</p>
+      <table>
+        <thead><tr><th>Принцип</th><th>Суть</th><th>Как в Python</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Инкапсуляция</strong></td><td>спрятать внутреннее устройство за интерфейсом</td><td>соглашение <code>_protected</code> / <code>__private</code> — жёсткого запрета нет</td></tr>
+          <tr><td><strong>Наследование</strong></td><td>переиспользовать поведение родителя</td><td><code>class Child(Parent)</code>, <code>super()</code>. Множественное наследование разрешено</td></tr>
+          <tr><td><strong>Полиморфизм</strong></td><td>один интерфейс — разные реализации</td><td>duck typing: важен не тип, а наличие нужных методов</td></tr>
+          <tr><td><strong>Абстракция</strong></td><td>выделить общий контракт, скрыв детали</td><td><code>abc.ABC</code> + <code>@abstractmethod</code></td></tr>
+        </tbody>
+      </table>
+      <div class="hl orange"><span class="hl-label">Инкапсуляции в Python нет «по-настоящему»</span>Ключевых слов <code>private</code> / <code>public</code> не существует. Одно подчёркивание <code>_x</code> — <em>договорённость</em> «не трогай снаружи», ничего не запрещает. Два подчёркивания <code>__x</code> включают <strong>name mangling</strong>: атрибут переименовывается в <code>_ClassName__x</code>, поэтому «снаружи не видно» — но достать всё равно можно. Это делалось не ради защиты, а чтобы имена не сталкивались при наследовании. Правильная формулировка на собесе: «в Python инкапсуляция — соглашение, а не ограничение языка».</div>
 
-        <p><strong>Duck typing и полиморфизм.</strong> «Если крякает как утка — значит утка»: Python не проверяет тип, он проверяет, есть ли нужный метод. Поэтому полиморфизм работает без общего базового класса — любой объект с методом <code>.get()</code> подойдёт там, где ожидают клиента. Для тестов это удобно: подсунуть фейковый клиент вместо настоящего можно вообще без наследования.</p>
+      <p><strong>Duck typing и полиморфизм.</strong> «Если крякает как утка — значит утка»: Python не проверяет тип, он проверяет, есть ли нужный метод. Поэтому полиморфизм работает без общего базового класса — любой объект с методом <code>.get()</code> подойдёт там, где ожидают клиента. Для тестов это удобно: подсунуть фейковый клиент вместо настоящего можно вообще без наследования.</p>
 
-        <p><strong>Три типа методов:</strong></p>
-        <ul>
-          <li><strong>Обычный метод</strong> автоматически получает экземпляр в <code>self</code> и работает с его состоянием</li>
-          <li><code>@staticmethod</code> ничего не получает автоматически: это независимая утилита, логически относящаяся к классу</li>
-          <li><code>@classmethod</code> получает класс в <code>cls</code>; его часто используют для альтернативных конструкторов и логики, которая должна учитывать класс-наследник</li>
-          <li><code>@property</code> позволяет вызывать метод как атрибут: <code>obj.full_name</code> без скобок</li>
-        </ul>
+      <p><strong>Три типа методов:</strong></p>
+      <ul>
+        <li><strong>Обычный метод</strong> автоматически получает экземпляр в <code>self</code> и работает с его состоянием</li>
+        <li><code>@staticmethod</code> ничего не получает автоматически: это независимая утилита, логически относящаяся к классу</li>
+        <li><code>@classmethod</code> получает класс в <code>cls</code>; его часто используют для альтернативных конструкторов и логики, которая должна учитывать класс-наследник</li>
+        <li><code>@property</code> позволяет вызывать метод как атрибут: <code>obj.full_name</code> без скобок</li>
+      </ul>
 
-        <p><strong>Magic / dunder методы</strong> подключают объект к протоколам Python: <code>__init__</code> инициализирует экземпляр, <code>__str__</code> даёт понятное пользователю представление, <code>__repr__</code> — техническое представление для разработчика, <code>__eq__</code> определяет <code>==</code>, а <code>__len__</code> — поведение <code>len()</code>.</p>
-      </div>
+      <p><strong>Magic / dunder методы</strong> подключают объект к протоколам Python: <code>__init__</code> инициализирует экземпляр, <code>__str__</code> даёт понятное пользователю представление, <code>__repr__</code> — техническое представление для разработчика, <code>__eq__</code> определяет <code>==</code>, а <code>__len__</code> — поведение <code>len()</code>.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Зачем это QA на практике:</strong></p>
-        <ul>
-          <li><strong>Page Object / client-слой</strong> — классы, прячущие детали за понятными методами (раздел Pytest)</li>
-          <li><strong>Базовые классы тестов</strong> — общий setup через наследование</li>
-          <li><strong>__eq__</strong> — чтобы сравнивать объекты в ассертах по значению, а не по ссылке</li>
-          <li><strong>Контекстные менеджеры</strong> — свой <code>with</code> для setup/teardown ресурса</li>
-        </ul>
+      <p><strong>Зачем это QA на практике:</strong></p>
+      <ul>
+        <li><strong>Page Object / client-слой</strong> — классы, прячущие детали за понятными методами (раздел Pytest)</li>
+        <li><strong>Базовые классы тестов</strong> — общий setup через наследование</li>
+        <li><strong>__eq__</strong> — чтобы сравнивать объекты в ассертах по значению, а не по ссылке</li>
+        <li><strong>Контекстные менеджеры</strong> — свой <code>with</code> для setup/teardown ресурса</li>
+      </ul>
 
-        <p style="margin-top:14px;"><strong>Абстрактный класс vs интерфейс.</strong> Абстрактный класс задаёт контракт, но также может хранить состояние и готовую реализацию. Отдельного ключевого слова для интерфейса в Python нет: обязательные методы и проверку при создании объекта дают <code>ABC</code> и <code>@abstractmethod</code>, а структурный контракт без обязательного наследования — <code>typing.Protocol</code> и статический анализатор типов.</p>
-        <div class="code-block"><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+      <p style="margin-top:14px;"><strong>Абстрактный класс vs интерфейс.</strong> Абстрактный класс задаёт контракт, но также может хранить состояние и готовую реализацию. Отдельного ключевого слова для интерфейса в Python нет: обязательные методы и проверку при создании объекта дают <code>ABC</code> и <code>@abstractmethod</code>, а структурный контракт без обязательного наследования — <code>typing.Protocol</code> и статический анализатор типов.</p>
+      <div class="code-block"><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
 <span class="kw">from</span> typing <span class="kw">import</span> Protocol
 
 <span class="kw">class</span> <span class="fn">BaseClient</span>(ABC):
@@ -996,34 +907,34 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
 <span class="kw">class</span> <span class="fn">Client</span>(Protocol):
     <span class="kw">def</span> <span class="fn">get</span>(self, path: str) -> dict: ...  <span class="cm"># достаточно совпасть по структуре</span></div>
 
-        <p><strong>Композиция vs наследование</strong> — любимый архитектурный вопрос. Наследование = «является» (<code>AdminUser</code> является <code>User</code>), композиция = «имеет» (<code>OrderTest</code> <em>имеет</em> <code>ApiClient</code>). Проблема наследования — жёсткая связь: меняешь базовый класс, ломаются все наследники, а глубокие иерархии тест-классов быстро превращаются в клубок. Современный совет — <strong>предпочитать композицию</strong>: во фреймворке лучше передать клиент в тест фикстурой, чем наследовать тест от <code>BaseTestWithClient</code>.</p>
+      <p><strong>Композиция vs наследование</strong> — любимый архитектурный вопрос. Наследование = «является» (<code>AdminUser</code> является <code>User</code>), композиция = «имеет» (<code>OrderTest</code> <em>имеет</em> <code>ApiClient</code>). Проблема наследования — жёсткая связь: меняешь базовый класс, ломаются все наследники, а глубокие иерархии тест-классов быстро превращаются в клубок. Современный совет — <strong>предпочитать композицию</strong>: во фреймворке лучше передать клиент в тест фикстурой, чем наследовать тест от <code>BaseTestWithClient</code>.</p>
 
-        <p style="margin-top:14px;"><strong>Принципы SOLID</strong> — пять правил проектирования классов (Роберт Мартин). У QA их спрашивают не как теорию ООП, а применительно к архитектуре тест-фреймворка:</p>
-        <table>
-          <thead><tr><th>Принцип</th><th>Суть</th><th>Как выглядит в тест-фреймворке</th></tr></thead>
-          <tbody>
-            <tr><td><strong>S</strong> — Single Responsibility<br><span style="opacity:.7;">единственная ответственность</span></td><td>у класса одна причина для изменения</td><td>Page Object описывает страницу и <em>не содержит ассертов</em>; API-клиент шлёт запросы и не знает про тест-данные</td></tr>
-            <tr><td><strong>O</strong> — Open/Closed<br><span style="opacity:.7;">открытость/закрытость</span></td><td>открыт для расширения, закрыт для изменения</td><td>новый способ оплаты — новый класс, а не ещё один <code>if</code> внутри существующего</td></tr>
-            <tr><td><strong>L</strong> — Liskov Substitution<br><span style="opacity:.7;">подстановка Лисков</span></td><td>наследник подставляется вместо родителя, не ломая поведение</td><td>если <code>MobilePage</code> наследует <code>BasePage</code>, общие тесты обязаны проходить и на нём</td></tr>
-            <tr><td><strong>I</strong> — Interface Segregation<br><span style="opacity:.7;">разделение интерфейсов</span></td><td>несколько узких интерфейсов лучше одного широкого</td><td>базовый класс не заставляет реализовывать <code>auth()</code> там, где авторизации нет</td></tr>
-            <tr><td><strong>D</strong> — Dependency Inversion<br><span style="opacity:.7;">инверсия зависимостей</span></td><td>зависеть от абстракции, а не от конкретной реализации</td><td>клиент приходит в тест фикстурой, а не создаётся внутри — можно подменить моком или клиентом другого стенда</td></tr>
-          </tbody>
-        </table>
-        <p><strong>D на практике</strong> — это и есть dependency injection, на котором стоит весь pytest:</p>
-        <div class="code-block"><span class="cm"># плохо: тест намертво привязан к реализации и окружению</span>
+      <p style="margin-top:14px;"><strong>Принципы SOLID</strong> — пять правил проектирования классов (Роберт Мартин). У QA их спрашивают не как теорию ООП, а применительно к архитектуре тест-фреймворка:</p>
+      <table>
+        <thead><tr><th>Принцип</th><th>Суть</th><th>Как выглядит в тест-фреймворке</th></tr></thead>
+        <tbody>
+          <tr><td><strong>S</strong> — Single Responsibility<br><span style="opacity:.7;">единственная ответственность</span></td><td>у класса одна причина для изменения</td><td>Page Object описывает страницу и <em>не содержит ассертов</em>; API-клиент шлёт запросы и не знает про тест-данные</td></tr>
+          <tr><td><strong>O</strong> — Open/Closed<br><span style="opacity:.7;">открытость/закрытость</span></td><td>открыт для расширения, закрыт для изменения</td><td>новый способ оплаты — новый класс, а не ещё один <code>if</code> внутри существующего</td></tr>
+          <tr><td><strong>L</strong> — Liskov Substitution<br><span style="opacity:.7;">подстановка Лисков</span></td><td>наследник подставляется вместо родителя, не ломая поведение</td><td>если <code>MobilePage</code> наследует <code>BasePage</code>, общие тесты обязаны проходить и на нём</td></tr>
+          <tr><td><strong>I</strong> — Interface Segregation<br><span style="opacity:.7;">разделение интерфейсов</span></td><td>несколько узких интерфейсов лучше одного широкого</td><td>базовый класс не заставляет реализовывать <code>auth()</code> там, где авторизации нет</td></tr>
+          <tr><td><strong>D</strong> — Dependency Inversion<br><span style="opacity:.7;">инверсия зависимостей</span></td><td>зависеть от абстракции, а не от конкретной реализации</td><td>клиент приходит в тест фикстурой, а не создаётся внутри — можно подменить моком или клиентом другого стенда</td></tr>
+        </tbody>
+      </table>
+      <p><strong>D на практике</strong> — это и есть dependency injection, на котором стоит весь pytest:</p>
+      <div class="code-block"><span class="cm"># плохо: тест намертво привязан к реализации и окружению</span>
 <span class="kw">def</span> <span class="fn">test_order</span>():
     client = <span class="fn">ApiClient</span>(<span class="st">"https://prod"</span>)   <span class="cm"># не подменить ни моком, ни стендом</span>
 
 <span class="cm"># хорошо: зависимость приходит снаружи</span>
 <span class="kw">def</span> <span class="fn">test_order</span>(api_client):            <span class="cm"># какой именно клиент — решает фикстура</span>
     ...</div>
-        <div class="hl orange"><span class="hl-label">Что реально нарушают в автотестах</span>Чаще всего <strong>SRP</strong>: Page Object, который и кликает, и ассертит, и ходит в базу; либо <code>utils.py</code> на тысячу строк, куда свалено всё. Второе место — <strong>LSP</strong>: наследник переопределил метод базового класса «немного по-другому», и общие тесты на нём падают. Сильный ответ на собесе — не пересказ пяти букв, а пример: «SRP у нас нарушался в Page Object с ассертами внутри — вынесли проверки в тесты, страницы стали переиспользуемыми».</div>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить одним предложением.</div>
+      <div class="hl orange"><span class="hl-label">Что реально нарушают в автотестах</span>Чаще всего <strong>SRP</strong>: Page Object, который и кликает, и ассертит, и ходит в базу; либо <code>utils.py</code> на тысячу строк, куда свалено всё. Второе место — <strong>LSP</strong>: наследник переопределил метод базового класса «немного по-другому», и общие тесты на нём падают. Сильный ответ на собесе — не пересказ пяти букв, а пример: «SRP у нас нарушался в Page Object с ассертами внутри — вынесли проверки в тесты, страницы стали переиспользуемыми».</div>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить одним предложением.</div>
 
-        <p><strong>Множественное наследование и MRO.</strong> В <code>class Service(CacheMixin, BaseService)</code> метод ищется в порядке MRO, рассчитанном алгоритмом C3; посмотреть порядок можно через <code>Service.__mro__</code>. <code>super()</code> вызывает не «родителя вообще», а следующий метод в этой цепочке. В ромбовидной иерархии это позволяет вызвать общего предка один раз, если все участники используют кооперативный <code>super()</code> и совместимые сигнатуры. Основные риски — конфликты имён, неожиданный порядок и класс, который оборвал цепочку вызовов.</p>
+      <p><strong>Множественное наследование и MRO.</strong> В <code>class Service(CacheMixin, BaseService)</code> метод ищется в порядке MRO, рассчитанном алгоритмом C3; посмотреть порядок можно через <code>Service.__mro__</code>. <code>super()</code> вызывает не «родителя вообще», а следующий метод в этой цепочке. В ромбовидной иерархии это позволяет вызвать общего предка один раз, если все участники используют кооперативный <code>super()</code> и совместимые сигнатуры. Основные риски — конфликты имён, неожиданный порядок и класс, который оборвал цепочку вызовов.</p>
 
-        <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
-        <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+      <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
+      <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
 
 @dataclass
 <span class="kw">class</span> <span class="fn">User</span>:
@@ -1032,10 +943,9 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
     role: <span class="fn">str</span> = <span class="st">"user"</span>
 
 <span class="fn">User</span>(<span class="val">1</span>, <span class="st">"Ann"</span>) == <span class="fn">User</span>(<span class="val">1</span>, <span class="st">"Ann"</span>)   <span class="cm"># True — __eq__ уже есть</span></div>
-        <p><strong><code>__slots__</code></strong> — фиксирует список допустимых атрибутов, убирая у объекта <code>__dict__</code>: экономит память и ловит опечатку в имени атрибута ошибкой вместо молчаливого создания нового поля. Нужен редко (много объектов), но знать термин стоит.</p>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Глубокое ООП (метаклассы, дескрипторы, MRO при сложном множественном наследовании) QA-автоматизатору почти не нужно — это для разработчиков библиотек. Достаточно: классы, наследование, <code>super()</code>, основные dunder-методы, <code>@property</code>/<code>@staticmethod</code>/<code>@classmethod</code>. Этого хватает, чтобы писать и читать тест-фреймворк.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>__str__</code> отличается от <code>__repr__</code>?» — <code>__str__</code> — «человеческое» представление для пользователя (<code>print(obj)</code>). <code>__repr__</code> — однозначное техническое для отладки, в идеале такое, чтобы по нему можно было воссоздать объект (<code>repr(obj)</code>, вывод в консоли/логах). Если определён только один — определяй <code>__repr__</code>, он используется как fallback.</div>
-      </div>
+      <p><strong><code>__slots__</code></strong> — фиксирует список допустимых атрибутов, убирая у объекта <code>__dict__</code>: экономит память и ловит опечатку в имени атрибута ошибкой вместо молчаливого создания нового поля. Нужен редко (много объектов), но знать термин стоит.</p>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>Глубокое ООП (метаклассы, дескрипторы, MRO при сложном множественном наследовании) QA-автоматизатору почти не нужно — это для разработчиков библиотек. Достаточно: классы, наследование, <code>super()</code>, основные dunder-методы, <code>@property</code>/<code>@staticmethod</code>/<code>@classmethod</code>. Этого хватает, чтобы писать и читать тест-фреймворк.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем <code>__str__</code> отличается от <code>__repr__</code>?» — <code>__str__</code> — «человеческое» представление для пользователя (<code>print(obj)</code>). <code>__repr__</code> — однозначное техническое для отладки, в идеале такое, чтобы по нему можно было воссоздать объект (<code>repr(obj)</code>, вывод в консоли/логах). Если определён только один — определяй <code>__repr__</code>, он используется как fallback.</div>
 
     </div>
   </section>
@@ -1049,10 +959,8 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Половина live-coding задач для QA — про строки (валидация, парсинг). Строка <strong>неизменяема</strong> (immutable): методы возвращают новую строку, а не меняют исходную. Базовые методы:</p>
-        <div class="code-block">s = <span class="st">"Hello World"</span>
+      <p>Половина live-coding задач для QA — про строки (валидация, парсинг). Строка <strong>неизменяема</strong> (immutable): методы возвращают новую строку, а не меняют исходную. Базовые методы:</p>
+      <div class="code-block">s = <span class="st">"Hello World"</span>
 s.lower(), s.upper()      <span class="cm"># 'hello world', 'HELLO WORLD'</span>
 s.strip()                 <span class="cm"># убрать пробелы по краям</span>
 s.split(<span class="st">" "</span>)             <span class="cm"># ['Hello', 'World']</span>
@@ -1060,15 +968,11 @@ s.split(<span class="st">" "</span>)             <span class="cm"># ['Hello', 'W
 s.replace(<span class="st">"l"</span>, <span class="st">"L"</span>)      <span class="cm"># 'HeLLo WorLd'</span>
 s.startswith(<span class="st">"He"</span>)        <span class="cm"># True</span>
 <span class="st">"World"</span> <span class="kw">in</span> s             <span class="cm"># True — подстрока</span></div>
-        <div class="hl green"><span class="hl-label">Проверки символов</span>Спрашивают постоянно (валидация пароля, ввода): <code>"123".isdigit()</code> (только цифры), <code>"abc".isalpha()</code> (только буквы), <code>"a1".isalnum()</code> (буквы+цифры), <code>ch.isupper()</code> / <code>ch.islower()</code> (регистр). Возвращают bool.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Проверки символов</span>Спрашивают постоянно (валидация пароля, ввода): <code>"123".isdigit()</code> (только цифры), <code>"abc".isalpha()</code> (только буквы), <code>"a1".isalnum()</code> (буквы+цифры), <code>ch.isupper()</code> / <code>ch.islower()</code> (регистр). Возвращают bool.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>any / all с генератором</strong> — главный приём для проверок «есть ли хоть один / все ли»:</p>
-        <div class="code-block"><span class="cm"># есть ли хоть одна цифра в строке</span>
+      <p><strong>any / all с генератором</strong> — главный приём для проверок «есть ли хоть один / все ли»:</p>
+      <div class="code-block"><span class="cm"># есть ли хоть одна цифра в строке</span>
 any(ch.isdigit() <span class="kw">for</span> ch <span class="kw">in</span> s)
 
 <span class="cm"># все ли символы — буквы</span>
@@ -1077,45 +981,37 @@ all(ch.isalpha() <span class="kw">for</span> ch <span class="kw">in</span> s)
 <span class="cm"># есть ли заглавная И строчная (валидатор пароля)</span>
 has_upper = any(ch.isupper() <span class="kw">for</span> ch <span class="kw">in</span> s)
 has_lower = any(ch.islower() <span class="kw">for</span> ch <span class="kw">in</span> s)</div>
-        <p><strong>Срезы</strong> (slicing): <code>s[1:3]</code> (с 1 по 2, stop не включается), <code>s[::-1]</code> (реверс — частый трюк для палиндрома), <code>s[:2]</code>, <code>s[-1]</code> (последний).</p>
-        <p><strong>Счётчик символов</strong> — типовой приём:</p>
-        <div class="code-block">counts = {}
+      <p><strong>Срезы</strong> на строках работают так же, как на списках (раздел 02). Для строк чаще всего нужен <code>s[::-1]</code> — реверс, типовой трюк в задачах про палиндром.</p>
+      <p><strong>Счётчик символов</strong> — типовой приём:</p>
+      <div class="code-block">counts = {}
 <span class="kw">for</span> ch <span class="kw">in</span> <span class="st">"hello"</span>:
     counts[ch] = counts.get(ch, <span class="val">0</span>) + <span class="val">1</span>
 <span class="cm"># {'h':1, 'e':1, 'l':2, 'o':1} — или короче: Counter("hello")</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Регулярные выражения (модуль <code>re</code>)</strong> — нужны для валидации (email, пароль, телефон) и парсинга (логи). Паттерны пишут как <code>r"..."</code> (raw string), чтобы не экранировать <code>\</code> дважды.</p>
-        <div class="code-block"><span class="kw">import</span> re
+      <p><strong>Регулярные выражения (модуль <code>re</code>)</strong> — нужны для валидации (email, пароль, телефон) и парсинга (логи). Паттерны пишут как <code>r"..."</code> (raw string), чтобы не экранировать <code>\</code> дважды.</p>
+      <div class="code-block"><span class="kw">import</span> re
 re.search(r<span class="st">"\d+"</span>, text)     <span class="cm"># первое совпадение где угодно (или None)</span>
 re.match(r<span class="st">"\d+"</span>, text)      <span class="cm"># только с НАЧАЛА строки</span>
 re.findall(r<span class="st">"\d+"</span>, text)    <span class="cm"># все совпадения списком</span>
 re.fullmatch(r<span class="st">"\d+"</span>, text)  <span class="cm"># совпадает ли ВСЯ строка</span>
 
 bool(re.search(r<span class="st">"[A-Z]"</span>, s))   <span class="cm"># есть ли заглавная</span></div>
-        <table>
-          <thead><tr><th>Паттерн</th><th>Значение</th></tr></thead>
-          <tbody>
-            <tr><td><code>\d</code> / <code>\D</code></td><td>цифра / не цифра</td></tr>
-            <tr><td><code>\w</code> / <code>\W</code></td><td>буква/цифра/_ / наоборот</td></tr>
-            <tr><td><code>\s</code> / <code>\S</code></td><td>пробельный / не пробельный</td></tr>
-            <tr><td><code>[abc]</code> / <code>[^abc]</code></td><td>один из / не из</td></tr>
-            <tr><td><code>[a-z]</code> / <code>[A-Za-z]</code></td><td>диапазон / буквы любого регистра</td></tr>
-            <tr><td><code>*</code> / <code>+</code> / <code>?</code></td><td>0+ / 1+ / 0 или 1</td></tr>
-            <tr><td><code>{3}</code> / <code>{2,5}</code></td><td>ровно 3 / от 2 до 5</td></tr>
-            <tr><td><code>^</code> / <code>$</code></td><td>начало / конец строки</td></tr>
-          </tbody>
-        </table>
-        <div class="hl orange"><span class="hl-label">Важная оговорка</span>Сложную валидацию email / URL / телефонов <strong>не пиши самодельным regex в проде</strong> — это классический источник багов (валидный email по RFC регулярка почти никогда не покрывает). Используй проверенную библиотеку или серверную валидацию. Regex хорош для <em>логов и простых проверок</em>, а не для «угадай все форматы email одной строкой».</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Разница <code>re.search</code>, <code>re.match</code>, <code>re.fullmatch</code>?» — <code>search</code> ищет совпадение <em>где угодно</em> в строке, <code>match</code> — только <em>с начала</em> строки, <code>fullmatch</code> — совпадает ли <em>вся</em> строка целиком. Для валидации «строка целиком соответствует формату» нужен <code>fullmatch</code> (или <code>^...$</code> в search), иначе <code>"123abc"</code> пройдёт проверку на <code>\d+</code> через search/match.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> regex легко забыть — попроси построить и объяснить паттерн.<br>
-          <strong>Пример промпта:</strong> <em>«Напиши regex для валидации пароля: минимум 8 символов, хотя бы одна цифра, заглавная и спецсимвол. Объясни паттерн по частям.»</em><br>
-          <strong>Что проверить руками:</strong> прогнать на граничных (пустая строка, юникод, очень длинный ввод) — regex часто пропускает edge cases.</div>
-      </div>
+      <table>
+        <thead><tr><th>Паттерн</th><th>Значение</th></tr></thead>
+        <tbody>
+          <tr><td><code>\d</code> / <code>\D</code></td><td>цифра / не цифра</td></tr>
+          <tr><td><code>\w</code> / <code>\W</code></td><td>буква/цифра/_ / наоборот</td></tr>
+          <tr><td><code>\s</code> / <code>\S</code></td><td>пробельный / не пробельный</td></tr>
+          <tr><td><code>[abc]</code> / <code>[^abc]</code></td><td>один из / не из</td></tr>
+          <tr><td><code>[a-z]</code> / <code>[A-Za-z]</code></td><td>диапазон / буквы любого регистра</td></tr>
+          <tr><td><code>*</code> / <code>+</code> / <code>?</code></td><td>0+ / 1+ / 0 или 1</td></tr>
+          <tr><td><code>{3}</code> / <code>{2,5}</code></td><td>ровно 3 / от 2 до 5</td></tr>
+          <tr><td><code>^</code> / <code>$</code></td><td>начало / конец строки</td></tr>
+        </tbody>
+      </table>
+      <div class="hl orange"><span class="hl-label">Важная оговорка</span>Сложную валидацию email / URL / телефонов <strong>не пиши самодельным regex в проде</strong> — это классический источник багов (валидный email по RFC регулярка почти никогда не покрывает). Используй проверенную библиотеку или серверную валидацию. Regex хорош для <em>логов и простых проверок</em>, а не для «угадай все форматы email одной строкой».</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Разница <code>re.search</code>, <code>re.match</code>, <code>re.fullmatch</code>?» — <code>search</code> ищет совпадение <em>где угодно</em> в строке, <code>match</code> — только <em>с начала</em> строки, <code>fullmatch</code> — совпадает ли <em>вся</em> строка целиком. Для валидации «строка целиком соответствует формату» нужен <code>fullmatch</code> (или <code>^...$</code> в search), иначе <code>"123abc"</code> пройдёт проверку на <code>\d+</code> через search/match.</div>
 
     </div>
   </section>
@@ -1129,49 +1025,32 @@ bool(re.search(r<span class="st">"[A-Z]"</span>, s))   <span class="cm"># ест
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Любимый формат Python-собеса — «чем X отличается от Y». Самое спрашиваемое:</p>
-        <div class="code-block">arr = [<span class="val">1</span>, <span class="val">2</span>]
+      <p>Любимый формат Python-собеса — «чем X отличается от Y». Самое спрашиваемое:</p>
+      <div class="code-block">arr = [<span class="val">1</span>, <span class="val">2</span>]
 arr.append([<span class="val">3</span>, <span class="val">4</span>])   <span class="cm"># [1, 2, [3, 4]] — добавил ОДИН элемент (список)</span>
 arr = [<span class="val">1</span>, <span class="val">2</span>]
 arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span class="cm"># [1, 2, 3, 4] — добавил КАЖДЫЙ элемент</span></div>
-        <div class="hl green"><span class="hl-label">append vs extend</span><code>append(x)</code> добавляет <em>x целиком</em> как один элемент (даже если x — список, он вложится). <code>extend(iterable)</code> добавляет <em>каждый элемент</em> из переданного. Запомнить: append — «положить коробку в конец», extend — «высыпать содержимое коробки».</div>
-      </div>
 
-      <hr class="lvl-divider">
+      <table>
+        <thead><tr><th>Пара</th><th>Разница</th></tr></thead>
+        <tbody>
+          <tr><td><code>append</code> vs <code>extend</code></td><td>положить коробку в конец vs высыпать её содержимое</td></tr>
+          <tr><td><code>append</code> vs <code>insert</code></td><td>в конец vs по индексу (<code>insert(0, x)</code> — в начало)</td></tr>
+          <tr><td><code>remove</code> vs <code>pop</code> vs <code>del</code></td><td>по значению vs по индексу (и вернуть) vs по индексу (без возврата)</td></tr>
+          <tr><td><code>sort()</code> vs <code>sorted()</code></td><td>меняет список на месте (None) vs возвращает новый отсортированный</td></tr>
+          <tr><td><code>d[key]</code> vs <code>d.get(key)</code></td><td>KeyError если нет vs None (или дефолт) если нет</td></tr>
+          <tr><td><code>/</code> vs <code>//</code></td><td>деление с float vs целочисленное (<code>7/2=3.5</code>, <code>7//2=3</code>)</td></tr>
+        </tbody>
+      </table>
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <table>
-          <thead><tr><th>Пара</th><th>Разница</th></tr></thead>
-          <tbody>
-            <tr><td><code>append</code> vs <code>extend</code></td><td>добавить элемент целиком vs добавить каждый элемент итерируемого</td></tr>
-            <tr><td><code>append</code> vs <code>insert</code></td><td>в конец vs по индексу (<code>insert(0, x)</code> — в начало)</td></tr>
-            <tr><td><code>remove</code> vs <code>pop</code> vs <code>del</code></td><td>по значению vs по индексу (и вернуть) vs по индексу (без возврата)</td></tr>
-            <tr><td><code>sort()</code> vs <code>sorted()</code></td><td>меняет список на месте (None) vs возвращает новый отсортированный</td></tr>
-            <tr><td><code>list</code> vs <code>tuple</code></td><td>изменяемый vs неизменяемый (tuple можно ключом dict, list — нет)</td></tr>
-            <tr><td><code>is</code> vs <code>==</code></td><td>тот же объект в памяти vs равны по значению</td></tr>
-            <tr><td><code>d[key]</code> vs <code>d.get(key)</code></td><td>KeyError если нет vs None (или дефолт) если нет</td></tr>
-            <tr><td><code>/</code> vs <code>//</code></td><td>деление с float vs целочисленное (<code>7/2=3.5</code>, <code>7//2=3</code>)</td></tr>
-          </tbody>
-        </table>
-      </div>
 
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Менее очевидные, но спрашивают:</strong></p>
-        <ul>
-          <li><strong>list comprehension vs generator</strong> — <code>[x for x in ...]</code> создаёт весь список в памяти; <code>(x for x in ...)</code> — ленивый генератор, отдаёт по одному (экономит память на больших данных)</li>
-          <li><strong>copy vs deepcopy</strong> — поверхностная копия (вложенные объекты общие) vs полная копия всего дерева (раздел «Синтаксис»)</li>
-          <li><strong><code>and</code> / <code>or</code> возвращают значение, не bool</strong> — <code>a or b</code> вернёт <code>a</code>, если оно truthy, иначе <code>b</code> (частый приём для дефолтов)</li>
-          <li><strong>truthy / falsy</strong> — пустые <code>[]</code>, <code>{}</code>, <code>""</code>, <code>0</code>, <code>None</code> в условии = False; непустые = True</li>
-          <li><strong><code>==</code> vs <code>is</code> для чисел</strong> — мелкие int (-5..256) кэшируются, <code>is</code> случайно вернёт True; всегда сравнивай значения через <code>==</code>, идентичность (<code>is</code>) — только для <code>None</code></li>
-        </ul>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что вернёт <code>[1,2].append([3,4])</code> и чему равна переменная?» — Метод <code>append</code> (как и <code>sort</code>, <code>extend</code>, <code>reverse</code>) меняет список <em>на месте</em> и возвращает <code>None</code>. Так что <code>x = arr.append(...)</code> положит в <code>x</code> None, а не новый список — частая ошибка. Сам список станет <code>[1, 2, [3, 4]]</code>. Методы, меняющие на месте, возвращают None; те, что возвращают новое (<code>sorted</code>, срезы) — не меняют исходник.</div>
-      </div>
+      <p><strong>Менее очевидные, но спрашивают:</strong></p>
+      <ul>
+        <li><strong><code>and</code> / <code>or</code> возвращают значение, не bool</strong> — <code>a or b</code> вернёт <code>a</code>, если оно truthy, иначе <code>b</code> (частый приём для дефолтов)</li>
+        <li><strong>truthy / falsy</strong> — пустые <code>[]</code>, <code>{}</code>, <code>""</code>, <code>0</code>, <code>None</code> в условии = False; непустые = True</li>
+        <li><strong><code>==</code> vs <code>is</code> для чисел</strong> — мелкие int (-5..256) кэшируются, <code>is</code> случайно вернёт True; всегда сравнивай значения через <code>==</code>, идентичность (<code>is</code>) — только для <code>None</code></li>
+      </ul>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чему будет равно <code>x</code> после <code>x = arr.append(4)</code>?» — <code>None</code>, а не новому списку. <code>append</code> (как и <code>sort</code>, <code>extend</code>, <code>reverse</code>, <code>remove</code>) меняет список <em>на месте</em> и ничего не возвращает — ошибка ровно в одну строку. Общее правило: что меняет на месте — возвращает <code>None</code>; что возвращает новое (<code>sorted</code>, <code>reversed</code>, срезы) — исходник не трогает.</div>
 
     </div>
   </section>
@@ -1185,30 +1064,24 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>GIL</strong> (Global Interpreter Lock) — глобальная блокировка интерпретатора CPython: <strong>в один момент времени байткод Python исполняет только один поток</strong>. Даже на 8 ядрах два потока не будут считать параллельно — они будут по очереди захватывать GIL.</p>
-        <div class="hl green"><span class="hl-label">Аналогия</span>GIL — это один микрофон на всю комнату. Людей (потоков) много, говорить одновременно нельзя: микрофон передают по кругу. Если задача — «говорить» (считать в CPU), очередь из потоков ничего не ускорит. Но если задача — «ждать ответа» (сеть, диск), говорящий всё равно молчит и отдаёт микрофон другим — вот тут потоки и выигрывают.</div>
-        <p><strong>Главное следствие:</strong> потоки в Python ускоряют <em>I/O-bound</em> задачи (запросы по сети, чтение файлов, ожидание БД) и <strong>не ускоряют CPU-bound</strong> (вычисления, парсинг, обработка данных). Пока поток ждёт ответа от сети, он отпускает GIL — остальные работают.</p>
-      </div>
+      <p><strong>GIL</strong> (Global Interpreter Lock) — глобальная блокировка интерпретатора CPython: <strong>в один момент времени байткод Python исполняет только один поток</strong>. Даже на 8 ядрах два потока не будут считать параллельно — они будут по очереди захватывать GIL.</p>
+      <div class="hl green"><span class="hl-label">Аналогия</span>GIL — это один микрофон на всю комнату. Людей (потоков) много, говорить одновременно нельзя: микрофон передают по кругу. Если задача — «говорить» (считать в CPU), очередь из потоков ничего не ускорит. Но если задача — «ждать ответа» (сеть, диск), говорящий всё равно молчит и отдаёт микрофон другим — вот тут потоки и выигрывают.</div>
+      <p><strong>Главное следствие:</strong> потоки в Python ускоряют <em>I/O-bound</em> задачи (запросы по сети, чтение файлов, ожидание БД) и <strong>не ускоряют CPU-bound</strong> (вычисления, парсинг, обработка данных). Пока поток ждёт ответа от сети, он отпускает GIL — остальные работают.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Три способа выполнять несколько задач</strong> — и когда какой:</p>
-        <table>
-          <thead><tr><th>Подход</th><th>Обходит GIL?</th><th>Для чего</th><th>Цена</th></tr></thead>
-          <tbody>
-            <tr><td><strong>threading</strong> (потоки)</td><td>нет</td><td>I/O-bound: HTTP-запросы, файлы, БД</td><td>дёшево, но общая память → гонки</td></tr>
-            <tr><td><strong>multiprocessing</strong> (процессы)</td><td><strong>да</strong> — у каждого процесса свой GIL</td><td>CPU-bound: вычисления, обработка данных</td><td>дорого: своя память, накладные на запуск и передачу данных</td></tr>
-            <tr><td><strong>asyncio</strong> (корутины)</td><td>не нужно — всё в одном потоке</td><td>много одновременных сетевых операций</td><td>нужен async-совместимый код целиком</td></tr>
-          </tbody>
-        </table>
-        <div class="hl"><span class="hl-label">Правило выбора</span><strong>CPU-bound → процессы. I/O-bound → потоки или asyncio.</strong> Это ответ на вопрос «как ускорить скрипт», и он же объясняет, почему <code>pytest-xdist</code> раскидывает тесты по <strong>процессам</strong> (<code>-n 4</code>), а не по потокам: процессы дают и настоящий параллелизм, и изоляцию — упавший тест не уронит соседей.</div>
+      <p><strong>Три способа выполнять несколько задач</strong> — и когда какой:</p>
+      <table>
+        <thead><tr><th>Подход</th><th>Обходит GIL?</th><th>Для чего</th><th>Цена</th></tr></thead>
+        <tbody>
+          <tr><td><strong>threading</strong> (потоки)</td><td>нет</td><td>I/O-bound: HTTP-запросы, файлы, БД</td><td>дёшево, но общая память → гонки</td></tr>
+          <tr><td><strong>multiprocessing</strong> (процессы)</td><td><strong>да</strong> — у каждого процесса свой GIL</td><td>CPU-bound: вычисления, обработка данных</td><td>дорого: своя память, накладные на запуск и передачу данных</td></tr>
+          <tr><td><strong>asyncio</strong> (корутины)</td><td>не нужно — всё в одном потоке</td><td>много одновременных сетевых операций</td><td>нужен async-совместимый код целиком</td></tr>
+        </tbody>
+      </table>
+      <div class="hl"><span class="hl-label">Правило выбора</span><strong>CPU-bound → процессы. I/O-bound → потоки или asyncio.</strong> Это ответ на вопрос «как ускорить скрипт», и он же объясняет, почему <code>pytest-xdist</code> раскидывает тесты по <strong>процессам</strong> (<code>-n 4</code>), а не по потокам: процессы дают и настоящий параллелизм, и изоляцию — упавший тест не уронит соседей.</div>
 
-        <p><strong>asyncio — синхронно vs асинхронно.</strong> Корутина на <code>await</code> добровольно отдаёт управление циклу событий, и тот запускает следующую задачу. Один поток, но пока одни запросы «в полёте», выполняются другие:</p>
-        <div class="code-block"><span class="cm"># синхронно: 100 запросов по 1 сек = ~100 сек</span>
+      <p><strong>asyncio — синхронно vs асинхронно.</strong> Корутина на <code>await</code> добровольно отдаёт управление циклу событий, и тот запускает следующую задачу. Один поток, но пока одни запросы «в полёте», выполняются другие:</p>
+      <div class="code-block"><span class="cm"># синхронно: 100 запросов по 1 сек = ~100 сек</span>
 <span class="kw">for</span> url <span class="kw">in</span> urls:
     requests.<span class="fn">get</span>(url)
 
@@ -1221,55 +1094,50 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
 
 <span class="kw">async def</span> <span class="fn">main</span>():
     <span class="kw">async with</span> httpx.<span class="fn">AsyncClient</span>() <span class="kw">as</span> client:
-        <span class="kw">return</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*[<span class="fn">fetch</span>(client, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
+      <span class="kw">return</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*[<span class="fn">fetch</span>(client, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
 
 asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
-        <ul>
-          <li><code>async def</code> — объявляет корутину; вызов <em>не</em> запускает её, а возвращает объект корутины</li>
-          <li><code>await</code> — ждать результат, отдав управление на это время</li>
-          <li><code>asyncio.gather()</code> — запустить пачку задач одновременно и дождаться всех</li>
-          <li><code>asyncio.run()</code> — точка входа, запускает цикл событий</li>
-        </ul>
-        <div class="hl orange"><span class="hl-label">Главная ошибка в async</span>Одна <strong>блокирующая</strong> строка внутри корутины останавливает весь цикл событий, и вся асинхронность пропадает. Классика: <code>time.sleep(1)</code> вместо <code>await asyncio.sleep(1)</code> или <code>requests.get()</code> вместо <code>httpx.AsyncClient</code>. Правило: внутри <code>async def</code> все операции ввода-вывода должны быть <code>await</code>-совместимыми.</div>
-        <p><strong>Concurrency vs parallelism.</strong> Concurrency означает, что несколько задач продвигаются с перекрытием во времени, переключаясь в точках ожидания. Parallelism — физически одновременное исполнение на разных ядрах или процессорах. <code>asyncio</code> обычно даёт concurrency в одном потоке, а не CPU-параллелизм.</p>
-      </div>
+      <ul>
+        <li><code>async def</code> — объявляет корутину; вызов <em>не</em> запускает её, а возвращает объект корутины</li>
+        <li><code>await</code> — ждать результат, отдав управление на это время</li>
+        <li><code>asyncio.gather()</code> — запустить пачку задач одновременно и дождаться всех</li>
+        <li><code>asyncio.run()</code> — точка входа, запускает цикл событий</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Главная ошибка в async</span>Одна <strong>блокирующая</strong> строка внутри корутины останавливает весь цикл событий, и вся асинхронность пропадает. Классика: <code>time.sleep(1)</code> вместо <code>await asyncio.sleep(1)</code> или <code>requests.get()</code> вместо <code>httpx.AsyncClient</code>. Правило: внутри <code>async def</code> все операции ввода-вывода должны быть <code>await</code>-совместимыми.</div>
+      <p><strong>Concurrency vs parallelism.</strong> Concurrency означает, что несколько задач продвигаются с перекрытием во времени, переключаясь в точках ожидания. Parallelism — физически одновременное исполнение на разных ядрах или процессорах. <code>asyncio</code> обычно даёт concurrency в одном потоке, а не CPU-параллелизм.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Где это реально встречается у QA:</strong></p>
-        <ul>
-          <li><strong>Параллельный прогон тестов</strong> — <code>pytest -n 4</code> (<code>pytest-xdist</code>): процессы, поэтому тесты обязаны быть изолированы (свои данные, никакого общего состояния)</li>
-          <li><strong>Пачка API-запросов</strong> — подготовить 500 сущностей для теста: <code>ThreadPoolExecutor</code> или <code>asyncio</code> вместо цикла на 10 минут</li>
-          <li><strong>Нагрузочные и WebSocket-тесты</strong> — держать сотни соединений одним процессом умеет только async</li>
-          <li><strong>Гонки в собственных тестах</strong> — общая фикстура, один тестовый юзер на всех, счётчик без блокировки: типичная причина flaky при параллельном запуске</li>
-        </ul>
-        <div class="code-block"><span class="cm"># простой параллелизм без asyncio — для I/O достаточно</span>
+      <p><strong>Где это реально встречается у QA:</strong></p>
+      <ul>
+        <li><strong>Параллельный прогон тестов</strong> — <code>pytest -n 4</code> (<code>pytest-xdist</code>): процессы, поэтому тесты обязаны быть изолированы (свои данные, никакого общего состояния)</li>
+        <li><strong>Пачка API-запросов</strong> — подготовить 500 сущностей для теста: <code>ThreadPoolExecutor</code> или <code>asyncio</code> вместо цикла на 10 минут</li>
+        <li><strong>Нагрузочные и WebSocket-тесты</strong> — держать сотни соединений одним процессом умеет только async</li>
+        <li><strong>Гонки в собственных тестах</strong> — общая фикстура, один тестовый юзер на всех, счётчик без блокировки: типичная причина flaky при параллельном запуске</li>
+      </ul>
+      <div class="code-block"><span class="cm"># простой параллелизм без asyncio — для I/O достаточно</span>
 <span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor
 
 <span class="kw">with</span> <span class="fn">ThreadPoolExecutor</span>(max_workers=<span class="val">10</span>) <span class="kw">as</span> pool:
     results = <span class="fn">list</span>(pool.<span class="fn">map</span>(create_user, payloads))</div>
 
-        <p><strong>Race condition возможна и в одном event loop.</strong> Если две корутины проверили пустой кэш и обе дошли до <code>await</code>, они могут одновременно запустить одну дорогую загрузку. Решение — блокировка на ключ или хранение общей выполняющейся задачи; после захвата блокировки кэш проверяют повторно.</p>
-        <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+      <p><strong>Race condition возможна и в одном event loop.</strong> Если две корутины проверили пустой кэш и обе дошли до <code>await</code>, они могут одновременно запустить одну дорогую загрузку. Решение — блокировка на ключ или хранение общей выполняющейся задачи; после захвата блокировки кэш проверяют повторно.</p>
+      <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
 
 locks = <span class="fn">defaultdict</span>(asyncio.Lock)
 
 <span class="kw">async def</span> <span class="fn">load</span>(user_id):
     <span class="kw">if</span> user_id <span class="kw">in</span> cache:
-        <span class="kw">return</span> cache[user_id]
+      <span class="kw">return</span> cache[user_id]
     <span class="kw">async with</span> locks[user_id]:
-        <span class="kw">if</span> user_id <span class="kw">not in</span> cache:       <span class="cm"># double check</span>
-            cache[user_id] = <span class="kw">await</span> <span class="fn">fetch_user</span>(user_id)
-        <span class="kw">return</span> cache[user_id]</div>
+      <span class="kw">if</span> user_id <span class="kw">not in</span> cache:       <span class="cm"># double check</span>
+          cache[user_id] = <span class="kw">await</span> <span class="fn">fetch_user</span>(user_id)
+      <span class="kw">return</span> cache[user_id]</div>
 
-        <div class="hl modern"><span class="hl-label">Про «GIL убрали»</span>В Python 3.13 появился экспериментальный <em>free-threaded</em> режим (сборка без GIL, PEP 703), в 3.14 он продолжает стабилизироваться. Но это отдельная сборка, а не поведение по умолчанию, и экосистема C-расширений к ней ещё адаптируется. Корректный ответ на собесе: «в обычном CPython GIL на месте, есть экспериментальная сборка без него — но в проде на неё пока не опираются».</div>
+      <div class="hl modern"><span class="hl-label">Про «GIL убрали»</span>В Python 3.13 появился экспериментальный <em>free-threaded</em> режим (сборка без GIL, PEP 703), в 3.14 он продолжает стабилизироваться. Но это отдельная сборка, а не поведение по умолчанию, и экосистема C-расширений к ней ещё адаптируется. Корректный ответ на собесе: «в обычном CPython GIL на месте, есть экспериментальная сборка без него — но в проде на неё пока не опираются».</div>
 
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У тебя скрипт делает 1000 HTTP-запросов и работает 20 минут. Как ускорить?» — Сначала уточнить, что задача <strong>I/O-bound</strong> (ждём сеть, не считаем) — значит GIL не мешает и процессы не нужны. Варианты по возрастанию: 1) <code>requests.Session()</code> — переиспользовать соединение, убрать повторные TLS-handshake; 2) <code>ThreadPoolExecutor</code> на 10–20 воркеров — самый дешёвый по изменениям путь; 3) <code>asyncio</code> + <code>httpx</code> — если запросов тысячи и нужен максимум; 4) проверить, не упрёмся ли в <strong>rate limit</strong> сервера — иначе ускорение превратится в 429.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У тебя скрипт делает 1000 HTTP-запросов и работает 20 минут. Как ускорить?» — Сначала уточнить, что задача <strong>I/O-bound</strong> (ждём сеть, не считаем) — значит GIL не мешает и процессы не нужны. Варианты по возрастанию: 1) <code>requests.Session()</code> — переиспользовать соединение, убрать повторные TLS-handshake; 2) <code>ThreadPoolExecutor</code> на 10–20 воркеров — самый дешёвый по изменениям путь; 3) <code>asyncio</code> + <code>httpx</code> — если запросов тысячи и нужен максимум; 4) проверить, не упрёмся ли в <strong>rate limit</strong> сервера — иначе ускорение превратится в 429.</div>
 
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему добавили потоков, а скрипт не ускорился?» — Почти наверняка задача CPU-bound: потоки делят один GIL и просто передают его по очереди, суммарная скорость та же плюс накладные на переключение. Лечится процессами (<code>multiprocessing</code>, <code>ProcessPoolExecutor</code>) либо выносом тяжёлой части в библиотеку, которая отпускает GIL (numpy, C-расширения).</div>
-      </div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему добавили потоков, а скрипт не ускорился?» — Почти наверняка задача CPU-bound: потоки делят один GIL и просто передают его по очереди, суммарная скорость та же плюс накладные на переключение. Лечится процессами (<code>multiprocessing</code>, <code>ProcessPoolExecutor</code>) либо выносом тяжёлой части в библиотеку, которая отпускает GIL (numpy, C-расширения).</div>
 
     </div>
   </section>
@@ -1283,10 +1151,8 @@ locks = <span class="fn">defaultdict</span>(asyncio.Lock)
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>То, что реально используешь в автотест-фреймворке каждый день — важнее алгоритмов. Начнём с <strong>исключений</strong>:</p>
-        <div class="code-block"><span class="kw">try</span>:
+      <p>То, что реально используешь в автотест-фреймворке каждый день — важнее алгоритмов. Начнём с <strong>исключений</strong>:</p>
+      <div class="code-block"><span class="kw">try</span>:
     response = client.get(<span class="st">"/orders"</span>)
 <span class="kw">except</span> ConnectionError <span class="kw">as</span> e:      <span class="cm"># ловим КОНКРЕТНОЕ, не голый except</span>
     logger.error(f<span class="st">"Сеть недоступна: {e}"</span>)
@@ -1295,41 +1161,22 @@ locks = <span class="fn">defaultdict</span>(asyncio.Lock)
     process(response)                <span class="cm"># если ошибки не было</span>
 <span class="kw">finally</span>:
     cleanup()                        <span class="cm"># выполнится всегда</span></div>
-        <div class="hl green"><span class="hl-label">Принцип для тестов</span>В тестах лучше <strong>падать явно, чем глотать ошибку</strong>. Голый <code>except:</code> прячет баги — тест «прошёл», хотя внутри всё сломалось. Лови конкретное исключение, а если поймал — либо обработай осмысленно, либо пробрось через <code>raise</code>. Молчаливый <code>except: pass</code> в тестах — это замаскированный непройденный тест.</div>
-        <div class="hl orange"><span class="hl-label">Не возвращай из finally</span><code>finally</code> выполняется перед любым выходом: после успеха, обработанного исключения, <code>return</code> или нового исключения. Если внутри него написать свой <code>return</code>, он переопределит прежний результат и подавит летящее исключение. Голый <code>raise</code> внутри <code>except</code> повторно выбрасывает текущее исключение с исходным traceback; <code>raise SomeException()</code> создаёт новое.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Принцип для тестов</span>В тестах лучше <strong>падать явно, чем глотать ошибку</strong>. Голый <code>except:</code> прячет баги — тест «прошёл», хотя внутри всё сломалось. Лови конкретное исключение, а если поймал — либо обработай осмысленно, либо пробрось через <code>raise</code>. Молчаливый <code>except: pass</code> в тестах — это замаскированный непройденный тест.</div>
+      <div class="hl orange"><span class="hl-label">Не возвращай из finally</span><code>finally</code> выполняется перед любым выходом: после успеха, обработанного исключения, <code>return</code> или нового исключения. Если внутри него написать свой <code>return</code>, он переопределит прежний результат и подавит летящее исключение. Голый <code>raise</code> внутри <code>except</code> повторно выбрасывает текущее исключение с исходным traceback; <code>raise SomeException()</code> создаёт новое.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Type hints (аннотации типов)</strong> — не обязательны, но в тестовом фреймворке делают код читаемым и ловят ошибки до запуска (через mypy):</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">get_user</span>(user_id: int) -> dict[str, Any]:
+      <p><strong>Type hints (аннотации типов)</strong> — не обязательны, но в тестовом фреймворке делают код читаемым и ловят ошибки до запуска (через mypy):</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">get_user</span>(user_id: int) -> dict[str, Any]:
     ...
 
 <span class="kw">def</span> <span class="fn">find</span>(name: str) -> Optional[User]:   <span class="cm"># может вернуть User или None</span>
     ...</div>
-        <p>Современный Python (3.11+): пиши <code>list[str]</code>, <code>dict[str, int]</code> напрямую (не <code>List</code> из typing). <code>Optional[X]</code> и <code>X | None</code> означают «X или None». Сам интерпретатор обычно не проверяет аннотации при вызове: ошибки до запуска ищут mypy/pyright, а runtime-валидацию выполняют отдельно.</p>
+      <p>Современный Python (3.11+): пиши <code>list[str]</code>, <code>dict[str, int]</code> напрямую (не <code>List</code> из typing). <code>Optional[X]</code> и <code>X | None</code> означают «X или None». Сам интерпретатор обычно не проверяет аннотации при вызове: ошибки до запуска ищут mypy/pyright, а runtime-валидацию выполняют отдельно.</p>
 
-        <p><strong>dataclass</strong> — удобно для тестовых DTO и моделей ответов API: класс данных без бойлерплейта:</p>
-        <div class="code-block"><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+      <p><strong>dataclass</strong> — базовый способ описать тестовый DTO или модель ответа без бойлерплейта: <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> генерируются сами, поэтому в ассертах сразу работает сравнение по значению (<code>assert actual == User(1, "Иван")</code>). Разбор с примером — в разделе 04 «ООП».</p>
 
-<span class="hdr">@dataclass</span>
-<span class="kw">class</span> <span class="fn">User</span>:
-    id: int
-    name: str
-    email: str = <span class="st">""</span>        <span class="cm"># значение по умолчанию</span>
-
-u = User(<span class="val">1</span>, <span class="st">"Иван"</span>)   <span class="cm"># __init__, __repr__, __eq__ — сгенерированы автоматически</span></div>
-        <p>Сравнение по значению (<code>__eq__</code>) из коробки — удобно в ассертах: <code>assert actual == User(1, "Иван")</code>.</p>
-      </div>
-
-      <hr class="lvl-divider">
-
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Pydantic</strong> — практичный инструмент для валидации моделей API: описываешь схему ответа как класс, Pydantic проверяет типы и структуру при парсинге. Незаменим для контроля контрактов в API-тестах:</p>
-        <div class="code-block"><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+      <p><strong>Pydantic</strong> — практичный инструмент для валидации моделей API: описываешь схему ответа как класс, Pydantic проверяет типы и структуру при парсинге. Незаменим для контроля контрактов в API-тестах:</p>
+      <div class="code-block"><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
 
 <span class="kw">class</span> <span class="fn">OrderResponse</span>(BaseModel):
     id: int
@@ -1339,29 +1186,25 @@ u = User(<span class="val">1</span>, <span class="st">"Иван"</span>)   <span
 <span class="cm"># парсит и ВАЛИДИРУЕТ ответ API — упадёт, если структура не та</span>
 order = OrderResponse(**response.json())
 <span class="kw">assert</span> order.status == <span class="st">"paid"</span></div>
-        <div class="hl green"><span class="hl-label">Зачем Pydantic в API-тестах</span>Вместо ручных проверок «есть ли поле, тот ли тип» — описываешь ожидаемую модель один раз, и Pydantic валидирует весь ответ: отсутствует поле, пришёл string вместо int, лишняя вложенность — тест падает с понятной ошибкой. Это контрактная проверка на стороне теста (см. раздел API → контракты). Используется в FastAPI, так что модели часто можно переиспользовать с бэкенда.</div>
+      <div class="hl green"><span class="hl-label">Зачем Pydantic в API-тестах</span>Вместо ручных проверок «есть ли поле, тот ли тип» — описываешь ожидаемую модель один раз, и Pydantic валидирует весь ответ: отсутствует поле, пришёл string вместо int, лишняя вложенность — тест падает с понятной ошибкой. Это контрактная проверка на стороне теста (см. раздел API → контракты). Используется в FastAPI, так что модели часто можно переиспользовать с бэкенда.</div>
 
-        <p><strong>Окружение и зависимости</strong> — что нужно знать:</p>
-        <ul>
-          <li><strong>venv</strong> — изолированное окружение под проект (<code>python -m venv .venv</code>). Зависимости не ставят глобально — конфликты версий между проектами</li>
-          <li><strong>pip + requirements.txt / pyproject.toml</strong> — фиксируют зависимости, чтобы у всех одинаковые версии</li>
-          <li><strong>ruff / black / mypy</strong> — современный минимум качества: ruff (быстрый линтер), black (форматтер), mypy (проверка типов). Часто в pre-commit и CI</li>
-        </ul>
+      <p><strong>Окружение и зависимости</strong> — что нужно знать:</p>
+      <ul>
+        <li><strong>venv</strong> — изолированное окружение под проект (<code>python -m venv .venv</code>). Зависимости не ставят глобально — конфликты версий между проектами</li>
+        <li><strong>pip + requirements.txt / pyproject.toml</strong> — фиксируют зависимости, чтобы у всех одинаковые версии</li>
+        <li><strong>ruff / black / mypy</strong> — современный минимум качества: ruff (быстрый линтер), black (форматтер), mypy (проверка типов). Часто в pre-commit и CI</li>
+      </ul>
 
-        <p><strong>Логирование</strong> — в QA-фреймворке важнее, чем кажется:</p>
-        <div class="code-block"><span class="kw">import</span> logging
+      <p><strong>Логирование</strong> — в QA-фреймворке важнее, чем кажется:</p>
+      <div class="code-block"><span class="kw">import</span> logging
 logger = logging.getLogger(__name__)
 
 logger.debug(<span class="st">"детали запроса"</span>)    <span class="cm"># подробности для дебага</span>
 logger.info(<span class="st">"тест начат"</span>)         <span class="cm"># ход выполнения</span>
 logger.warning(<span class="st">"повтор попытки"</span>)
 logger.error(<span class="st">"запрос упал"</span>)        <span class="cm"># ошибки</span></div>
-        <div class="hl orange"><span class="hl-label">logging вместо print</span>Не <code>print()</code> в тестах, а <code>logging</code>: уровни (debug/info/warning/error) позволяют фильтровать шум, логи идут в отчёт и CI. <strong>Критично:</strong> при логировании request/response <em>не пиши токены, пароли, ключи</em> в логи — они утекут в CI и хранилища. Маскируй чувствительные поля (связка с разделом Безопасность).</div>
-        <div class="hl modern"><span class="hl-label">Современный Python для QA</span>Рабочий минимум — <strong>Python 3.11+</strong> (актуальная ветка уже 3.14.x). Для собеса и работы не нужны новейшие фичи — достаточно владеть современным Python 3: f-strings, type hints, <code>pathlib</code> вместо <code>os.path</code>, dataclasses, comprehensions, pytest. Это и есть «современно и достаточно».</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> code review (найти mutable default, off-by-one, неверную сложность), рефакторинг простыни в читаемые функции, генерация Pydantic-моделей по примеру JSON-ответа.<br>
-          <strong>Пример промпта:</strong> <em>«Вот JSON-ответ API [пример]. Сгенерируй Pydantic-модель для валидации в тестах.»</em><br>
-          <strong>Что проверить руками:</strong> опциональные/nullable поля и реальные граничные форматы — LLM часто делает все поля обязательными.</div>
-      </div>
+      <div class="hl orange"><span class="hl-label">logging вместо print</span>Не <code>print()</code> в тестах, а <code>logging</code>: уровни (debug/info/warning/error) позволяют фильтровать шум, логи идут в отчёт и CI. <strong>Критично:</strong> при логировании request/response <em>не пиши токены, пароли, ключи</em> в логи — они утекут в CI и хранилища. Маскируй чувствительные поля (связка с разделом Безопасность).</div>
+      <div class="hl modern"><span class="hl-label">Современный Python для QA</span>Рабочий минимум — <strong>Python 3.11+</strong> (актуальная ветка уже 3.14.x). Для собеса и работы не нужны новейшие фичи — достаточно владеть современным Python 3: f-strings, type hints, <code>pathlib</code> вместо <code>os.path</code>, dataclasses, comprehensions, pytest. Это и есть «современно и достаточно».</div>
 
     </div>
   </section>
@@ -1375,50 +1218,39 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Big O</strong> показывает, как растёт время (или память) с ростом данных. Не точные секунды, а характер роста:</p>
-        <table>
-          <thead><tr><th>Сложность</th><th>Название</th><th>Пример</th></tr></thead>
-          <tbody>
-            <tr><td><code>O(1)</code></td><td>константа</td><td>доступ по индексу, dict lookup</td></tr>
-            <tr><td><code>O(log n)</code></td><td>логарифм</td><td>бинарный поиск</td></tr>
-            <tr><td><code>O(n)</code></td><td>линейная</td><td>один проход по списку</td></tr>
-            <tr><td><code>O(n log n)</code></td><td>линейно-лог.</td><td>хорошая сортировка (<code>sorted</code>)</td></tr>
-            <tr><td><code>O(n²)</code></td><td>квадратичная</td><td>вложенные циклы по одному списку</td></tr>
-          </tbody>
-        </table>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Big O — это «во сколько раз станет хуже, если данных станет в 10 раз больше». O(1) — без разницы. O(n) — в 10 раз дольше. O(n²) — в 100 раз. Поэтому случайный вложенный цикл на большом списке превращает быстрый тест в зависающий.</div>
-      </div>
+      <p><strong>Big O</strong> показывает, как растёт время (или память) с ростом данных. Не точные секунды, а характер роста:</p>
+      <table>
+        <thead><tr><th>Сложность</th><th>Название</th><th>Пример</th></tr></thead>
+        <tbody>
+          <tr><td><code>O(1)</code></td><td>константа</td><td>доступ по индексу, dict lookup</td></tr>
+          <tr><td><code>O(log n)</code></td><td>логарифм</td><td>бинарный поиск</td></tr>
+          <tr><td><code>O(n)</code></td><td>линейная</td><td>один проход по списку</td></tr>
+          <tr><td><code>O(n log n)</code></td><td>линейно-лог.</td><td>хорошая сортировка (<code>sorted</code>)</td></tr>
+          <tr><td><code>O(n²)</code></td><td>квадратичная</td><td>вложенные циклы по одному списку</td></tr>
+        </tbody>
+      </table>
+      <div class="hl green"><span class="hl-label">Аналогия</span>Big O — это «во сколько раз станет хуже, если данных станет в 10 раз больше». O(1) — без разницы. O(n) — в 10 раз дольше. O(n²) — в 100 раз. Поэтому случайный вложенный цикл на большом списке превращает быстрый тест в зависающий.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Как определить сложность по коду:</strong></p>
-        <div class="code-block"><span class="cm"># O(n) — один цикл по n элементам</span>
+      <p><strong>Как определить сложность по коду:</strong></p>
+      <div class="code-block"><span class="cm"># O(n) — один цикл по n элементам</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     process(x)
 
 <span class="cm"># O(n²) — цикл в цикле по тем же данным</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">for</span> y <span class="kw">in</span> items:
-        compare(x, y)
+      compare(x, y)
 
 <span class="cm"># O(n) — ВАЖНО: in по списку внутри цикла = скрытый O(n²)</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">if</span> x <span class="kw">in</span> other_list:   <span class="cm"># каждый in — O(n)!</span>
-        ...</div>
-        <p>Последний пример — частая ошибка: выглядит как один цикл, но <code>in</code> по списку внутри делает его O(n²). Замена <code>other_list</code> на <code>set</code> возвращает O(n).</p>
-      </div>
+      ...</div>
+      <p>Последний пример — частая ошибка: выглядит как один цикл, но <code>in</code> по списку внутри делает его O(n²). Замена <code>other_list</code> на <code>set</code> возвращает O(n).</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Space complexity</strong> (память) — отдельно от времени. Создал <code>set</code> из всех элементов → O(n) памяти. Иногда жертвуют памятью ради скорости (кэш, словарь-индекс) — это осознанный trade-off.</p>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какая сложность у поиска дубликатов через два вложенных цикла и через set?» — Вложенные циклы: O(n²) время, O(1) память. Через set: O(n) время, O(n) память. Классический trade-off «время vs память»: set быстрее, но занимает место. На больших данных O(n) через set почти всегда выигрывает.</div>
-      </div>
+      <p><strong>Space complexity</strong> (память) — отдельно от времени. Создал <code>set</code> из всех элементов → O(n) памяти. Иногда жертвуют памятью ради скорости (кэш, словарь-индекс) — это осознанный trade-off.</p>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какая сложность у поиска дубликатов через два вложенных цикла и через set?» — Вложенные циклы: O(n²) время, O(1) память. Через set: O(n) время, O(n) память. Классический trade-off «время vs память»: set быстрее, но занимает место. На больших данных O(n) через set почти всегда выигрывает.</div>
 
     </div>
   </section>
@@ -1432,29 +1264,23 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Задача 1. Валидные скобки.</strong> Проверить, что скобки <code>()[]{}</code> правильно закрыты и вложены. <code>"([])"</code> → True, <code>"([)]"</code> → False.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">is_valid</span>(s):
+      <p><strong>Задача 1. Валидные скобки.</strong> Проверить, что скобки <code>()[]{}</code> правильно закрыты и вложены. <code>"([])"</code> → True, <code>"([)]"</code> → False.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">is_valid</span>(s):
     stack = []
     pairs = {<span class="st">')'</span>: <span class="st">'('</span>, <span class="st">']'</span>: <span class="st">'['</span>, <span class="st">'}'</span>: <span class="st">'{'</span>}
     <span class="kw">for</span> ch <span class="kw">in</span> s:
-        <span class="kw">if</span> ch <span class="kw">in</span> <span class="st">'([{'</span>:
-            stack.append(ch)
-        <span class="kw">elif</span> ch <span class="kw">in</span> pairs:
-            <span class="kw">if</span> <span class="kw">not</span> stack <span class="kw">or</span> stack.pop() != pairs[ch]:
-                <span class="kw">return</span> <span class="kw">False</span>
+      <span class="kw">if</span> ch <span class="kw">in</span> <span class="st">'([{'</span>:
+          stack.append(ch)
+      <span class="kw">elif</span> ch <span class="kw">in</span> pairs:
+          <span class="kw">if</span> <span class="kw">not</span> stack <span class="kw">or</span> stack.pop() != pairs[ch]:
+              <span class="kw">return</span> <span class="kw">False</span>
     <span class="kw">return</span> <span class="kw">not</span> stack   <span class="cm"># стек пуст = все закрыты</span></div>
-        <div class="hl green"><span class="hl-label">Идея</span>Стек (list как стек): открывающую скобку кладём, закрывающую — сверяем с вершиной. Аналогия — вложенные вызовы функций: последний открытый должен закрыться первым (LIFO). O(n) время, O(n) память.</div>
-        <div class="hl"><span class="hl-label">Honestly</span>Это <em>частая алгоритмическая задача</em>, полезная для демонстрации работы со стеком, но не ежедневная QA-практика. На реальной работе ты скорее парсишь логи и валидируешь ответы API, чем считаешь скобки. Знать стоит, но это не ядро профессии.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Идея</span>Стек (list как стек): открывающую скобку кладём, закрывающую — сверяем с вершиной. Аналогия — вложенные вызовы функций: последний открытый должен закрыться первым (LIFO). O(n) время, O(n) память.</div>
+      <div class="hl"><span class="hl-label">Honestly</span>Это <em>частая алгоритмическая задача</em>, полезная для демонстрации работы со стеком, но не ежедневная QA-практика. На реальной работе ты скорее парсишь логи и валидируешь ответы API, чем считаешь скобки. Знать стоит, но это не ядро профессии.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Задача 2. Сравнить версии.</strong> <code>"1.2.0"</code> vs <code>"1.10.1"</code> → вернуть −1 / 0 / 1. Подвох: <code>"1.10"</code> &gt; <code>"1.2"</code> (как числа, не строки).</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">compare_versions</span>(v1, v2):
+      <p><strong>Задача 2. Сравнить версии.</strong> <code>"1.2.0"</code> vs <code>"1.10.1"</code> → вернуть −1 / 0 / 1. Подвох: <code>"1.10"</code> &gt; <code>"1.2"</code> (как числа, не строки).</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">compare_versions</span>(v1, v2):
     p1 = [<span class="fn">int</span>(x) <span class="kw">for</span> x <span class="kw">in</span> v1.split(<span class="st">'.'</span>)]
     p2 = [<span class="fn">int</span>(x) <span class="kw">for</span> x <span class="kw">in</span> v2.split(<span class="st">'.'</span>)]
     <span class="cm"># дополнить нулями до равной длины: 1.2 vs 1.2.0</span>
@@ -1462,25 +1288,20 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     p1 += [<span class="val">0</span>] * (length - <span class="fn">len</span>(p1))
     p2 += [<span class="val">0</span>] * (length - <span class="fn">len</span>(p2))
     <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">zip</span>(p1, p2):
-        <span class="kw">if</span> a != b:
-            <span class="kw">return</span> <span class="val">1</span> <span class="kw">if</span> a > b <span class="kw">else</span> -<span class="val">1</span>
+      <span class="kw">if</span> a != b:
+          <span class="kw">return</span> <span class="val">1</span> <span class="kw">if</span> a > b <span class="kw">else</span> -<span class="val">1</span>
     <span class="kw">return</span> <span class="val">0</span></div>
-        <p>Ключевое — <strong>сравнивать как числа</strong> (через <code>int</code>), а не как строки, и дополнять короткую версию нулями.</p>
-      </div>
+      <p>Ключевое — <strong>сравнивать как числа</strong> (через <code>int</code>), а не как строки, и дополнять короткую версию нулями.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Что показать на собесе помимо решения:</strong></p>
-        <ul>
-          <li><strong>Уточни вход:</strong> могут ли быть буквы (<code>1.2.0-rc1</code>)? отрицательные? пустые строки?</li>
-          <li><strong>Назови edge cases:</strong> пустая строка, разная длина, ведущие нули (<code>01</code>), невалидный формат</li>
-          <li><strong>Оцени сложность:</strong> O(n) по длине строки</li>
-          <li><strong>Сразу прикинь тесты</strong> (это плюс для QA): равные, больше/меньше, разная длина, edge cases</li>
-        </ul>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему <code>"1.10" &gt; "1.2"</code> ломается при строковом сравнении?» — Потому что строки сравниваются посимвольно: <code>'1' == '1'</code>, потом <code>'1' &lt; '2'</code> → <code>"1.10"</code> считается меньше. А по смыслу версий 10 &gt; 2. Поэтому версии всегда разбивают по точкам и сравнивают части как числа.</div>
-      </div>
+      <p><strong>Что показать на собесе помимо решения:</strong></p>
+      <ul>
+        <li><strong>Уточни вход:</strong> могут ли быть буквы (<code>1.2.0-rc1</code>)? отрицательные? пустые строки?</li>
+        <li><strong>Назови edge cases:</strong> пустая строка, разная длина, ведущие нули (<code>01</code>), невалидный формат</li>
+        <li><strong>Оцени сложность:</strong> O(n) по длине строки</li>
+        <li><strong>Сразу прикинь тесты</strong> (это плюс для QA): равные, больше/меньше, разная длина, edge cases</li>
+      </ul>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Почему <code>"1.10" &gt; "1.2"</code> ломается при строковом сравнении?» — Потому что строки сравниваются посимвольно: <code>'1' == '1'</code>, потом <code>'1' &lt; '2'</code> → <code>"1.10"</code> считается меньше. А по смыслу версий 10 &gt; 2. Поэтому версии всегда разбивают по точкам и сравнивают части как числа.</div>
 
     </div>
   </section>
@@ -1494,66 +1315,55 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Задача 3. Найти дубликаты в списке.</strong> <code>[1,2,2,3,3,3]</code> → <code>[2,3]</code>.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">find_duplicates</span>(nums):
+      <p><strong>Задача 3. Найти дубликаты в списке.</strong> <code>[1,2,2,3,3,3]</code> → <code>[2,3]</code>.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">find_duplicates</span>(nums):
     seen, dups = <span class="fn">set</span>(), <span class="fn">set</span>()
     <span class="kw">for</span> n <span class="kw">in</span> nums:
-        <span class="kw">if</span> n <span class="kw">in</span> seen:
-            dups.add(n)
-        seen.add(n)
+      <span class="kw">if</span> n <span class="kw">in</span> seen:
+          dups.add(n)
+      seen.add(n)
     <span class="kw">return</span> <span class="fn">list</span>(dups)
 
 <span class="cm"># Или короче через Counter:</span>
 <span class="kw">from</span> collections <span class="kw">import</span> Counter
 <span class="kw">def</span> <span class="fn">find_duplicates</span>(nums):
     <span class="kw">return</span> [n <span class="kw">for</span> n, cnt <span class="kw">in</span> Counter(nums).items() <span class="kw">if</span> cnt > <span class="val">1</span>]</div>
-        <div class="hl green"><span class="hl-label">Идея</span>Используем <code>set</code> для проверки «видели ли уже» за O(1). Один проход — O(n) время, O(n) память. Вариант с Counter короче и читаемее — на собесе для QA идиоматичность ценится.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Идея</span>Используем <code>set</code> для проверки «видели ли уже» за O(1). Один проход — O(n) время, O(n) память. Вариант с Counter короче и читаемее — на собесе для QA идиоматичность ценится.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Задача 4. Top K частых элементов.</strong> <code>["a","b","a","c","a","b"]</code>, k=2 → <code>["a","b"]</code>.</p>
-        <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> Counter
+      <p><strong>Задача 4. Top K частых элементов.</strong> <code>["a","b","a","c","a","b"]</code>, k=2 → <code>["a","b"]</code>.</p>
+      <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> Counter
 
 <span class="kw">def</span> <span class="fn">top_k</span>(items, k):
     <span class="kw">return</span> [item <span class="kw">for</span> item, _ <span class="kw">in</span> Counter(items).most_common(k)]</div>
-        <p><code>Counter.most_common(k)</code> делает всю работу. На собесе можно показать, что знаешь и «ручной» способ (отсортировать по частоте), но идиоматичное решение — через Counter.</p>
+      <p><code>Counter.most_common(k)</code> делает всю работу. На собесе можно показать, что знаешь и «ручной» способ (отсортировать по частоте), но идиоматичное решение — через Counter.</p>
 
-        <p style="margin-top:14px;"><strong>Задача 5. Парсинг логов.</strong> Посчитать ошибки по типу — близко к реальной работе QA.</p>
-        <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> Counter
+      <p style="margin-top:14px;"><strong>Задача 5. Парсинг логов.</strong> Посчитать ошибки по типу — близко к реальной работе QA.</p>
+      <div class="code-block"><span class="kw">from</span> collections <span class="kw">import</span> Counter
 
 <span class="kw">def</span> <span class="fn">count_errors</span>(log_lines):
     errors = Counter()
     <span class="kw">for</span> line <span class="kw">in</span> log_lines:
-        <span class="kw">if</span> <span class="st">"ERROR"</span> <span class="kw">in</span> line:
-            <span class="cm"># берём текст после ERROR как тип</span>
-            msg = line.split(<span class="st">"ERROR"</span>, <span class="val">1</span>)[<span class="val">1</span>].strip()
-            errors[msg] += <span class="val">1</span>
+      <span class="kw">if</span> <span class="st">"ERROR"</span> <span class="kw">in</span> line:
+          <span class="cm"># берём текст после ERROR как тип</span>
+          msg = line.split(<span class="st">"ERROR"</span>, <span class="val">1</span>)[<span class="val">1</span>].strip()
+          errors[msg] += <span class="val">1</span>
     <span class="kw">return</span> errors.most_common()   <span class="cm"># отсортировано по частоте</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Задача 6. Объединить пересекающиеся интервалы.</strong> <code>[[1,3],[2,6],[8,10]]</code> → <code>[[1,6],[8,10]]</code>.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">merge_intervals</span>(intervals):
+      <p><strong>Задача 6. Объединить пересекающиеся интервалы.</strong> <code>[[1,3],[2,6],[8,10]]</code> → <code>[[1,6],[8,10]]</code>.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">merge_intervals</span>(intervals):
     intervals.sort(key=<span class="kw">lambda</span> x: x[<span class="val">0</span>])   <span class="cm"># сортируем по началу</span>
     result = [intervals[<span class="val">0</span>]]
     <span class="kw">for</span> start, end <span class="kw">in</span> intervals[<span class="val">1</span>:]:
-        <span class="kw">if</span> start <= result[-<span class="val">1</span>][<span class="val">1</span>]:        <span class="cm"># пересекается с последним</span>
-            result[-<span class="val">1</span>][<span class="val">1</span>] = <span class="fn">max</span>(result[-<span class="val">1</span>][<span class="val">1</span>], end)
-        <span class="kw">else</span>:
-            result.append([start, end])
+      <span class="kw">if</span> start <= result[-<span class="val">1</span>][<span class="val">1</span>]:        <span class="cm"># пересекается с последним</span>
+          result[-<span class="val">1</span>][<span class="val">1</span>] = <span class="fn">max</span>(result[-<span class="val">1</span>][<span class="val">1</span>], end)
+      <span class="kw">else</span>:
+          result.append([start, end])
     <span class="kw">return</span> result</div>
-        <div class="hl green"><span class="hl-label">Идея</span>Сначала сортировка по началу (O(n log n)) — после неё достаточно одного прохода: если текущий интервал пересекается с последним в результате — расширяем, иначе добавляем новый. Сортировка — ключ ко многим интервальным задачам.</div>
-        <div class="hl"><span class="hl-label">Уровень задачи</span>Это уже <em>SDET/SWE-style</em> вопрос. Для обычного QA Automation достаточно понимать принцип «сортировка + один проход», без углубления в алгоритмику. Если на собесе именно QA-роль — такие задачи редкость.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какая сложность у merge intervals?» — O(n log n), и она определяется сортировкой, а не проходом. Сам проход после сортировки — O(n). Когда в задаче есть «пересечения / перекрытия интервалов» — почти всегда первый шаг это сортировка, и итоговая сложность O(n log n).</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Идея</span>Сначала сортировка по началу (O(n log n)) — после неё достаточно одного прохода: если текущий интервал пересекается с последним в результате — расширяем, иначе добавляем новый. Сортировка — ключ ко многим интервальным задачам.</div>
+      <div class="hl"><span class="hl-label">Уровень задачи</span>Это уже <em>SDET/SWE-style</em> вопрос. Для обычного QA Automation достаточно понимать принцип «сортировка + один проход», без углубления в алгоритмику. Если на собесе именно QA-роль — такие задачи редкость.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Какая сложность у merge intervals?» — O(n log n), и она определяется сортировкой, а не проходом. Сам проход после сортировки — O(n). Когда в задаче есть «пересечения / перекрытия интервалов» — почти всегда первый шаг это сортировка, и итоговая сложность O(n log n).</div>
 
     </div>
   </section>
@@ -1567,10 +1377,8 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Напиши unit-тесты для функции</strong> — для QA это родная территория: применяешь те же техники тест-дизайна. Возьмём <code>compare_versions</code> из раздела 03:</p>
-        <div class="code-block"><span class="kw">import</span> pytest
+      <p><strong>Напиши unit-тесты для функции</strong> — для QA это родная территория: применяешь те же техники тест-дизайна. Возьмём <code>compare_versions</code> из раздела 03:</p>
+      <div class="code-block"><span class="kw">import</span> pytest
 
 <span class="hdr">@pytest.mark.parametrize(<span class="st">"v1, v2, expected"</span>, [
     (<span class="st">"1.0"</span>, <span class="st">"1.0"</span>, <span class="val">0</span>),       <span class="cm"># равны</span>
@@ -1580,50 +1388,36 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
 ])</span>
 <span class="kw">def</span> <span class="fn">test_compare_versions</span>(v1, v2, expected):
     <span class="kw">assert</span> compare_versions(v1, v2) == expected</div>
-        <div class="hl green"><span class="hl-label">Принцип</span>Покрываешь по категориям: позитив (равны, больше, меньше), границы (разная длина, ведущие нули), негатив (пустая строка, невалидный формат). Это те же классы эквивалентности и граничные значения из раздела теории — просто применённые к коду.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Принцип</span>Покрываешь по категориям: позитив (равны, больше, меньше), границы (разная длина, ведущие нули), негатив (пустая строка, невалидный формат). Это те же классы эквивалентности и граничные значения из раздела теории — просто применённые к коду.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>«Найди баг в коде»</strong> — проверяют внимательность. Три классических Python-бага:</p>
-        <div class="code-block"><span class="cm"># БАГ 1: изменяемый дефолтный аргумент</span>
+      <p><strong>«Найди баг в коде»</strong> — проверяют внимательность. Три классических Python-бага:</p>
+      <div class="code-block"><span class="cm"># БАГ 1: изменяемый дефолтный аргумент</span>
 <span class="kw">def</span> <span class="fn">add_item</span>(item, items=[]):   <span class="cm"># список создаётся ОДИН раз!</span>
     items.append(item)
     <span class="kw">return</span> items
 <span class="cm"># add_item(1) → [1], add_item(2) → [1, 2] — накапливает!</span>
 <span class="cm"># Фикс: items=None, внутри if items is None: items = []</span></div>
-        <div class="code-block"><span class="cm"># БАГ 2: изменение списка во время итерации</span>
+      <div class="code-block"><span class="cm"># БАГ 2: изменение списка во время итерации</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">if</span> x &lt; <span class="val">0</span>:
-        items.remove(x)   <span class="cm"># пропускает элементы, портит итерацию</span>
+      items.remove(x)   <span class="cm"># пропускает элементы, портит итерацию</span>
 <span class="cm"># Фикс: items = [x for x in items if x &gt;= 0]</span></div>
-        <div class="code-block"><span class="cm"># БАГ 3: off-by-one в диапазоне</span>
+      <div class="code-block"><span class="cm"># БАГ 3: off-by-one в диапазоне</span>
 <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(items) - <span class="val">1</span>):   <span class="cm"># пропускает последний элемент</span>
     process(items[i])
 <span class="cm"># Фикс: range(len(items)) если нужны все</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>«Как бы ты протестировал свой собственный код?»</strong> — сильный ответ показывает QA-мышление:</p>
-        <ul>
-          <li><strong>Happy path</strong> — работает на типичном входе</li>
-          <li><strong>Границы</strong> — пустой вход, один элемент, очень большой вход</li>
-          <li><strong>Негатив</strong> — невалидные данные, None, неверный тип</li>
-          <li><strong>Edge cases</strong> — дубликаты, отрицательные, юникод, спецсимволы</li>
-          <li><strong>Свойства</strong> — для сортировки: результат отсортирован и той же длины (property-based, Hypothesis)</li>
-        </ul>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Преимущество QA на кодинг-секции — не только написать функцию, но и сразу сказать, как её ломать. Многие кандидаты-разработчики пишут код и останавливаются. Когда ты добавляешь «вот тут я бы проверил пустой вход и переполнение» — это твоя сильная сторона, показывай её. Чистый код для QA: понятные имена, маленькие функции, без дублирования, ранний <code>return</code> вместо вложенных if.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> генерация тестов к функции, поиск edge cases, ревью на баги.<br>
-          <strong>Пример промпта:</strong> <em>«Вот функция [код]. Напиши pytest-тесты: happy path, границы, негатив, edge cases. Используй parametrize. Подскажи, есть ли в коде баги.»</em><br>
-          <strong>Что проверить руками:</strong> доменную логику и реальные граничные случаи продукта — LLM генерит шаблонные тесты, но не знает контекст твоей задачи.
-        </div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что не так с <code>def f(x, lst=[])</code>?» — Дефолтный список создаётся <em>один раз</em> при определении функции, а не на каждый вызов. Поэтому он сохраняет изменения между вызовами — частый источник «магических» багов. Правильно: <code>def f(x, lst=None): if lst is None: lst = []</code>.</div>
-      </div>
+      <p><strong>«Как бы ты протестировал свой собственный код?»</strong> — сильный ответ показывает QA-мышление:</p>
+      <ul>
+        <li><strong>Happy path</strong> — работает на типичном входе</li>
+        <li><strong>Границы</strong> — пустой вход, один элемент, очень большой вход</li>
+        <li><strong>Негатив</strong> — невалидные данные, None, неверный тип</li>
+        <li><strong>Edge cases</strong> — дубликаты, отрицательные, юникод, спецсимволы</li>
+        <li><strong>Свойства</strong> — для сортировки: результат отсортирован и той же длины (property-based, Hypothesis)</li>
+      </ul>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>Преимущество QA на кодинг-секции — не только написать функцию, но и сразу сказать, как её ломать. Многие кандидаты-разработчики пишут код и останавливаются. Когда ты добавляешь «вот тут я бы проверил пустой вход и переполнение» — это твоя сильная сторона, показывай её. Чистый код для QA: понятные имена, маленькие функции, без дублирования, ранний <code>return</code> вместо вложенных if.</div>
 
     </div>
   </section>
@@ -1637,67 +1431,58 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Частый формат для QA — дан <strong>класс с багами или недостающими методами</strong>, нужно починить/реализовать. Две реальные задачи такого типа.</p>
-        <p><strong>Задача A. Последовательные числа.</strong> Вернуть <code>True</code>, если в массиве есть 3+ подряд идущих числа (22, 23, 24). Менять можно только тело метода.</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">test_method</span>(self, array: list) -> bool:
+      <p>Частый формат для QA — дан <strong>класс с багами или недостающими методами</strong>, нужно починить/реализовать. Две реальные задачи такого типа.</p>
+      <p><strong>Задача A. Последовательные числа.</strong> Вернуть <code>True</code>, если в массиве есть 3+ подряд идущих числа (22, 23, 24). Менять можно только тело метода.</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">test_method</span>(self, array: list) -> bool:
     counter = <span class="val">1</span>                       <span class="cm"># одно число — уже "1 подряд"</span>
     <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(array) - <span class="val">1</span>):    <span class="cm"># до предпоследнего: i+1 валиден</span>
-        <span class="kw">if</span> array[i+<span class="val">1</span>] == array[i] + <span class="val">1</span>:
-            counter += <span class="val">1</span>
-            <span class="kw">if</span> counter >= <span class="val">3</span>:
-                <span class="kw">return</span> <span class="kw">True</span>
-        <span class="kw">else</span>:
-            counter = <span class="val">1</span>                   <span class="cm"># сброс при разрыве</span>
+      <span class="kw">if</span> array[i+<span class="val">1</span>] == array[i] + <span class="val">1</span>:
+          counter += <span class="val">1</span>
+          <span class="kw">if</span> counter >= <span class="val">3</span>:
+              <span class="kw">return</span> <span class="kw">True</span>
+      <span class="kw">else</span>:
+          counter = <span class="val">1</span>                   <span class="cm"># сброс при разрыве</span>
     <span class="kw">return</span> <span class="kw">False</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Баги, которые надо было найти в задаче A</strong> (типовые):</p>
-        <ul>
-          <li><code>range(1, len(array))</code> + обращение к <code>array[i+1]</code> → выход за границы (IndexError). Нужно <code>range(len(array)-1)</code></li>
-          <li>counter стартовал с 0, но первая пара = уже 2 числа подряд → off-by-one</li>
-          <li><code>if counter == 3</code> — жёсткое равенство; безопаснее <code>>= 3</code></li>
-          <li>Счётчик не сбрасывался при разрыве последовательности → ложные срабатывания</li>
-        </ul>
-        <p><strong>Тест-кейсы (проговорить как QA):</strong> пустой массив, 1 элемент, ровно 3 подряд, 4+ подряд, последовательность в начале/середине/конце, отрицательные, дубликаты (<code>[1,2,2,3]</code> — это 3 подряд?), убывающая.</p>
-      </div>
+      <p><strong>Баги, которые надо было найти в задаче A</strong> (типовые):</p>
+      <ul>
+        <li><code>range(1, len(array))</code> + обращение к <code>array[i+1]</code> → выход за границы (IndexError). Нужно <code>range(len(array)-1)</code></li>
+        <li>counter стартовал с 0, но первая пара = уже 2 числа подряд → off-by-one</li>
+        <li><code>if counter == 3</code> — жёсткое равенство; безопаснее <code>>= 3</code></li>
+        <li>Счётчик не сбрасывался при разрыве последовательности → ложные срабатывания</li>
+      </ul>
+      <p><strong>Тест-кейсы (проговорить как QA):</strong> пустой массив, 1 элемент, ровно 3 подряд, 4+ подряд, последовательность в начале/середине/конце, отрицательные, дубликаты (<code>[1,2,2,3]</code> — это 3 подряд?), убывающая.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Задача B. Валидатор пароля.</strong> Реализовать недостающие методы класса. Главная ловушка — обращение к атрибуту класса без <code>self.</code> (NameError) и сравнение строки с числом вместо <code>len()</code>.</p>
-        <div class="code-block"><span class="kw">class</span> <span class="fn">Validator</span>:
+      <p><strong>Задача B. Валидатор пароля.</strong> Реализовать недостающие методы класса. Главная ловушка — обращение к атрибуту класса без <code>self.</code> (NameError) и сравнение строки с числом вместо <code>len()</code>.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">Validator</span>:
     CRITICAL_LENGTH = <span class="val">8</span>
 
     <span class="kw">def</span> <span class="fn">__init__</span>(self, password):
-        self.password = password
+      self.password = password
 
     <span class="kw">def</span> <span class="fn">is_length_valid</span>(self) -> bool:
-        <span class="kw">return</span> <span class="fn">len</span>(self.password) >= self.CRITICAL_LENGTH  <span class="cm"># self.! и len()!</span>
+      <span class="kw">return</span> <span class="fn">len</span>(self.password) >= self.CRITICAL_LENGTH  <span class="cm"># self.! и len()!</span>
 
     <span class="kw">def</span> <span class="fn">has_digits</span>(self) -> bool:
-        <span class="kw">return</span> any(ch.isdigit() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+      <span class="kw">return</span> any(ch.isdigit() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
 
     <span class="kw">def</span> <span class="fn">has_different_cases</span>(self) -> bool:
-        has_upper = any(ch.isupper() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
-        has_lower = any(ch.islower() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
-        <span class="kw">return</span> has_upper <span class="kw">and</span> has_lower
+      has_upper = any(ch.isupper() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+      has_lower = any(ch.islower() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+      <span class="kw">return</span> has_upper <span class="kw">and</span> has_lower
 
     <span class="kw">def</span> <span class="fn">calculate_complexity</span>(self) -> int:
-        checks = [self.is_length_valid(), self.has_digits(),
-                  self.has_different_cases()]
-        <span class="kw">return</span> <span class="fn">sum</span>(<span class="val">1</span> <span class="kw">for</span> ok <span class="kw">in</span> checks <span class="kw">if</span> ok)  <span class="cm"># True == 1</span></div>
-        <div class="hl orange"><span class="hl-label">Две главные ловушки</span>1) Внутри методов <em>всегда</em> <code>self.x</code>, не просто <code>x</code> — иначе NameError (это и был баг с <code>CRITICAL_LENGTH</code>). 2) <code>self.password</code> — это строка; сравнивать с числом нельзя, нужен <code>len()</code>, иначе TypeError. Эти два бага — суть задачи.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем <code>sum(1 for ok in checks if ok)</code>, можно ли проще?» — Можно <code>sum(checks)</code> напрямую: в Python <code>True == 1</code>, <code>False == 0</code>, поэтому сумма списка булевых = число True. Приём, который любят на собесе: <code>sum([True, False, True])</code> вернёт 2. Знание, что bool — подтип int, отличает уверенный ответ.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> тренировка формата «почини класс» — генерация похожих задач с багами.<br>
-          <strong>Пример промпта:</strong> <em>«Дай Python-класс с 3 типовыми багами (self, off-by-one, сравнение типов) и попроси меня их найти. Потом проверь мой ответ.»</em><br>
-          <strong>Что проверить руками:</strong> свой разбор — называй баг, причину и минимальный фикс (не переписывай класс с нуля, как требуют на собесе).</div>
+      checks = [self.is_length_valid(), self.has_digits(),
+                self.has_different_cases()]
+      <span class="kw">return</span> <span class="fn">sum</span>(<span class="val">1</span> <span class="kw">for</span> ok <span class="kw">in</span> checks <span class="kw">if</span> ok)  <span class="cm"># True == 1</span></div>
+      <div class="hl orange"><span class="hl-label">Две главные ловушки</span>1) Внутри методов <em>всегда</em> <code>self.x</code>, не просто <code>x</code> — иначе NameError (это и был баг с <code>CRITICAL_LENGTH</code>). 2) <code>self.password</code> — это строка; сравнивать с числом нельзя, нужен <code>len()</code>, иначе TypeError. Эти два бага — суть задачи.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем <code>sum(1 for ok in checks if ok)</code>, можно ли проще?» — Можно <code>sum(checks)</code> напрямую: в Python <code>True == 1</code>, <code>False == 0</code>, поэтому сумма списка булевых = число True. Приём, который любят на собесе: <code>sum([True, False, True])</code> вернёт 2. Знание, что bool — подтип int, отличает уверенный ответ.</div>
+      <div class="hl llm"><span class="hl-label">AI в работе с Python — сводка по всему разделу</span>Вопрос «как используешь AI» задают один раз, а не по каждой теме. Что реально экономит время:<br><br>
+        <strong>Где помогает:</strong> построить и объяснить regex по частям; ревью кода на типовые питоновские баги — mutable default, off-by-one, изменение коллекции во время итерации, случайный <code>O(n²)</code>; Pydantic-модель по примеру JSON-ответа; черновик pytest-тестов к функции с <code>parametrize</code>; разложить простыню в читаемые функции; сгенерировать тренировочные задачи формата «почини класс» и проверить твой разбор.<br><br>
+        <strong>Что всегда проверяешь руками:</strong> границы — regex стабильно не держит пустую строку, юникод и очень длинный ввод; в Pydantic-моделях LLM делает все поля обязательными, хотя половина nullable; сгенерированные тесты шаблонные и не знают доменную логику твоего продукта.<br><br>
+        <strong>Готовый ответ на собесе:</strong> <em>«Регулярки, бойлерплейт моделей и первый черновик тестов отдаю LLM — это экономит время на механике. Дальше сам: доменные кейсы, границы и негатив, потому что модель не знает мой продукт. Код из LLM всегда перечитываю — на mutable default и скрытый O(n²) она попадается так же, как человек».</em>
       </div>
 
     </div>
@@ -1712,15 +1497,6 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {
