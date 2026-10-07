@@ -693,6 +693,71 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 
       <p><strong><code>lambda</code>, <code>map</code>, <code>filter</code></strong> — функциональный минимум. <code>lambda x: x*2</code> — безымянная функция в одно выражение. <code>map(f, seq)</code> применяет функцию к каждому элементу, <code>filter(f, seq)</code> отбирает по условию; оба возвращают <em>ленивый итератор</em>, поэтому обычно оборачивают в <code>list()</code>. В Python принято предпочитать comprehension: <code>[x*2 for x in nums]</code> читается лучше, чем <code>list(map(lambda x: x*2, nums))</code>. Где <code>lambda</code> реально уместна — как <code>key</code> в сортировке: <code>sorted(users, key=lambda u: u.age)</code>.</p>
 
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">Типизация: четыре слова, которые путают</strong></p>
+      <p>Это две <em>независимые</em> характеристики языка, и их постоянно смешивают:</p>
+      <table>
+        <thead><tr><th></th><th>Статическая</th><th>Динамическая</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Строгая</strong></td><td>Java, C#, Go</td><td><strong>Python</strong></td></tr>
+          <tr><td><strong>Слабая</strong></td><td>C</td><td>JavaScript, PHP</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li><strong>Статическая / динамическая</strong> — <em>когда</em> определён тип. Статическая: тип привязан к переменной навсегда (объявил в Java <code>int</code> — строкой уже не сделаешь). Динамическая: тип принадлежит <em>значению</em>, а имя — просто ссылка, поэтому <code>x = 25</code>, а следом <code>x = "Alex"</code> — норма</li>
+        <li><strong>Строгая / слабая</strong> — <em>насколько охотно</em> язык сам приводит типы в операциях. Строгая: молча не приводит, несовместимое — ошибка. Слабая: приводит, как считает нужным</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Python — строго типизированный. Это частая ошибка</span>Раз тип не пишут явно, Python нередко называют «нестрого типизированным» — и на собесе это слышно. Проверка в одну строку: <code>"1" + 1</code> в Python даёт <code>TypeError</code>, а в JavaScript — <code>"11"</code>. Вот <em>это</em> и есть слабая типизация. Правильная формулировка: <strong>Python динамически и строго типизированный</strong>; отсутствие объявления типов — про динамику, а не про строгость.</div>
+      <div class="code-block"><span class="st">"1"</span> + <span class="val">1</span>        <span class="cm"># TypeError — строгая типизация: молча не приведёт</span>
+<span class="st">"ab"</span> * <span class="val">3</span>       <span class="cm"># 'ababab' — не приведение: у str свой смысл оператора *</span>
+<span class="kw">True</span> + <span class="val">1</span>       <span class="cm"># 2       — исключение: bool наследует int</span>
+<span class="val">1</span> == <span class="val">1.0</span>       <span class="cm"># True    — числовые типы сравниваются между собой</span></div>
+
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">Любой объект = значение + тип + id</strong></p>
+      <p>В Python объект — это <em>всё</em>: число, строка, функция, класс. И у каждого объекта ровно три свойства — через них объясняется почти весь набор каверзных вопросов:</p>
+      <table>
+        <thead><tr><th>Свойство</th><th>Как получить</th><th>Что это</th></tr></thead>
+        <tbody>
+          <tr><td><strong>значение</strong></td><td>сама переменная</td><td>что внутри; сравнивается через <code>==</code></td></tr>
+          <tr><td><strong>тип</strong></td><td><code>type(x)</code></td><td>класс, по которому объект создан</td></tr>
+          <tr><td><strong>id</strong></td><td><code>id(x)</code></td><td>адрес в памяти, «паспорт»; сравнивается через <code>is</code></td></tr>
+        </tbody>
+      </table>
+      <div class="code-block">x = <span class="val">25</span>
+<span class="fn">type</span>(x)                     <span class="cm"># &lt;class 'int'&gt; — класс есть, даже если мы его не писали</span>
+<span class="fn">id</span>(x)                       <span class="cm"># 140234… — адрес объекта в памяти</span>
+<span class="fn">isinstance</span>(x, <span class="fn">int</span>)          <span class="cm"># True — x является экземпляром int?</span>
+<span class="fn">isinstance</span>(x, (<span class="fn">int</span>, <span class="fn">float</span>))   <span class="cm"># можно кортеж типов — «любой из»</span></div>
+      <p><code>type(x) is int</code> и <code>isinstance(x, int)</code> — не одно и то же: <code>isinstance</code> учитывает наследование, <code>type</code> требует точного совпадения класса. В проверках почти всегда нужен <code>isinstance</code>.</p>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что вернёт <code>isinstance(True, int)</code>?» — <code>True</code>, и это обычно удивляет. <code>bool</code> в Python — <strong>наследник <code>int</code></strong>, где <code>True == 1</code>, а <code>False == 0</code>. Отсюда и <code>sum([True, False, True]) == 2</code>, и возможность складывать <code>True</code> с числами. Если нужно отличить настоящий <code>int</code> от <code>bool</code> — проверяй <code>type(x) is int</code>.</div>
+      <div class="hl green"><span class="hl-label">int в Python не переполняется</span>Любимое сравнение с Java: там <code>int</code> — 32 бита, и при превышении <code>2³¹−1</code> случается <strong>overflow</strong> — число молча становится отрицательным. В Python 3 <code>int</code> произвольной точности: ограничен только памятью, границ у типа нет, факториал от 1000 посчитается без ошибок. Для QA отсюда практический вывод: классический тест «переполнение целого» на питоновском коде ищет не там — переполнение ловится на стороне БД (<code>INT</code> vs <code>BIGINT</code>) и внешних API.</div>
+
+      <p><strong>Приведение типов (casting).</strong> <code>int()</code>, <code>float()</code>, <code>str()</code>, <code>bool()</code> — это вызовы конструкторов соответствующих классов, то есть создание <em>нового</em> объекта. Если преобразовать нельзя — будет <code>ValueError</code>, а не <code>None</code> и не ноль:</p>
+      <div class="code-block"><span class="fn">int</span>(<span class="st">"42"</span>)        <span class="cm"># 42</span>
+<span class="fn">int</span>(<span class="st">"42.5"</span>)      <span class="cm"># ValueError ⚠ строку с точкой int() не берёт</span>
+<span class="fn">int</span>(<span class="val">42.9</span>)        <span class="cm"># 42     — обрезает дробную часть, а НЕ округляет</span>
+<span class="fn">int</span>(<span class="st">"abc"</span>)       <span class="cm"># ValueError</span>
+<span class="fn">float</span>(<span class="st">"42.5"</span>)    <span class="cm"># 42.5</span>
+<span class="fn">bool</span>(<span class="st">""</span>), <span class="fn">bool</span>(<span class="val">0</span>), <span class="fn">bool</span>([])   <span class="cm"># False — всё пустое falsy</span></div>
+
+      <p style="margin-top:24px;"><strong style="color:#fff;font-size:15px;">float, деньги и почему <code>0.1 + 0.2 != 0.3</code></strong></p>
+      <p>Один из самых частых вопросов на собесе — и в платёжном продукте не теория, а ежедневная практика.</p>
+      <div class="code-block"><span class="val">0.1</span> + <span class="val">0.2</span>             <span class="cm"># 0.30000000000000004</span>
+<span class="val">0.1</span> + <span class="val">0.2</span> == <span class="val">0.3</span>      <span class="cm"># False ⚠</span>
+<span class="val">1.1</span> * <span class="val">3</span>               <span class="cm"># 3.3000000000000003</span></div>
+      <p><strong>Почему.</strong> <code>float</code> хранится в двоичном виде (стандарт IEEE 754). Десятичная <code>0.1</code> в двоичной системе — бесконечная периодическая дробь, ровно как <code>1/3</code> в десятичной. Точно записать её нельзя, поэтому хранится ближайшее представимое число, а при операциях погрешности накапливаются. Это не особенность Python: так же ведут себя Java, JavaScript, C и любой язык с IEEE 754.</p>
+      <div class="hl red"><span class="hl-label">Деньги во float не хранят</span>Копейки теряются на округлениях, и отчётность перестаёт сходиться. Два рабочих способа. <strong>1)</strong> Хранить сумму <em>целым числом в минорных единицах</em> — копейках, центах: <code>1000</code> = 10 рублей 00 копеек. Так устроены почти все платёжные API. <strong>2)</strong> Использовать <code>Decimal</code> — десятичную арифметику с заданной точностью и явными правилами округления.</div>
+      <div class="code-block"><span class="kw">from</span> decimal <span class="kw">import</span> Decimal
+
+<span class="fn">Decimal</span>(<span class="st">"0.1"</span>) + <span class="fn">Decimal</span>(<span class="st">"0.2"</span>)   <span class="cm"># Decimal('0.3') — точно</span>
+<span class="fn">Decimal</span>(<span class="val">0.1</span>)                      <span class="cm"># ⚠ создан из float — мусор уже внутри</span>
+<span class="cm"># правило: Decimal создавать ИЗ СТРОКИ, не из float</span></div>
+      <p><strong>Что это значит в тестах.</strong> Сравнивать <code>float</code> на точное равенство нельзя — ассерт будет мигать:</p>
+      <div class="code-block"><span class="kw">assert</span> total == <span class="val">0.3</span>                   <span class="cm"># ⚠ флаки-ассерт</span>
+<span class="kw">assert</span> total == pytest.<span class="fn">approx</span>(<span class="val">0.3</span>)     <span class="cm"># ✓ сравнение с допуском</span>
+<span class="kw">assert</span> math.<span class="fn">isclose</span>(total, <span class="val">0.3</span>)       <span class="cm"># ✓ то же без pytest</span>
+<span class="kw">assert</span> total_minor == <span class="val">30</span>             <span class="cm"># ✓ лучше всего: сравниваем целые копейки</span></div>
+      <div class="hl green"><span class="hl-label">Что проверять в платёжном продукте</span>Где обычно и живут баги: <strong>округление комиссии</strong> — в чью пользу округляем, банальный источник расхождений на копейку; <strong>деление суммы</strong> — сплит платежа на троих, где сумма частей обязана равняться исходной; <strong>конвертация валют</strong> с разным числом знаков (JPY — 0 знаков, BHD — 3, «везде два» неверно); <strong>сумма в UI vs в API vs в БД</strong> — не появляется ли <code>float</code> где-то по дороге; <strong>JSON</strong> — дробное число в теле запроса точность уже потеряло, поэтому в платёжных API суммы передают целыми или строкой.</div>
+
       <div class="hl orange"><span class="hl-label">copy vs deepcopy</span>Присваивание <code>b = a</code> для списка — это <em>та же ссылка</em>, не копия: меняешь <code>b</code> — меняется <code>a</code>. <code>copy.copy()</code> — поверхностная копия (вложенные объекты общие). <code>copy.deepcopy()</code> — полная копия всего дерева. Частый источник багов с мутабельными структурами.</div>
 
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Что выведет <code>a = [[]] * 3; a[0].append(1)</code>?» — <code>[[1], [1], [1]]</code>, а не <code>[[1], [], []]</code>. Потому что <code>* 3</code> создаёт три ссылки на <em>один и тот же</em> вложенный список, а не три разных. Классическая ловушка с мутабельностью. Правильно: <code>[[] for _ in range(3)]</code>.</div>
@@ -708,7 +773,7 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
       <span class="section-badge">quick recall</span>
     </div>
     <div class="section-body">
-      <p>Копилка мелких вопросов по синтаксису, на которых легко «поплыть» на собесе. Не теория — просто быстро освежить перед интервью. Показывается на всех уровнях.</p>
+      <p>Копилка мелких вопросов по синтаксису, на которых легко «поплыть» на собесе. Не теория — просто быстро освежить перед интервью.</p>
 
       <!-- item: print sep/end -->
       <p style="margin-top:16px;"><strong><code>print()</code> — параметры <code>sep</code> и <code>end</code>.</strong> <code>sep</code> — что ставить <em>между</em> аргументами (по умолчанию пробел), <code>end</code> — чем <em>закончить</em> вывод (по умолчанию <code>\n</code>, перенос строки).</p>
@@ -827,6 +892,32 @@ i = <span class="val">0</span>
     <span class="kw">return</span> target</div>
       <div class="hl green"><span class="hl-label">Запомнить</span>Дефолт вычисляется при <em>определении</em> функции, а не при вызове. Поэтому мутабельные дефолты (<code>[]</code>, <code>{}</code>, <code>set()</code>) — всегда баг: пиши <code>None</code> и создавай внутри. Немутабельные (<code>0</code>, <code>""</code>, <code>None</code>, кортеж) безопасны. Та же причина у <code>def f(x=datetime.now())</code> — время «замёрзнет» на момент импорта модуля.</div>
 
+      <!-- item: кэш мелких чисел и интернирование строк -->
+      <p style="margin-top:16px;"><strong>Кэш мелких чисел и интернирование строк.</strong> CPython заранее создаёт объекты для «популярных» значений и переиспользует их, экономя память. Из-за этого <code>is</code> иногда отвечает <code>True</code> там, где по логике должно быть <code>False</code>.</p>
+      <div class="code-block">a = <span class="val">256</span>; b = <span class="val">256</span>
+a <span class="kw">is</span> b             <span class="cm"># True  — int от -5 до 256 закэширован</span>
+
+a = <span class="val">257</span>; b = <span class="val">257</span>
+a <span class="kw">is</span> b             <span class="cm"># False — за границей кэша это два разных объекта</span>
+
+a = <span class="st">"test"</span>; b = <span class="st">"test"</span>
+a <span class="kw">is</span> b             <span class="cm"># True  — короткие строки-идентификаторы интернируются</span>
+
+a = <span class="st">"hello world"</span>; b = <span class="st">"hello world"</span>
+a <span class="kw">is</span> b             <span class="cm"># False — строка с пробелом уже не интернируется</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Диапазон кэша — <strong>от −5 до 256</strong>, и это деталь <em>реализации CPython</em>, а не правило языка: в другом интерпретаторе или при запуске из файла вместо REPL результат может отличаться. Практический вывод один: <strong><code>is</code> для сравнения значений не использовать никогда</strong>, только <code>==</code>; <code>is</code> остаётся для <code>None</code>. Сильный ответ на собесе звучит так: «формально должно быть <code>False</code>, но CPython кэширует мелкие int, поэтому вернётся <code>True</code> — и ровно поэтому значения так не сравнивают».</div>
+
+      <!-- item: почему строка неизменяема -->
+      <p style="margin-top:16px;"><strong>Почему строка неизменяема.</strong> Сам факт известен: <code>s[0] = "B"</code> падает. Спрашивают обычно <em>почему</em>, и ответ «так решили» слабый.</p>
+      <div class="code-block">s = <span class="st">"Alex"</span>
+s[<span class="val">0</span>] = <span class="st">"B"</span>                <span class="cm"># TypeError: 'str' object does not support item assignment</span>
+s = <span class="st">"B"</span> + s[<span class="val">1</span>:]            <span class="cm"># ✓ создаём новую строку</span>
+
+<span class="cm"># склейка в цикле = новый объект на каждой итерации</span>
+<span class="kw">for</span> w <span class="kw">in</span> words: text += w   <span class="cm"># ⚠ на больших данных медленно</span>
+text = <span class="st">""</span>.<span class="fn">join</span>(words)        <span class="cm"># ✓ один проход, одна аллокация</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>Строка лежит в памяти <em>непрерывным</em> блоком. Дописать символ «на месте» нельзя: нет гарантии, что соседняя ячейка свободна — её мог занять другой объект. Поэтому любое изменение означает выделить новую память и скопировать всё содержимое. Отсюда три следствия: строка неизменяема; она <strong>хешируема</strong>, а значит годится ключом <code>dict</code>; склейка строк в цикле — антипаттерн, вместо неё <code>"".join()</code>.</div>
+
     </div>
   </section>
 
@@ -931,6 +1022,16 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
       <div class="hl orange"><span class="hl-label">Что реально нарушают в автотестах</span>Чаще всего <strong>SRP</strong>: Page Object, который и кликает, и ассертит, и ходит в базу; либо <code>utils.py</code> на тысячу строк, куда свалено всё. Второе место — <strong>LSP</strong>: наследник переопределил метод базового класса «немного по-другому», и общие тесты на нём падают. Сильный ответ на собесе — не пересказ пяти букв, а пример: «SRP у нас нарушался в Page Object с ассертами внутри — вынесли проверки в тесты, страницы стали переиспользуемыми».</div>
       <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить одним предложением.</div>
 
+      <p style="margin-top:14px;"><strong>DRY, KISS, YAGNI</strong> — три принципа, которые спрашивают в одном ряду с SOLID:</p>
+      <table>
+        <thead><tr><th>Принцип</th><th>Суть</th><th>Как выглядит нарушение в тестах</th></tr></thead>
+        <tbody>
+          <tr><td><strong>DRY</strong><br><span style="opacity:.7;">Don't Repeat Yourself</span></td><td>каждое знание живёт в одном месте</td><td>авторизация скопирована в 40 тестов — поменялся эндпоинт, правишь 40 файлов. Лечится фикстурой</td></tr>
+          <tr><td><strong>KISS</strong><br><span style="opacity:.7;">Keep It Simple, Stupid</span></td><td>простое решение лучше умного</td><td>самописный раннер поверх pytest «чтобы гибче» — через полгода в нём никто не разбирается</td></tr>
+          <tr><td><strong>YAGNI</strong><br><span style="opacity:.7;">You Aren't Gonna Need It</span></td><td>не строй то, что пока не нужно</td><td>фреймворк «под пять будущих платформ», а тестов — на одну</td></tr>
+        </tbody>
+      </table>
+      <div class="hl green"><span class="hl-label">Как проверить DRY за десять секунд</span>Задать себе вопрос: <em>«если завтра изменится одна деталь — во скольких местах я поправлю код?»</em> Больше одного — DRY нарушен. Это же объясняет, зачем вообще нужны классы: когда у пользователя появляется новое поле, при россыпи отдельных переменных правишь везде, где они перечислены, а при классе — в одном конструкторе. Обратная сторона: <strong>DRY — про знание, а не про похожий текст</strong>. Два теста, которые случайно выглядят одинаково, но проверяют разные правила, объединять не нужно: в тестах читаемость важнее сухости, и немного дублирования лучше хитрой общей функции, после которой непонятно, что именно упало.</div>
       <p><strong>Множественное наследование и MRO.</strong> В <code>class Service(CacheMixin, BaseService)</code> метод ищется в порядке MRO, рассчитанном алгоритмом C3; посмотреть порядок можно через <code>Service.__mro__</code>. <code>super()</code> вызывает не «родителя вообще», а следующий метод в этой цепочке. В ромбовидной иерархии это позволяет вызвать общего предка один раз, если все участники используют кооперативный <code>super()</code> и совместимые сигнатуры. Основные риски — конфликты имён, неожиданный порядок и класс, который оборвал цепочку вызовов.</p>
 
       <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
@@ -1048,7 +1149,7 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
       <ul>
         <li><strong><code>and</code> / <code>or</code> возвращают значение, не bool</strong> — <code>a or b</code> вернёт <code>a</code>, если оно truthy, иначе <code>b</code> (частый приём для дефолтов)</li>
         <li><strong>truthy / falsy</strong> — пустые <code>[]</code>, <code>{}</code>, <code>""</code>, <code>0</code>, <code>None</code> в условии = False; непустые = True</li>
-        <li><strong><code>==</code> vs <code>is</code> для чисел</strong> — мелкие int (-5..256) кэшируются, <code>is</code> случайно вернёт True; всегда сравнивай значения через <code>==</code>, идентичность (<code>is</code>) — только для <code>None</code></li>
+        <li><strong><code>==</code> vs <code>is</code></strong> — <code>==</code> сравнивает значения, <code>is</code> — тот ли это объект в памяти. Для значений всегда <code>==</code>; <code>is</code> оставляем для <code>None</code> (про кэш мелких int — раздел 03)</li>
       </ul>
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чему будет равно <code>x</code> после <code>x = arr.append(4)</code>?» — <code>None</code>, а не новому списку. <code>append</code> (как и <code>sort</code>, <code>extend</code>, <code>reverse</code>, <code>remove</code>) меняет список <em>на месте</em> и ничего не возвращает — ошибка ровно в одну строку. Общее правило: что меняет на месте — возвращает <code>None</code>; что возвращает новое (<code>sorted</code>, <code>reversed</code>, срезы) — исходник не трогает.</div>
 
