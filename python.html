@@ -1285,9 +1285,50 @@ locks = <span class="fn">defaultdict</span>(asyncio.Lock)
     amount: float
 
 <span class="cm"># парсит и ВАЛИДИРУЕТ ответ API — упадёт, если структура не та</span>
-order = OrderResponse(**response.json())
+order = OrderResponse.<span class="fn">model_validate</span>(response.json())
 <span class="kw">assert</span> order.status == <span class="st">"paid"</span></div>
       <div class="hl green"><span class="hl-label">Зачем Pydantic в API-тестах</span>Вместо ручных проверок «есть ли поле, тот ли тип» — описываешь ожидаемую модель один раз, и Pydantic валидирует весь ответ: отсутствует поле, пришёл string вместо int, лишняя вложенность — тест падает с понятной ошибкой. Это контрактная проверка на стороне теста (см. раздел API → контракты). Используется в FastAPI, так что модели часто можно переиспользовать с бэкенда.</div>
+
+      <p><strong>Как работает валидация.</strong> Проверка идёт при создании модели: каждое значение прогоняется через тип поля. По умолчанию режим мягкий (<em>lax</em>) — совместимое Pydantic приводит сам: <code>"10"</code> в <code>int</code> станет <code>10</code>, словарь в поле с типом другой модели — вложенной моделью, <code>"admin"</code> — членом <code>Enum</code>. Несовместимое даёт <code>ValidationError</code> сразу со списком всех ошибок. Приведение строже встроенного: <code>18.9</code> в <code>int</code> — ошибка, дробь молча не отрезается, как в <code>int(18.9)</code>; <code>"false"</code>, <code>"no"</code>, <code>"off"</code>, <code>"0"</code> в <code>bool</code> дают <code>False</code>, хотя <code>bool("false")</code> вернёт <code>True</code>, а произвольная строка вроде <code>"abc"</code> — ошибка.</p>
+      <ul>
+        <li><strong>Обязательность.</strong> Поле без дефолта обязательно по умолчанию, помечать его не нужно. <code>Optional[str]</code> значит «строка или None», но <em>не</em> «можно не передавать» — необязательным поле делает только дефолт: <code>nickname: str | None = None</code>. В Pydantic v1 было иначе, отсюда путаница</li>
+        <li><strong><code>default</code> vs <code>default_factory</code>.</strong> Обычный дефолт вычисляется один раз при объявлении класса: <code>id: str = str(uuid4())</code> даст всем экземплярам один id. <code>Field(default_factory=...)</code> вызывает функцию для каждого экземпляра. Изменяемый дефолт вроде <code>tags: list[str] = []</code> Pydantic копирует сам, поэтому в модели он безопасен — в отличие от дефолта в функции (раздел 03)</li>
+        <li><strong>Строгость.</strong> <code>StrictInt</code>, <code>StrictStr</code> или <code>Field(strict=True)</code> отключают приведение — <code>"15"</code> уже ошибка. <code>Union[int, str]</code> в v2 сначала ищет <em>точное</em> совпадение типа среди всех вариантов и только потом приводит, поэтому <code>"15"</code> останется строкой при любом порядке в <code>Union</code>. Формула «слева направо, первый подходящий» описывает v1</li>
+      </ul>
+      <div class="code-block"><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
+
+<span class="kw">class</span> <span class="fn">User</span>(BaseModel):
+    model_config = <span class="fn">ConfigDict</span>(extra=<span class="st">"forbid"</span>, validate_assignment=<span class="kw">True</span>, populate_by_name=<span class="kw">True</span>)
+
+    first_name: str = <span class="fn">Field</span>(alias=<span class="st">"firstName"</span>, min_length=<span class="val">2</span>)   <span class="cm"># в JSON ключ firstName</span>
+    last_name: str
+    age: int = <span class="fn">Field</span>(ge=<span class="val">18</span>, le=<span class="val">120</span>)                         <span class="cm"># gt / ge / lt / le</span>
+    code: str = <span class="fn">Field</span>(pattern=<span class="st">r"^[A-Z]{3}$"</span>)
+    tags: list[str] = <span class="fn">Field</span>(default_factory=list)
+
+    @<span class="fn">field_validator</span>(<span class="st">"first_name"</span>, mode=<span class="st">"before"</span>)   <span class="cm"># до приведения — сырое значение</span>
+    @classmethod
+    <span class="kw">def</span> <span class="fn">strip</span>(cls, v):
+        <span class="kw">return</span> v.strip() <span class="kw">if</span> <span class="fn">isinstance</span>(v, str) <span class="kw">else</span> v
+
+    @<span class="fn">model_validator</span>(mode=<span class="st">"after"</span>)                    <span class="cm"># готовая модель — правила между полями</span>
+    <span class="kw">def</span> <span class="fn">check</span>(self):
+        <span class="kw">if</span> self.first_name == self.last_name:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"имя и фамилия совпадают"</span>)
+        <span class="kw">return</span> self
+
+    @computed_field                                   <span class="cm"># не хранится, но попадает в model_dump</span>
+    @property
+    <span class="kw">def</span> <span class="fn">full_name</span>(self) -> str:                     <span class="cm"># аннотация типа обязательна</span>
+        <span class="kw">return</span> f<span class="st">"{self.first_name} {self.last_name}"</span></div>
+      <ul>
+        <li><strong><code>@field_validator("поле")</code></strong> + <code>@classmethod</code> — своя проверка поля. По умолчанию работает <em>после</em> приведения типа и получает уже <code>int</code>; с <code>mode="before"</code> — до него, на входе сырое значение. Что вернул — то и сохранится; <code>raise ValueError</code> превращается в <code>ValidationError</code>. Несколько валидаторов на одно поле идут по порядку объявления</li>
+        <li><strong><code>@model_validator(mode="after")</code></strong> — проверка готового экземпляра целиком, для правил между полями: дата окончания позже начала, пароль совпадает с подтверждением</li>
+        <li><strong><code>ConfigDict</code>.</strong> <code>extra</code> — что делать с лишними полями во входе: <code>"ignore"</code> (по умолчанию, молча отбросить), <code>"forbid"</code> (ошибка), <code>"allow"</code> (сохранить). <code>validate_assignment=True</code> — проверять и присваивание, иначе <code>user.age = "abc"</code> пройдёт молча. <code>populate_by_name=True</code> — при заданном <code>alias</code> разрешить и имя поля, без него <code>User(first_name=...)</code> упадёт. <code>from_attributes=True</code> — собрать модель из атрибутов обычного объекта, например ORM-сущности</li>
+        <li><strong>Вход и выход.</strong> <code>model_validate(dict)</code> и <code>model_validate_json(str)</code> собирают модель из словаря или JSON-строки. <code>model_dump()</code> отдаёт <strong>dict</strong>, <code>model_dump_json()</code> — JSON-<strong>строку</strong>; путать их — классика собеса. Параметры дампа: <code>by_alias=True</code> (ключи по алиасам), <code>exclude_none=True</code>, <code>exclude_unset=True</code></li>
+        <li><strong>Прочее.</strong> <code>model_copy(update={...})</code> — копия с изменёнными полями. <code>TypeAdapter(list[int]).validate_python(data)</code> — та же валидация без модели, для списков и простых типов</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Ловушки, на которых горят API-тесты</span><strong>1)</strong> <code>model_copy(update=...)</code> <em>не валидирует</em>: <code>update={"age": "abc"}</code> молча положит строку в int-поле — опасно, если так собираешь тестовые данные из шаблона. <strong>2)</strong> <code>model_dump()</code> оставляет <code>datetime</code>, <code>UUID</code>, <code>Decimal</code> объектами, и <code>requests.post(json=model.model_dump())</code> упадёт на сериализации — для тела запроса нужен <code>model_dump(mode="json")</code>. <strong>3)</strong> Для PATCH <code>exclude_unset</code> и <code>exclude_none</code> дают разные запросы: первый сохраняет явно переданный <code>None</code> («обнули поле») и убирает непереданное («не трогай»), второй выкидывает оба. <strong>4)</strong> <code>extra</code> в модели ответа — решение о дизайне контрактного теста: <code>"forbid"</code> ловит неожиданные новые поля API, <code>"ignore"</code> не ломает тесты при обратно совместимом расширении.</div>
 
       <p><strong>Окружение и зависимости</strong> — что нужно знать:</p>
       <ul>
