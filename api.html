@@ -1844,7 +1844,7 @@ session.headers.update({<span class="st">'Authorization'</span>: <span class="st
 <span class="kw">from</span> requests.adapters <span class="kw">import</span> HTTPAdapter
 <span class="kw">from</span> urllib3.util <span class="kw">import</span> Retry
 retries = Retry(total=<span class="val">3</span>, backoff_factor=<span class="val">0.5</span>,
-              status_forcelist=[<span class="val">502</span>, <span class="val">503</span>, <span class="val">504</span>])
+                status_forcelist=[<span class="val">502</span>, <span class="val">503</span>, <span class="val">504</span>])
 session.mount(<span class="st">'https://'</span>, HTTPAdapter(max_retries=retries))
 
 <span class="cm"># Timeout — ВСЕГДА указывай, иначе тест может висеть вечно</span>
@@ -1954,10 +1954,10 @@ order = order_client.create(product_id=<span class="val">42</span>, quantity=<sp
 <span class="hdr">@responses.activate</span>
 <span class="kw">def</span> <span class="fn">test_order_with_mocked_payment</span>():
     responses.add(
-      responses.POST,
-      <span class="st">'https://payments.com/charge'</span>,
-      json={<span class="st">'status'</span>: <span class="st">'success'</span>},
-      status=<span class="val">200</span>
+        responses.POST,
+        <span class="st">'https://payments.com/charge'</span>,
+        json={<span class="st">'status'</span>: <span class="st">'success'</span>},
+        status=<span class="val">200</span>
     )
     <span class="cm"># Теперь наш код, вызывая платёжку, получит этот ответ</span>
     result = create_order_and_pay(...)
@@ -1994,9 +1994,9 @@ order = order_client.create(product_id=<span class="val">42</span>, quantity=<sp
 schema = {
     <span class="st">'type'</span>: <span class="st">'object'</span>,
     <span class="st">'properties'</span>: {
-      <span class="st">'id'</span>: {<span class="st">'type'</span>: <span class="st">'integer'</span>},
-      <span class="st">'name'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>},
-      <span class="st">'email'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>, <span class="st">'format'</span>: <span class="st">'email'</span>}
+        <span class="st">'id'</span>: {<span class="st">'type'</span>: <span class="st">'integer'</span>},
+        <span class="st">'name'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>},
+        <span class="st">'email'</span>: {<span class="st">'type'</span>: <span class="st">'string'</span>, <span class="st">'format'</span>: <span class="st">'email'</span>}
     },
     <span class="st">'required'</span>: [<span class="st">'id'</span>, <span class="st">'name'</span>]
 }
@@ -2069,9 +2069,9 @@ validate(instance=response.json(), schema=schema)</div>
 
       <p style="margin-top:14px;"><strong>Charles и подмена трафика</strong> — что это вообще. Прокси встаёт <em>между</em> приложением и сервером, весь трафик идёт через него:</p>
       <div class="code-block">Приложение  →  [ Charles / прокси ]  →  Сервер
-                    ↑
-            видит и может изменить
-            запрос и ответ</div>
+                      ↑
+              видит и может изменить
+              запрос и ответ</div>
       <p>Что это даёт QA:</p>
       <table>
         <thead><tr><th>Возможность</th><th>Зачем</th></tr></thead>

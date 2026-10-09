@@ -616,8 +616,8 @@ base_url = os.environ.<span class="fn">get</span>(<span class="st">"BASE_URL"</s
       <p><strong>Генераторы (<code>yield</code>)</strong> — ленивые: вызов функции с <code>yield</code> только создаёт генератор, а тело начинает выполняться при первом <code>next()</code>. Каждый <code>yield</code> отдаёт значение и сохраняет состояние до следующего запроса. После завершения функции генератор выбрасывает <code>StopIteration</code>. Такой подход не держит все данные в памяти и удобен для больших файлов и потоков данных:</p>
       <div class="code-block"><span class="kw">def</span> <span class="fn">read_large_file</span>(path):
     <span class="kw">with</span> <span class="fn">open</span>(path) <span class="kw">as</span> f:
-      <span class="kw">for</span> line <span class="kw">in</span> f:
-          <span class="kw">yield</span> line.strip()   <span class="cm"># по строке, не весь файл в память</span></div>
+        <span class="kw">for</span> line <span class="kw">in</span> f:
+            <span class="kw">yield</span> line.strip()   <span class="cm"># по строке, не весь файл в память</span></div>
 
       <p><strong>Итератор vs генератор</strong> — спрашивают в паре. <strong>Итератор</strong> — любой объект с <code>__iter__()</code> и <code>__next__()</code>, который отдаёт элементы по одному и бросает <code>StopIteration</code>, когда кончились. <strong>Генератор</strong> — это <em>частный случай</em> итератора, который Python строит за тебя из функции с <code>yield</code> (или из выражения в круглых скобках). То есть каждый генератор — итератор, но не наоборот. И то и другое одноразовое: прошёл до конца — заново не перечитаешь, нужен новый.</p>
       <div class="code-block"><span class="cm"># то же самое «руками» — так выглядит итератор изнутри</span>
@@ -625,14 +625,14 @@ base_url = os.environ.<span class="fn">get</span>(<span class="st">"BASE_URL"</s
     <span class="kw">def</span> <span class="fn">__init__</span>(self, n): self.n = n
     <span class="kw">def</span> <span class="fn">__iter__</span>(self): <span class="kw">return</span> self
     <span class="kw">def</span> <span class="fn">__next__</span>(self):
-      <span class="kw">if</span> self.n &lt;= <span class="val">0</span>: <span class="kw">raise</span> StopIteration
-      self.n -= <span class="val">1</span>
-      <span class="kw">return</span> self.n + <span class="val">1</span></div>
+        <span class="kw">if</span> self.n &lt;= <span class="val">0</span>: <span class="kw">raise</span> StopIteration
+        self.n -= <span class="val">1</span>
+        <span class="kw">return</span> self.n + <span class="val">1</span></div>
 
       <p><strong>Замыкание (closure)</strong> — вложенная функция запоминает переменные внешней даже после того, как внешняя завершилась. На этом стоят декораторы и фабрики функций:</p>
       <div class="code-block"><span class="kw">def</span> <span class="fn">make_multiplier</span>(k):
     <span class="kw">def</span> <span class="fn">inner</span>(x):
-      <span class="kw">return</span> x * k       <span class="cm"># k «замкнута» — жива после выхода из make_multiplier</span>
+        <span class="kw">return</span> x * k       <span class="cm"># k «замкнута» — жива после выхода из make_multiplier</span>
     <span class="kw">return</span> inner
 
 double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
@@ -642,9 +642,9 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 <span class="kw">def</span> <span class="fn">counter</span>():
     n = <span class="val">0</span>
     <span class="kw">def</span> <span class="fn">inc</span>():
-      <span class="kw">nonlocal</span> n     <span class="cm"># без nonlocal — UnboundLocalError</span>
-      n += <span class="val">1</span>
-      <span class="kw">return</span> n
+        <span class="kw">nonlocal</span> n     <span class="cm"># без nonlocal — UnboundLocalError</span>
+        n += <span class="val">1</span>
+        <span class="kw">return</span> n
     <span class="kw">return</span> inc</div>
       <p><strong>LEGB и late binding.</strong> Имя ищется последовательно в Local, Enclosing, Global и Builtins. Замыкание хранит ссылку на переменную из внешней области, а не снимок её значения. Поэтому созданные в цикле функции <code>lambda: i</code> после цикла вернут одно последнее значение. Зафиксировать значение на каждой итерации можно аргументом по умолчанию: <code>lambda i=i: i</code>.</p>
 
@@ -653,16 +653,16 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 
 <span class="kw">def</span> <span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">1</span>):        <span class="cm"># декоратор С АРГУМЕНТАМИ = 3 уровня вложенности</span>
     <span class="kw">def</span> <span class="fn">decorator</span>(func):
-      @functools.wraps(func)          <span class="cm"># сохраняет __name__ и docstring оригинала</span>
-      <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
-          <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(times):
-              <span class="kw">try</span>:
-                  <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
-              <span class="kw">except</span> Exception:
-                  <span class="kw">if</span> attempt == times - <span class="val">1</span>: <span class="kw">raise</span>
-                  time.<span class="fn">sleep</span>(delay)
-          <span class="kw">return</span> <span class="kw">None</span>
-      <span class="kw">return</span> wrapper
+        @functools.wraps(func)          <span class="cm"># сохраняет __name__ и docstring оригинала</span>
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+            <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(times):
+                <span class="kw">try</span>:
+                    <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
+                <span class="kw">except</span> Exception:
+                    <span class="kw">if</span> attempt == times - <span class="val">1</span>: <span class="kw">raise</span>
+                    time.<span class="fn">sleep</span>(delay)
+            <span class="kw">return</span> <span class="kw">None</span>
+        <span class="kw">return</span> wrapper
     <span class="kw">return</span> decorator
 
 @<span class="fn">retry</span>(times=<span class="val">3</span>, delay=<span class="val">2</span>)
@@ -673,11 +673,11 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
       <div class="code-block"><span class="cm"># 1) класс с __enter__ / __exit__</span>
 <span class="kw">class</span> <span class="fn">Timer</span>:
     <span class="kw">def</span> <span class="fn">__enter__</span>(self):
-      self.start = time.<span class="fn">time</span>()
-      <span class="kw">return</span> self                <span class="cm"># то, что попадёт в «as ...»</span>
+        self.start = time.<span class="fn">time</span>()
+        <span class="kw">return</span> self                <span class="cm"># то, что попадёт в «as ...»</span>
     <span class="kw">def</span> <span class="fn">__exit__</span>(self, exc_type, exc, tb):
-      <span class="fn">print</span>(time.<span class="fn">time</span>() - self.start)
-      <span class="cm"># return True — ПОДАВИТЬ исключение; None/False — пробросить дальше</span>
+        <span class="fn">print</span>(time.<span class="fn">time</span>() - self.start)
+        <span class="cm"># return True — ПОДАВИТЬ исключение; None/False — пробросить дальше</span>
 
 <span class="cm"># 2) короче — через contextlib</span>
 <span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager
@@ -686,9 +686,9 @@ double = <span class="fn">make_multiplier</span>(<span class="val">2</span>)
 <span class="kw">def</span> <span class="fn">temp_user</span>(api):
     user = api.<span class="fn">create_user</span>()
     <span class="kw">try</span>:
-      <span class="kw">yield</span> user             <span class="cm"># всё до yield = setup, после = teardown</span>
+        <span class="kw">yield</span> user             <span class="cm"># всё до yield = setup, после = teardown</span>
     <span class="kw">finally</span>:
-      api.<span class="fn">delete_user</span>(user.id)   <span class="cm"># finally — чтобы чистилось и при падении</span></div>
+        api.<span class="fn">delete_user</span>(user.id)   <span class="cm"># finally — чтобы чистилось и при падении</span></div>
       <p>Ровно на этой механике устроены фикстуры pytest с <code>yield</code>: до <code>yield</code> — подготовка, после — уборка.</p>
 
       <p><strong><code>lambda</code>, <code>map</code>, <code>filter</code></strong> — функциональный минимум. <code>lambda x: x*2</code> — безымянная функция в одно выражение. <code>map(f, seq)</code> применяет функцию к каждому элементу, <code>filter(f, seq)</code> отбирает по условию; оба возвращают <em>ленивый итератор</em>, поэтому обычно оборачивают в <code>list()</code>. В Python принято предпочитать comprehension: <code>[x*2 for x in nums]</code> читается лучше, чем <code>list(map(lambda x: x*2, nums))</code>. Где <code>lambda</code> реально уместна — как <code>key</code> в сортировке: <code>sorted(users, key=lambda u: u.age)</code>.</p>
@@ -933,10 +933,10 @@ text = <span class="st">""</span>.<span class="fn">join</span>(words)        <sp
       <p>ООП нужно QA-автоматизатору на практике: фреймворк строится на классах (Page Object, client-слой, базовые классы тестов). Базовое:</p>
       <div class="code-block"><span class="kw">class</span> <span class="fn">ApiClient</span>:
     <span class="kw">def</span> <span class="fn">__init__</span>(self, base_url):   <span class="cm"># инициализатор</span>
-      self.base_url = base_url      <span class="cm"># атрибут</span>
+        self.base_url = base_url      <span class="cm"># атрибут</span>
 
     <span class="kw">def</span> <span class="fn">get</span>(self, path):           <span class="cm"># метод</span>
-      <span class="kw">return</span> requests.get(self.base_url + path)
+        <span class="kw">return</span> requests.get(self.base_url + path)
 
 client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># объект (экземпляр)</span></div>
       <p><strong>Класс</strong> описывает структуру и поведение, а <strong>объект</strong> — конкретный экземпляр класса со своим состоянием. <code>self</code> — ссылка на этот экземпляр. Технически объект создаёт <code>__new__</code>, а <code>__init__</code> инициализирует уже созданный объект; на собеседовании <code>__init__</code> часто упрощённо называют конструктором.</p>
@@ -948,8 +948,8 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
 
 <span class="kw">class</span> <span class="fn">OrderTest</span>(BaseTest):       <span class="cm"># наследует BaseTest</span>
     <span class="kw">def</span> <span class="fn">setup</span>(self):
-      <span class="fn">super</span>().setup()           <span class="cm"># следующий метод по MRO</span>
-      <span class="cm"># + своя логика</span></div>
+        <span class="fn">super</span>().setup()           <span class="cm"># следующий метод по MRO</span>
+        <span class="cm"># + своя логика</span></div>
 
       <p><strong>Четыре принципа ООП</strong> — просят назвать почти всегда, и лучше сразу с питоновской спецификой:</p>
       <table>
@@ -1195,7 +1195,7 @@ arr.extend([<span class="val">3</span>, <span class="val">4</span>])   <span cla
 
 <span class="kw">async def</span> <span class="fn">main</span>():
     <span class="kw">async with</span> httpx.<span class="fn">AsyncClient</span>() <span class="kw">as</span> client:
-      <span class="kw">return</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*[<span class="fn">fetch</span>(client, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
+        <span class="kw">return</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*[<span class="fn">fetch</span>(client, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
 
 asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</div>
       <ul>
@@ -1228,11 +1228,11 @@ locks = <span class="fn">defaultdict</span>(asyncio.Lock)
 
 <span class="kw">async def</span> <span class="fn">load</span>(user_id):
     <span class="kw">if</span> user_id <span class="kw">in</span> cache:
-      <span class="kw">return</span> cache[user_id]
+        <span class="kw">return</span> cache[user_id]
     <span class="kw">async with</span> locks[user_id]:
-      <span class="kw">if</span> user_id <span class="kw">not in</span> cache:       <span class="cm"># double check</span>
-          cache[user_id] = <span class="kw">await</span> <span class="fn">fetch_user</span>(user_id)
-      <span class="kw">return</span> cache[user_id]</div>
+        <span class="kw">if</span> user_id <span class="kw">not in</span> cache:       <span class="cm"># double check</span>
+            cache[user_id] = <span class="kw">await</span> <span class="fn">fetch_user</span>(user_id)
+        <span class="kw">return</span> cache[user_id]</div>
 
       <div class="hl modern"><span class="hl-label">Про «GIL убрали»</span>В Python 3.13 появился экспериментальный <em>free-threaded</em> режим (сборка без GIL, PEP 703), в 3.14 он продолжает стабилизироваться. Но это отдельная сборка, а не поведение по умолчанию, и экосистема C-расширений к ней ещё адаптируется. Корректный ответ на собесе: «в обычном CPython GIL на месте, есть экспериментальная сборка без него — но в проде на неё пока не опираются».</div>
 
@@ -1382,12 +1382,12 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
 <span class="cm"># O(n²) — цикл в цикле по тем же данным</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">for</span> y <span class="kw">in</span> items:
-      compare(x, y)
+        compare(x, y)
 
 <span class="cm"># O(n) — ВАЖНО: in по списку внутри цикла = скрытый O(n²)</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">if</span> x <span class="kw">in</span> other_list:   <span class="cm"># каждый in — O(n)!</span>
-      ...</div>
+        ...</div>
       <p>Последний пример — частая ошибка: выглядит как один цикл, но <code>in</code> по списку внутри делает его O(n²). Замена <code>other_list</code> на <code>set</code> возвращает O(n).</p>
 
 
@@ -1411,11 +1411,11 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     stack = []
     pairs = {<span class="st">')'</span>: <span class="st">'('</span>, <span class="st">']'</span>: <span class="st">'['</span>, <span class="st">'}'</span>: <span class="st">'{'</span>}
     <span class="kw">for</span> ch <span class="kw">in</span> s:
-      <span class="kw">if</span> ch <span class="kw">in</span> <span class="st">'([{'</span>:
-          stack.append(ch)
-      <span class="kw">elif</span> ch <span class="kw">in</span> pairs:
-          <span class="kw">if</span> <span class="kw">not</span> stack <span class="kw">or</span> stack.pop() != pairs[ch]:
-              <span class="kw">return</span> <span class="kw">False</span>
+        <span class="kw">if</span> ch <span class="kw">in</span> <span class="st">'([{'</span>:
+            stack.append(ch)
+        <span class="kw">elif</span> ch <span class="kw">in</span> pairs:
+            <span class="kw">if</span> <span class="kw">not</span> stack <span class="kw">or</span> stack.pop() != pairs[ch]:
+                <span class="kw">return</span> <span class="kw">False</span>
     <span class="kw">return</span> <span class="kw">not</span> stack   <span class="cm"># стек пуст = все закрыты</span></div>
       <div class="hl green"><span class="hl-label">Идея</span>Стек (list как стек): открывающую скобку кладём, закрывающую — сверяем с вершиной. Аналогия — вложенные вызовы функций: последний открытый должен закрыться первым (LIFO). O(n) время, O(n) память.</div>
       <div class="hl"><span class="hl-label">Honestly</span>Это <em>частая алгоритмическая задача</em>, полезная для демонстрации работы со стеком, но не ежедневная QA-практика. На реальной работе ты скорее парсишь логи и валидируешь ответы API, чем считаешь скобки. Знать стоит, но это не ядро профессии.</div>
@@ -1430,8 +1430,8 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     p1 += [<span class="val">0</span>] * (length - <span class="fn">len</span>(p1))
     p2 += [<span class="val">0</span>] * (length - <span class="fn">len</span>(p2))
     <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">zip</span>(p1, p2):
-      <span class="kw">if</span> a != b:
-          <span class="kw">return</span> <span class="val">1</span> <span class="kw">if</span> a > b <span class="kw">else</span> -<span class="val">1</span>
+        <span class="kw">if</span> a != b:
+            <span class="kw">return</span> <span class="val">1</span> <span class="kw">if</span> a > b <span class="kw">else</span> -<span class="val">1</span>
     <span class="kw">return</span> <span class="val">0</span></div>
       <p>Ключевое — <strong>сравнивать как числа</strong> (через <code>int</code>), а не как строки, и дополнять короткую версию нулями.</p>
 
@@ -1461,9 +1461,9 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
       <div class="code-block"><span class="kw">def</span> <span class="fn">find_duplicates</span>(nums):
     seen, dups = <span class="fn">set</span>(), <span class="fn">set</span>()
     <span class="kw">for</span> n <span class="kw">in</span> nums:
-      <span class="kw">if</span> n <span class="kw">in</span> seen:
-          dups.add(n)
-      seen.add(n)
+        <span class="kw">if</span> n <span class="kw">in</span> seen:
+            dups.add(n)
+        seen.add(n)
     <span class="kw">return</span> <span class="fn">list</span>(dups)
 
 <span class="cm"># Или короче через Counter:</span>
@@ -1486,10 +1486,10 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
 <span class="kw">def</span> <span class="fn">count_errors</span>(log_lines):
     errors = Counter()
     <span class="kw">for</span> line <span class="kw">in</span> log_lines:
-      <span class="kw">if</span> <span class="st">"ERROR"</span> <span class="kw">in</span> line:
-          <span class="cm"># берём текст после ERROR как тип</span>
-          msg = line.split(<span class="st">"ERROR"</span>, <span class="val">1</span>)[<span class="val">1</span>].strip()
-          errors[msg] += <span class="val">1</span>
+        <span class="kw">if</span> <span class="st">"ERROR"</span> <span class="kw">in</span> line:
+            <span class="cm"># берём текст после ERROR как тип</span>
+            msg = line.split(<span class="st">"ERROR"</span>, <span class="val">1</span>)[<span class="val">1</span>].strip()
+            errors[msg] += <span class="val">1</span>
     <span class="kw">return</span> errors.most_common()   <span class="cm"># отсортировано по частоте</span></div>
 
 
@@ -1498,10 +1498,10 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     intervals.sort(key=<span class="kw">lambda</span> x: x[<span class="val">0</span>])   <span class="cm"># сортируем по началу</span>
     result = [intervals[<span class="val">0</span>]]
     <span class="kw">for</span> start, end <span class="kw">in</span> intervals[<span class="val">1</span>:]:
-      <span class="kw">if</span> start <= result[-<span class="val">1</span>][<span class="val">1</span>]:        <span class="cm"># пересекается с последним</span>
-          result[-<span class="val">1</span>][<span class="val">1</span>] = <span class="fn">max</span>(result[-<span class="val">1</span>][<span class="val">1</span>], end)
-      <span class="kw">else</span>:
-          result.append([start, end])
+        <span class="kw">if</span> start <= result[-<span class="val">1</span>][<span class="val">1</span>]:        <span class="cm"># пересекается с последним</span>
+            result[-<span class="val">1</span>][<span class="val">1</span>] = <span class="fn">max</span>(result[-<span class="val">1</span>][<span class="val">1</span>], end)
+        <span class="kw">else</span>:
+            result.append([start, end])
     <span class="kw">return</span> result</div>
       <div class="hl green"><span class="hl-label">Идея</span>Сначала сортировка по началу (O(n log n)) — после неё достаточно одного прохода: если текущий интервал пересекается с последним в результате — расширяем, иначе добавляем новый. Сортировка — ключ ко многим интервальным задачам.</div>
       <div class="hl"><span class="hl-label">Уровень задачи</span>Это уже <em>SDET/SWE-style</em> вопрос. Для обычного QA Automation достаточно понимать принцип «сортировка + один проход», без углубления в алгоритмику. Если на собесе именно QA-роль — такие задачи редкость.</div>
@@ -1543,7 +1543,7 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
       <div class="code-block"><span class="cm"># БАГ 2: изменение списка во время итерации</span>
 <span class="kw">for</span> x <span class="kw">in</span> items:
     <span class="kw">if</span> x &lt; <span class="val">0</span>:
-      items.remove(x)   <span class="cm"># пропускает элементы, портит итерацию</span>
+        items.remove(x)   <span class="cm"># пропускает элементы, портит итерацию</span>
 <span class="cm"># Фикс: items = [x for x in items if x &gt;= 0]</span></div>
       <div class="code-block"><span class="cm"># БАГ 3: off-by-one в диапазоне</span>
 <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(items) - <span class="val">1</span>):   <span class="cm"># пропускает последний элемент</span>
@@ -1578,12 +1578,12 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
       <div class="code-block"><span class="kw">def</span> <span class="fn">test_method</span>(self, array: list) -> bool:
     counter = <span class="val">1</span>                       <span class="cm"># одно число — уже "1 подряд"</span>
     <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(array) - <span class="val">1</span>):    <span class="cm"># до предпоследнего: i+1 валиден</span>
-      <span class="kw">if</span> array[i+<span class="val">1</span>] == array[i] + <span class="val">1</span>:
-          counter += <span class="val">1</span>
-          <span class="kw">if</span> counter >= <span class="val">3</span>:
-              <span class="kw">return</span> <span class="kw">True</span>
-      <span class="kw">else</span>:
-          counter = <span class="val">1</span>                   <span class="cm"># сброс при разрыве</span>
+        <span class="kw">if</span> array[i+<span class="val">1</span>] == array[i] + <span class="val">1</span>:
+            counter += <span class="val">1</span>
+            <span class="kw">if</span> counter >= <span class="val">3</span>:
+                <span class="kw">return</span> <span class="kw">True</span>
+        <span class="kw">else</span>:
+            counter = <span class="val">1</span>                   <span class="cm"># сброс при разрыве</span>
     <span class="kw">return</span> <span class="kw">False</span></div>
 
 
@@ -1602,23 +1602,23 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
     CRITICAL_LENGTH = <span class="val">8</span>
 
     <span class="kw">def</span> <span class="fn">__init__</span>(self, password):
-      self.password = password
+        self.password = password
 
     <span class="kw">def</span> <span class="fn">is_length_valid</span>(self) -> bool:
-      <span class="kw">return</span> <span class="fn">len</span>(self.password) >= self.CRITICAL_LENGTH  <span class="cm"># self.! и len()!</span>
+        <span class="kw">return</span> <span class="fn">len</span>(self.password) >= self.CRITICAL_LENGTH  <span class="cm"># self.! и len()!</span>
 
     <span class="kw">def</span> <span class="fn">has_digits</span>(self) -> bool:
-      <span class="kw">return</span> any(ch.isdigit() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+        <span class="kw">return</span> any(ch.isdigit() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
 
     <span class="kw">def</span> <span class="fn">has_different_cases</span>(self) -> bool:
-      has_upper = any(ch.isupper() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
-      has_lower = any(ch.islower() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
-      <span class="kw">return</span> has_upper <span class="kw">and</span> has_lower
+        has_upper = any(ch.isupper() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+        has_lower = any(ch.islower() <span class="kw">for</span> ch <span class="kw">in</span> self.password)
+        <span class="kw">return</span> has_upper <span class="kw">and</span> has_lower
 
     <span class="kw">def</span> <span class="fn">calculate_complexity</span>(self) -> int:
-      checks = [self.is_length_valid(), self.has_digits(),
-                self.has_different_cases()]
-      <span class="kw">return</span> <span class="fn">sum</span>(<span class="val">1</span> <span class="kw">for</span> ok <span class="kw">in</span> checks <span class="kw">if</span> ok)  <span class="cm"># True == 1</span></div>
+        checks = [self.is_length_valid(), self.has_digits(),
+                  self.has_different_cases()]
+        <span class="kw">return</span> <span class="fn">sum</span>(<span class="val">1</span> <span class="kw">for</span> ok <span class="kw">in</span> checks <span class="kw">if</span> ok)  <span class="cm"># True == 1</span></div>
       <div class="hl orange"><span class="hl-label">Две главные ловушки</span>1) Внутри методов <em>всегда</em> <code>self.x</code>, не просто <code>x</code> — иначе NameError (это и был баг с <code>CRITICAL_LENGTH</code>). 2) <code>self.password</code> — это строка; сравнивать с числом нельзя, нужен <code>len()</code>, иначе TypeError. Эти два бага — суть задачи.</div>
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем <code>sum(1 for ok in checks if ok)</code>, можно ли проще?» — Можно <code>sum(checks)</code> напрямую: в Python <code>True == 1</code>, <code>False == 0</code>, поэтому сумма списка булевых = число True. Приём, который любят на собесе: <code>sum([True, False, True])</code> вернёт 2. Знание, что bool — подтип int, отличает уверенный ответ.</div>
       <div class="hl llm"><span class="hl-label">AI в работе с Python — сводка по всему разделу</span>Вопрос «как используешь AI» задают один раз, а не по каждой теме. Что реально экономит время:<br><br>
