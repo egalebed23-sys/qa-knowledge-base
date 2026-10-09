@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -231,31 +205,6 @@
     color: #5de0b0;
   }
   .section-body { padding: 22px 26px; }
-
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
 
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
@@ -442,7 +391,6 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -523,7 +471,7 @@
   .gloss-card .g-body strong { color: #cfe0f5; }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -571,15 +519,8 @@
   <div class="home-block" id="how">
     <h2>Как читать эту базу</h2>
     <p style="color:var(--text);font-size:14px;line-height:1.7;margin-bottom:18px;">
-      Классическая теория QA местами устарела — её писали под waterfall и большие отделы тестирования. Но на собесах её всё ещё спрашивают, поэтому каждый раздел держит <strong>три слоя</strong>. Переключатель <strong>L1 / L2 / L3</strong> вверху страницы управляет глубиной: уровни кумулятивные — L2 показывает L1 + детали, L3 показывает всё.
+      Классическая теория QA местами устарела — её писали под waterfall и большие отделы тестирования. Но на собесах её всё ещё спрашивают, поэтому она здесь есть. В каждой теме сначала определение, потом детали, потом то, что отличает senior-ответ: пограничные случаи, trade-offs, каверзные вопросы. Цветные блоки помечают, что перед тобой:
     </p>
-
-    <div class="format-row">
-      <span class="format-badge" style="background:rgba(93,224,176,0.15);color:#5de0b0;">L1 / L2 / L3</span>
-      <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
-        <strong>То, что ждут на собесе.</strong> L1 — базовое определение, которое должен знать любой. L2 — детали и нюансы уровня middle. L3 — то, что отличает Senior: пограничные случаи, trade-offs, каверзные вопросы. Начинай с L2, переключайся на L3 перед собесом на сильную роль.
-      </div>
-    </div>
 
     <div class="format-row">
       <span class="format-badge" style="background:rgba(93,138,181,0.18);color:#a8c5e8;">В реальном мире</span>
@@ -591,7 +532,7 @@
     <div class="format-row">
       <span class="format-badge" style="background:rgba(0,201,167,0.15);color:#5de0b0;">Практика</span>
       <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
-        <strong>Единственный раздел без уровней.</strong> <a href="practice.html" style="color:var(--accent2);">Практика Python</a> устроена иначе: задачи идут по главам книги «Python. Исчерпывающее руководство», и каждая решается только тем, что к этой главе уже разобрано. Код пишется и запускается прямо на странице, проверка — автоматическая, на нескольких наборах данных.
+        <strong>Устроена иначе, чем остальные разделы.</strong> <a href="practice.html" style="color:var(--accent2);">Практика Python</a> устроена иначе: задачи идут по главам книги «Python. Исчерпывающее руководство», и каждая решается только тем, что к этой главе уже разобрано. Код пишется и запускается прямо на странице, проверка — автоматическая, на нескольких наборах данных.
       </div>
     </div>
 
@@ -738,15 +679,6 @@
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {
