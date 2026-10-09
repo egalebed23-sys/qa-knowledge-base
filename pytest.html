@@ -146,32 +146,6 @@
     color: var(--muted);
   }
   .crumbs span { color: var(--text); }
-  .level-switch {
-    margin-left: auto;
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .level-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.4px;
-  }
-  .level-btn:hover { color: var(--text); }
-  .level-btn.active { background: var(--accent); color: #fff; }
-  .level-btn .lbl { font-weight: 600; }
-  .level-btn .desc { display: inline; opacity: 0.7; margin-left: 4px; font-weight: 400; }
-
   /* ─── HEADER ─── */
   .header {
     max-width: var(--content-max);
@@ -231,31 +205,6 @@
     color: #5de0b0;
   }
   .section-body { padding: 22px 26px; }
-
-  /* ─── LEVEL BLOCKS ─── */
-  .lvl { margin-bottom: 18px; position: relative; }
-  .lvl:last-child { margin-bottom: 0; }
-  .lvl-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .lvl-1 .lvl-tag { background: #0d2a1f; color: #5de0b0; }
-  .lvl-2 .lvl-tag { background: #0d1f35; color: #6aa3f5; }
-  .lvl-3 .lvl-tag { background: #2a1a3a; color: #c79af5; }
-  body[data-level="1"] .lvl-2,
-  body[data-level="1"] .lvl-3 { display: none; }
-  body[data-level="2"] .lvl-3 { display: none; }
-  .lvl-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
 
   /* ─── ATOMS ─── */
   ul { list-style: none; padding: 0; }
@@ -442,7 +391,6 @@
     .main { margin-left: 0; max-width: 100%; padding: 24px 16px 60px; }
     .grid2, .grid3, .req-resp { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .level-switch { margin-left: 0; }
   }
 
   /* ─── SCROLL TO TOP ─── */
@@ -482,7 +430,7 @@
   }
 </style>
 </head>
-<body data-level="3">
+<body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -522,16 +470,11 @@
 <main class="main">
   <div class="topbar">
     <div class="crumbs">QA Senior / <span>Pytest</span></div>
-    <div class="level-switch" role="tablist">
-      <button class="level-btn" data-lvl="1"><span class="lbl">L1</span><span class="desc">Основы</span></button>
-      <button class="level-btn" data-lvl="2"><span class="lbl">L2</span><span class="desc">+ Детали</span></button>
-      <button class="level-btn active" data-lvl="3"><span class="lbl">L3</span><span class="desc">+ Senior</span></button>
-    </div>
   </div>
 
   <div class="header">
     <h1>Pytest</h1>
-    <p>// 6 подтем · фикстуры, параметризация, моки, фреймворк</p>
+    <p>// 6 подтем · фикстуры, параметризация, моки, хуки, параллельный запуск, CI</p>
   </div>
 
 
@@ -544,72 +487,76 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>pytest</strong> — самый популярный фреймворк для тестов на Python. Тест — это обычная функция с <code>assert</code>:</p>
-        <div class="code-block"><span class="cm"># test_math.py</span>
+      <p><strong>pytest</strong> — самый популярный фреймворк для тестов на Python. Тест — это обычная функция с <code>assert</code>:</p>
+      <div class="code-block"><span class="cm"># test_math.py</span>
 <span class="kw">def</span> <span class="fn">test_addition</span>():
     <span class="kw">assert</span> <span class="val">2</span> + <span class="val">2</span> == <span class="val">4</span>
 
 <span class="kw">def</span> <span class="fn">test_string</span>():
     <span class="kw">assert</span> <span class="st">"hello"</span>.upper() == <span class="st">"HELLO"</span></div>
-        <p>Запуск — команда <code>pytest</code> в терминале. Pytest сам находит файлы <code>test_*.py</code> и функции <code>test_*</code>.</p>
-        <div class="hl green"><span class="hl-label">Главное преимущество</span>Обычный <code>assert</code> вместо <code>assertEqual</code>/<code>assertTrue</code> из unittest. При падении pytest сам показывает, что было слева и справа: <code>assert 2 + 2 == 5</code> → видно <code>4 != 5</code>. Не нужно запоминать десятки методов проверки.</div>
-      </div>
+      <p>Запуск — команда <code>pytest</code> в терминале, тесты он находит сам по соглашениям об именах (ниже).</p>
+      <div class="hl green"><span class="hl-label">Главное преимущество</span>Обычный <code>assert</code> вместо <code>assertEqual</code>/<code>assertTrue</code> из unittest. При падении pytest сам показывает, что было слева и справа: <code>assert 2 + 2 == 5</code> → видно <code>4 != 5</code>. Работает это за счёт <strong>assertion rewriting</strong>: при импорте pytest переписывает <code>assert</code> в тестовых модулях и <code>conftest.py</code>, чтобы при падении вывести значения. В обычных модулях-хелперах этого нет — <code>assert</code> там упадёт голым <code>AssertionError</code> без деталей. Лечится <code>pytest.register_assert_rewrite("helpers")</code> в conftest или тем, что хелпер возвращает значение, а проверяет его сам тест.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Соглашения об именах</strong> (pytest находит тесты по ним): файлы <code>test_*.py</code>, функции <code>test_*</code>, классы <code>Test*</code> (без <code>__init__</code>).</p>
-        <p><strong>Полезные флаги запуска:</strong></p>
-        <table>
-          <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
-          <tbody>
-            <tr><td><code>pytest -v</code></td><td>подробный вывод (имя каждого теста)</td></tr>
-            <tr><td><code>pytest -k "login"</code></td><td>запустить тесты, в имени которых есть login</td></tr>
-            <tr><td><code>pytest -x</code></td><td>остановиться на первом падении</td></tr>
-            <tr><td><code>pytest --maxfail=2</code></td><td>остановиться после 2 падений</td></tr>
-            <tr><td><code>pytest test_api.py::test_login</code></td><td>конкретный тест</td></tr>
-            <tr><td><code>pytest -s</code></td><td>показывать print (не перехватывать вывод)</td></tr>
-          </tbody>
-        </table>
-        <p><strong>Структура теста — AAA</strong> (Arrange-Act-Assert):</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">test_user_creation</span>():
+      <p><strong>Соглашения об именах</strong> (по ним pytest находит тесты): файлы <code>test_*.py</code> <em>или</em> <code>*_test.py</code>, функции <code>test_*</code>, классы <code>Test*</code> без <code>__init__</code> с методами <code>test_*</code>. Шаблоны меняются в конфиге: <code>python_files</code>, <code>python_classes</code>, <code>python_functions</code>.</p>
+      <p><strong>Полезные флаги запуска:</strong></p>
+      <table>
+        <thead><tr><th>Команда</th><th>Что делает</th></tr></thead>
+        <tbody>
+          <tr><td><code>pytest -v</code></td><td>подробный вывод (имя каждого теста)</td></tr>
+          <tr><td><code>pytest -k "login"</code></td><td>запустить тесты, в имени которых есть login</td></tr>
+          <tr><td><code>pytest -x</code></td><td>остановиться на первом падении</td></tr>
+          <tr><td><code>pytest --maxfail=2</code></td><td>остановиться после 2 падений</td></tr>
+          <tr><td><code>pytest test_api.py::test_login</code></td><td>конкретный тест</td></tr>
+          <tr><td><code>pytest -s</code></td><td>показывать print (не перехватывать вывод)</td></tr>
+          <tr><td><code>pytest --lf</code> / <code>--ff</code></td><td>только упавшие в прошлый раз / сначала упавшие, потом остальные</td></tr>
+          <tr><td><code>pytest --durations=10</code></td><td>10 самых медленных тестов — с этого начинают ускорение</td></tr>
+          <tr><td><code>pytest --co</code></td><td>только собрать список тестов, не запуская: проверить, что выбирают <code>-k</code> и <code>-m</code></td></tr>
+          <tr><td><code>pytest --fixtures</code></td><td>все доступные фикстуры и где они объявлены</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Структура теста — AAA</strong> (Arrange-Act-Assert):</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">test_user_creation</span>():
     data = {<span class="st">"name"</span>: <span class="st">"Иван"</span>}        <span class="cm"># Arrange</span>
     user = create_user(data)          <span class="cm"># Act</span>
     <span class="kw">assert</span> user.name == <span class="st">"Иван"</span>        <span class="cm"># Assert</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Проверка исключений:</strong></p>
-        <div class="code-block"><span class="kw">import</span> pytest
+      <p><strong>Статусы в отчёте</strong> — частый вопрос «чем ERROR отличается от FAILED»:</p>
+      <ul>
+        <li><strong>FAILED</strong> — упал сам тест: не прошёл <code>assert</code> или исключение в теле теста</li>
+        <li><strong>ERROR</strong> — упала <em>подготовка или уборка</em>: исключение в фикстуре до или после теста. Сам тест мог и не запуститься, поэтому ERROR — сигнал смотреть на окружение и данные, а не на проверяемую логику</li>
+        <li><strong>SKIPPED</strong>, <strong>XFAIL</strong> (ожидаемо упал), <strong>XPASS</strong> (ожидали падение, а прошёл) — см. раздел 06</li>
+      </ul>
+      <p><strong>Проверка исключений:</strong></p>
+      <div class="code-block"><span class="kw">import</span> pytest
 
 <span class="kw">def</span> <span class="fn">test_divide_by_zero</span>():
     <span class="kw">with</span> pytest.raises(ZeroDivisionError):
-        result = <span class="val">1</span> / <span class="val">0</span></div>
-        <p><strong>Фреймворки, которые стоит уметь сравнить:</strong></p>
-        <table>
-          <thead><tr><th>Инструмент</th><th>Подход и применение</th></tr></thead>
-          <tbody>
-            <tr><td><strong>pytest</strong></td><td>лаконичные функции, обычный <code>assert</code>, фикстуры, параметризация и плагины; основной универсальный выбор для Python AQA</td></tr>
-            <tr><td><strong>unittest</strong></td><td>стандартная библиотека и xUnit-стиль: классы, <code>setUp</code>/<code>tearDown</code>, методы <code>assertEqual</code>; меньше внешних зависимостей, больше шаблонного кода</td></tr>
-            <tr><td><strong>Robot Framework</strong></td><td>keyword-driven acceptance-тесты с табличным синтаксисом; читаем для не-разработчиков, но сложнее поддерживать при большой программной логике</td></tr>
-            <tr><td><strong>Behave</strong></td><td>BDD-сценарии на Gherkin и Python step definitions; полезен, когда команда действительно совместно работает со спецификациями в формате Given/When/Then</td></tr>
-          </tbody>
-        </table>
-        <div class="hl modern"><span class="hl-label">pytest vs unittest</span>unittest есть в стандартной библиотеке, но многословный (классы, <code>self.assertEqual</code>). pytest — внешний пакет, но удобнее: голый <code>assert</code>, фикстуры (мощнее setUp/tearDown), параметризация, огромная экосистема плагинов (xdist, allure, mock, cov). В современных проектах де-факто стандарт — pytest.</div>
-        <p><strong>Интеграционные тесты с pytest</strong> проверяют совместную работу реальных компонентов: например, API записывает заказ в БД, а тест читает его обратно. Фикстуры поднимают клиент, соединение и тестовые данные, а через <code>yield</code> гарантируют очистку. Такие тесты маркируют отдельно, запускают в воспроизводимом окружении и не подменяют моками те границы, взаимодействие с которыми проверяют.</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.integration</span>
+        result = <span class="val">1</span> / <span class="val">0</span>
+
+<span class="kw">def</span> <span class="fn">test_age_validation</span>():
+    <span class="kw">with</span> pytest.raises(ValueError, match=<span class="st">r"must be \d+"</span>) <span class="kw">as</span> exc:
+        validate_age(<span class="val">10</span>)
+    <span class="kw">assert</span> exc.value.args[<span class="val">0</span>].startswith(<span class="st">"age"</span>)   <span class="cm"># сам объект исключения</span></div>
+      <p><code>match</code> — это регулярное выражение, и ищется оно через <code>re.search</code>, то есть в любом месте сообщения. Точки, скобки и другие спецсимволы в ожидаемом тексте надо экранировать или обернуть в <code>re.escape()</code>. Через <code>as exc</code> доступны тип, сообщение и атрибуты исключения. Для сравнения float — <code>pytest.approx</code> (почему — раздел Python, «Синтаксис»).</p>
+      <p><strong>Фреймворки, которые стоит уметь сравнить:</strong></p>
+      <table>
+        <thead><tr><th>Инструмент</th><th>Подход и применение</th></tr></thead>
+        <tbody>
+          <tr><td><strong>pytest</strong></td><td>лаконичные функции, обычный <code>assert</code>, фикстуры, параметризация и плагины; основной универсальный выбор для Python AQA</td></tr>
+          <tr><td><strong>unittest</strong></td><td>стандартная библиотека и xUnit-стиль: классы, <code>setUp</code>/<code>tearDown</code>, методы <code>assertEqual</code>; меньше внешних зависимостей, больше шаблонного кода</td></tr>
+          <tr><td><strong>Robot Framework</strong></td><td>keyword-driven acceptance-тесты с табличным синтаксисом; читаем для не-разработчиков, но сложнее поддерживать при большой программной логике</td></tr>
+          <tr><td><strong>Behave</strong></td><td>BDD-сценарии на Gherkin и Python step definitions; полезен, когда команда действительно совместно работает со спецификациями в формате Given/When/Then</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Интеграционные тесты с pytest</strong> проверяют совместную работу реальных компонентов: например, API записывает заказ в БД, а тест читает его обратно. Фикстуры поднимают клиент, соединение и тестовые данные, а через <code>yield</code> гарантируют очистку. Такие тесты маркируют отдельно, запускают в воспроизводимом окружении и не подменяют моками те границы, взаимодействие с которыми проверяют.</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.integration</span>
 <span class="kw">def</span> <span class="fn">test_order_is_saved</span>(api_client, db):
     order = api_client.<span class="fn">create_order</span>()
     stored = db.<span class="fn">get_order</span>(order.id)
     <span class="kw">assert</span> stored.status == <span class="st">"created"</span></div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем pytest лучше unittest?» — Голый <code>assert</code> с понятным выводом вместо методов <code>assertEqual</code>; фикстуры гибче setUp/tearDown (scope, переиспользование, зависимости); параметризация одним декоратором; богатая экосистема плагинов. unittest хорош тем, что в стандартной библиотеке — не нужно ставить.</div>
-      </div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Чем pytest лучше unittest?» — Голый <code>assert</code> с понятным выводом вместо методов <code>assertEqual</code>; фикстуры гибче setUp/tearDown (scope, переиспользование, зависимости); параметризация одним декоратором; богатая экосистема плагинов. unittest хорош тем, что в стандартной библиотеке — не нужно ставить.</div>
 
     </div>
   </section>
@@ -623,10 +570,8 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Фикстура (fixture)</strong> — подготовка того, что нужно тесту: данные, соединение с БД, авторизованный клиент. Объявляешь через <code>@pytest.fixture</code>, тест получает её как аргумент.</p>
-        <div class="code-block"><span class="kw">import</span> pytest
+      <p><strong>Фикстура (fixture)</strong> — подготовка того, что нужно тесту: данные, соединение с БД, авторизованный клиент. Объявляешь через <code>@pytest.fixture</code>, тест получает её как аргумент.</p>
+      <div class="code-block"><span class="kw">import</span> pytest
 
 <span class="hdr">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">user</span>():
@@ -634,68 +579,81 @@
 
 <span class="kw">def</span> <span class="fn">test_user_is_admin</span>(user):   <span class="cm"># fixture передаётся по имени</span>
     <span class="kw">assert</span> user[<span class="st">"role"</span>] == <span class="st">"admin"</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Фикстура — это dependency injection для тестов: тест объявляет, что ему нужно (аргумент <code>user</code>), pytest сам создаёт и подставляет. Тест не занимается подготовкой — он просто получает готовое, как функция получает аргументы.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Аналогия</span>Фикстура — это dependency injection для тестов: тест объявляет, что ему нужно (аргумент <code>user</code>), pytest сам создаёт и подставляет. Тест не занимается подготовкой — он просто получает готовое, как функция получает аргументы.</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Setup/teardown через yield</strong> — код до <code>yield</code> это подготовка, после — очистка:</p>
-        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+      <p><strong>Setup/teardown через yield</strong> — код до <code>yield</code> это подготовка, после — очистка:</p>
+      <div class="code-block"><span class="hdr">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">db_connection</span>():
     conn = connect_to_db()      <span class="cm"># setup</span>
     <span class="kw">yield</span> conn                   <span class="cm"># отдаём тесту</span>
     conn.close()                <span class="cm"># teardown (всегда выполнится)</span></div>
-        <p><strong>Scope</strong> — как часто пересоздавать фикстуру:</p>
-        <table>
-          <thead><tr><th>Scope</th><th>Создаётся</th></tr></thead>
-          <tbody>
-            <tr><td><code>function</code> (по умолчанию)</td><td>на каждый тест заново</td></tr>
-            <tr><td><code>class</code></td><td>один раз на класс тестов</td></tr>
-            <tr><td><code>module</code></td><td>один раз на файл</td></tr>
-            <tr><td><code>session</code></td><td>один раз на весь прогон (дорогие ресурсы: БД, токен)</td></tr>
-          </tbody>
-        </table>
-        <p><strong>conftest.py</strong> — файл с общими фикстурами, доступными всем тестам в директории без импорта. Туда выносят переиспользуемое: клиент API, авторизацию, подключение к БД.</p>
-        <div class="code-block"><span class="cm"># conftest.py</span>
+      <p><strong>Scope</strong> — как часто пересоздавать фикстуру:</p>
+      <table>
+        <thead><tr><th>Scope</th><th>Создаётся</th></tr></thead>
+        <tbody>
+          <tr><td><code>function</code> (по умолчанию)</td><td>на каждый тест заново</td></tr>
+          <tr><td><code>class</code></td><td>один раз на класс тестов</td></tr>
+          <tr><td><code>module</code></td><td>один раз на файл</td></tr>
+          <tr><td><code>session</code></td><td>один раз на весь прогон (дорогие ресурсы: БД, токен)</td></tr>
+        </tbody>
+      </table>
+      <p>Есть ещё <code>package</code> — один раз на пакет тестов. Два правила, которые спрашивают:</p>
+      <ul>
+        <li><strong>Фикстура может зависеть только от фикстур того же или более широкого scope.</strong> Session-фикстура, которая просит function-фикстуру, падает с <code>ScopeMismatch</code>, и тест получает статус ERROR: долгоживущий объект не может держать ссылку на то, что пересоздаётся на каждый тест</li>
+        <li><strong>Уборка идёт в обратном порядке.</strong> Если <code>order</code> зависит от <code>user</code>, сначала создаётся <code>user</code>, потом <code>order</code>, а убираются они наоборот — сначала <code>order</code>, потом <code>user</code>. Поэтому заказ удаляется раньше, чем пользователь, и внешние ключи не мешают</li>
+      </ul>
+      <p><strong>conftest.py</strong> — файл с общими фикстурами и хуками, его не импортируют: pytest находит его сам. Таких файлов может быть несколько, по одному на уровень папок. Фикстуры из conftest видны тестам этой папки и всех вложенных, а <em>ближайший</em> conftest переопределяет фикстуру с тем же именем — так в <code>tests/admin/</code> подменяют общий <code>client</code> на админский, не трогая остальные тесты. Корневой conftest держит общее: клиент API, авторизацию, подключение к БД.</p>
+      <div class="code-block"><span class="cm"># conftest.py</span>
 <span class="hdr">@pytest.fixture(scope=<span class="st">"session"</span>)</span>
 <span class="kw">def</span> <span class="fn">api_client</span>():
     client = APIClient(base_url=<span class="st">"..."</span>)
     client.login(<span class="st">"user"</span>, <span class="st">"pass"</span>)
     <span class="kw">return</span> client       <span class="cm"># один авторизованный клиент на весь прогон</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Фикстуры зависят от фикстур</strong> — выстраиваются в цепочку:</p>
-        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+      <p><strong>Фикстуры зависят от фикстур</strong> — выстраиваются в цепочку:</p>
+      <div class="code-block"><span class="hdr">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">order</span>(api_client, user):   <span class="cm"># использует две другие фикстуры</span>
     <span class="kw">return</span> api_client.create_order(user_id=user.id)</div>
-        <p><strong>Фабрики</strong> — фикстура возвращает функцию, чтобы создавать объекты с разными параметрами:</p>
-        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+      <p><strong>Фабрики</strong> — фикстура возвращает функцию, чтобы создавать объекты с разными параметрами:</p>
+      <div class="code-block"><span class="hdr">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">make_user</span>():
     <span class="kw">def</span> <span class="fn">_make</span>(role=<span class="st">"user"</span>):
         <span class="kw">return</span> create_user(role=role)
     <span class="kw">return</span> _make          <span class="cm"># в тесте: make_user(role="admin")</span></div>
-        <p><strong>Встроенные фикстуры</strong> — даёт сам pytest, мини-примеры:</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">test_file</span>(tmp_path):              <span class="cm"># tmp_path — pathlib.Path, временная папка</span>
+      <p><strong>Встроенные фикстуры</strong> — даёт сам pytest, мини-примеры:</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">test_file</span>(tmp_path):              <span class="cm"># tmp_path — pathlib.Path, временная папка</span>
     f = tmp_path / <span class="st">"data.txt"</span>
     f.write_text(<span class="st">"hello"</span>)
 
-<span class="kw">def</span> <span class="fn">test_env</span>(monkeypatch):           <span class="cm"># подмена env/атрибутов</span>
-    monkeypatch.setenv(<span class="st">"API_URL"</span>, <span class="st">"http://test"</span>)
+<span class="kw">def</span> <span class="fn">test_output</span>(capsys):            <span class="cm"># перехват stdout / stderr</span>
+    print(<span class="st">"done"</span>)
+    <span class="kw">assert</span> capsys.readouterr().out == <span class="st">"done\n"</span>
 
 <span class="kw">def</span> <span class="fn">test_logs</span>(caplog):               <span class="cm"># перехват логов для проверки</span>
     do_something()
     <span class="kw">assert</span> <span class="st">"ошибка"</span> <span class="kw">in</span> caplog.text</div>
-        <p>Используй <code>tmp_path</code> (на <code>pathlib.Path</code>), а не устаревший <code>tmpdir</code>.</p>
-        <div class="hl orange"><span class="hl-label">autouse-фикстуры</span><code>@pytest.fixture(autouse=True)</code> применяется ко всем тестам в области без явного указания в аргументах. <strong>Удобно</strong> для сквозной подготовки (сброс состояния, общий лог). <strong>Опасно</strong> — создаёт «неявную магию»: тест зависит от того, чего не видно в его сигнатуре. Применяй для действительно сквозного и очевидного, иначе тесты становится трудно читать и дебажить.</div>
-        <div class="hl orange"><span class="hl-label">Главное про teardown</span>Очистка через <code>yield</code> выполнится <em>даже если тест упал</em> — это важно для изоляции. Создал данные в БД → удалил после, независимо от результата. Тесты не должны оставлять данные, которые сломают следующий прогон (связка с разделом БД).</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Фикстура со scope=session создаёт юзера, тесты его меняют. В чём риск?» — Тесты перестают быть изолированными: один тест поменял состояние общего юзера → следующий падает или зависит от порядка. Дорогие ресурсы (соединение, токен) шарить можно, а изменяемые данные лучше создавать на каждый тест (function scope) или откатывать в teardown.</div>
-      </div>
+      <p>Используй <code>tmp_path</code> (на <code>pathlib.Path</code>), а не устаревший <code>tmpdir</code>. <code>monkeypatch</code> — подмена переменных окружения и атрибутов — разобран в разделе 04.</p>
+      <p><strong>Объект <code>request</code></strong> — встроенная фикстура, через которую фикстура узнаёт, для кого её вызвали:</p>
+      <ul>
+        <li><code>request.param</code> — текущее значение из <code>params</code> или <code>indirect</code>-параметризации</li>
+        <li><code>request.node.name</code> — имя теста: удобно для уникальных тестовых данных и имён скриншотов</li>
+        <li><code>request.addfinalizer(fn)</code> — уборка без <code>yield</code>; сработает, даже если фикстура упала уже после регистрации</li>
+        <li><code>request.config.getoption("--env")</code> — своя опция командной строки (раздел 05, хуки)</li>
+      </ul>
+      <p><strong>Параметры у самой фикстуры</strong> — <code>@pytest.fixture(params=[...])</code>: каждый тест, который её берёт, прогоняется по разу на значение. В отличие от <code>indirect</code> (раздел 03), значения задаёт фикстура, а не тест.</p>
+      <div class="code-block"><span class="hdr">@pytest.fixture(params=[<span class="st">"admin"</span>, <span class="st">"user"</span>])</span>
+<span class="kw">def</span> <span class="fn">role</span>(request):
+    <span class="kw">return</span> request.param
+
+<span class="kw">def</span> <span class="fn">test_profile</span>(role): ...       <span class="cm"># test_profile[admin], test_profile[user]</span>
+
+<span class="hdr">@pytest.mark.usefixtures(<span class="st">"clean_db"</span>)</span>     <span class="cm"># значение не нужно — нужен только побочный эффект</span>
+<span class="kw">def</span> <span class="fn">test_report</span>(): ...</div>
+      <div class="hl orange"><span class="hl-label">autouse-фикстуры</span><code>@pytest.fixture(autouse=True)</code> применяется ко всем тестам в области без явного указания в аргументах. <strong>Удобно</strong> для сквозной подготовки (сброс состояния, общий лог). <strong>Опасно</strong> — создаёт «неявную магию»: тест зависит от того, чего не видно в его сигнатуре. Применяй для действительно сквозного и очевидного, иначе тесты становится трудно читать и дебажить.</div>
+      <div class="hl orange"><span class="hl-label">Главное про teardown</span>Уборка после <code>yield</code> выполнится, <em>даже если тест упал</em>, — на этом держится изоляция: создал данные в БД, удалил после, независимо от результата. Но если упала <em>сама подготовка</em> до <code>yield</code>, уборка этой фикстуры не запустится, а тест получит ERROR. Опасно, когда фикстура создаёт несколько ресурсов подряд: первый создан, на втором упало, и первый остаётся мусором. Защита — один ресурс на одну фикстуру, а цепочку строить зависимостями; либо регистрировать уборку через <code>request.addfinalizer</code> сразу после создания каждого ресурса.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Фикстура со scope=session создаёт юзера, тесты его меняют. В чём риск?» — Тесты перестают быть изолированными: один тест поменял состояние общего юзера → следующий падает или зависит от порядка. Дорогие ресурсы (соединение, токен) шарить можно, а изменяемые данные лучше создавать на каждый тест (function scope) или откатывать в teardown.</div>
 
     </div>
   </section>
@@ -709,10 +667,8 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p><strong>Параметризация</strong> — один тест прогоняется на множестве входных данных. Не дублируешь код, не пишешь 10 почти одинаковых тестов:</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
+      <p><strong>Параметризация</strong> — один тест прогоняется на множестве входных данных. Не дублируешь код, не пишешь 10 почти одинаковых тестов:</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
     (<span class="val">2</span>, <span class="val">4</span>),
     (<span class="val">3</span>, <span class="val">9</span>),
     (<span class="val">5</span>, <span class="val">25</span>),
@@ -720,38 +676,30 @@
 <span class="kw">def</span> <span class="fn">test_square</span>(value, expected):
     <span class="kw">assert</span> value ** <span class="val">2</span> == expected
 <span class="cm"># pytest создаст 3 отдельных теста</span></div>
-        <div class="hl green"><span class="hl-label">Аналогия</span>Параметризация — как цикл по тест-кейсам, но каждая итерация — <em>отдельный</em> тест в отчёте. Упал один набор данных — видно, какой именно, остальные прошли. Это лучше, чем цикл внутри одного теста (там первое падение прячет остальные).</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Аналогия</span>Параметризация — как цикл по тест-кейсам, но каждая итерация — <em>отдельный</em> тест в отчёте. Упал один набор данных — видно, какой именно, остальные прошли. Это лучше, чем цикл внутри одного теста (там первое падение прячет остальные).</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>ids</strong> — читаемые имена для каждого набора (видны в отчёте):</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"email, valid"</span>, [
+      <p><strong>ids</strong> — читаемые имена для каждого набора (видны в отчёте):</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"email, valid"</span>, [
     (<span class="st">"user@mail.com"</span>, <span class="kw">True</span>),
     (<span class="st">"no-at-sign"</span>, <span class="kw">False</span>),
     (<span class="st">""</span>, <span class="kw">False</span>),
 ], ids=[<span class="st">"valid"</span>, <span class="st">"no_at"</span>, <span class="st">"empty"</span>])</span>
 <span class="kw">def</span> <span class="fn">test_email_validation</span>(email, valid):
     <span class="kw">assert</span> is_valid_email(email) == valid</div>
-        <p>В отчёте будет <code>test_email_validation[valid]</code>, <code>[no_at]</code>, <code>[empty]</code> — сразу понятно, какой случай упал.</p>
-        <p><strong>pytest.param</strong> — современный способ задать id и пометить отдельный набор (например, известный баг через xfail):</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
+      <p>В отчёте будет <code>test_email_validation[valid]</code>, <code>[no_at]</code>, <code>[empty]</code> — сразу понятно, какой случай упал.</p>
+      <p><strong>pytest.param</strong> — современный способ задать id и пометить отдельный набор (например, известный баг через xfail):</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"value, expected"</span>, [
     pytest.param(<span class="val">2</span>, <span class="val">4</span>, id=<span class="st">"positive"</span>),
     pytest.param(<span class="val">0</span>, <span class="val">0</span>, id=<span class="st">"zero"</span>),
     pytest.param(-<span class="val">1</span>, <span class="val">1</span>, id=<span class="st">"negative"</span>, marks=pytest.mark.xfail),
 ])</span>
 <span class="kw">def</span> <span class="fn">test_square</span>(value, expected): ...</div>
-        <p>Это прямое применение <strong>техник тест-дизайна</strong> (раздел теории): классы эквивалентности и граничные значения превращаются в наборы параметров.</p>
-      </div>
+      <p>Это прямое применение <strong>техник тест-дизайна</strong> (раздел теории): классы эквивалентности и граничные значения превращаются в наборы параметров.</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Параметризованные фикстуры (indirect)</strong> — один тест прогоняется на разных конфигурациях (роли, окружения, клиенты). Особенно полезно для API-тестов:</p>
-        <div class="code-block"><span class="hdr">@pytest.fixture</span>
+      <p><strong>Параметризованные фикстуры (indirect)</strong> — один тест прогоняется на разных конфигурациях (роли, окружения, клиенты). Особенно полезно для API-тестов:</p>
+      <div class="code-block"><span class="hdr">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">client</span>(request):
     role = request.param          <span class="cm"># значение приходит из parametrize</span>
     <span class="kw">return</span> make_client(role=role)
@@ -759,19 +707,19 @@
 <span class="hdr">@pytest.mark.parametrize(<span class="st">"client"</span>, [<span class="st">"admin"</span>, <span class="st">"user"</span>], indirect=<span class="kw">True</span>)</span>
 <span class="kw">def</span> <span class="fn">test_access</span>(client):       <span class="cm"># тест прогонится для admin и user</span>
     ...</div>
-        <p><code>indirect=True</code> направляет параметр <em>в фикстуру</em>, а не в тест напрямую — фикстура успевает подготовить ресурс под каждый набор.</p>
-        <p><strong>Тест-данные</strong> — где брать:</p>
-        <ul>
-          <li><strong>Inline</strong> — прямо в parametrize (простые случаи)</li>
-          <li><strong>Фабрики</strong> — <code>factory_boy</code> для объектов с реалистичными полями</li>
-          <li><strong>Faker</strong> — фейковые данные (имена, email, адреса)</li>
-          <li><strong>Внешние файлы</strong> — JSON/CSV/YAML для больших датасетов</li>
-        </ul>
-        <div class="hl orange"><span class="hl-label">Уникальность данных</span>При параллельном запуске тесты не должны конфликтовать за одни данные. Генерируй уникальное: <code>f"user_{uuid4()}@test.com"</code>, а не хардкод <code>"test@test.com"</code> — иначе два теста создадут юзера с одним email и один упадёт.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><em>«Сгенерируй parametrize-набор для теста валидации пароля: валидные, слишком короткие, без цифр, без спецсимволов, юникод, граничная длина. С ids через pytest.param.»</em><br><br>
-          LLM хорошо превращает описание правил валидации в готовые параметризованные наборы по классам эквивалентности.
-        </div>
-      </div>
+      <p><code>indirect=True</code> направляет параметр <em>в фикстуру</em>, а не в тест напрямую — фикстура успевает подготовить ресурс под каждый набор.</p>
+      <p><strong>Несколько <code>parametrize</code> на одном тесте перемножаются.</strong> Два декоратора по 2 и 3 значения дают 6 тестов, ещё один на 4 значения — уже 24. Удобно для матрицы «роль × браузер», но легко раздуть набор незаметно. Если нужны конкретные сочетания, а не все, их перечисляют кортежами в одном <code>parametrize</code>.</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.parametrize(<span class="st">"role"</span>, [<span class="st">"admin"</span>, <span class="st">"user"</span>])</span>
+<span class="hdr">@pytest.mark.parametrize(<span class="st">"browser"</span>, [<span class="st">"chromium"</span>, <span class="st">"firefox"</span>, <span class="st">"webkit"</span>])</span>
+<span class="kw">def</span> <span class="fn">test_login</span>(role, browser): ...   <span class="cm"># 2 × 3 = 6 тестов</span></div>
+      <p><strong>Тест-данные</strong> — где брать:</p>
+      <ul>
+        <li><strong>Inline</strong> — прямо в parametrize (простые случаи)</li>
+        <li><strong>Фабрики</strong> — <code>factory_boy</code> для объектов с реалистичными полями</li>
+        <li><strong>Faker</strong> — фейковые данные (имена, email, адреса)</li>
+        <li><strong>Внешние файлы</strong> — JSON/CSV/YAML для больших датасетов</li>
+      </ul>
+      <div class="hl orange"><span class="hl-label">Уникальность данных</span>При параллельном запуске тесты не должны конфликтовать за одни данные. Генерируй уникальное: <code>f"user_{uuid4()}@test.com"</code>, а не хардкод <code>"test@test.com"</code> — иначе два теста создадут юзера с одним email и один упадёт.</div>
 
     </div>
   </section>
@@ -785,23 +733,17 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Мок подменяет внешнюю зависимость (API, БД, время) на управляемую заглушку, чтобы тест не зависел от внешнего мира. Базовые инструменты — <code>monkeypatch</code> (встроенный) и <code>mocker</code> (плагин pytest-mock).</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">test_with_monkeypatch</span>(monkeypatch):
+      <p>Мок подменяет внешнюю зависимость (API, БД, время) на управляемую заглушку, чтобы тест не зависел от внешнего мира. Базовые инструменты — <code>monkeypatch</code> (встроенный) и <code>mocker</code> (плагин pytest-mock).</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">test_with_monkeypatch</span>(monkeypatch):
     <span class="cm"># подменить переменную окружения</span>
     monkeypatch.setenv(<span class="st">"API_URL"</span>, <span class="st">"http://test"</span>)
     <span class="cm"># подменить функцию</span>
     monkeypatch.setattr(time, <span class="st">"time"</span>, <span class="kw">lambda</span>: <span class="val">12345</span>)</div>
-        <div class="hl green"><span class="hl-label">Зачем</span>Тест должен проверять <em>твою</em> логику, а не работу чужого сервиса. Если код ходит в платёжку — мокаешь её ответ, и тест не зависит от того, доступна ли платёжка сейчас. Это делает тесты быстрыми и стабильными (см. также раздел API → контрактное тестирование).</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Зачем</span>Тест должен проверять <em>твою</em> логику, а не работу чужого сервиса. Если код ходит в платёжку — мокаешь её ответ, и тест не зависит от того, доступна ли платёжка сейчас. Это делает тесты быстрыми и стабильными (см. также раздел API → контрактное тестирование).</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>pytest-mock</strong> — это <em>плагин</em> (не часть ядра pytest), даёт фикстуру <code>mocker</code> — обёртку над <code>unittest.mock</code>, удобнее в pytest:</p>
-        <div class="code-block"><span class="kw">def</span> <span class="fn">test_order_payment</span>(mocker):
+      <p><strong>pytest-mock</strong> — это <em>плагин</em> (не часть ядра pytest), даёт фикстуру <code>mocker</code> — обёртку над <code>unittest.mock</code>, удобнее в pytest:</p>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">test_order_payment</span>(mocker):
     <span class="cm"># подменяем функцию, задаём что вернёт</span>
     mock_pay = mocker.patch(<span class="st">"app.payment.charge"</span>)
     mock_pay.return_value = {<span class="st">"status"</span>: <span class="st">"success"</span>}
@@ -811,27 +753,39 @@
     <span class="kw">assert</span> result.paid <span class="kw">is</span> <span class="kw">True</span>
     mock_pay.assert_called_once()       <span class="cm"># проверка вызова</span>
     mock_pay.assert_called_with(amount=<span class="val">100</span>)</div>
-        <p><strong>Мок HTTP-вызовов</strong> — через библиотеку <code>responses</code> (как в разделе API):</p>
-        <div class="code-block"><span class="hdr">@responses.activate</span>
+      <p><strong>Мок HTTP-вызовов</strong> — через библиотеку <code>responses</code> (как в разделе API):</p>
+      <div class="code-block"><span class="hdr">@responses.activate</span>
 <span class="kw">def</span> <span class="fn">test_external_api</span>():
     responses.add(responses.GET, <span class="st">"https://api.ext.com/data"</span>,
                   json={<span class="st">"key"</span>: <span class="st">"value"</span>}, status=<span class="val">200</span>)
     result = fetch_data()
     <span class="kw">assert</span> result[<span class="st">"key"</span>] == <span class="st">"value"</span></div>
-      </div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <div class="hl orange"><span class="hl-label">Patch там, где используется</span>Классическая ошибка: мокать функцию там, где она <em>определена</em>, а не там, где <em>используется</em>. Если <code>app.service</code> делает <code>from app.payment import charge</code>, то патчить надо <code>app.service.charge</code>, а не <code>app.payment.charge</code>. Иначе мок не сработает, тест ходит в реальный код.</div>
-        <p><strong>Что мокать, а что нет</strong> (связка с разделом API):</p>
-        <ul>
-          <li><strong>Мокать</strong>: чужие внешние сервисы (платёжки, сторонние API), медленное (сеть), недетерминированное (время, random)</li>
-          <li><strong>Не мокать</strong>: своё ядро (бизнес-логику, которую и тестируешь), свою БД (лучше реальная через Testcontainers)</li>
-        </ul>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Замокал всё, тесты зелёные — это хорошо?» — Не обязательно. Over-mocking опасен: тест проверяет моки, а не систему. Если замокал собственную бизнес-логику — тест зелёный, а реальный код сломан. Правило: мокай границы (внешнее, дорогое), а ядро тестируй по-настоящему. Зелёный тест на моках ≠ работающий код.</div>
-      </div>
+      <div class="hl orange"><span class="hl-label">Patch там, где используется</span>Классическая ошибка: мокать функцию там, где она <em>определена</em>, а не там, где <em>используется</em>. Если <code>app.service</code> делает <code>from app.payment import charge</code>, то патчить надо <code>app.service.charge</code>, а не <code>app.payment.charge</code>. Иначе мок не сработает, тест ходит в реальный код.</div>
+      <p><strong>Что задаёт поведение мока:</strong></p>
+      <ul>
+        <li><code>return_value</code> — что вернуть при каждом вызове</li>
+        <li><code>side_effect</code> — исключение (проверить обработку ошибки), список значений (вызов за вызовом — так тестируют retry: сначала таймаут, потом успех) или функция</li>
+        <li><code>Mock</code> vs <code>MagicMock</code> — второй дополнительно поддерживает «магические» методы: <code>len()</code>, итерацию, <code>with</code>. <code>mocker.patch</code> по умолчанию создаёт <code>MagicMock</code></li>
+        <li><code>autospec</code> — мок повторяет сигнатуру настоящего объекта. Без него <code>Mock</code> молча примет опечатку в имени метода и вызов с неверными аргументами, и тест останется зелёным, когда настоящий код уже упадёт</li>
+      </ul>
+      <div class="code-block"><span class="kw">from</span> unittest.mock <span class="kw">import</span> Mock, create_autospec
+
+pay = Mock(side_effect=[TimeoutError, {<span class="st">"status"</span>: <span class="st">"ok"</span>}])   <span class="cm"># 1-й вызов — исключение, 2-й — успех</span>
+
+m = Mock()
+m.chrage(<span class="val">100</span>)                  <span class="cm"># опечатка — Mock проглотит молча</span>
+m = create_autospec(PaymentClient, instance=<span class="kw">True</span>)
+m.chrage(<span class="val">100</span>)                  <span class="cm"># AttributeError — такого метода нет</span>
+m.charge(<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>)                 <span class="cm"># TypeError — неверная сигнатура</span>
+<span class="cm"># в pytest-mock: mocker.patch("app.service.charge", autospec=True)</span></div>
+      <p><strong>Что мокать, а что нет</strong> (связка с разделом API):</p>
+      <ul>
+        <li><strong>Мокать</strong>: чужие внешние сервисы (платёжки, сторонние API), медленное (сеть), недетерминированное (время, random)</li>
+        <li><strong>Не мокать</strong>: своё ядро (бизнес-логику, которую и тестируешь), свою БД (лучше реальная через Testcontainers)</li>
+      </ul>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Замокал всё, тесты зелёные — это хорошо?» — Не обязательно. Over-mocking опасен: тест проверяет моки, а не систему. Если замокал собственную бизнес-логику — тест зелёный, а реальный код сломан. Правило: мокай границы (внешнее, дорогое), а ядро тестируй по-настоящему. Зелёный тест на моках ≠ работающий код.</div>
 
     </div>
   </section>
@@ -845,10 +799,8 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>«Расскажи про свой автотест-фреймворк» — типовая структура E2E-проекта:</p>
-        <div class="code-block">project/
+      <p>«Расскажи про свой автотест-фреймворк» — типовая структура E2E-проекта:</p>
+      <div class="code-block">project/
 ├── tests/                  <span class="cm"># сами тесты, разбиты по доменам/фичам</span>
 │   ├── conftest.py         <span class="cm"># общие фикстуры (корневые)</span>
 │   ├── api/
@@ -869,58 +821,56 @@
 ├── pyproject.toml          <span class="cm"># зависимости, ruff/mypy</span>
 ├── .env.example            <span class="cm"># шаблон переменных (без секретов!)</span>
 └── README.md               <span class="cm"># как запустить</span></div>
-        <div class="hl green"><span class="hl-label">Главный принцип</span>Тест отвечает на вопрос <em>«что проверяем»</em>, всё остальное вынесено: <em>как ходить</em> (clients/pages), <em>с какими данными</em> (data), <em>куда</em> (config). Тест не должен содержать ни голых HTTP-запросов, ни селекторов, ни хардкода URL — он читается как бизнес-сценарий.</div>
-      </div>
+      <div class="hl green"><span class="hl-label">Главный принцип</span>Тест отвечает на вопрос <em>«что проверяем»</em>, всё остальное вынесено: <em>как ходить</em> (clients/pages), <em>с какими данными</em> (data), <em>куда</em> (config). Тест не должен содержать ни голых HTTP-запросов, ни селекторов, ни хардкода URL — он читается как бизнес-сценарий. Если разговор уйдёт в <strong>SOLID</strong>, здесь работают ровно два принципа: <strong>SRP</strong> — страница и клиент отдельно от проверок, и <strong>DIP</strong> — зависимости приходят фикстурой, а не создаются внутри теста (разбор всех пяти — в разделе Python, «ООП»).</div>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Что куда класть</strong> — best practices:</p>
-        <table>
-          <thead><tr><th>Папка</th><th>Что лежит / правило</th></tr></thead>
-          <tbody>
-            <tr><td><code>tests/</code></td><td>только проверки и сценарии. Разбивка по доменам/фичам, не «свалка». Имя теста описывает поведение</td></tr>
-            <tr><td><code>clients/</code> <code>pages/</code></td><td>взаимодействие с системой (API/UI). Меняется эндпоинт/локатор — правишь здесь, тесты не трогаешь</td></tr>
-            <tr><td><code>data/</code></td><td>фабрики тест-данных, уникальные значения. Никаких хардкод-данных в тестах</td></tr>
-            <tr><td><code>config/</code></td><td>настройки окружений (base_url, таймауты) через переменные. Переключение dev/stage без правки кода</td></tr>
-            <tr><td><code>conftest.py</code></td><td>фикстуры: корневой — общие (сессия, авторизация), вложенные — для своей группы тестов</td></tr>
-            <tr><td><code>utils/</code></td><td>переиспользуемые хелперы — но не «склад всего подряд»</td></tr>
-          </tbody>
-        </table>
-        <p><strong>Слои</strong> (отделяют тесты от деталей): <strong>Client/Page-слой</strong> (как взаимодействуем) → <strong>Test-слой</strong> (что проверяем) → <strong>Data-слой</strong> (с чем). Зависимости идут в одну сторону: тест использует клиент и данные, но клиент не знает про тесты.</p>
-        <p><strong>Маркеры</strong> — помечать и группировать:</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.smoke</span>
+      <p><strong>Слои</strong> (отделяют тесты от деталей): <strong>Client/Page-слой</strong> (как взаимодействуем) → <strong>Test-слой</strong> (что проверяем) → <strong>Data-слой</strong> (с чем). Зависимости идут в одну сторону: тест использует клиент и данные, но клиент не знает про тесты.</p>
+      <p><strong>Маркеры</strong> — помечать и группировать:</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.smoke</span>
 <span class="kw">def</span> <span class="fn">test_critical_path</span>(): ...
 <span class="cm"># pytest -m smoke  /  pytest -m "not slow"</span></div>
-        <p><strong>Config и секреты:</strong> окружения через переменные (<code>.env</code> локально, secrets в CI), <code>.env</code> в <code>.gitignore</code>, в репо только <code>.env.example</code>. Секреты — никогда в код (связка с разделом Безопасность).</p>
-      </div>
+      <p><strong>Config и секреты:</strong> окружения через переменные (<code>.env</code> локально, secrets в CI), <code>.env</code> в <code>.gitignore</code>, в репо только <code>.env.example</code>. Секреты — никогда в код (связка с разделом Безопасность).</p>
+      <p style="margin-top:14px;"><strong>Хуки</strong> — точки расширения pytest, объявляются в <code>conftest.py</code>. Два самых частых на практике:</p>
+      <div class="code-block"><span class="cm"># conftest.py</span>
+<span class="kw">def</span> <span class="fn">pytest_addoption</span>(parser):                     <span class="cm"># своя опция: pytest --env dev</span>
+    parser.addoption(<span class="st">"--env"</span>, default=<span class="st">"stage"</span>)
 
-      <hr class="lvl-divider">
+<span class="hdr">@pytest.fixture(scope=<span class="st">"session"</span>)</span>
+<span class="kw">def</span> <span class="fn">base_url</span>(request):
+    <span class="kw">return</span> URLS[request.config.getoption(<span class="st">"--env"</span>)]
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Паттерны проектирования автотестов</strong> — частый senior-вопрос «какие паттерны используешь и зачем»:</p>
-        <table>
-          <thead><tr><th>Паттерн</th><th>Суть и зачем</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Page Object</strong> (POM)</td><td>страница = класс с локаторами и методами. Тесты не знают про селекторы; поменялась вёрстка — правишь в одном месте. Для UI</td></tr>
-            <tr><td><strong>Client / Service Object</strong></td><td>то же для API: класс-обёртка над эндпоинтами домена. Тесты работают с <code>client.create_order()</code>, не с HTTP. Аналог POM для бэкенда</td></tr>
-            <tr><td><strong>Factory / Builder</strong></td><td>создание тест-данных: фабрика генерит объект с дефолтами + уникальными полями, builder собирает сложный объект по частям. Убирает копипасту setup</td></tr>
-            <tr><td><strong>Fixture / DI</strong></td><td>встроен в pytest: подготовка и очистка ресурсов, внедрение зависимостей в тест через аргументы. Замена setup/teardown</td></tr>
-            <tr><td><strong>Singleton</strong></td><td>один экземпляр на прогон (конфиг, сессия). Осторожно с общим состоянием при параллели</td></tr>
-          </tbody>
-        </table>
-        <p>Реже: <strong>Screenplay</strong> и <strong>Fluent interface</strong> — достаточно знать названия.</p>
-        <div class="hl green"><span class="hl-label">Общий принцип всех паттернов</span>Все они про одно — <strong>разделение ответственности и убирание дублирования</strong>: что проверяем (тест) отделено от как взаимодействуем (Page/Client Object) и с какими данными (Factory). Не нужно знать все паттерны наизусть — нужно понимать <em>зачем</em>: чтобы тесты читались как сценарии и менялись в одном месте, а не в пятидесяти. Если разговор уйдёт в <strong>SOLID</strong>, здесь работают ровно два принципа: <strong>SRP</strong> — страница и клиент отдельно от проверок, и <strong>DIP</strong> — зависимости приходят фикстурой, а не создаются внутри теста (разбор всех пяти — в разделе Python, «ООП»).</div>
-        <div class="hl"><span class="hl-label">Каркас ответа «расскажи про свой фреймворк»</span>Структурируй так: 1) <strong>стек</strong> — pytest + requests, Allure для отчётов; 2) <strong>слои</strong> — клиенты по доменам (Client Object), тесты не знают про HTTP; 3) <strong>фикстуры</strong> — авторизация и тест-данные в conftest, очистка через teardown; 4) <strong>данные</strong> — фабрики, уникальные значения; 5) <strong>маркеры</strong> — smoke/regression для разделения прогонов; 6) <strong>CI</strong> — параллельный запуск, Allure-отчёт, gate на merge. Заверши тем, <em>что улучшил</em>: «сократил флак с X до Y», «ускорил прогон вдвое».</div>
-        <div class="hl modern"><span class="hl-label">В реальном мире</span>Хороший фреймворк оценивают не по «красоте», а по тому, легко ли в нём <em>писать</em> новые тесты и <em>читать</em> чужие. Если для нового теста надо скопировать 20 строк настройки — слои плохие. Если тест читается как бизнес-сценарий (<code>order = client.create(); assert order.status == "paid"</code>) — фреймворк удался.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем client-слой, если можно просто requests в тесте?» — При росте до сотен тестов голые requests превращаются в ад поддержки: поменялся эндпоинт — правишь в 50 местах. Client-слой = единая точка: меняешь в одном месте. Плюс тесты читаются как сценарии, а не как HTTP-запросы. Это та же причина, по которой для UI делают Page Object.</div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Как ты организуешь E2E-проект, чтобы он не превратился в хаос?» — Best practices: 1) <strong>разделение слоёв</strong> — тесты (что), clients/pages (как), data (с чем), config (где); 2) <strong>тесты независимы</strong> — каждый сам готовит данные и убирает за собой, не зависит от порядка и от других тестов; 3) <strong>изоляция данных</strong> — уникальные значения через фабрики, setup через API (не через UI); 4) <strong>окружения через config</strong>, секреты вне кода; 5) <strong>E2E мало</strong> — только критичные сквозные пути, логику вниз по пирамиде на API; 6) <strong>стабильность</strong> — явные ожидания вместо sleep, борьба с flaky. Главный критерий зрелости: новый тест пишется быстро и читается без расшифровки.</div>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> разложить прототип в нормальную структуру фреймворка.<br>
-          <strong>Пример промпта:</strong> <em>«Вот тест с голыми requests [код]. Разнеси по слоям: вынеси HTTP в client-слой, данные в фабрики, предложи фикстуры и маркеры. Покажи итоговую структуру папок.»</em><br>
-          <strong>Что проверить руками:</strong> где тесты не изолированы (общее состояние, зависимость от порядка) — LLM это часто пропускает, а именно тут рождается flaky.</div>
-      </div>
+<span class="hdr">@pytest.hookimpl(wrapper=<span class="kw">True</span>)</span>
+<span class="kw">def</span> <span class="fn">pytest_runtest_makereport</span>(item, call):          <span class="cm"># результат каждой фазы теста</span>
+    report = <span class="kw">yield</span>
+    setattr(item, f<span class="st">"rep_{report.when}"</span>, report)      <span class="cm"># rep_setup / rep_call / rep_teardown</span>
+    <span class="kw">return</span> report
+
+<span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">page</span>(browser, request):
+    page = browser.new_page()
+    <span class="kw">yield</span> page
+    <span class="kw">if</span> request.node.rep_call.failed:                    <span class="cm"># скриншот только упавших</span>
+        allure.attach(page.screenshot(), name=request.node.name,
+                      attachment_type=allure.attachment_type.PNG)
+    page.close()</div>
+      <p>Это и есть ответ на частый вопрос «как сделать скриншот при падении UI-теста»: хук сохраняет отчёт о фазе на объекте теста, фикстура в уборке смотрит, упал ли тест. Ещё один полезный хук — <code>pytest_collection_modifyitems</code>: менять список собранных тестов, например автоматически вешать маркер <code>api</code> на всё из папки <code>tests/api/</code>.</p>
+
+
+      <p><strong>Паттерны проектирования автотестов</strong> — частый senior-вопрос «какие паттерны используешь и зачем»:</p>
+      <table>
+        <thead><tr><th>Паттерн</th><th>Суть и зачем</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Page Object</strong> (POM)</td><td>страница = класс с локаторами и методами. Тесты не знают про селекторы; поменялась вёрстка — правишь в одном месте. Для UI</td></tr>
+          <tr><td><strong>Client / Service Object</strong></td><td>то же для API: класс-обёртка над эндпоинтами домена. Тесты работают с <code>client.create_order()</code>, не с HTTP. Аналог POM для бэкенда</td></tr>
+          <tr><td><strong>Factory / Builder</strong></td><td>создание тест-данных: фабрика генерит объект с дефолтами + уникальными полями, builder собирает сложный объект по частям. Убирает копипасту setup</td></tr>
+          <tr><td><strong>Fixture / DI</strong></td><td>встроен в pytest: подготовка и очистка ресурсов, внедрение зависимостей в тест через аргументы. Замена setup/teardown</td></tr>
+          <tr><td><strong>Singleton</strong></td><td>один экземпляр на прогон (конфиг, сессия). Осторожно с общим состоянием при параллели</td></tr>
+        </tbody>
+      </table>
+      <p>Реже: <strong>Screenplay</strong> и <strong>Fluent interface</strong> — достаточно знать названия.</p>
+      <div class="hl"><span class="hl-label">Каркас ответа «расскажи про свой фреймворк»</span>Структурируй так: 1) <strong>стек</strong> — pytest + requests, Allure для отчётов; 2) <strong>слои</strong> — клиенты по доменам (Client Object), тесты не знают про HTTP; 3) <strong>фикстуры</strong> — авторизация и тест-данные в conftest, очистка через teardown; 4) <strong>данные</strong> — фабрики, уникальные значения, подготовка через API, а не через UI; 5) <strong>маркеры</strong> — smoke/regression для разделения прогонов; 6) <strong>CI</strong> — параллельный запуск, Allure-отчёт, gate на merge. Заверши тем, <em>что улучшил</em>: «сократил флак с X до Y», «ускорил прогон вдвое».</div>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>Хороший фреймворк оценивают не по «красоте», а по тому, легко ли в нём <em>писать</em> новые тесты и <em>читать</em> чужие. Если для нового теста надо скопировать 20 строк настройки — слои плохие. Если тест читается как бизнес-сценарий (<code>order = client.create(); assert order.status == "paid"</code>) — фреймворк удался.</div>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем client-слой, если можно просто requests в тесте?» — При росте до сотен тестов голые requests превращаются в ад поддержки: поменялся эндпоинт — правишь в 50 местах. Client-слой = единая точка: меняешь в одном месте. Плюс тесты читаются как сценарии, а не как HTTP-запросы. Это та же причина, по которой для UI делают Page Object.</div>
 
     </div>
   </section>
@@ -934,16 +884,14 @@
     </div>
     <div class="section-body">
 
-      <div class="lvl lvl-1">
-        <span class="lvl-tag">L1 · Основы</span>
-        <p>Тесты должны гоняться автоматически в CI на каждый PR (см. раздел CI/CD) и давать понятный отчёт. Базовые инструменты:</p>
-        <ul>
-          <li><strong>pytest-xdist</strong> — параллельный запуск</li>
-          <li><strong>pytest-cov</strong> — покрытие кода</li>
-          <li><strong>Allure</strong> — красивые отчёты с шагами и аттачами</li>
-        </ul>
-        <p><strong>Где конфигурируется pytest</strong> — частый вопрос. В <code>pytest.ini</code> или <code>pyproject.toml</code> (современнее, всё в одном файле):</p>
-        <div class="code-block"><span class="cm"># pyproject.toml</span>
+      <p>Тесты должны гоняться автоматически в CI на каждый PR (см. раздел CI/CD) и давать понятный отчёт. Базовые инструменты:</p>
+      <ul>
+        <li><strong>pytest-xdist</strong> — параллельный запуск</li>
+        <li><strong>pytest-cov</strong> — покрытие кода</li>
+        <li><strong>Allure</strong> — красивые отчёты с шагами и аттачами</li>
+      </ul>
+      <p><strong>Где конфигурируется pytest</strong> — частый вопрос. В <code>pytest.ini</code> или <code>pyproject.toml</code> (современнее, всё в одном файле):</p>
+      <div class="code-block"><span class="cm"># pyproject.toml</span>
 [tool.pytest.ini_options]
 testpaths = [<span class="st">"tests"</span>]          <span class="cm"># где искать тесты</span>
 python_files = <span class="st">"test_*.py"</span>      <span class="cm"># шаблон файлов с тестами</span>
@@ -952,23 +900,20 @@ markers = [
     <span class="st">"smoke: быстрые критичные тесты"</span>,
     <span class="st">"slow: долгие тесты"</span>,
 ]</div>
-        <p><code>--strict-markers</code> — заставляет регистрировать все маркеры (защита от опечаток в <code>@pytest.mark</code>).</p>
-      </div>
+      <p><code>--strict-markers</code> — заставляет регистрировать все маркеры (защита от опечаток в <code>@pytest.mark</code>).</p>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-2">
-        <span class="lvl-tag">L2 · Детали</span>
-        <p><strong>Параллельный запуск</strong> — главный способ ускорить:</p>
-        <div class="code-block">pytest -n 4         <span class="cm"># в 4 процесса (pytest-xdist)</span>
+      <p><strong>Параллельный запуск</strong> — главный способ ускорить:</p>
+      <div class="code-block">pytest -n 4         <span class="cm"># в 4 процесса (pytest-xdist)</span>
 pytest -n auto      <span class="cm"># по числу ядер</span></div>
-        <p>Требование — <strong>изоляция тестов</strong>: не зависят друг от друга и от общих данных, иначе при параллели начнут конфликтовать.</p>
-        <p><strong>Разделение прогонов маркерами</strong> (связка с CI/CD):</p>
-        <div class="code-block">pytest -m smoke           <span class="cm"># быстрые на каждый PR</span>
+      <p>Требование — <strong>изоляция тестов</strong>: не зависят друг от друга и от общих данных, иначе при параллели начнут конфликтовать.</p>
+      <div class="hl orange"><span class="hl-label">xdist: session-фикстура — одна на воркер, а не на прогон</span>При <code>-n 3</code> session-фикстура выполнится три раза — по разу в каждом процессе-воркере. Три логина ещё терпимо, но если она сидит базу или создаёт общего пользователя, воркеры начнут мешать друг другу. Варианты: сделать подготовку идемпотентной или своей для каждого воркера (фикстура <code>worker_id</code> даёт <code>gw0</code>, <code>gw1</code>…, без xdist — <code>master</code>); одноразовую подготовку закрыть файловой блокировкой (<code>filelock</code>, пример есть в документации xdist); или вынести её из pytest в отдельный шаг CI до запуска тестов. Тесты, которым нужно идти вместе на одном воркере, группируют: <code>--dist loadscope</code> (по модулю или классу) или <code>--dist loadgroup</code> с маркером <code>@pytest.mark.xdist_group("name")</code>.</div>
+      <p><strong>Разделение прогонов маркерами</strong> (связка с CI/CD):</p>
+      <div class="code-block">pytest -m smoke           <span class="cm"># быстрые на каждый PR</span>
 pytest -m regression      <span class="cm"># полный набор ночью</span></div>
-        <p><strong>Flaky-тесты</strong> — <code>pytest-rerunfailures</code> позволяет перезапускать упавшие (<code>--reruns 2</code>), но это <em>костыль, не лечение</em>: прячет проблему, а не решает (см. CI/CD).</p>
-        <p><strong>skip / xfail</strong> — управление «непроходящими» тестами:</p>
-        <div class="code-block"><span class="hdr">@pytest.mark.skip(reason=<span class="st">"фича в разработке"</span>)</span>
+      <p><strong>Flaky-тесты</strong> — <code>pytest-rerunfailures</code> позволяет перезапускать упавшие (<code>--reruns 2</code>), но это <em>костыль, не лечение</em>: прячет проблему, а не решает (см. CI/CD).</p>
+      <p><strong>skip / xfail</strong> — управление «непроходящими» тестами:</p>
+      <div class="code-block"><span class="hdr">@pytest.mark.skip(reason=<span class="st">"фича в разработке"</span>)</span>
 <span class="kw">def</span> <span class="fn">test_new</span>(): ...
 
 <span class="hdr">@pytest.mark.skipif(sys.platform == <span class="st">"win32"</span>, reason=<span class="st">"только Linux"</span>)</span>
@@ -976,19 +921,27 @@ pytest -m regression      <span class="cm"># полный набор ночью<
 
 <span class="hdr">@pytest.mark.xfail(reason=<span class="st">"известный баг JIRA-123"</span>)</span>
 <span class="kw">def</span> <span class="fn">test_known_bug</span>(): ...   <span class="cm"># ожидаем падение</span></div>
-        <div class="hl orange"><span class="hl-label">xfail — не способ прятать плохой тест</span><code>xfail</code> = «знаем, что падает, есть заведённый баг» — тест помечен честно, и если он вдруг <em>пройдёт</em>, pytest подсветит это (XPASS — баг починили). Это не то же, что закомментировать или <code>skip</code> сломанный тест, чтобы «не мешал». Используй xfail только с указанием реальной причины/тикета, иначе это маскировка проблемы.</div>
-      </div>
+      <div class="hl orange"><span class="hl-label">xfail — не способ прятать плохой тест</span><code>xfail</code> = «знаем, что падает, есть заведённый баг» — тест помечен честно. Важная деталь: если такой тест вдруг <em>прошёл</em> (XPASS), по умолчанию прогон <strong>не падает</strong> — XPASS только появляется в сводке (<code>-rX</code>), и маркер может годами висеть на давно починенном баге. Чтобы XPASS ронял прогон, нужен <code>@pytest.mark.xfail(strict=True)</code> или <code>xfail_strict = true</code> в конфиге — тогда починили баг, тест покраснел, маркер пришлось снять. И xfail ставят только с реальной причиной или тикетом — это не то же, что закомментировать или <code>skip</code>-нуть сломанный тест, чтобы не мешал.</div>
+      <p><strong>Коды выхода pytest</strong> — по ним CI решает, красный ли шаг:</p>
+      <ul>
+        <li><code>0</code> — всё прошло; <code>1</code> — есть упавшие тесты</li>
+        <li><code>2</code> — прогон прерван, в том числе ошибкой при сборе тестов (опечатка в импорте); <code>3</code> — внутренняя ошибка pytest; <code>4</code> — неверное использование командной строки</li>
+        <li><code>5</code> — <strong>не собрано ни одного теста</strong>. Ловушка CI: <code>pytest -m smoke</code>, когда маркер не стоит ни на одном тесте, даёт код 5 и красный пайплайн. Обратная ошибка — обернуть запуск в <code>|| true</code> и потерять настоящие падения</li>
+      </ul>
+      <p><strong>Ещё три плагина, которые спрашивают:</strong></p>
+      <ul>
+        <li><strong>pytest-randomly</strong> — каждый раз запускает тесты в случайном порядке и печатает seed в шапке. Ловит зависимость от порядка, которую последовательный запуск прячет. Воспроизвести падение — <code>--randomly-seed=&lt;seed&gt;</code>, отключить — <code>-p no:randomly</code></li>
+        <li><strong>pytest-timeout</strong> — <code>--timeout=60</code> убивает зависший тест, вместо того чтобы держать CI-джобу до общего таймаута</li>
+        <li><strong>Allure</strong> — <code>@allure.step("Создать заказ")</code> на методах клиента превращает вызовы в шаги отчёта, <code>allure.attach(...)</code> прикладывает запрос, ответ или скриншот (пример — хук в разделе 05)</li>
+      </ul>
 
-      <hr class="lvl-divider">
 
-      <div class="lvl lvl-3">
-        <span class="lvl-tag">L3 · Senior</span>
-        <p><strong>Ускорить медленный suite</strong> на стороне pytest: параллелизация (<code>-n auto</code>), переиспользование дорогих фикстур (<code>session</code> scope), убрать <code>sleep</code> → явные ожидания. Процессная часть (разделить на pre-merge/nightly, сдвиг по пирамиде, value автотестов) — в разделе CI/CD.</p>
-        <div class="hl llm"><span class="hl-label">Делегируй LLM</span><strong>Где помогает:</strong> генерация каркаса тестов по функции, конвертация ручных кейсов в код.<br>
-          <strong>Пример промпта:</strong> <em>«Напиши pytest-тесты для функции [код]: позитив, негатив, граничные, исключения. Используй parametrize и фикстуры.»</em><br>
-          <strong>Что проверить руками:</strong> доменные кейсы и приоритизацию — их LLM не знает.
-        </div>
-        <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тест иногда падает, иногда проходит. Что делаешь?» — Не <code>--reruns</code> и забыть. Ищу причину flaky: гонки/тайминги (<code>sleep</code> вместо ожидания), зависимость от порядка тестов, общие тест-данные при параллели, нестабильный внешний сервис (мокать), недетерминизм (время, random). retry — временная мера, пока чиню корень.</div>
+      <p><strong>Ускорить медленный suite</strong> на стороне pytest: параллелизация (<code>-n auto</code>), переиспользование дорогих фикстур (<code>session</code> scope), убрать <code>sleep</code> → явные ожидания. Процессная часть (разделить на pre-merge/nightly, сдвиг по пирамиде, value автотестов) — в разделе CI/CD.</p>
+      <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Тест иногда падает, иногда проходит. Что делаешь?» — Не <code>--reruns</code> и забыть. Ищу причину flaky: гонки/тайминги (<code>sleep</code> вместо ожидания), зависимость от порядка тестов, общие тест-данные при параллели, нестабильный внешний сервис (мокать), недетерминизм (время, random). retry — временная мера, пока чиню корень.</div>
+      <div class="hl llm"><span class="hl-label">AI в работе с pytest — сводка по всему разделу</span>Вопрос «как используешь AI» задают один раз, а не по каждой теме. Что реально экономит время:<br><br>
+        <strong>Где помогает:</strong> превратить правила валидации в <code>parametrize</code>-наборы по классам эквивалентности и границам, сразу с <code>ids</code> через <code>pytest.param</code>; набросать каркас тестов к функции — позитив, негатив, граничные, исключения; разложить тест с голыми <code>requests</code> по слоям — клиент, фабрики данных, фикстуры, маркеры.<br><br>
+        <strong>Что всегда проверяешь руками:</strong> изоляцию — общее состояние и зависимость от порядка LLM пропускает чаще всего, а именно тут рождается flaky; цель <code>patch</code> — модель охотно патчит место определения, а не использования; моки без <code>autospec</code>, которые принимают что угодно; доменные кейсы и приоритеты — их модель не знает.<br><br>
+        <strong>Готовый ответ на собесе:</strong> <em>«Параметризованные наборы и черновики тестов генерирую, дальше читаю как чужой код: смотрю, изолированы ли тесты, туда ли стоит patch, не проглатывают ли моки неверные вызовы. Доменные проверки пишу сам».</em>
       </div>
 
     </div>
@@ -1003,15 +956,6 @@ pytest -m regression      <span class="cm"># полный набор ночью<
 </button>
 
 <script>
-  const buttons = document.querySelectorAll('.level-btn');
-  const body = document.body;
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      body.setAttribute('data-level', btn.dataset.lvl);
-    });
-  });
   const scrollBtn = document.querySelector('.scroll-top');
   if (scrollBtn) {
     window.addEventListener('scroll', () => {
