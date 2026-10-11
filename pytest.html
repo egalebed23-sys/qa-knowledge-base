@@ -540,6 +540,30 @@
         validate_age(<span class="val">10</span>)
     <span class="kw">assert</span> exc.value.args[<span class="val">0</span>].startswith(<span class="st">"age"</span>)   <span class="cm"># сам объект исключения</span></div>
       <p><code>match</code> — это регулярное выражение, и ищется оно через <code>re.search</code>, то есть в любом месте сообщения. Точки, скобки и другие спецсимволы в ожидаемом тексте надо экранировать или обернуть в <code>re.escape()</code>. Через <code>as exc</code> доступны тип, сообщение и атрибуты исключения. Для сравнения float — <code>pytest.approx</code> (почему — раздел Python, «Синтаксис»).</p>
+      <p style="margin-top:18px;"><strong>Стратегия проверок: жёсткие, мягкие и «падай раньше».</strong> Обычный <code>assert</code> — жёсткий: тест останавливается на первом расхождении, и об остальных ты не узнаешь. Мягкие проверки собирают все расхождения и падают в конце — в pytest это плагин <code>pytest-check</code>:</p>
+      <div class="code-block"><span class="kw">from</span> pytest_check <span class="kw">import</span> check
+
+<span class="kw">def</span> <span class="fn">test_create_user</span>(api, payload):
+    r = api.post(<span class="st">"/users"</span>, json=payload)
+    <span class="kw">assert</span> r.status_code == <span class="val">201</span>, r.text        <span class="cm"># жёстко: без 201 дальше проверять нечего</span>
+    body = r.json()
+    check.equal(body[<span class="st">"role"</span>], <span class="st">"user"</span>)           <span class="cm"># мягко: независимые поля одного ответа,</span>
+    check.equal(body[<span class="st">"balance"</span>], <span class="val">0</span>)            <span class="cm"># в отчёте будут все расхождения сразу</span>
+    check.is_none(body.get(<span class="st">"deleted_at"</span>))</div>
+      <p>Правило, которое примиряет два подхода: <strong>жёстко</strong> проверяют условия и промежуточные шаги — если запрос вернул 500 или страница не открылась, всё дальнейшее превращается в шум и уводит от причины. <strong>Мягко</strong> — независимые свойства одного итогового результата. Это и есть «падай раньше» на уровне теста: проверять состояние после каждого значимого шага, чтобы тест падал в корне проблемы, а не тремя шагами позже на её последствии. Критерий хорошего теста — причину падения видно из отчёта без перезапуска и отладки; отсюда сообщение вторым аргументом <code>assert</code> и тело ответа во вложении.</p>
+      <p><strong>Сравнивать модель целиком, а не поле за полем.</strong> Десяток строк <code>assert body["x"] == ...</code> тяжело поддерживать: добавилось поле — правишь все тесты. Сравнивают весь объект, убрав нестабильные поля вроде id и дат:</p>
+      <ul>
+        <li><strong>dataclass</strong> — pytest сам показывает, какие атрибуты различаются</li>
+        <li><strong>Pydantic</strong> — <code>model_dump(exclude=...)</code> с обеих сторон: pytest выведет только различающиеся ключи</li>
+        <li><strong>Вложенный JSON</strong> — <code>DeepDiff</code> с <code>exclude_paths</code>: даёт точный путь до расхождения</li>
+      </ul>
+      <div class="code-block">VOLATILE = {<span class="st">"id"</span>, <span class="st">"created_at"</span>}
+<span class="kw">assert</span> actual.model_dump(exclude=VOLATILE) == expected.model_dump(exclude=VOLATILE)
+<span class="cm"># E   Differing items:</span>
+<span class="cm"># E   {'role': 'admin'} != {'role': 'user'}</span>
+
+diff = DeepDiff(expected, actual, exclude_paths=[<span class="st">"root['id']"</span>])
+<span class="kw">assert</span> <span class="kw">not</span> diff, diff      <span class="cm"># {'values_changed': {"root['user']['tags'][1]": ...}}</span></div>
       <p><strong>Фреймворки, которые стоит уметь сравнить:</strong></p>
       <table>
         <thead><tr><th>Инструмент</th><th>Подход и применение</th></tr></thead>
@@ -864,10 +888,13 @@ m.charge(<span class="val">1</span>, <span class="val">2</span>, <span class="va
           <tr><td><strong>Client / Service Object</strong></td><td>то же для API: класс-обёртка над эндпоинтами домена. Тесты работают с <code>client.create_order()</code>, не с HTTP. Аналог POM для бэкенда</td></tr>
           <tr><td><strong>Factory / Builder</strong></td><td>создание тест-данных: фабрика генерит объект с дефолтами + уникальными полями, builder собирает сложный объект по частям. Убирает копипасту setup</td></tr>
           <tr><td><strong>Fixture / DI</strong></td><td>встроен в pytest: подготовка и очистка ресурсов, внедрение зависимостей в тест через аргументы. Замена setup/teardown</td></tr>
-          <tr><td><strong>Singleton</strong></td><td>один экземпляр на прогон (конфиг, сессия). Осторожно с общим состоянием при параллели</td></tr>
+          <tr><td><strong>Singleton</strong></td><td>один экземпляр на прогон (конфиг, сессия). Осторожно с общим состоянием при параллели. В Python его редко пишут классом: модуль импортируется один раз и уже ведёт себя как синглтон, а на прогон хватает session-фикстуры</td></tr>
+          <tr><td><strong>Facade</strong></td><td>простой вход в сложную последовательность: слой шагов <code>admin_steps.create_user_with_account()</code> прячет несколько вызовов клиента и проверки между ними. Тест читается как сценарий, цепочка правится в одном месте</td></tr>
+          <tr><td><strong>Adapter</strong></td><td>приводит разные модели к одному виду, чтобы их можно было сравнить: модель запроса, ответ API и строку из БД — к общему словарю или Pydantic-модели</td></tr>
         </tbody>
       </table>
       <p>Реже: <strong>Screenplay</strong> и <strong>Fluent interface</strong> — достаточно знать названия.</p>
+      <p><strong>Точки масштабируемости</strong> — места, куда добавляешь немного кода, а получаешь поддержку большого куска новой функциональности. Это готовый ответ на «чем хорош твой фреймворк»: <em>фабрика данных</em> — новая сущность генерируется без правки тестов; <em>общий клиент</em> — новый эндпоинт подключается строкой, а не классом с копипастой; <em>конфиг окружений</em> — новый стенд это новая запись, а не правка кода; <em>сравнение моделей</em> — новое поле проверяется автоматически. Признак, что такой точки нет: на каждое расширение копируешь кусок существующего кода. По сути это OCP из SOLID на практике (раздел Python, «ООП»).</p>
       <div class="hl"><span class="hl-label">Каркас ответа «расскажи про свой фреймворк»</span>Структурируй так: 1) <strong>стек</strong> — pytest + requests, Allure для отчётов; 2) <strong>слои</strong> — клиенты по доменам (Client Object), тесты не знают про HTTP; 3) <strong>фикстуры</strong> — авторизация и тест-данные в conftest, очистка через teardown; 4) <strong>данные</strong> — фабрики, уникальные значения, подготовка через API, а не через UI; 5) <strong>маркеры</strong> — smoke/regression для разделения прогонов; 6) <strong>CI</strong> — параллельный запуск, Allure-отчёт, gate на merge. Заверши тем, <em>что улучшил</em>: «сократил флак с X до Y», «ускорил прогон вдвое».</div>
       <div class="hl modern"><span class="hl-label">В реальном мире</span>Хороший фреймворк оценивают не по «красоте», а по тому, легко ли в нём <em>писать</em> новые тесты и <em>читать</em> чужие. Если для нового теста надо скопировать 20 строк настройки — слои плохие. Если тест читается как бизнес-сценарий (<code>order = client.create(); assert order.status == "paid"</code>) — фреймворк удался.</div>
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем client-слой, если можно просто requests в тесте?» — При росте до сотен тестов голые requests превращаются в ад поддержки: поменялся эндпоинт — правишь в 50 местах. Client-слой = единая точка: меняешь в одном месте. Плюс тесты читаются как сценарии, а не как HTTP-запросы. Это та же причина, по которой для UI делают Page Object.</div>
