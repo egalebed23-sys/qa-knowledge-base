@@ -918,6 +918,19 @@ s = <span class="st">"B"</span> + s[<span class="val">1</span>:]            <spa
 text = <span class="st">""</span>.<span class="fn">join</span>(words)        <span class="cm"># ✓ один проход, одна аллокация</span></div>
       <div class="hl green"><span class="hl-label">Запомнить</span>Строка лежит в памяти <em>непрерывным</em> блоком. Дописать символ «на месте» нельзя: нет гарантии, что соседняя ячейка свободна — её мог занять другой объект. Поэтому любое изменение означает выделить новую память и скопировать всё содержимое. Отсюда три следствия: строка неизменяема; она <strong>хешируема</strong>, а значит годится ключом <code>dict</code>; склейка строк в цикле — антипаттерн, вместо неё <code>"".join()</code>.</div>
 
+
+      <!-- item: comprehension в разных скобках -->
+      <p style="margin-top:16px;"><strong>Что выведет comprehension в разных скобках.</strong> Классический вопрос «что будет на экране»:</p>
+      <div class="code-block">[i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>)]            <span class="cm"># [0, 1, ..., 9]                      — list</span>
+(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>))            <span class="cm"># &lt;generator object &lt;genexpr&gt; ...&gt;  — генератор ⚠</span>
+{i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>)}            <span class="cm"># {0, 1, ..., 9}                      — set</span>
+{i: i * i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">3</span>)}        <span class="cm"># {0: 0, 1: 1, 2: 4}                  — dict</span>
+<span class="fn">tuple</span>(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">10</span>))       <span class="cm"># (0, 1, ..., 9)                      — кортеж только так</span>
+
+g = (i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="val">3</span>))
+<span class="fn">list</span>(g)                            <span class="cm"># [0, 1, 2]</span>
+<span class="fn">list</span>(g)                            <span class="cm"># []  ⚠ генератор одноразовый</span></div>
+      <div class="hl green"><span class="hl-label">Запомнить</span>В круглых скобках получается <strong>не кортеж, а генераторное выражение</strong>: значения ещё не вычислены, они появятся только при итерации, и пройти по ним можно один раз. «Tuple comprehension» в Python нет — кортеж собирают через <code>tuple(...)</code>. Причина в том, что кортеж делает запятая, а не скобки: <code>(1)</code> — это <code>int</code>, а <code>(1,)</code> — уже <code>tuple</code>.</div>
     </div>
   </section>
 
@@ -1621,6 +1634,41 @@ logger.error(<span class="st">"запрос упал"</span>)        <span class
         <span class="kw">return</span> <span class="fn">sum</span>(<span class="val">1</span> <span class="kw">for</span> ok <span class="kw">in</span> checks <span class="kw">if</span> ok)  <span class="cm"># True == 1</span></div>
       <div class="hl orange"><span class="hl-label">Две главные ловушки</span>1) Внутри методов <em>всегда</em> <code>self.x</code>, не просто <code>x</code> — иначе NameError (это и был баг с <code>CRITICAL_LENGTH</code>). 2) <code>self.password</code> — это строка; сравнивать с числом нельзя, нужен <code>len()</code>, иначе TypeError. Эти два бага — суть задачи.</div>
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«Зачем <code>sum(1 for ok in checks if ok)</code>, можно ли проще?» — Можно <code>sum(checks)</code> напрямую: в Python <code>True == 1</code>, <code>False == 0</code>, поэтому сумма списка булевых = число True. Приём, который любят на собесе: <code>sum([True, False, True])</code> вернёт 2. Знание, что bool — подтип int, отличает уверенный ответ.</div>
+      <p style="margin-top:18px;"><strong>Задача C. Класс-итератор.</strong> Написать класс <code>Iterator(start, stop)</code>, который в цикле <code>for</code> выдаёт числа от <code>start</code> до <code>stop</code> включительно. Протокол итератора разобран в разделе 02; здесь — как его пишут на собесе и что спрашивают следом.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">Iterator</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, start, stop):
+        self.current = start
+        self.stop = stop
+
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">__next__</span>(self):
+        <span class="kw">if</span> self.current &gt; self.stop:          <span class="cm"># граница включена, поэтому &gt;, а не &gt;=</span>
+            <span class="kw">raise</span> StopIteration
+        value = self.current
+        self.current += <span class="val">1</span>
+        <span class="kw">return</span> value
+
+it = <span class="fn">Iterator</span>(<span class="val">1</span>, <span class="val">10</span>)
+<span class="kw">for</span> index <span class="kw">in</span> it:
+    <span class="fn">print</span>(index)                         <span class="cm"># 1, 2, 3 … 10</span></div>
+      <p><code>for</code> сначала вызывает <code>iter(it)</code>, то есть <code>__iter__</code>, а потом <code>next()</code> — пока не получит <code>StopIteration</code>.</p>
+      <p><strong>Вопрос вдогонку: «что выведет второй <code>for</code> по тому же <code>it</code>?»</strong> Ничего. Итератор одноразовый: <code>current</code> уже больше <code>stop</code>, а <code>__iter__</code> возвращает тот же исчерпанный объект. Чтобы обходить повторно, <code>__iter__</code> делают генератором — каждый <code>for</code> получает свежий генератор, и <code>__next__</code> больше не нужен:</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">Range</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, start, stop):
+        self.start, self.stop = start, stop
+
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+        current = self.start
+        <span class="kw">while</span> current &lt;= self.stop:
+            <span class="kw">yield</span> current
+            current += <span class="val">1</span>
+
+r = <span class="fn">Range</span>(<span class="val">1</span>, <span class="val">3</span>)
+<span class="fn">list</span>(r), <span class="fn">list</span>(r)        <span class="cm"># ([1, 2, 3], [1, 2, 3]) — обходится сколько угодно раз</span>
+<span class="fn">next</span>(r)                      <span class="cm"># TypeError: 'Range' object is not an iterator</span></div>
+      <div class="hl orange"><span class="hl-label">Деталь, которая отличает сильный ответ</span>Второй класс — уже не итератор, а <strong>итерируемый объект</strong>: у него есть только <code>__iter__</code>, поэтому <code>next(r)</code> падает с <code>TypeError</code>. Итератор здесь — генератор, который возвращает <code>__iter__</code>. Так устроены встроенные коллекции: <code>list</code> и <code>range</code> итерируемые, и каждый <code>for</code> создаёт по ним новый итератор. Поэтому класс во втором варианте честнее назвать не <code>Iterator</code>, а, например, <code>Range</code>.</div>
       <div class="hl llm"><span class="hl-label">AI в работе с Python — сводка по всему разделу</span>Вопрос «как используешь AI» задают один раз, а не по каждой теме. Что реально экономит время:<br><br>
         <strong>Где помогает:</strong> построить и объяснить regex по частям; ревью кода на типовые питоновские баги — mutable default, off-by-one, изменение коллекции во время итерации, случайный <code>O(n²)</code>; Pydantic-модель по примеру JSON-ответа; черновик pytest-тестов к функции с <code>parametrize</code>; разложить простыню в читаемые функции; сгенерировать тренировочные задачи формата «почини класс» и проверить твой разбор.<br><br>
         <strong>Что всегда проверяешь руками:</strong> границы — regex стабильно не держит пустую строку, юникод и очень длинный ввод; в Pydantic-моделях LLM делает все поля обязательными, хотя половина nullable; сгенерированные тесты шаблонные и не знают доменную логику твоего продукта.<br><br>
