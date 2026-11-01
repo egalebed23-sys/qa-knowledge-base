@@ -1015,25 +1015,176 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
 
       <p style="margin-top:14px;"><strong>Принципы SOLID</strong> — пять правил проектирования классов (Роберт Мартин). У QA их спрашивают не как теорию ООП, а применительно к архитектуре тест-фреймворка:</p>
       <table>
-        <thead><tr><th>Принцип</th><th>Суть</th><th>Как выглядит в тест-фреймворке</th></tr></thead>
+        <thead><tr><th>Принцип</th><th>Суть</th><th>Признак нарушения</th></tr></thead>
         <tbody>
-          <tr><td><strong>S</strong> — Single Responsibility<br><span style="opacity:.7;">единственная ответственность</span></td><td>у класса одна причина для изменения</td><td>Page Object описывает страницу и <em>не содержит ассертов</em>; API-клиент шлёт запросы и не знает про тест-данные</td></tr>
-          <tr><td><strong>O</strong> — Open/Closed<br><span style="opacity:.7;">открытость/закрытость</span></td><td>открыт для расширения, закрыт для изменения</td><td>новый способ оплаты — новый класс, а не ещё один <code>if</code> внутри существующего</td></tr>
-          <tr><td><strong>L</strong> — Liskov Substitution<br><span style="opacity:.7;">подстановка Лисков</span></td><td>наследник подставляется вместо родителя, не ломая поведение</td><td>если <code>MobilePage</code> наследует <code>BasePage</code>, общие тесты обязаны проходить и на нём</td></tr>
-          <tr><td><strong>I</strong> — Interface Segregation<br><span style="opacity:.7;">разделение интерфейсов</span></td><td>несколько узких интерфейсов лучше одного широкого</td><td>базовый класс не заставляет реализовывать <code>auth()</code> там, где авторизации нет</td></tr>
-          <tr><td><strong>D</strong> — Dependency Inversion<br><span style="opacity:.7;">инверсия зависимостей</span></td><td>зависеть от абстракции, а не от конкретной реализации</td><td>клиент приходит в тест фикстурой, а не создаётся внутри — можно подменить моком или клиентом другого стенда</td></tr>
+          <tr><td><strong>S</strong> — Single Responsibility<br><span style="opacity:.7;">единственная ответственность</span></td><td>у класса одна причина для изменения</td><td>правка вёрстки и правка ожидаемого результата идут в один и тот же класс</td></tr>
+          <tr><td><strong>O</strong> — Open/Closed<br><span style="opacity:.7;">открытость/закрытость</span></td><td>открыт для расширения, закрыт для изменения</td><td>каждая новая сущность — ещё один <code>elif</code> в старом коде</td></tr>
+          <tr><td><strong>L</strong> — Liskov Substitution<br><span style="opacity:.7;">подстановка Лисков</span></td><td>наследник подставляется вместо родителя, не ломая поведение</td><td>общий код падает на одном из наследников или проверяет его тип</td></tr>
+          <tr><td><strong>I</strong> — Interface Segregation<br><span style="opacity:.7;">разделение интерфейсов</span></td><td>несколько узких интерфейсов лучше одного широкого</td><td>методы-заглушки с <code>raise NotImplementedError</code></td></tr>
+          <tr><td><strong>D</strong> — Dependency Inversion<br><span style="opacity:.7;">инверсия зависимостей</span></td><td>зависеть от абстракции, а не от конкретной реализации</td><td>клиент и адрес стенда создаются прямо внутри теста или шага</td></tr>
         </tbody>
       </table>
-      <p><strong>D на практике</strong> — это и есть dependency injection, на котором стоит весь pytest:</p>
-      <div class="code-block"><span class="cm"># плохо: тест намертво привязан к реализации и окружению</span>
-<span class="kw">def</span> <span class="fn">test_order</span>():
-    client = <span class="fn">ApiClient</span>(<span class="st">"https://prod"</span>)   <span class="cm"># не подменить ни моком, ни стендом</span>
+      <p>Теперь каждый принцип на самом простом примере: сначала как выглядит нарушение, потом как его исправить.</p>
+      <p style="margin-top:18px;"><strong>S — одна причина для изменения.</strong> Page Object отвечает за то, <em>как</em> работать со страницей, а тест — за то, <em>что</em> проверить. Когда это смешано, у класса появляются две причины меняться.</p>
+      <div class="code-block"><span class="cm"># плохо</span>
+<span class="kw">class</span> <span class="fn">LoginPage</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, page):
+        self.page = page
 
-<span class="cm"># хорошо: зависимость приходит снаружи</span>
-<span class="kw">def</span> <span class="fn">test_order</span>(api_client):            <span class="cm"># какой именно клиент — решает фикстура</span>
-    ...</div>
+    <span class="kw">def</span> <span class="fn">login</span>(self, user, password):
+        self.page.fill(<span class="st">"#user"</span>, user)
+        self.page.fill(<span class="st">"#password"</span>, password)
+        self.page.click(<span class="st">"#submit"</span>)
+        <span class="kw">assert</span> self.page.url.endswith(<span class="st">"/home"</span>)   <span class="cm"># проверка внутри страницы</span>
+
+<span class="cm"># хорошо</span>
+<span class="kw">class</span> <span class="fn">LoginPage</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, page):
+        self.page = page
+
+    <span class="kw">def</span> <span class="fn">login</span>(self, user, password):             <span class="cm"># только действия</span>
+        self.page.fill(<span class="st">"#user"</span>, user)
+        self.page.fill(<span class="st">"#password"</span>, password)
+        self.page.click(<span class="st">"#submit"</span>)
+
+    <span class="kw">def</span> <span class="fn">error_text</span>(self):
+        <span class="kw">return</span> self.page.inner_text(<span class="st">"#error"</span>)
+
+<span class="kw">def</span> <span class="fn">test_login_ok</span>(login_page, page):             <span class="cm"># проверки — в тестах</span>
+    login_page.login(<span class="st">"ann"</span>, <span class="st">"secret"</span>)
+    <span class="kw">assert</span> page.url.endswith(<span class="st">"/home"</span>)
+
+<span class="kw">def</span> <span class="fn">test_login_wrong_password</span>(login_page):
+    login_page.login(<span class="st">"ann"</span>, <span class="st">"wrong"</span>)
+    <span class="kw">assert</span> login_page.error_text() == <span class="st">"Неверный пароль"</span></div>
+      <p>В первом варианте негативный тест не написать: <code>login</code> упадёт на своём <code>assert</code> раньше, чем тест дойдёт до текста ошибки. Во втором изменения не смешиваются: поменялась вёрстка — правим страницу, поменялось ожидание — правим тест.</p>
+      <p style="margin-top:18px;"><strong>O — добавляем новое, не трогая старое.</strong> Если для новой возможности приходится открывать уже рабочий код и дописывать в него ветку, каждая правка рискует сломать то, что работало.</p>
+      <div class="code-block"><span class="cm"># плохо</span>
+<span class="kw">def</span> <span class="fn">payment_payload</span>(method):
+    <span class="kw">if</span> method == <span class="st">"card"</span>:
+        <span class="kw">return</span> {<span class="st">"type"</span>: <span class="st">"card"</span>, <span class="st">"pan"</span>: <span class="st">"4242424242424242"</span>}
+    <span class="kw">elif</span> method == <span class="st">"sbp"</span>:
+        <span class="kw">return</span> {<span class="st">"type"</span>: <span class="st">"sbp"</span>, <span class="st">"phone"</span>: <span class="st">"+79990000000"</span>}
+    <span class="cm"># новый способ оплаты — снова правим эту функцию</span>
+
+<span class="cm"># хорошо</span>
+<span class="kw">class</span> <span class="fn">CardPayment</span>:
+    <span class="kw">def</span> <span class="fn">payload</span>(self):
+        <span class="kw">return</span> {<span class="st">"type"</span>: <span class="st">"card"</span>, <span class="st">"pan"</span>: <span class="st">"4242424242424242"</span>}
+
+<span class="kw">class</span> <span class="fn">SbpPayment</span>:
+    <span class="kw">def</span> <span class="fn">payload</span>(self):
+        <span class="kw">return</span> {<span class="st">"type"</span>: <span class="st">"sbp"</span>, <span class="st">"phone"</span>: <span class="st">"+79990000000"</span>}
+
+<span class="kw">def</span> <span class="fn">pay</span>(client, method):                         <span class="cm"># не меняется при новых способах</span>
+    <span class="kw">return</span> client.post(<span class="st">"/payments"</span>, json=method.payload())
+
+<span class="hdr">@pytest.mark.parametrize("method", [CardPayment(), SbpPayment()])</span>
+<span class="kw">def</span> <span class="fn">test_pay</span>(client, method):
+    <span class="kw">assert</span> pay(client, method).status_code == 201</div>
+      <p>Новый способ оплаты теперь — это новый класс и одно значение в <code>parametrize</code>. Функция <code>pay</code> и готовые классы не меняются, поэтому сломать их этой правкой нельзя.</p>
+      <p style="margin-top:18px;"><strong>L — наследник работает везде, где работает родитель.</strong> Код, написанный для <code>BasePage</code>, не должен знать, какая именно страница ему досталась.</p>
+      <div class="code-block"><span class="cm"># плохо</span>
+<span class="kw">class</span> <span class="fn">BasePage</span>:
+    url = <span class="st">"/"</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, page):
+        self.page = page
+
+    <span class="kw">def</span> <span class="fn">open</span>(self):
+        self.page.goto(self.url)
+
+<span class="kw">class</span> <span class="fn">AdminPage</span>(BasePage):
+    url = <span class="st">"/admin"</span>
+
+    <span class="kw">def</span> <span class="fn">open</span>(self, token):                       <span class="cm"># родитель обещал open() без аргументов</span>
+        self.page.goto(<span class="st">f"{self.url}?token={token}"</span>)
+
+<span class="kw">def</span> <span class="fn">check_opens</span>(some_page):                      <span class="cm"># общий код для любой страницы</span>
+    some_page.open()                             <span class="cm"># на AdminPage — TypeError</span>
+
+<span class="cm"># хорошо</span>
+<span class="kw">class</span> <span class="fn">AdminPage</span>(BasePage):
+    url = <span class="st">"/admin"</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, page, token):             <span class="cm"># всё своё получает при создании</span>
+        super().__init__(page)
+        self.token = token
+
+    <span class="kw">def</span> <span class="fn">open</span>(self):                              <span class="cm"># вызывается так же, как у родителя</span>
+        self.page.goto(<span class="st">f"{self.url}?token={self.token}"</span>)</div>
+      <p>Теперь <code>check_opens</code> одинаково работает и с <code>BasePage(page)</code>, и с <code>AdminPage(page, token)</code>. Принцип нарушается и тогда, когда наследник возвращает другой тип или бросает исключение там, где родитель его не бросал. Верный признак нарушения — <code>if isinstance(page, AdminPage)</code> в общем коде.</p>
+      <p style="margin-top:18px;"><strong>I — не заставлять класс иметь то, что ему не нужно.</strong> Широкий базовый класс вынуждает наследников реализовывать лишние методы, и появляются заглушки.</p>
+      <div class="code-block"><span class="cm"># плохо</span>
+<span class="kw">class</span> <span class="fn">BaseClient</span>(ABC):
+<span class="hdr">    @abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">get</span>(self, path): ...
+
+<span class="hdr">    @abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">post</span>(self, path, body): ...
+
+<span class="kw">class</span> <span class="fn">ReportClient</span>(BaseClient):                  <span class="cm"># отчёты можно только читать</span>
+    <span class="kw">def</span> <span class="fn">get</span>(self, path):
+        <span class="kw">return</span> self.session.get(path)
+
+    <span class="kw">def</span> <span class="fn">post</span>(self, path, body):                  <span class="cm"># метод-заглушка: нужен только базовому классу</span>
+        <span class="kw">raise</span> NotImplementedError
+
+<span class="cm"># хорошо</span>
+<span class="kw">class</span> <span class="fn">Reader</span>(ABC):
+<span class="hdr">    @abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">get</span>(self, path): ...
+
+<span class="kw">class</span> <span class="fn">Writer</span>(ABC):
+<span class="hdr">    @abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">post</span>(self, path, body): ...
+
+<span class="kw">class</span> <span class="fn">ReportClient</span>(Reader):                      <span class="cm"># post у него просто нет</span>
+    <span class="kw">def</span> <span class="fn">get</span>(self, path):
+        <span class="kw">return</span> self.session.get(path)
+
+<span class="kw">class</span> <span class="fn">UserClient</span>(Reader, Writer):                <span class="cm"># этому клиенту нужно и то, и другое</span>
+    <span class="kw">def</span> <span class="fn">get</span>(self, path):
+        <span class="kw">return</span> self.session.get(path)
+
+    <span class="kw">def</span> <span class="fn">post</span>(self, path, body):
+        <span class="kw">return</span> self.session.post(path, json=body)</div>
+      <p>По объявлению класса сразу видно, что он умеет. У <code>ReportClient</code> больше нет метода, который выглядит рабочим, но падает только при вызове.</p>
+      <p style="margin-top:18px;"><strong>D — зависеть от того, что объект умеет, а не от конкретного класса.</strong> Шаги теста должны получать клиент снаружи, а не создавать его сами.</p>
+      <div class="code-block"><span class="cm"># плохо</span>
+<span class="kw">class</span> <span class="fn">OrderSteps</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.client = ApiClient(<span class="st">"https://stage.shop.test"</span>)   <span class="cm"># клиент и стенд зашиты внутри</span>
+
+    <span class="kw">def</span> <span class="fn">create_paid_order</span>(self):
+        order = self.client.create_order()
+        <span class="kw">return</span> self.client.pay(order[<span class="st">"id"</span>])
+
+<span class="cm"># хорошо</span>
+<span class="kw">class</span> <span class="fn">OrderSteps</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, client):                  <span class="cm"># подойдёт любой объект с нужными методами</span>
+        self.client = client
+
+    <span class="kw">def</span> <span class="fn">create_paid_order</span>(self):
+        order = self.client.create_order()
+        <span class="kw">return</span> self.client.pay(order[<span class="st">"id"</span>])
+
+<span class="hdr">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">steps</span>(api_client):                           <span class="cm"># какой клиент и какой стенд — решает фикстура</span>
+    <span class="kw">return</span> OrderSteps(api_client)
+
+<span class="kw">class</span> <span class="fn">FakeClient</span>:                                <span class="cm"># для проверки самих шагов — без сети</span>
+    <span class="kw">def</span> <span class="fn">create_order</span>(self):
+        <span class="kw">return</span> {<span class="st">"id"</span>: 1}
+
+    <span class="kw">def</span> <span class="fn">pay</span>(self, order_id):
+        <span class="kw">return</span> {<span class="st">"id"</span>: order_id, <span class="st">"status"</span>: <span class="st">"paid"</span>}
+
+<span class="kw">def</span> <span class="fn">test_steps_pay_for_order</span>():
+    <span class="kw">assert</span> OrderSteps(FakeClient()).create_paid_order()[<span class="st">"status"</span>] == <span class="st">"paid"</span></div>
+      <p>Теперь стенд меняется в одной фикстуре, а шаги можно проверить с <code>FakeClient</code> без сети. В Python абстракцией часто служит сам набор методов: это duck typing из начала раздела, и общий базовый класс здесь не обязателен. Тот же приём работает в самом тесте: <code>def test_order(api_client)</code> вместо <code>ApiClient(...)</code> внутри. Передача зависимости снаружи называется dependency injection, а фикстуры pytest — готовый механизм для неё; DIP — принцип, ради которого её передают.</p>
       <div class="hl orange"><span class="hl-label">Что реально нарушают в автотестах</span>Чаще всего <strong>SRP</strong>: Page Object, который и кликает, и ассертит, и ходит в базу; либо <code>utils.py</code> на тысячу строк, куда свалено всё. Второе место — <strong>LSP</strong>: наследник переопределил метод базового класса «немного по-другому», и общие тесты на нём падают. Сильный ответ на собесе — не пересказ пяти букв, а пример: «SRP у нас нарушался в Page Object с ассертами внутри — вынесли проверки в тесты, страницы стали переиспользуемыми».</div>
-      <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить одним предложением.</div>
+      <div class="hl modern"><span class="hl-label">В реальном мире</span>SOLID — ориентир, а не догма. В тестовом коде читаемость важнее чистоты: если ради OCP появляются три слоя абстракций, чтобы добавить одно поле, это хуже, чем лишний <code>if</code>. Реально окупаются в тестах два принципа — <strong>SRP</strong> (разделить страницу, клиент и проверки) и <strong>DIP</strong> (зависимости через фикстуры). Остальные три достаточно уметь назвать и объяснить на простом примере.</div>
 
       <p style="margin-top:14px;"><strong>DRY, KISS, YAGNI</strong> — три принципа, которые спрашивают в одном ряду с SOLID:</p>
       <table>
