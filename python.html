@@ -1196,6 +1196,149 @@ client = ApiClient(<span class="st">"http://api"</span>)   <span class="cm"># о
         </tbody>
       </table>
       <div class="hl green"><span class="hl-label">Как проверить DRY за десять секунд</span>Задать себе вопрос: <em>«если завтра изменится одна деталь — во скольких местах я поправлю код?»</em> Больше одного — DRY нарушен. Это же объясняет, зачем вообще нужны классы: когда у пользователя появляется новое поле, при россыпи отдельных переменных правишь везде, где они перечислены, а при классе — в одном конструкторе. Обратная сторона: <strong>DRY — про знание, а не про похожий текст</strong>. Два теста, которые случайно выглядят одинаково, но проверяют разные правила, объединять не нужно: в тестах читаемость важнее сухости, и немного дублирования лучше хитрой общей функции, после которой непонятно, что именно упало.</div>
+      <p style="margin-top:22px;"><strong>Паттерны проектирования</strong> — готовые решения типовых проблем в устройстве кода. У QA их спрашивают потому, что на них держится тестовый фреймворк. Ниже самые частые, по группам, на самых простых примерах из тестов.</p>
+      <p style="margin-top:14px;"><strong>Порождающие</strong> — как создавать объекты.</p>
+      <p style="margin-top:18px;"><strong>Singleton</strong> <span style="opacity:.7;">· одиночка</span>. Нужен ровно один экземпляр на весь прогон, например настройки.</p>
+      <div class="code-block"><span class="kw">import</span> os
+
+<span class="kw">class</span> <span class="fn">Config</span>:
+    _instance = <span class="kw">None</span>
+
+    <span class="kw">def</span> <span class="fn">__new__</span>(cls):
+        <span class="kw">if</span> cls._instance <span class="kw">is</span> <span class="kw">None</span>:                <span class="cm"># создаём только в первый раз</span>
+            cls._instance = <span class="fn">super</span>().__new__(cls)
+            cls._instance.base_url = os.getenv(<span class="st">"BASE_URL"</span>, <span class="st">"https://stage.shop.test"</span>)
+        <span class="kw">return</span> cls._instance
+
+<span class="kw">assert</span> Config() <span class="kw">is</span> Config()                      <span class="cm"># сколько ни вызывай — один и тот же объект</span></div>
+      <p>В Python класс-синглтон пишут редко: модуль импортируется один раз, поэтому строка <code>settings = Settings()</code> в конце <code>config.py</code> и <code>from config import settings</code> уже дают единственный экземпляр, а на прогон хватает фикстуры со scope <code>session</code>. Минус любого синглтона — общее состояние: тест, который изменил <code>base_url</code>, влияет на остальные, а при параллельном запуске у каждого процесса экземпляр свой.</p>
+      <p style="margin-top:18px;"><strong>Factory</strong> <span style="opacity:.7;">· фабрика</span>. Объект создаётся в одном месте, а тест не знает, какой именно класс и с какими значениями по умолчанию.</p>
+      <div class="code-block"><span class="kw">from</span> uuid <span class="kw">import</span> uuid4
+
+<span class="kw">def</span> <span class="fn">make_user</span>(**overrides):
+    user = {<span class="st">"name"</span>: <span class="st">f"user_{uuid4().hex[:8]}"</span>, <span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"age"</span>: <span class="val">30</span>}
+    <span class="kw">return</span> {**user, **overrides}                 <span class="cm"># значения по умолчанию плюс то, что важно тесту</span>
+
+make_user()                                      <span class="cm"># каждый раз уникальное имя</span>
+make_user(role=<span class="st">"admin"</span>)                          <span class="cm"># поменяли одно поле, остальные по умолчанию</span>
+
+<span class="kw">class</span> <span class="fn">ChromeDriver</span>: ...
+<span class="kw">class</span> <span class="fn">FirefoxDriver</span>: ...
+
+DRIVERS = {<span class="st">"chrome"</span>: ChromeDriver, <span class="st">"firefox"</span>: FirefoxDriver}
+
+<span class="kw">def</span> <span class="fn">make_driver</span>(name):                           <span class="cm"># какой класс создавать, решает фабрика</span>
+    <span class="kw">return</span> DRIVERS[name]()</div>
+      <p>Для тестовых данных это самая полезная точка: значения по умолчанию меняют в одном месте, а в тесте указывают только то, что для него важно. Готовые решения — <code>factory_boy</code> и <code>Faker</code>.</p>
+      <p style="margin-top:18px;"><strong>Builder</strong> <span style="opacity:.7;">· строитель</span>. Объект собирается по шагам из многих необязательных частей.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">OrderBuilder</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._order = {<span class="st">"items"</span>: [], <span class="st">"coupon"</span>: <span class="kw">None</span>, <span class="st">"delivery"</span>: <span class="st">"courier"</span>}
+
+    <span class="kw">def</span> <span class="fn">with_item</span>(self, sku, qty=<span class="val">1</span>):
+        self._order[<span class="st">"items"</span>].append({<span class="st">"sku"</span>: sku, <span class="st">"qty"</span>: qty})
+        <span class="kw">return</span> self                              <span class="cm"># возвращаем себя, чтобы вызовы можно было цеплять</span>
+
+    <span class="kw">def</span> <span class="fn">with_coupon</span>(self, code):
+        self._order[<span class="st">"coupon"</span>] = code
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">build</span>(self):
+        <span class="kw">assert</span> self._order[<span class="st">"items"</span>], <span class="st">"в заказе нет товаров"</span>   <span class="cm"># проверка в одном месте, в конце</span>
+        <span class="kw">return</span> <span class="fn">dict</span>(self._order)
+
+order = OrderBuilder().with_item(<span class="st">"A1"</span>, <span class="val">2</span>).with_item(<span class="st">"B7"</span>).with_coupon(<span class="st">"SALE10"</span>).build()</div>
+      <p>Подходит, когда частей много и нужно проверить собранное целиком. Для простых данных хватает фабрики с <code>**overrides</code> — не усложняй.</p>
+      <p style="margin-top:22px;"><strong>Структурные</strong> — как соединять классы.</p>
+      <p style="margin-top:18px;"><strong>Adapter</strong> <span style="opacity:.7;">· адаптер</span>. Есть класс с неподходящим интерфейсом, который нельзя изменить.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">LegacyUserService</span>:                         <span class="cm"># чужой код: другое имя метода и другой формат</span>
+    <span class="kw">def</span> <span class="fn">fetch</span>(self, uid):
+        <span class="kw">return</span> {<span class="st">"fullName"</span>: <span class="st">"Ann Lee"</span>, <span class="st">"years"</span>: <span class="val">30</span>}
+
+<span class="kw">class</span> <span class="fn">UserServiceAdapter</span>:                        <span class="cm"># тесты видят один и тот же интерфейс</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, legacy):
+        self.legacy = legacy
+
+    <span class="kw">def</span> <span class="fn">get_user</span>(self, user_id):
+        raw = self.legacy.fetch(user_id)
+        first, last = raw[<span class="st">"fullName"</span>].split(<span class="st">" "</span>, <span class="val">1</span>)
+        <span class="kw">return</span> {<span class="st">"first_name"</span>: first, <span class="st">"last_name"</span>: last, <span class="st">"age"</span>: raw[<span class="st">"years"</span>]}
+
+user = UserServiceAdapter(LegacyUserService()).get_user(<span class="val">1</span>)</div>
+      <p>Различия двух сервисов спрятаны в одном месте, а тесты работают с одним интерфейсом. Так же приводят к одному виду ответ API и строку из БД, чтобы их можно было сравнить.</p>
+      <p style="margin-top:18px;"><strong>Facade</strong> <span style="opacity:.7;">· фасад</span>. Одно простое действие скрывает цепочку вызовов нескольких классов.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">CheckoutSteps</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, users, orders, payments):
+        self.users, self.orders, self.payments = users, orders, payments
+
+    <span class="kw">def</span> <span class="fn">paid_order</span>(self):                        <span class="cm"># одна понятная операция вместо трёх вызовов</span>
+        user = self.users.create()
+        order = self.orders.create(user[<span class="st">"id"</span>])
+        self.payments.pay(order[<span class="st">"id"</span>])
+        <span class="kw">return</span> order[<span class="st">"id"</span>]
+
+<span class="kw">def</span> <span class="fn">test_refund_paid_order</span>(checkout, refunds):
+    order_id = checkout.paid_order()             <span class="cm"># подготовка в одну строку</span>
+    <span class="kw">assert</span> refunds.refund(order_id)[<span class="st">"status"</span>] == <span class="st">"refunded"</span></div>
+      <p>Тест читается как сценарий, а цепочку подготовки правят в одном месте. В тестовых фреймворках это слой <code>steps</code>, а Page Object и Client Object (раздел Pytest) — тот же приём над страницей и над API.</p>
+      <p style="margin-top:18px;"><strong>Decorator</strong> <span style="opacity:.7;">· декоратор</span>. Нужно добавить поведение объекту, не меняя его класс.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">LoggingClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, client):
+        self._client = client                    <span class="cm"># оборачиваемый клиент</span>
+
+    <span class="kw">def</span> <span class="fn">get</span>(self, path):
+        <span class="fn">print</span>(<span class="st">f"GET {path}"</span>)
+        response = self._client.get(path)
+        <span class="fn">print</span>(<span class="st">f"-&gt; {response.status_code}"</span>)
+        <span class="kw">return</span> response
+
+client = LoggingClient(ApiClient(<span class="st">"https://stage.shop.test"</span>))   <span class="cm"># снаружи тот же интерфейс</span>
+client.get(<span class="st">"/users/1"</span>)</div>
+      <p>Объект оборачивают другим с тем же интерфейсом: так добавляют логирование, повторы, замер времени. Не путай с синтаксисом <code>@decorator</code>: для функций это та же идея, пример с <code>@retry</code> — в разделе 02.</p>
+      <p style="margin-top:22px;"><strong>Поведенческие</strong> — как объекты взаимодействуют.</p>
+      <p style="margin-top:18px;"><strong>Strategy</strong> <span style="opacity:.7;">· стратегия</span>. Меняющийся кусок поведения передают снаружи, а класс не знает, какой именно.</p>
+      <div class="code-block"><span class="kw">import</span> base64
+
+<span class="kw">class</span> <span class="fn">ApiClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, auth):                    <span class="cm"># auth — функция, которая возвращает заголовки</span>
+        self.auth = auth
+
+    <span class="kw">def</span> <span class="fn">headers</span>(self):
+        <span class="kw">return</span> {<span class="st">"Content-Type"</span>: <span class="st">"application/json"</span>, **self.auth()}
+
+<span class="kw">def</span> <span class="fn">basic</span>(user, password):
+    token = base64.b64encode(<span class="st">f"{user}:{password}"</span>.encode()).decode()
+    <span class="kw">return</span> <span class="kw">lambda</span>: {<span class="st">"Authorization"</span>: <span class="st">f"Basic {token}"</span>}
+
+<span class="kw">def</span> <span class="fn">bearer</span>(token):
+    <span class="kw">return</span> <span class="kw">lambda</span>: {<span class="st">"Authorization"</span>: <span class="st">f"Bearer {token}"</span>}
+
+ApiClient(basic(<span class="st">"admin"</span>, <span class="st">"admin"</span>)).headers()
+ApiClient(bearer(<span class="st">"abc123"</span>)).headers()            <span class="cm"># способ авторизации сменили, клиент не трогали</span></div>
+      <p>В клиенте нет <code>if auth == 'basic'</code>: новый способ авторизации — новая функция, а клиент не меняется (это OCP из блока выше). В Python стратегией обычно служит обычная функция, а не иерархия классов.</p>
+      <p style="margin-top:18px;"><strong>Observer</strong> <span style="opacity:.7;">· наблюдатель</span>. Событие должно дойти до нескольких получателей, и источник не должен о них знать.</p>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">RunNotifier</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._listeners = []
+
+    <span class="kw">def</span> <span class="fn">subscribe</span>(self, listener):               <span class="cm"># подписчик — любая функция</span>
+        self._listeners.append(listener)
+
+    <span class="kw">def</span> <span class="fn">test_finished</span>(self, name, passed):
+        <span class="kw">for</span> listener <span class="kw">in</span> self._listeners:         <span class="cm"># источник не знает, сколько подписчиков и что они делают</span>
+            listener(name, passed)
+
+<span class="kw">def</span> <span class="fn">to_chat</span>(name, passed):
+    <span class="kw">if</span> <span class="kw">not</span> passed:
+        <span class="fn">print</span>(<span class="st">"в чат: упал"</span>, name)
+
+notifier = RunNotifier()
+notifier.subscribe(<span class="kw">lambda</span> name, passed: <span class="fn">print</span>(<span class="st">"лог:"</span>, name, passed))
+notifier.subscribe(to_chat)
+notifier.test_finished(<span class="st">"test_login"</span>, <span class="kw">False</span>)</div>
+      <p>Источник рассылает событие подписчикам и не знает, сколько их. По этой идее устроены хуки pytest и подписчики на события в системах отчётов.</p>
+      <div class="hl purple"><span class="hl-label">Как отвечать на собесе</span>Паттерн — решение конкретной проблемы, поэтому отвечай через проблему: «синглтон нужен, чтобы настройки не читались заново в каждом тесте», а не «это порождающий паттерн». В Python многие паттерны встроены в язык: Singleton — это модуль, Strategy — функция, Decorator — синтаксис, Observer — список функций. Реже спрашивают Template Method (базовый класс задаёт порядок шагов, в pytest его заменяют фикстуры) и Proxy — достаточно знать название и идею. Если пример не приходит в голову, бери Page Object: он есть в любом UI-фреймворке.</div>
+
       <p><strong>Множественное наследование и MRO.</strong> В <code>class Service(CacheMixin, BaseService)</code> метод ищется в порядке MRO, рассчитанном алгоритмом C3; посмотреть порядок можно через <code>Service.__mro__</code>. <code>super()</code> вызывает не «родителя вообще», а следующий метод в этой цепочке. В ромбовидной иерархии это позволяет вызвать общего предка один раз, если все участники используют кооперативный <code>super()</code> и совместимые сигнатуры. Основные риски — конфликты имён, неожиданный порядок и класс, который оборвал цепочку вызовов.</p>
 
       <p><strong><code>@dataclass</code></strong> — генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> за тебя. Идеально для моделей тест-данных: сравнение по значению из коробки, читаемый вывод в отчёте при падении.</p>
