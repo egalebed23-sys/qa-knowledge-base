@@ -854,6 +854,7 @@ document.addEventListener("click", e => {
 
 document.addEventListener("keydown", e => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;   // не перехватывать ввод в окне поиска
   if (state.pos >= state.order.length) return;
   const i = state.order[state.pos];
   const perm = permFor(i);
@@ -876,5 +877,6 @@ function start(saved) {
 }
 start(null);
 </script>
+<script src="search.js" defer></script>
 </body>
 </html>
