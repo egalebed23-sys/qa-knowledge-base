@@ -31,7 +31,13 @@
 
   /* short words must match whole; longer ones match as a prefix of a word, so
      Russian endings and plurals do not get in the way ("тестирование" ~ "тестирования") */
-  function stemOf(t) { return t.length <= 3 ? t : t.length <= 5 ? t.slice(0, -1) : t.slice(0, -2); }
+  /* latin words are matched whole (so "extend" does not hit "external"), minus a plural "s";
+     the two-letter cut is only for Russian endings */
+  function stemOf(t) {
+    if (t.length <= 3) return t;
+    if (/^[a-z0-9]+$/.test(t)) return t.length > 4 ? t.replace(/s$/, '') : t;
+    return t.length <= 5 ? t.slice(0, -1) : t.slice(0, -2);
+  }
   function termSource(t, forHighlight) {
     var stem = escRe(stemOf(t)).replace(/е/g, '[её]');
     var exact = t.length <= 3;
