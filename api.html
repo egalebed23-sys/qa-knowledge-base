@@ -476,6 +476,7 @@
     <a href="#contract">14 · Контракты и mocking</a>
     <a href="#tools">15 · Инструменты: Postman, Charles, Swagger</a>
     <a href="#senior-api">16 · Senior-кейсы по API</a>
+    <a href="#interview-questions">17 · Вопросы на собеседовании</a>
   </div>
 </aside>
 
@@ -552,6 +553,7 @@
         <li><strong>Тело</strong> — данные запроса (обычно JSON; не у всех методов есть)</li>
       </ul>
       <p>В ответе — три части: <strong>статус-код</strong> (200, 404, 500), <strong>заголовки</strong>, <strong>тело</strong>.</p>
+      <p><strong>Path, query и body.</strong> Path-параметр занимает место в пути, например <code>42</code> в <code>/users/{user_id}/orders</code>. Query-параметры идут после <code>?</code> и часто задают фильтры или пагинацию, например <code>GET /users/42/orders?status=paid&amp;limit=10</code>. Body передаётся отдельно от URL. Например, в <code>POST /orders</code> тело может содержать JSON с товарами и количеством.</p>
       <div class="hl green"><span class="hl-label">Аналогия</span>HTTP-запрос как команда в shell: метод = команда (<code>cat</code>, <code>rm</code>, <code>cp</code>) — что делаем. URL = путь к файлу — над чем. Заголовки = флаги и опции (<code>-r</code>, <code>--force</code>) — как именно. Тело = stdin — что передаём на вход. Ответ — это exit code (статус) + stdout (тело) + дополнительные метаданные (заголовки).</div>
 
       <p>Стандартный вид сырого HTTP-запроса и ответа:</p>
@@ -2288,6 +2290,47 @@ validate(instance=response.json(), schema=schema)</div>
 
       <div class="hl purple"><span class="hl-label">Каверзный вопрос</span>«У тебя API из 200 эндпоинтов и неделя времени. Что делаешь?» — Не «покрою все 200». А: 1) risk-based — выделю revenue-critical (платежи, auth, заказы), 2) на них — полные функциональные + contract тесты, 3) на остальные — быструю schema-validation из OpenAPI (дёшево, ловит структурные поломки), 4) schemathesis по всей спеке для авто-фаззинга, 5) договорюсь о приоритетах с командой. Покрыть осознанно важное лучше, чем поверхностно всё.</div>
 
+    </div>
+  </section>
+
+  <!-- ─────── 17. ВОПРОСЫ НА СОБЕСЕДОВАНИИ ─────── -->
+  <section class="section" id="interview-questions">
+    <div class="section-header">
+      <span class="section-num">17</span>
+      <span class="section-title">Вопросы на собеседовании</span>
+      <span class="section-badge">interview</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>Что такое API и что называют эндпоинтом?</li>
+        <li>Из чего состоят HTTP-запрос и HTTP-ответ?</li>
+        <li>Чем HTTP отличается от HTTPS и что даёт TLS?</li>
+        <li>Чем отличаются path-параметры, query-параметры и тело запроса?</li>
+        <li>Какие HTTP-методы ты знаешь? Чем <code>PUT</code> отличается от <code>PATCH</code>?</li>
+        <li>Что такое идемпотентность и какие HTTP-методы идемпотентны? Почему повторный <code>DELETE</code> может вернуть <code>404</code>?</li>
+        <li>Когда API возвращает <code>200</code>, <code>201</code>, <code>202</code> или <code>204</code>?</li>
+        <li>В каких случаях уместны <code>400</code>, <code>404</code>, <code>409</code> и <code>422</code>?</li>
+        <li>Чем отличаются <code>401</code> и <code>403</code>?</li>
+        <li>Чем отличаются <code>500</code>, <code>502</code>, <code>503</code> и <code>504</code>?</li>
+        <li>Чем отличается <code>Content-Type</code> от <code>Accept</code>?</li>
+        <li>Что такое REST и что означает ограничение stateless?</li>
+        <li>Чем REST отличается от SOAP, GraphQL и gRPC?</li>
+        <li>Как устроена пагинация API и чем cursor-based подход отличается от offset/limit?</li>
+        <li>В чём разница между WebSocket, SSE и polling?</li>
+        <li>Зачем нужен брокер сообщений и чем Kafka отличается от RabbitMQ?</li>
+        <li>Как проверить асинхронный сценарий, если результат становится виден с задержкой или событие приходит дважды?</li>
+        <li>Чем отличаются cookie, серверная сессия, <code>localStorage</code> и <code>sessionStorage</code>?</li>
+        <li>Чем аутентификация отличается от авторизации? Как работают Basic, Bearer и API Key?</li>
+        <li>Из чего состоит JWT и зачем отдельно нужны access token и refresh token?</li>
+        <li>Для чего нужны OAuth 2.0 и OpenID Connect и чем они отличаются?</li>
+        <li>Что проверяешь в ответе API кроме HTTP-статуса?</li>
+        <li>Как бы ты протестировал <code>POST /order</code>? Какие проверки поставишь первыми?</li>
+        <li>Как проверишь, что повторный запрос после таймаута не создаёт второй заказ или второе списание?</li>
+        <li>Как локализовать ошибку <code>500</code>, если UI показывает только «Что-то пошло не так»?</li>
+        <li>Что такое контрактное тестирование и как проверить, что новая версия API не сломает старых клиентов?</li>
+        <li>Когда стоит подменить внешний сервис в API-тесте и чем mock отличается от stub?</li>
+        <li>Чем OpenAPI отличается от Swagger UI и какими инструментами ты проверяешь API вручную и в автотестах?</li>
+      </ul>
     </div>
   </section>
 
