@@ -1,8 +1,5 @@
-/* Git keeps the site's shell; the sidebar follows the course instead of the catalog. */
-:root { --sidebar-w: 19rem; }
-.sidebar { padding-top: 1.25rem; }
-.sidebar-brand { margin-bottom: .9rem; }
-.guide-nav, .other-sections { margin-inline: 1rem; }
+/* Course navigation follows the shared section catalog. */
+.guide-nav { margin-inline: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
 .guide-nav h2 { margin: 0 0 .8rem; font-size: 1.15rem; }
 .read-label { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); font-size: .85rem; }
 .read-label b, .chapter-group small, #current-chapter { font: 500 .78rem 'JetBrains Mono', monospace; }
@@ -19,7 +16,7 @@
   background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px;
 }
 .chapter-group { margin-block: .5rem; }
-.chapter-group > summary, .other-sections > summary {
+.chapter-group > summary {
   padding: .65rem .5rem; font-size: .875rem; font-weight: 650; cursor: pointer;
 }
 .chapter-group[open] > summary, .chapter-group > summary:hover { background: var(--surface); border-radius: 6px; }
@@ -43,9 +40,6 @@
 .chapter-link .done { margin-left: .45rem; font: .7rem 'JetBrains Mono', monospace; white-space: nowrap; }
 .guide-shortcuts { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
 .guide-shortcuts a, .crumbs a { color: var(--accent); font-size: .82rem; }
-.other-sections { padding-top: .4rem; border-top: 1px solid var(--border); }
-.other-sections .nav-group { padding: 0; }
-.other-sections .nav-group-title { display: none; }
 #filter-empty { padding: .75rem; color: var(--muted); }
 #current-chapter { margin-left: auto; color: var(--muted); }
 .header { border-top: 2px solid var(--accent); }

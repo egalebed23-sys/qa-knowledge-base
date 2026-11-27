@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700;800&amp;display=optional">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
 <title>QA Senior · Безопасность</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
   :root {
     --bg: #0d0f14;
@@ -440,9 +441,10 @@
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
+    <button type="button" class="kb-search-btn" disabled><span aria-hidden="true">⌕</span><span>Поиск по базе</span><kbd>/</kbd></button>
   </div>
-  <details class="sidebar-menu" open>
-    <summary>Разделы и оглавление</summary>
+  <button type="button" class="menu-toggle" aria-controls="sidebar-links" aria-expanded="false">Разделы и оглавление</button>
+  <div id="sidebar-links">
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -469,7 +471,7 @@
     <a href="#auth">03 · Auth и секреты</a>
     <a href="#practice">04 · Безопасность на практике QA</a>
   </div>
-  </details>
+  </div>
 </aside>
 
 <main class="main">

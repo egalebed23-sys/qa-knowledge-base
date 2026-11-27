@@ -280,10 +280,9 @@
 
   /* ───────────── DOM + events ───────────── */
   var CSS = [
-    '.kb-search-btn{display:flex;align-items:center;gap:8px;width:100%;margin-top:14px;padding:8px 10px;background:var(--bg,#0d0f14);border:1px solid var(--border,#252830);border-radius:8px;color:var(--muted,#7a7f92);font:500 13px/1.2 "Manrope",system-ui,sans-serif;cursor:pointer;text-align:left}',
     '.kb-search-btn:hover{border-color:#343846;color:var(--text,#e8eaf0)}',
     '.kb-search-btn.kb-fixed{position:fixed;top:12px;right:12px;width:auto;margin:0;z-index:50;background:var(--surface,#161920)}',
-    '.kb-search-btn kbd,.kb-s-close{margin-left:auto;font:600 11px "JetBrains Mono",ui-monospace,monospace;color:var(--muted-2,#5a5f72);border:1px solid var(--border,#252830);border-radius:4px;padding:1px 6px;background:transparent}',
+    '.kb-s-close{margin-left:auto;font:600 11px "JetBrains Mono",ui-monospace,monospace;color:var(--muted-2,#5a5f72);border:1px solid var(--border,#252830);border-radius:4px;padding:1px 6px;background:transparent}',
     '.kb-s-overlay{position:fixed;inset:0;z-index:1000;display:flex;justify-content:center;align-items:flex-start;padding:8vh 16px 16px;background:rgba(5,7,11,.72)}',
     '.kb-s-overlay[hidden]{display:none}',
     '.kb-s-box{display:flex;flex-direction:column;width:100%;max-width:720px;max-height:84vh;background:var(--surface,#161920);border:1px solid #343846;border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,.55);overflow:hidden;font-family:"Manrope",system-ui,sans-serif;color:var(--text,#e8eaf0)}',
@@ -313,12 +312,14 @@
     st.textContent = CSS;
     document.head.appendChild(st);
 
-    trigger = document.createElement('button');
-    trigger.type = 'button'; trigger.className = 'kb-search-btn';
-    trigger.innerHTML = '<span aria-hidden="true">⌕</span><span>Поиск по базе</span><kbd>/</kbd>';
-    var brand = document.querySelector('.sidebar-brand');
-    if (brand) brand.appendChild(trigger);
-    else { trigger.classList.add('kb-fixed'); document.body.appendChild(trigger); }
+    trigger = document.querySelector('.sidebar-brand .kb-search-btn');
+    if (!trigger) {
+      trigger = document.createElement('button');
+      trigger.type = 'button'; trigger.className = 'kb-search-btn kb-fixed';
+      trigger.innerHTML = '<span aria-hidden="true">⌕</span><span>Поиск по базе</span><kbd>/</kbd>';
+      document.body.appendChild(trigger);
+    }
+    trigger.disabled = false;
     trigger.addEventListener('click', function () { openSearch(); });
 
     overlay = document.createElement('div');
