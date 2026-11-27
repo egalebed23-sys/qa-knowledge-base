@@ -822,15 +822,52 @@
     height: 18px;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="git-guide.css">
+<script src="git-guide.js" defer></script>
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
-    <div class="nav-group">
+  <details class="sidebar-menu" open>
+    <summary>Оглавление Git</summary>
+    <nav class="guide-nav" aria-label="Главы Git">
+      <h2>Оглавление Git</h2>
+      <label class="read-label" for="read-progress">Прочитано глав <b id="read-count">0 / 13</b></label>
+      <progress id="read-progress" value="0" max="13"></progress>
+      <input type="search" id="chapter-filter" aria-label="Найти главу" placeholder="Найти главу или команду">
+      <details class="chapter-group" open><summary>Основы Git<small>0 / 3</small></summary>
+        <a class="chapter-link" href="#g01"><span class="read-mark" aria-hidden="true"></span><span>01 · init, status, add, commit<span class="done" data-toc-done="g01"></span></span></a>
+        <a class="chapter-link" href="#g02"><span class="read-mark" aria-hidden="true"></span><span>02 · diff, restore, .gitignore<span class="done" data-toc-done="g02"></span></span></a>
+        <a class="chapter-link" href="#g03"><span class="read-mark" aria-hidden="true"></span><span>03 · log, show, ссылки<span class="done" data-toc-done="g03"></span></span></a>
+      </details>
+      <details class="chapter-group"><summary>Ветки и слияние<small>0 / 3</small></summary>
+        <a class="chapter-link" href="#g04"><span class="read-mark" aria-hidden="true"></span><span>04 · Ветки<span class="done" data-toc-done="g04"></span></span></a>
+        <a class="chapter-link" href="#g05"><span class="read-mark" aria-hidden="true"></span><span>05 · Слияние<span class="done" data-toc-done="g05"></span></span></a>
+        <a class="chapter-link" href="#g06"><span class="read-mark" aria-hidden="true"></span><span>06 · Конфликты<span class="done" data-toc-done="g06"></span></span></a>
+      </details>
+      <details class="chapter-group"><summary>Работа с историей и origin<small>0 / 4</small></summary>
+        <a class="chapter-link" href="#g07"><span class="read-mark" aria-hidden="true"></span><span>07 · Отмена изменений<span class="done" data-toc-done="g07"></span></span></a>
+        <a class="chapter-link" href="#g08"><span class="read-mark" aria-hidden="true"></span><span>08 · Rebase<span class="done" data-toc-done="g08"></span></span></a>
+        <a class="chapter-link" href="#g09"><span class="read-mark" aria-hidden="true"></span><span>09 · Stash<span class="done" data-toc-done="g09"></span></span></a>
+        <a class="chapter-link" href="#g10"><span class="read-mark" aria-hidden="true"></span><span>10 · Удалённый репозиторий<span class="done" data-toc-done="g10"></span></span></a>
+      </details>
+      <details class="chapter-group"><summary>Справочник<small>0 / 3</small></summary>
+        <a class="chapter-link" href="#g11"><span class="read-mark" aria-hidden="true"></span><span>11 · Командные процессы</span></a>
+        <a class="chapter-link" href="#g12"><span class="read-mark" aria-hidden="true"></span><span>12 · Переписывание и поиск</span></a>
+        <a class="chapter-link" href="#g13"><span class="read-mark" aria-hidden="true"></span><span>13 · Тэги, worktree, секреты</span></a>
+      </details>
+      <p id="filter-empty" hidden>Совпадений нет</p>
+      <div class="guide-shortcuts"><a href="#how">Формат раздела</a><a href="#sandbox">Песочница Git</a></div>
+    </nav>
+    <details class="other-sections"><summary>Другие разделы базы</summary>
+<div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
     <a class="nav-item" href="theory.html"><span class="nav-num">01</span> Теория</a>
@@ -849,42 +886,36 @@
     <a class="nav-item" href="practice.html"><span class="nav-num">14</span> Практика Python</a>
     <a class="nav-item" href="scenarios.html"><span class="nav-num">15</span> Сценарные кейсы</a>
   </div>
-  <div class="toc-inner">
-    <div class="nav-group-title toc-part">Тренажёр Git</div>
-    <a href="#how">— · Формат раздела</a>
-    <a href="#sandbox">— · Песочница</a>
-    <a href="#g01">01 · init, status, add, commit<span class="done" data-toc-done="g01"></span></a>
-    <a href="#g02">02 · diff, restore, .gitignore<span class="done" data-toc-done="g02"></span></a>
-    <a href="#g03">03 · log, show, ссылки<span class="done" data-toc-done="g03"></span></a>
-    <a href="#g04">04 · Ветки<span class="done" data-toc-done="g04"></span></a>
-    <a href="#g05">05 · Слияние<span class="done" data-toc-done="g05"></span></a>
-    <a href="#g06">06 · Конфликты<span class="done" data-toc-done="g06"></span></a>
-    <a href="#g07">07 · Отмена изменений<span class="done" data-toc-done="g07"></span></a>
-    <a href="#g08">08 · Rebase<span class="done" data-toc-done="g08"></span></a>
-    <a href="#g09">09 · Stash<span class="done" data-toc-done="g09"></span></a>
-    <a href="#g10">10 · Удалённый репозиторий<span class="done" data-toc-done="g10"></span></a>
-    <div class="nav-group-title toc-part">Справочник</div>
-    <a href="#g11">11 · Командные процессы</a>
-    <a href="#g12">12 · Переписывание и поиск</a>
-    <a href="#g13">13 · Тэги, worktree, секреты</a>
-  </div>
+    </details>
+  </details>
 </aside>
 
 <main class="main">
   <div class="topbar">
-    <div class="crumbs">QA Senior / <span>Git</span></div>
+    <div class="crumbs"><a href="index.html">База знаний</a> / <span>Git</span></div>
+    <span id="current-chapter">Обзор курса</span>
   </div>
 
   <div class="header">
     <h1>Git</h1>
     <p>// команды · состояния · ветки · история · конфликты</p>
+    <div class="hero-actions">
+      <a class="hero-action primary" id="resume-git" href="#g01">Начать с главы 01</a>
+      <a class="hero-action" href="#sandbox">Открыть песочницу</a>
+    </div>
+    <nav class="guide-map" aria-label="Учебные блоки">
+      <a href="#g01"><span>Главы 01–03</span><strong>Основы Git</strong></a>
+      <a href="#g04"><span>Главы 04–06</span><strong>Ветки и слияние</strong></a>
+      <a href="#g07"><span>Главы 07–10</span><strong>Работа с историей и origin</strong></a>
+      <a href="#g11"><span>Главы 11–13</span><strong>Справочник</strong></a>
+    </nav>
   </div>
 
   <div class="progress-bar">
     <div class="progress-label">Решено <b id="p-done">0</b> из <span id="p-total">0</span></div>
     <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
     <div class="runtime-state">репозиторий работает прямо в браузере</div>
-    <button class="btn btn-ghost" id="reset-progress" style="font-size:10.5px;padding:5px 10px;">Сбросить прогресс</button>
+    <button class="btn btn-ghost" id="reset-progress" style="font-size:10.5px;padding:5px 10px;">Сбросить отметки задач</button>
   </div>
 
   <section class="section" id="how">

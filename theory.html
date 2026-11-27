@@ -430,8 +430,11 @@
     height: 18px;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
@@ -440,6 +443,8 @@
     <div class="sub">// interview prep base</div>
   </div>
 
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -480,6 +485,7 @@
     <a href="#ai">17 · AI для QA Automation</a>
     <a href="#interview-questions">18 · Вопросы на собеседовании</a>
   </div>
+  </details>
 </aside>
 
 <!-- ═══════════ MAIN ═══════════ -->

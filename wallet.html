@@ -429,14 +429,19 @@
     height: 18px;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA · Wallet prep</div>
     <div class="sub">// blockchain · TMA · отдельный модуль</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
   <div class="nav-group">
     <div class="nav-group-title">Теория блокчейна</div>
     <a class="nav-item active" href="#"><span class="nav-num">01</span> Как устроен блокчейн</a>
@@ -470,7 +475,8 @@
     <div class="nav-group-title">Заметка</div>
     <a href="#" style="font-size:11px;color:var(--muted);line-height:1.5;">Отдельный модуль под крипто-вакансии (Wallet in Telegram и т.п.). Не входит в общую базу.</a>
   </div>
-  </aside>
+    </details>
+</aside>
 
 <main class="main">
   <div class="topbar">

@@ -429,14 +429,19 @@
     height: 18px;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -465,6 +470,7 @@
     <a href="#pw-locators">05 · Локаторы, ожидания, Page Object</a>
     <a href="#pw-practice">06 · UI-автоматизация на практике</a>
   </div>
+  </details>
 </aside>
 
 <main class="main">

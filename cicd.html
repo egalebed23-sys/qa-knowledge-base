@@ -460,14 +460,19 @@
   .pipe-stage.deploy { border-color: #5de0b0; color: #5de0b0; }
   .pipe-arr { color: var(--muted); font-size: 14px; }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -496,6 +501,7 @@
     <a href="#artifacts">05 · Артефакты и окружения</a>
     <a href="#qa-cicd">06 · CI/CD в работе QA</a>
   </div>
+  </details>
 </aside>
 
 <main class="main">

@@ -470,14 +470,19 @@
   .gloss-card .g-body { font-size: 13px; color: var(--text); line-height: 1.62; }
   .gloss-card .g-body strong { color: #cfe0f5; }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item active" href="#"><span class="nav-num">00</span> Старт</a>
@@ -503,6 +508,7 @@
     <a href="#sections">Разделы</a>
     <a href="#glossary">Глоссарий современных терминов</a>
   </div>
+  </details>
 </aside>
 
 <main class="main">
@@ -513,6 +519,10 @@
   <div class="home-hero">
     <h1>База для подготовки к собесам</h1>
     <p class="tagline">QA Senior с автоматизацией на Python. Структурированный конспект по всем темам, которые спрашивают на собеседованиях — от классической теории до микросервисов, CI/CD и поведенческих вопросов.</p>
+    <div class="hero-actions">
+      <a class="hero-action primary" href="#sections">Выбрать раздел</a>
+      <a class="hero-action" href="theory-quiz.html">Пройти тест по теории</a>
+    </div>
   </div>
 
   <!-- КАК ЧИТАТЬ -->
@@ -534,13 +544,13 @@
       <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
         <strong>Устроена иначе, чем остальные разделы.</strong> <a href="practice.html" style="color:var(--accent2);">Практика Python</a> устроена иначе: задачи идут по главам книги «Python. Исчерпывающее руководство», и каждая решается только тем, что к этой главе уже разобрано. Код пишется и запускается прямо на странице, проверка — автоматическая, на нескольких наборах данных.
       </div>
+    </div>
 
     <div class="format-row">
       <span class="format-badge" style="background:rgba(0,91,255,0.16);color:#7fb0ff;">Тест</span>
       <div style="font-size:13.5px;line-height:1.6;color:var(--text);">
         <strong>Проверка себя по теории.</strong> <a href="theory-quiz.html" style="color:var(--accent2);">Тест по теории тестирования</a> — 53 вопроса по главам 01–10. Ответ проверяется сразу, рядом объяснение и ссылка на нужный раздел, а в конце видно, какие главы стоит перечитать.
       </div>
-    </div>
     </div>
 
     <div class="format-row">

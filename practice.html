@@ -715,14 +715,19 @@
   }
   .scroll-top svg { width: 18px; height: 18px; }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
   <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -743,6 +748,7 @@
     <a class="nav-item" href="scenarios.html"><span class="nav-num">15</span> Сценарные кейсы</a>
   </div>
   <div class="toc-inner" id="toc"></div>
+  </details>
 </aside>
 
 <main class="main">

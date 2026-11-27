@@ -430,14 +430,19 @@
     height: 18px;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
+<script src="navigation.js" defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true"></div>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="logo">QA Senior · Python</div>
     <div class="sub">// interview prep base</div>
   </div>
+  <details class="sidebar-menu" open>
+    <summary>Разделы и оглавление</summary>
     <div class="nav-group">
     <div class="nav-group-title">Разделы</div>
     <a class="nav-item" href="index.html"><span class="nav-num">00</span> Старт</a>
@@ -464,6 +469,7 @@
     <a href="#auth">03 · Auth и секреты</a>
     <a href="#practice">04 · Безопасность на практике QA</a>
   </div>
+  </details>
 </aside>
 
 <main class="main">
